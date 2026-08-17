@@ -187,8 +187,8 @@
                 height: 45px;
             }
             th, td {
-                padding: 8px 3px; /* Reduced padding for mobile */
-                font-size: 0.75rem; /* Smaller font to fit columns */
+                padding: 8px 3px;
+                font-size: 0.75rem;
             }
             .icons-container {
                 gap: 2px;
@@ -200,7 +200,6 @@
             .fotmob-rank {
                 width: 15px;
             }
-            /* Use scrolling only for highly detailed secondary tables */
             .table-wrapper {
                 width: 100%;
                 overflow-x: auto;
@@ -229,6 +228,7 @@
                 <th>W</th>
                 <th>D</th>
                 <th>L</th>
+                <th>+/-</th>
                 <th>GD</th>
                 <th>PTS</th>
             </tr>
@@ -439,6 +439,7 @@
                 <td>${p.W}</td>
                 <td>${p.D}</td>
                 <td>${p.L}</td>
+                <td>${p.GF}-${p.GA}</td>
                 <td>${p.GD > 0 ? '+' + p.GD : p.GD}</td>
                 <td><strong>${p.PTS}</strong></td>
             `;
@@ -449,7 +450,6 @@
     function renderBreakdownTable(playerStatsObj, teamStatsObj) {
         let playerStatsArray = Object.values(playerStatsObj);
         
-        // Sort players by total points
         playerStatsArray.sort((a, b) => {
             if (b.PTS !== a.PTS) return b.PTS - a.PTS;
             if (b.GD !== a.GD) return b.GD - a.GD;
@@ -460,7 +460,6 @@
         breakdownTbody.innerHTML = '';
 
         playerStatsArray.forEach((p, playerIndex) => {
-            // Get player's teams and sort them by individual team points (high to low)
             let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
             playerTeams.sort((a, b) => {
                 if (b.PTS !== a.PTS) return b.PTS - a.PTS;
@@ -471,7 +470,6 @@
                 const tr = document.createElement('tr');
                 const logoUrl = teamLogos[team.team] || '';
                 
-                // Only display Rank and Player name on the first row for that player
                 const rankDisplay = teamIndex === 0 ? `<span class="fotmob-rank">${playerIndex + 1}</span>` : '';
                 const playerDisplay = teamIndex === 0 ? `<strong>${p.player}</strong>` : '';
                 
@@ -602,7 +600,6 @@
         let teamStats = initializeTeamStats();
         const statusEl = document.getElementById('status-indicator');
 
-        // Initial render with zeroed data
         renderPrimaryTable(playerStats);
         renderBreakdownTable(playerStats, teamStats);
         renderSecondaryTable(playerStats);
@@ -610,7 +607,7 @@
 
         const cacheKey = 'pl_match_data';
         const cacheTimeKey = 'pl_match_data_time';
-        const cacheDuration = 5 * 60 * 1000; // 5 minutes
+        const cacheDuration = 5 * 60 * 1000;
 
         try {
             let data;
@@ -726,7 +723,7 @@
                                 if (homePlayer && homePlayer !== t.owner) {
                                     t.PGA += (awayScore - homeScore);
                                 }
-                            } else if (awayScore === homeScore) {
+                            } else if (homeScore === awayScore) {
                                 t.D += 1;
                                 t.PTS += 1;
                             } else {
