@@ -428,6 +428,23 @@
         </table>
     </div>
 
+    <!-- Draft Value Performance by Player Section -->
+    <h2>Draft Value Performance by Player</h2>
+    <div class="table-wrapper">
+        <table id="draft-player-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th class="text-left">Player</th>
+                    <th>Total Diff</th>
+                </tr>
+            </thead>
+            <tbody id="draft-player-body">
+                <!-- Dynamically populated via JS -->
+            </tbody>
+        </table>
+    </div>
+
 </div>
 
 <script>
@@ -703,6 +720,11 @@
                 const tr = document.createElement('tr');
                 const logoUrl = teamLogos[team.team] || '';
                 
+                let displayName = team.team;
+                if (displayName === "Manchester City") displayName = "Man City";
+                else if (displayName === "Manchester United") displayName = "Man United";
+                else if (displayName === "Nottingham Forest") displayName = "Nottm Forest";
+
                 const rankDisplay = teamIndex === 0 ? `<span class="fotmob-rank">${playerIndex + 1}</span>` : '';
                 const playerDisplay = teamIndex === 0 ? `<strong>${p.player}</strong>` : '';
                 
@@ -712,7 +734,7 @@
                     <td class="text-left">
                         <div class="team-inline">
                             ${logoUrl ? `<img src="${logoUrl}" class="team-icon" alt="${team.team} crest">` : ''}
-                            ${team.team}
+                            ${displayName}
                         </div>
                     </td>
                     <td><strong>${team.PTS}</strong></td>
@@ -954,6 +976,11 @@
                 formattedDiff = `${diff}`;
             }
 
+            let displayName = t.team;
+            if (displayName === "Manchester City") displayName = "Man City";
+            else if (displayName === "Manchester United") displayName = "Man United";
+            else if (displayName === "Nottingham Forest") displayName = "Nottm Forest";
+
             const logoUrl = teamLogos[t.team] || '';
             const tr = document.createElement('tr');
 
@@ -963,7 +990,7 @@
                     <div class="team-inline">
                         ${logoUrl ? `<img src="${logoUrl}" class="team-icon" alt="${t.team} crest">` : ''}
                         <div style="line-height: 1.2;">
-                            <div style="font-weight: 600; color: #1a1a1a;">${t.team}</div>
+                            <div style="font-weight: 600; color: #1a1a1a;">${displayName}</div>
                             <div style="font-size: 0.75rem; color: #888;">${t.owner}</div>
                         </div>
                     </div>
@@ -971,6 +998,73 @@
                 <td><strong>${t.PTS}</strong></td>
                 <td>${t.GD > 0 ? '+' + t.GD : t.GD}</td>
                 <td>${pick}</td>
+                <td><span class="stat-value ${pillClass}">${formattedDiff}</span></td>
+            `;
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    // New Draft Value Performance by Player logic
+    function renderPlayerDraftValueTable(playerStatsObj, teamStatsObj) {
+        const teamsArray = Object.values(teamStatsObj);
+        
+        // Ensure same rank logic is used
+        teamsArray.sort((a, b) => {
+            if (b.PTS !== a.PTS) return b.PTS - a.PTS;
+            if (b.GD !== a.GD) return b.GD - a.GD;
+            return b.GF - a.GF;
+        });
+
+        const teamRankMap = {};
+        teamsArray.forEach((t, idx) => {
+            teamRankMap[t.team] = idx + 1;
+        });
+
+        const players = Object.values(playerStatsObj);
+        players.forEach(p => {
+            let totalDiff = 0;
+            p.teams.forEach(teamName => {
+                const rank = teamRankMap[teamName] || 20; 
+                const pick = draftPicks[teamName] || 20;
+                totalDiff += (pick - rank);
+            });
+            p.totalDraftDiff = totalDiff;
+        });
+
+        // Sort descending to show highest positive diff first
+        players.sort((a, b) => b.totalDraftDiff - a.totalDraftDiff);
+
+        const tbody = document.getElementById('draft-player-body');
+        tbody.innerHTML = '';
+
+        players.forEach((p, idx) => {
+            const tr = document.createElement('tr');
+            
+            const iconsHtml = p.teams.map(t => {
+                const logoUrl = teamLogos[t] || '';
+                return `<img src="${logoUrl}" class="team-icon" alt="${t} crest">`;
+            }).join('');
+
+            const playerCell = `
+                <div>${p.player}</div>
+                <div class="icons-container">${iconsHtml}</div>
+            `;
+
+            let pillClass = 'pill-gray';
+            let formattedDiff = '0';
+
+            if (p.totalDraftDiff > 0) {
+                pillClass = 'pill-green';
+                formattedDiff = `+${p.totalDraftDiff}`;
+            } else if (p.totalDraftDiff < 0) {
+                pillClass = 'pill-red';
+                formattedDiff = `${p.totalDraftDiff}`;
+            }
+
+            tr.innerHTML = `
+                <td class="fotmob-rank">${idx + 1}</td>
+                <td class="fotmob-player">${playerCell}</td>
                 <td><span class="stat-value ${pillClass}">${formattedDiff}</span></td>
             `;
 
@@ -989,6 +1083,7 @@
         renderDivisions(teamStats);
         renderSeasonAwards(playerStats);
         renderDraftRankTable(teamStats);
+        renderPlayerDraftValueTable(playerStats, teamStats);
 
         const cacheKey = 'pl_match_data';
         const cacheTimeKey = 'pl_match_data_time';
@@ -1144,6 +1239,7 @@
             renderDivisions(teamStats);
             renderSeasonAwards(playerStats);
             renderDraftRankTable(teamStats);
+            renderPlayerDraftValueTable(playerStats, teamStats);
 
             statusEl.textContent = `Successfully processed 2025/2026 season data (${gamesProcessed} completed matches evaluated).`;
 
