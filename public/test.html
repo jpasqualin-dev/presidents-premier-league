@@ -408,7 +408,7 @@
         </a>
     </div>
 
-    <!-- Draft vs Rank Performance Section -->
+    <!-- Draft Value Performance Section -->
     <h2>Draft Value Performance</h2>
     <div class="table-wrapper">
         <table id="draft-rank-table">
@@ -439,16 +439,16 @@
         "Jamey": ["Chelsea", "Tottenham", "Crystal Palace", "Leeds United"]
     };
 
-    // Mapped Draft Pick Numbers (1-20). Adjust pick numbers here as needed.
+    // Corrected draft pick order mapping
     const draftPicks = {
-        "Manchester City": 1,
-        "Arsenal": 2,
+        "Arsenal": 1,
+        "Manchester City": 2,
         "Liverpool": 3,
-        "Chelsea": 4,
-        "Tottenham": 5,
-        "Manchester United": 6,
-        "Newcastle": 7,
-        "Aston Villa": 8,
+        "Manchester United": 4,
+        "Chelsea": 5,
+        "Tottenham": 6,
+        "Aston Villa": 7,
+        "Newcastle": 8,
         "Brighton": 9,
         "Bournemouth": 10,
         "Nottingham Forest": 11,
@@ -695,7 +695,8 @@
             let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
             playerTeams.sort((a, b) => {
                 if (b.PTS !== a.PTS) return b.PTS - a.PTS;
-                return b.GD - a.GD;
+                if (b.GD !== a.GD) return b.GD - a.GD;
+                return b.GF - a.GF;
             });
 
             playerTeams.forEach((team, teamIndex) => {
@@ -732,7 +733,8 @@
             if (mode === 'PTS') {
                 teamsInDiv.sort((a, b) => {
                     if (b.PTS !== a.PTS) return b.PTS - a.PTS;
-                    return b.GD - a.GD;
+                    if (b.GD !== a.GD) return b.GD - a.GD;
+                    return b.GF - a.GF;
                 });
             } else {
                 teamsInDiv.sort((a, b) => {
@@ -894,39 +896,39 @@
             return card;
         }
 
-        const boot = [...players].sort((a,b) => b.goldenBoot - a.goldenBoot || b.PTS - a.PTS);
+        const boot = [...players].sort((a,b) => b.goldenBoot - a.goldenBoot || b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
         container.appendChild(createAwardCard("Golden Boot", boot, p => p.goldenBoot, "pill-green"));
 
-        const gloves = [...players].sort((a,b) => b.goldenGloves - a.goldenGloves || b.PTS - a.PTS);
+        const gloves = [...players].sort((a,b) => b.goldenGloves - a.goldenGloves || b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
         container.appendChild(createAwardCard("Golden Gloves (Clean Sheets)", gloves, p => p.goldenGloves, "pill-blue"));
 
-        const ppm = [...players].sort((a,b) => b.ppm - a.ppm || b.PTS - a.PTS);
+        const ppm = [...players].sort((a,b) => b.ppm - a.ppm || b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
         container.appendChild(createAwardCard("PTS per match", ppm, p => p.ppm.toFixed(2), "pill-purple"));
 
-        const gpm = [...players].sort((a,b) => b.gpm - a.gpm || b.PTS - a.PTS);
+        const gpm = [...players].sort((a,b) => b.gpm - a.gpm || b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
         container.appendChild(createAwardCard("Goals per match", gpm, p => p.gpm.toFixed(2), "pill-blue"));
 
-        const gcpm = [...players].sort((a,b) => a.gcpm - b.gcpm || b.PTS - a.PTS);
+        const gcpm = [...players].sort((a,b) => a.gcpm - b.gcpm || b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
         container.appendChild(createAwardCard("Goals conceded per match", gcpm, p => p.gcpm.toFixed(2), "pill-red"));
 
-        const gd = [...players].sort((a,b) => b.GD - a.GD || b.PTS - a.PTS);
+        const gd = [...players].sort((a,b) => b.GD - a.GD || b.PTS - a.PTS || b.GF - a.GF);
         container.appendChild(createAwardCard("Goal difference", gd, p => (p.GD > 0 ? '+' + p.GD : p.GD), "pill-gray"));
 
-        const pvp = [...players].sort((a,b) => b.pvpWins - a.pvpWins || b.PTS - a.PTS);
+        const pvp = [...players].sort((a,b) => b.pvpWins - a.pvpWins || b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
         container.appendChild(createAwardCard("PvP wins", pvp, p => p.pvpWins, "pill-purple"));
 
-        const pga = [...players].sort((a,b) => b.pga - a.pga || b.PTS - a.PTS);
+        const pga = [...players].sort((a,b) => b.pga - a.pga || b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
         container.appendChild(createAwardCard("PGA", pga, p => (p.pga > 0 ? '+' + p.pga : p.pga), "pill-green"));
 
-        const ptsPga = [...players].sort((a,b) => b.ptsPga - a.ptsPga || b.PTS - a.PTS);
+        const ptsPga = [...players].sort((a,b) => b.ptsPga - a.ptsPga || b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
         container.appendChild(createAwardCard("PTS + PGA", ptsPga, p => p.ptsPga, "pill-blue"));
     }
 
-    // Renders the Draft vs Rank Performance Table
+    // Renders Draft vs Rank Performance Table with PTS -> GD -> GF ranking & tie-break rules
     function renderDraftRankTable(teamStatsObj) {
         const teamsArray = Object.values(teamStatsObj);
 
-        // Sort all 20 teams by Points, Goal Difference, Goals For
+        // Sort all 20 teams by Points (PTS), Goal Difference (GD), Goals For (GF)
         teamsArray.sort((a, b) => {
             if (b.PTS !== a.PTS) return b.PTS - a.PTS;
             if (b.GD !== a.GD) return b.GD - a.GD;
@@ -939,7 +941,7 @@
         teamsArray.forEach((t, idx) => {
             const rank = idx + 1;
             const pick = draftPicks[t.team] || rank;
-            const diff = pick - rank; // Positive = outperforming draft pick, Negative = underperforming
+            const diff = pick - rank;
 
             let pillClass = 'pill-gray';
             let formattedDiff = '0';
