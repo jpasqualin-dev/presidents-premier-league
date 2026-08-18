@@ -155,7 +155,7 @@
             color: #38003c;
         }
 
-        /* Division Headers & Toggle Styles (Mimicking FotMob) */
+        /* Division Headers & Toggle Styles */
         .division-header-container {
             display: flex;
             justify-content: space-between;
@@ -196,6 +196,83 @@
             color: #ffffff;
         }
 
+        /* Overall Standings Header & Light Mode Switch */
+        .overall-header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 2px solid #00ff87;
+            padding-bottom: 8px;
+            margin-top: 35px;
+        }
+
+        .overall-header-container h2 {
+            margin: 0;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .light-mode-toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toggle-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #888;
+            transition: color 0.3s;
+        }
+
+        .toggle-label.active-label {
+            color: #1a1a1a;
+        }
+
+        .light-toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 52px;
+            height: 28px;
+        }
+
+        .light-toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #e5e5ea; /* Light gray track */
+            transition: .4s;
+            border-radius: 28px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 24px;
+            width: 24px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white; /* White thumb */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2), 0 0 1px rgba(0,0,0,0.1); /* Subtle drop shadow */
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #00ff87; /* Vibrant PL green */
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
         /* Mobile specific adjustments */
         @media (max-width: 768px) {
             body {
@@ -214,12 +291,23 @@
                 padding: 10px 4px;
                 font-size: 0.8rem;
             }
-            .division-header-container h2 {
+            .division-header-container h2, .overall-header-container h2 {
                 font-size: 1.1rem;
             }
             .toggle-btn {
                 padding: 4px 12px;
                 font-size: 0.75rem;
+            }
+            .light-toggle-switch {
+                width: 46px;
+                height: 24px;
+            }
+            .slider:before {
+                height: 20px;
+                width: 20px;
+            }
+            input:checked + .slider:before {
+                transform: translateX(22px);
             }
         }
     </style>
@@ -234,21 +322,23 @@
 
     <div id="status-indicator">Initializing 2025/2026 season data...</div>
 
-    <h2>Overall Standings</h2>
+    <!-- Overall Standings Header with Light Mode Toggle -->
+    <div class="overall-header-container">
+        <h2>Overall Standings</h2>
+        <div class="light-mode-toggle-container">
+            <span id="label-pts" class="toggle-label active-label">PTS</span>
+            <label class="light-toggle-switch">
+                <input type="checkbox" id="overall-mode-toggle" onchange="toggleOverallMode()">
+                <span class="slider"></span>
+            </label>
+            <span id="label-pga" class="toggle-label">PGA</span>
+        </div>
+    </div>
+
     <div class="table-wrapper">
         <table id="standings-table">
             <thead>
-                <tr>
-                    <th>#</th>
-                    <th class="text-left">Player</th>
-                    <th>PL</th>
-                    <th>W</th>
-                    <th>D</th>
-                    <th>L</th>
-                    <th>+/-</th>
-                    <th>GD</th>
-                    <th>PTS</th>
-                </tr>
+                <!-- Populated dynamically via JS -->
             </thead>
             <tbody id="standings-body">
             </tbody>
@@ -343,6 +433,9 @@
     let currentSecondarySortMetric = 'ptsPga';
     let currentSecondarySortAscending = false;
 
+    // Track mode for Overall Standings table
+    let overallMode = 'PTS';
+
     // Track mode for each division (PTS or PGA)
     let divisionModes = {
         "Red and Blue Division": 'PTS',
@@ -424,6 +517,26 @@
         }
     }
 
+    function toggleOverallMode() {
+        const toggle = document.getElementById('overall-mode-toggle');
+        const ptsLabel = document.getElementById('label-pts');
+        const pgaLabel = document.getElementById('label-pga');
+
+        if (toggle.checked) {
+            overallMode = 'PGA';
+            pgaLabel.classList.add('active-label');
+            ptsLabel.classList.remove('active-label');
+        } else {
+            overallMode = 'PTS';
+            ptsLabel.classList.add('active-label');
+            pgaLabel.classList.remove('active-label');
+        }
+
+        if (cachedPlayerStats) {
+            renderPrimaryTable(cachedPlayerStats);
+        }
+    }
+
     function toggleDivisionMode(divName, mode) {
         divisionModes[divName] = mode;
         if (cachedTeamStats) {
@@ -433,11 +546,52 @@
 
     function renderPrimaryTable(playerStatsObj) {
         let playerStatsArray = Object.values(playerStatsObj);
-        playerStatsArray.sort((a, b) => {
-            if (b.PTS !== a.PTS) return b.PTS - a.PTS;
-            if (b.GD !== a.GD) return b.GD - a.GD;
-            return b.GF - a.GF;
-        });
+        
+        // Dynamic Sorting based on selected mode
+        if (overallMode === 'PTS') {
+            playerStatsArray.sort((a, b) => {
+                if (b.PTS !== a.PTS) return b.PTS - a.PTS;
+                if (b.GD !== a.GD) return b.GD - a.GD;
+                return b.GF - a.GF;
+            });
+        } else {
+            playerStatsArray.sort((a, b) => {
+                if (b.ptsPga !== a.ptsPga) return b.ptsPga - a.ptsPga;
+                return b.pga - a.pga;
+            });
+        }
+
+        const primaryTable = document.getElementById('standings-table');
+        let theadHtml = '';
+
+        // Dynamic Columns based on selected mode
+        if (overallMode === 'PTS') {
+            theadHtml = `
+                <tr>
+                    <th>#</th>
+                    <th class="text-left">Player</th>
+                    <th>PL</th>
+                    <th>W</th>
+                    <th>D</th>
+                    <th>L</th>
+                    <th>+/-</th>
+                    <th>GD</th>
+                    <th>PTS</th>
+                </tr>
+            `;
+        } else {
+            theadHtml = `
+                <tr>
+                    <th>#</th>
+                    <th class="text-left">Player</th>
+                    <th>PTS</th>
+                    <th>PvP Wins</th>
+                    <th>PGA</th>
+                    <th>PTS+PGA</th>
+                </tr>
+            `;
+        }
+        primaryTable.querySelector('thead').innerHTML = theadHtml;
 
         const primaryTbody = document.getElementById('standings-body');
         primaryTbody.innerHTML = '';
@@ -450,20 +604,33 @@
                 return `<img src="${logoUrl}" class="team-icon" style="width: 16px; height: 16px;" alt="${t} crest">`;
             }).join('');
 
-            tr.innerHTML = `
-                <td class="fotmob-rank">${index + 1}</td>
-                <td class="fotmob-player">
-                    <div>${p.player}</div>
-                    <div class="icons-container">${iconsHtml}</div>
-                </td>
-                <td>${p.PL}</td>
-                <td>${p.W}</td>
-                <td>${p.D}</td>
-                <td>${p.L}</td>
-                <td>${p.GF}-${p.GA}</td>
-                <td>${p.GD > 0 ? '+' + p.GD : p.GD}</td>
-                <td><strong>${p.PTS}</strong></td>
+            const playerCell = `
+                <div>${p.player}</div>
+                <div class="icons-container">${iconsHtml}</div>
             `;
+
+            if (overallMode === 'PTS') {
+                tr.innerHTML = `
+                    <td class="fotmob-rank">${index + 1}</td>
+                    <td class="fotmob-player">${playerCell}</td>
+                    <td>${p.PL}</td>
+                    <td>${p.W}</td>
+                    <td>${p.D}</td>
+                    <td>${p.L}</td>
+                    <td>${p.GF}-${p.GA}</td>
+                    <td>${p.GD > 0 ? '+' + p.GD : p.GD}</td>
+                    <td><strong>${p.PTS}</strong></td>
+                `;
+            } else {
+                tr.innerHTML = `
+                    <td class="fotmob-rank">${index + 1}</td>
+                    <td class="fotmob-player">${playerCell}</td>
+                    <td>${p.PTS}</td>
+                    <td>${p.pvpWins}</td>
+                    <td>${p.pga > 0 ? '+' + p.pga : p.pga}</td>
+                    <td class="highlight-col">${p.ptsPga}</td>
+                `;
+            }
             primaryTbody.appendChild(tr);
         });
     }
@@ -615,12 +782,18 @@
             teamsInDiv.forEach((t, idx) => {
                 const logoUrl = teamLogos[t.team] || '';
                 
+                // Shorten specific team names dynamically to save horizontal space
+                let displayName = t.team;
+                if (displayName === "Manchester City") displayName = "Man City";
+                else if (displayName === "Manchester United") displayName = "Man United";
+                else if (displayName === "Nottingham Forest") displayName = "Nottm Forest";
+                
                 // Stacked Team and Owner Layout
                 const teamCellHTML = `
                     <div class="team-inline">
                         ${logoUrl ? `<img src="${logoUrl}" class="team-icon" alt="${t.team} crest">` : ''}
                         <div style="line-height: 1.2;">
-                            <div style="font-weight: 600; color: #1a1a1a;">${t.team}</div>
+                            <div style="font-weight: 600; color: #1a1a1a;">${displayName}</div>
                             <div style="font-size: 0.75rem; color: #888;">${t.owner}</div>
                         </div>
                     </div>
