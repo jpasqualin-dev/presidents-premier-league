@@ -142,6 +142,49 @@
             background-color: #f8f9fa;
         }
 
+        /* Expandable Table Rows */
+        .expandable-row {
+            cursor: pointer;
+            transition: background-color 0.15s ease;
+        }
+        .expandable-row:hover {
+            background-color: #fafafa;
+        }
+        
+        .table-chevron {
+            color: #a0aec0;
+            font-size: 0.75rem;
+            transition: transform 0.2s ease;
+            margin-left: 6px;
+            display: inline-block;
+        }
+        
+        .expandable-row.expanded .table-chevron {
+            transform: rotate(90deg);
+        }
+
+        .nested-table-row {
+            display: none;
+        }
+        
+        .nested-table-row.expanded {
+            display: table-row;
+        }
+
+        .nested-teams-table-container {
+            padding: 0;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .nested-teams-table-container .nested-teams-container {
+            background-color: transparent;
+            margin-bottom: 0;
+            border-radius: 0;
+            padding: 12px 24px 12px 48px; /* Indent to align with player name */
+            display: block;
+        }
+
         .highlight-col {
             font-weight: bold;
             color: #38003c;
@@ -391,6 +434,7 @@
             th, td { padding: 10px 4px; font-size: 0.8rem; }
             h2, .plain-table-title, .division-header-container h2, .overall-header-container h2 { font-size: 1.1rem; }
             .toggle-btn { padding: 4px 12px; font-size: 0.75rem; }
+            .nested-teams-table-container .nested-teams-container { padding: 12px 10px 12px 24px; }
         }
     </style>
 </head>
@@ -619,9 +663,17 @@
         return null;
     }
 
+    function toggleNestedTable(rowEl) {
+        rowEl.classList.toggle('expanded');
+        const nestedRow = rowEl.nextElementSibling;
+        if (nestedRow && nestedRow.classList.contains('nested-table-row')) {
+            nestedRow.classList.toggle('expanded');
+        }
+    }
+
     function setOverallMode(mode) {
         overallMode = mode;
-        if (cachedPlayerStats) renderPrimaryTable(cachedPlayerStats);
+        if (cachedPlayerStats && cachedTeamStats) renderPrimaryTable(cachedPlayerStats, cachedTeamStats);
     }
 
     function toggleDivisionMode(divName, mode) {
@@ -629,7 +681,7 @@
         if (cachedTeamStats) renderDivisions(cachedTeamStats);
     }
 
-    function renderPrimaryTable(playerStatsObj) {
+    function renderPrimaryTable(playerStatsObj, teamStatsObj) {
         let playerStatsArray = Object.values(playerStatsObj);
         
         if (overallMode === 'PTS') {
@@ -666,8 +718,17 @@
 
         playerStatsArray.forEach((p, index) => {
             const tr = document.createElement('tr');
+            tr.className = 'expandable-row';
+            tr.onclick = function() { toggleNestedTable(this); };
+
             const iconsHtml = p.teams.map(t => teamLogos[t] ? `<img src="${teamLogos[t]}" class="team-icon" alt="${t} crest">` : '').join('');
-            const playerCell = `<div>${p.player}</div><div class="icons-container">${iconsHtml}</div>`;
+            
+            const playerCell = `
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    ${p.player} <span class="table-chevron">❯</span>
+                </div>
+                <div class="icons-container">${iconsHtml}</div>
+            `;
 
             if (overallMode === 'PTS') {
                 tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${p.PL}</td><td>${p.W}</td><td>${p.D}</td><td>${p.L}</td><td>${p.GF}-${p.GA}</td><td>${p.GD > 0 ? '+' + p.GD : p.GD}</td><td><strong>${p.PTS}</strong></td>`;
@@ -675,6 +736,56 @@
                 tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${p.PTS}</td><td>${p.pvpWins}</td><td>${p.pga > 0 ? '+' + p.pga : p.pga}</td><td class="highlight-col">${p.ptsPga}</td>`;
             }
             primaryTbody.appendChild(tr);
+
+            // Nested Team Row
+            const nestedTr = document.createElement('tr');
+            nestedTr.className = 'nested-table-row';
+            
+            let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
+            if (overallMode === 'PTS') {
+                playerTeams.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
+            } else {
+                playerTeams.sort((a, b) => b.ptsPga - a.ptsPga || b.PGA - a.PGA);
+            }
+
+            let teamsHtml = '<div class="nested-teams-container">';
+            playerTeams.forEach(t => {
+                let statsHtml = '';
+                if (overallMode === 'PTS') {
+                    statsHtml = `
+                        <div style="display: flex; gap: 15px; font-size: 0.85rem;">
+                            <div><span style="color:#718096">PL:</span> ${t.PL}</div>
+                            <div><span style="color:#718096">W-D-L:</span> ${t.W}-${t.D}-${t.L}</div>
+                            <div><span style="color:#718096">GD:</span> ${t.GD > 0 ? '+'+t.GD : t.GD}</div>
+                            <div><span style="color:#718096">PTS:</span> <strong>${t.PTS}</strong></div>
+                        </div>
+                    `;
+                } else {
+                    statsHtml = `
+                        <div style="display: flex; gap: 15px; font-size: 0.85rem;">
+                            <div><span style="color:#718096">PTS:</span> ${t.PTS}</div>
+                            <div><span style="color:#718096">PvP:</span> ${t.pvpWins}</div>
+                            <div><span style="color:#718096">PGA:</span> ${t.PGA > 0 ? '+'+t.PGA : t.PGA}</div>
+                            <div><span style="color:#718096">Total:</span> <strong>${t.ptsPga}</strong></div>
+                        </div>
+                    `;
+                }
+
+                teamsHtml += `
+                    <div class="nested-team-row">
+                        <div class="nested-team-name">
+                            ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="nested-team-icon" alt="${t.team}">` : ''}
+                            ${t.team}
+                        </div>
+                        ${statsHtml}
+                    </div>
+                `;
+            });
+            teamsHtml += '</div>';
+
+            const colspanCount = overallMode === 'PTS' ? 9 : 6;
+            nestedTr.innerHTML = `<td colspan="${colspanCount}" style="padding: 0; border-bottom: none;"><div class="nested-teams-table-container">${teamsHtml}</div></td>`;
+            primaryTbody.appendChild(nestedTr);
         });
     }
 
@@ -955,20 +1066,72 @@
 
         players.forEach((p, idx) => {
             const tr = document.createElement('tr');
-            const iconsHtml = p.teams.map(t => teamLogos[t] ? `<img src="${teamLogos[t]}" class="team-icon" alt="crest">` : '').join('');
-            const playerCell = `<div>${p.player}</div><div class="icons-container">${iconsHtml}</div>`;
+            tr.className = 'expandable-row';
+            tr.onclick = function() { toggleNestedTable(this); };
 
-            let pillClass = 'pill-gray';
-            let formattedDiff = '0';
-            if (p.totalDraftDiff > 0) { pillClass = 'pill-green'; formattedDiff = `+${p.totalDraftDiff}`; }
-            else if (p.totalDraftDiff < 0) { pillClass = 'pill-red'; formattedDiff = `${p.totalDraftDiff}`; }
+            const iconsHtml = p.teams.map(t => teamLogos[t] ? `<img src="${teamLogos[t]}" class="team-icon" alt="crest">` : '').join('');
+            
+            const playerCell = `
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    ${p.player} <span class="table-chevron">❯</span>
+                </div>
+                <div class="icons-container">${iconsHtml}</div>
+            `;
+
+            let overallPillClass = 'pill-gray';
+            let overallFormattedDiff = '0';
+            if (p.totalDraftDiff > 0) { overallPillClass = 'pill-green'; overallFormattedDiff = `+${p.totalDraftDiff}`; }
+            else if (p.totalDraftDiff < 0) { overallPillClass = 'pill-red'; overallFormattedDiff = `${p.totalDraftDiff}`; }
 
             tr.innerHTML = `
                 <td class="fotmob-rank">${idx + 1}</td>
                 <td class="fotmob-player">${playerCell}</td>
-                <td><span class="stat-value ${pillClass}">${formattedDiff}</span></td>
+                <td><span class="stat-value ${overallPillClass}">${overallFormattedDiff}</span></td>
             `;
             tbody.appendChild(tr);
+
+            // Nested Team Row
+            const nestedTr = document.createElement('tr');
+            nestedTr.className = 'nested-table-row';
+            
+            let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
+            
+            // Sort inner teams by diff so highest diff shows at top
+            playerTeams.sort((a, b) => {
+                const diffA = (draftPicks[a.team] || 20) - (teamRankMap[a.team] || 20);
+                const diffB = (draftPicks[b.team] || 20) - (teamRankMap[b.team] || 20);
+                return diffB - diffA; 
+            });
+
+            let teamsHtml = '<div class="nested-teams-container">';
+            playerTeams.forEach(t => {
+                const rank = teamRankMap[t.team] || 20;
+                const pick = draftPicks[t.team] || 20;
+                const diff = pick - rank;
+                
+                let pillClass = 'pill-gray';
+                let formattedDiff = '0';
+                if (diff > 0) { pillClass = 'pill-green'; formattedDiff = `+${diff}`; }
+                else if (diff < 0) { pillClass = 'pill-red'; formattedDiff = `${diff}`; }
+
+                teamsHtml += `
+                    <div class="nested-team-row">
+                        <div class="nested-team-name">
+                            ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="nested-team-icon" alt="${t.team}">` : ''}
+                            ${t.team}
+                        </div>
+                        <div style="display: flex; gap: 15px; font-size: 0.85rem; align-items: center;">
+                            <div><span style="color:#718096">Pick:</span> ${pick}</div>
+                            <div><span style="color:#718096">Rank:</span> ${rank}</div>
+                            <div class="stat-value ${pillClass}" style="transform: scale(0.9); opacity: 0.9;">${formattedDiff}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            teamsHtml += '</div>';
+
+            nestedTr.innerHTML = `<td colspan="3" style="padding: 0; border-bottom: none;"><div class="nested-teams-table-container">${teamsHtml}</div></td>`;
+            tbody.appendChild(nestedTr);
         });
     }
 
@@ -977,7 +1140,7 @@
         let teamStats = initializeTeamStats();
         const statusEl = document.getElementById('status-indicator');
 
-        renderPrimaryTable(playerStats);
+        renderPrimaryTable(playerStats, teamStats);
         renderBreakdownTable(playerStats, teamStats);
         renderDivisions(teamStats);
         renderSeasonAwards(playerStats, teamStats);
@@ -1106,7 +1269,7 @@
             cachedPlayerStats = playerStats;
             cachedTeamStats = teamStats;
 
-            renderPrimaryTable(playerStats);
+            renderPrimaryTable(playerStats, teamStats);
             renderBreakdownTable(playerStats, teamStats);
             renderDivisions(teamStats);
             renderSeasonAwards(playerStats, teamStats);
