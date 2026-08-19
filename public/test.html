@@ -103,6 +103,10 @@
             text-align: left;
         }
 
+        .draft-title {
+            font-size: 1.15rem; /* Reduced slightly to prevent scrolling */
+        }
+
         .text-left {
             text-align: left !important;
         }
@@ -151,6 +155,12 @@
             background-color: #fafafa;
         }
         
+        /* Remove highlight when expanded */
+        .expandable-row.expanded,
+        .expandable-row.expanded:hover {
+            background-color: #ffffff !important; 
+        }
+
         .table-chevron {
             color: #a0aec0;
             font-size: 0.75rem;
@@ -165,24 +175,23 @@
 
         .nested-table-row {
             display: none;
+            background-color: #fcfcfc;
         }
         
         .nested-table-row.expanded {
             display: table-row;
         }
-
-        .nested-teams-table-container {
-            padding: 0;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #eaeaea;
+        
+        .nested-table-row td {
+            font-size: 0.85rem;
+            color: #555;
+            padding-top: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #eaeaea;
         }
-
-        .nested-teams-table-container .nested-teams-container {
-            background-color: transparent;
-            margin-bottom: 0;
-            border-radius: 0;
-            padding: 12px 24px 12px 48px; /* Indent to align with player name */
-            display: block;
+        
+        .nested-table-row:hover {
+            background-color: #f4f6f8;
         }
 
         .highlight-col {
@@ -204,6 +213,18 @@
             border-bottom: none;
             padding-bottom: 0;
             font-size: 1.4rem;
+        }
+
+        /* Smaller Font for Division Tables to Prevent Scrolling */
+        #divisions-container table {
+            font-size: 0.8rem;
+        }
+        #divisions-container th, #divisions-container td {
+            padding: 10px 4px;
+        }
+        #divisions-container .team-inline .team-icon {
+            width: 16px;
+            height: 16px;
         }
 
         .toggle-switch {
@@ -305,6 +326,12 @@
         .stat-player-row:hover {
             background-color: #fafafa;
         }
+        
+        /* Remove highlight when expanded for awards cards */
+        .stat-player-wrapper.expanded .stat-player-row,
+        .stat-player-wrapper.expanded .stat-player-row:hover {
+            background-color: #ffffff !important; 
+        }
 
         .stat-rank {
             width: 24px;
@@ -360,7 +387,7 @@
 
         .nested-teams-container {
             display: none;
-            background-color: #f8f9fa;
+            background-color: #fcfcfc;
             padding: 8px 16px 10px 36px;
             border-radius: 6px;
             margin-bottom: 8px;
@@ -433,8 +460,9 @@
             .lion-logo { height: 45px; }
             th, td { padding: 10px 4px; font-size: 0.8rem; }
             h2, .plain-table-title, .division-header-container h2, .overall-header-container h2 { font-size: 1.1rem; }
+            .draft-title { font-size: 1rem; }
             .toggle-btn { padding: 4px 12px; font-size: 0.75rem; }
-            .nested-teams-table-container .nested-teams-container { padding: 12px 10px 12px 24px; }
+            #divisions-container table { font-size: 0.75rem; }
         }
     </style>
 </head>
@@ -455,27 +483,6 @@
                 <!-- Populated dynamically via JS -->
             </thead>
             <tbody id="standings-body">
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Team Breakdown by Player -->
-    <div class="table-wrapper">
-        <table id="breakdown-table">
-            <thead>
-                <tr class="title-row">
-                    <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
-                        <h2 class="plain-table-title">Team Breakdown by Player</h2>
-                    </th>
-                </tr>
-                <tr>
-                    <th>Rank</th>
-                    <th class="text-left">Player</th>
-                    <th class="text-left">Teams</th>
-                    <th>Total Points</th>
-                </tr>
-            </thead>
-            <tbody id="breakdown-body">
             </tbody>
         </table>
     </div>
@@ -509,7 +516,7 @@
             <thead>
                 <tr class="title-row">
                     <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
-                        <h2 class="plain-table-title">Draft Value Performance</h2>
+                        <h2 class="plain-table-title draft-title">Draft Value Performance</h2>
                     </th>
                 </tr>
                 <tr>
@@ -532,7 +539,7 @@
             <thead>
                 <tr class="title-row">
                     <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
-                        <h2 class="plain-table-title">Draft Value Performance by Player</h2>
+                        <h2 class="plain-table-title draft-title">Draft Value Performance by Player</h2>
                     </th>
                 </tr>
                 <tr>
@@ -663,12 +670,12 @@
         return null;
     }
 
-    function toggleNestedTable(rowEl) {
+    // Toggle TR rows that share the target class
+    function toggleNestedTableTRs(rowEl, targetClass) {
         rowEl.classList.toggle('expanded');
-        const nestedRow = rowEl.nextElementSibling;
-        if (nestedRow && nestedRow.classList.contains('nested-table-row')) {
-            nestedRow.classList.toggle('expanded');
-        }
+        document.querySelectorAll(`.${targetClass}`).forEach(el => {
+            el.classList.toggle('expanded');
+        });
     }
 
     function setOverallMode(mode) {
@@ -717,9 +724,10 @@
         primaryTbody.innerHTML = '';
 
         playerStatsArray.forEach((p, index) => {
+            const targetClass = `nested-overall-${index}`;
             const tr = document.createElement('tr');
             tr.className = 'expandable-row';
-            tr.onclick = function() { toggleNestedTable(this); };
+            tr.onclick = function() { toggleNestedTableTRs(this, targetClass); };
 
             const iconsHtml = p.teams.map(t => teamLogos[t] ? `<img src="${teamLogos[t]}" class="team-icon" alt="${t} crest">` : '').join('');
             
@@ -737,10 +745,7 @@
             }
             primaryTbody.appendChild(tr);
 
-            // Nested Team Row
-            const nestedTr = document.createElement('tr');
-            nestedTr.className = 'nested-table-row';
-            
+            // Nested Team Rows (Aligning directly under the parent headers)
             let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
             if (overallMode === 'PTS') {
                 playerTeams.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
@@ -748,71 +753,45 @@
                 playerTeams.sort((a, b) => b.ptsPga - a.ptsPga || b.PGA - a.PGA);
             }
 
-            let teamsHtml = '<div class="nested-teams-container">';
             playerTeams.forEach(t => {
-                let statsHtml = '';
-                if (overallMode === 'PTS') {
-                    statsHtml = `
-                        <div style="display: flex; gap: 15px; font-size: 0.85rem;">
-                            <div><span style="color:#718096">PL:</span> ${t.PL}</div>
-                            <div><span style="color:#718096">W-D-L:</span> ${t.W}-${t.D}-${t.L}</div>
-                            <div><span style="color:#718096">GD:</span> ${t.GD > 0 ? '+'+t.GD : t.GD}</div>
-                            <div><span style="color:#718096">PTS:</span> <strong>${t.PTS}</strong></div>
-                        </div>
-                    `;
-                } else {
-                    statsHtml = `
-                        <div style="display: flex; gap: 15px; font-size: 0.85rem;">
-                            <div><span style="color:#718096">PTS:</span> ${t.PTS}</div>
-                            <div><span style="color:#718096">PvP:</span> ${t.pvpWins}</div>
-                            <div><span style="color:#718096">PGA:</span> ${t.PGA > 0 ? '+'+t.PGA : t.PGA}</div>
-                            <div><span style="color:#718096">Total:</span> <strong>${t.ptsPga}</strong></div>
-                        </div>
-                    `;
-                }
-
-                teamsHtml += `
-                    <div class="nested-team-row">
-                        <div class="nested-team-name">
-                            ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="nested-team-icon" alt="${t.team}">` : ''}
-                            ${t.team}
-                        </div>
-                        ${statsHtml}
-                    </div>
-                `;
-            });
-            teamsHtml += '</div>';
-
-            const colspanCount = overallMode === 'PTS' ? 9 : 6;
-            nestedTr.innerHTML = `<td colspan="${colspanCount}" style="padding: 0; border-bottom: none;"><div class="nested-teams-table-container">${teamsHtml}</div></td>`;
-            primaryTbody.appendChild(nestedTr);
-        });
-    }
-
-    function renderBreakdownTable(playerStatsObj, teamStatsObj) {
-        let playerStatsArray = Object.values(playerStatsObj).sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
-        const breakdownTbody = document.getElementById('breakdown-body');
-        breakdownTbody.innerHTML = '';
-
-        playerStatsArray.forEach((p, playerIndex) => {
-            let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean).sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
-            playerTeams.forEach((team, teamIndex) => {
-                const tr = document.createElement('tr');
-                let displayName = team.team;
+                let displayName = t.team;
                 if (displayName === "Manchester City") displayName = "Man City";
                 else if (displayName === "Manchester United") displayName = "Man United";
                 else if (displayName === "Nottingham Forest") displayName = "Nottm Forest";
 
-                const rankDisplay = teamIndex === 0 ? `<span class="fotmob-rank">${playerIndex + 1}</span>` : '';
-                const playerDisplay = teamIndex === 0 ? `<strong>${p.player}</strong>` : '';
-                
-                tr.innerHTML = `
-                    <td>${rankDisplay}</td>
-                    <td class="text-left">${playerDisplay}</td>
-                    <td class="text-left"><div class="team-inline">${teamLogos[team.team] ? `<img src="${teamLogos[team.team]}" class="team-icon" alt="crest">` : ''}${displayName}</div></td>
-                    <td><strong>${team.PTS}</strong></td>
+                const teamNameCell = `
+                    <div class="team-inline" style="padding-left: 10px;">
+                        ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="${t.team}">` : ''}
+                        ${displayName}
+                    </div>
                 `;
-                breakdownTbody.appendChild(tr);
+
+                const nestedTr = document.createElement('tr');
+                nestedTr.className = `nested-table-row ${targetClass}`;
+
+                if (overallMode === 'PTS') {
+                    nestedTr.innerHTML = `
+                        <td></td>
+                        <td class="text-left">${teamNameCell}</td>
+                        <td>${t.PL}</td>
+                        <td>${t.W}</td>
+                        <td>${t.D}</td>
+                        <td>${t.L}</td>
+                        <td>${t.GF}-${t.GA}</td>
+                        <td>${t.GD > 0 ? '+'+t.GD : t.GD}</td>
+                        <td><strong>${t.PTS}</strong></td>
+                    `;
+                } else {
+                    nestedTr.innerHTML = `
+                        <td></td>
+                        <td class="text-left">${teamNameCell}</td>
+                        <td>${t.PTS}</td>
+                        <td>${t.pvpWins}</td>
+                        <td>${t.PGA > 0 ? '+'+t.PGA : t.PGA}</td>
+                        <td><strong>${t.ptsPga}</strong></td>
+                    `;
+                }
+                primaryTbody.appendChild(nestedTr);
             });
         });
     }
@@ -907,11 +886,16 @@
 
                 let teamsHtml = '';
                 playerTeams.forEach(t => {
+                    let displayName = t.team;
+                    if (displayName === "Manchester City") displayName = "Man City";
+                    else if (displayName === "Manchester United") displayName = "Man United";
+                    else if (displayName === "Nottingham Forest") displayName = "Nottm Forest";
+
                     teamsHtml += `
                         <div class="nested-team-row">
                             <div class="nested-team-name">
                                 ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="nested-team-icon" alt="${t.team}">` : ''}
-                                ${t.team}
+                                ${displayName}
                             </div>
                             <div class="stat-value ${config.pillClass}" style="transform: scale(0.9); opacity: 0.9;">
                                 ${config.teamVal(t)}
@@ -1065,9 +1049,10 @@
         tbody.innerHTML = '';
 
         players.forEach((p, idx) => {
+            const targetClass = `nested-draft-${idx}`;
             const tr = document.createElement('tr');
             tr.className = 'expandable-row';
-            tr.onclick = function() { toggleNestedTable(this); };
+            tr.onclick = function() { toggleNestedTableTRs(this, targetClass); };
 
             const iconsHtml = p.teams.map(t => teamLogos[t] ? `<img src="${teamLogos[t]}" class="team-icon" alt="crest">` : '').join('');
             
@@ -1090,10 +1075,7 @@
             `;
             tbody.appendChild(tr);
 
-            // Nested Team Row
-            const nestedTr = document.createElement('tr');
-            nestedTr.className = 'nested-table-row';
-            
+            // Nested Team Rows (Aligning directly under the parent headers)
             let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
             
             // Sort inner teams by diff so highest diff shows at top
@@ -1103,7 +1085,6 @@
                 return diffB - diffA; 
             });
 
-            let teamsHtml = '<div class="nested-teams-container">';
             playerTeams.forEach(t => {
                 const rank = teamRankMap[t.team] || 20;
                 const pick = draftPicks[t.team] || 20;
@@ -1114,24 +1095,27 @@
                 if (diff > 0) { pillClass = 'pill-green'; formattedDiff = `+${diff}`; }
                 else if (diff < 0) { pillClass = 'pill-red'; formattedDiff = `${diff}`; }
 
-                teamsHtml += `
-                    <div class="nested-team-row">
-                        <div class="nested-team-name">
-                            ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="nested-team-icon" alt="${t.team}">` : ''}
-                            ${t.team}
-                        </div>
-                        <div style="display: flex; gap: 15px; font-size: 0.85rem; align-items: center;">
-                            <div><span style="color:#718096">Pick:</span> ${pick}</div>
-                            <div><span style="color:#718096">Rank:</span> ${rank}</div>
-                            <div class="stat-value ${pillClass}" style="transform: scale(0.9); opacity: 0.9;">${formattedDiff}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            teamsHtml += '</div>';
+                let displayName = t.team;
+                if (displayName === "Manchester City") displayName = "Man City";
+                else if (displayName === "Manchester United") displayName = "Man United";
+                else if (displayName === "Nottingham Forest") displayName = "Nottm Forest";
 
-            nestedTr.innerHTML = `<td colspan="3" style="padding: 0; border-bottom: none;"><div class="nested-teams-table-container">${teamsHtml}</div></td>`;
-            tbody.appendChild(nestedTr);
+                const nestedTr = document.createElement('tr');
+                nestedTr.className = `nested-table-row ${targetClass}`;
+
+                nestedTr.innerHTML = `
+                    <td></td>
+                    <td class="text-left">
+                        <div style="display: flex; align-items: center; gap: 8px; padding-left: 10px;">
+                            ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="${t.team}">` : ''}
+                            <span>${displayName}</span>
+                            <span style="color:#888; font-size: 0.75rem;">(Pick: ${pick}, Rank: ${rank})</span>
+                        </div>
+                    </td>
+                    <td><span class="stat-value ${pillClass}" style="transform: scale(0.9); opacity: 0.9;">${formattedDiff}</span></td>
+                `;
+                tbody.appendChild(nestedTr);
+            });
         });
     }
 
@@ -1141,7 +1125,6 @@
         const statusEl = document.getElementById('status-indicator');
 
         renderPrimaryTable(playerStats, teamStats);
-        renderBreakdownTable(playerStats, teamStats);
         renderDivisions(teamStats);
         renderSeasonAwards(playerStats, teamStats);
         renderDraftRankTable(teamStats);
@@ -1270,7 +1253,6 @@
             cachedTeamStats = teamStats;
 
             renderPrimaryTable(playerStats, teamStats);
-            renderBreakdownTable(playerStats, teamStats);
             renderDivisions(teamStats);
             renderSeasonAwards(playerStats, teamStats);
             renderDraftRankTable(teamStats);
