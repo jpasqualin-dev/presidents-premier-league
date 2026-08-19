@@ -104,7 +104,7 @@
         }
 
         .draft-title {
-            font-size: 1.15rem; /* Reduced slightly to prevent scrolling */
+            font-size: 1.15rem; 
         }
 
         .text-left {
@@ -155,7 +155,6 @@
             background-color: #fafafa;
         }
         
-        /* Remove highlight when expanded */
         .expandable-row.expanded,
         .expandable-row.expanded:hover {
             background-color: #ffffff !important; 
@@ -215,19 +214,46 @@
             font-size: 1.4rem;
         }
 
-        /* Highly Compact Division Tables to Match "Red and Blue" Width */
+        /* Highly Compact & Fixed Division Tables */
         #divisions-container table {
             font-size: 0.75rem;
+            table-layout: fixed; /* Forces uniform column widths across all tables */
+            word-wrap: break-word;
         }
+        
+        /* Explicit Column Widths to Ensure Exact Alignment */
+        #divisions-container th:nth-child(1), #divisions-container td:nth-child(1) { width: 8%; } /* Rank Column */
+        #divisions-container th:nth-child(2), #divisions-container td:nth-child(2) { width: 42%; } /* Team/Owner Column */
+        #divisions-container th:nth-child(n+3), #divisions-container td:nth-child(n+3) { width: auto; } /* Divides remaining space equally among stats */
+
         #divisions-container th, #divisions-container td {
             padding: 8px 3px;
+            overflow: hidden; 
+            text-overflow: ellipsis; 
         }
+        
         #divisions-container .team-inline {
             gap: 5px;
         }
+        
         #divisions-container .team-inline .team-icon {
             width: 14px;
             height: 14px;
+            flex-shrink: 0; /* Prevents icons from squishing */
+        }
+
+        /* Allow division headers to flex wrap so the toggle button doesn't force a widened table */
+        #divisions-container .division-header-container {
+            align-items: center;
+            flex-wrap: wrap; 
+            gap: 8px;
+        }
+        
+        #divisions-container .division-header-container h2 {
+            font-size: 1.05rem; /* Significantly reduced to fit long names */
+            white-space: normal; /* Allow title to wrap if necessary */
+            line-height: 1.2;
+            flex: 1;
         }
 
         .toggle-switch {
@@ -236,6 +262,7 @@
             border-radius: 20px;
             padding: 4px;
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
+            flex-shrink: 0;
         }
 
         .toggle-btn {
@@ -330,7 +357,6 @@
             background-color: #fafafa;
         }
         
-        /* Remove highlight when expanded for awards cards */
         .stat-player-wrapper.expanded .stat-player-row,
         .stat-player-wrapper.expanded .stat-player-row:hover {
             background-color: #ffffff !important; 
@@ -462,13 +488,17 @@
             h1 { font-size: 1.3rem; }
             .lion-logo { height: 45px; }
             th, td { padding: 10px 4px; font-size: 0.8rem; }
-            h2, .plain-table-title, .division-header-container h2, .overall-header-container h2 { font-size: 1.1rem; }
+            h2, .plain-table-title, .overall-header-container h2 { font-size: 1.1rem; }
             .draft-title { font-size: 1rem; }
             .toggle-btn { padding: 4px 12px; font-size: 0.75rem; }
             
             /* Further compression for mobile division tables */
             #divisions-container table { font-size: 0.68rem; }
             #divisions-container th, #divisions-container td { padding: 6px 2px; }
+            #divisions-container .division-header-container h2 { font-size: 0.9rem; } /* Tiny font for longest division names on mobile */
+            
+            #divisions-container th:nth-child(1), #divisions-container td:nth-child(1) { width: 10%; } 
+            #divisions-container th:nth-child(2), #divisions-container td:nth-child(2) { width: 44%; } 
         }
     </style>
 </head>
@@ -751,7 +781,7 @@
             }
             primaryTbody.appendChild(tr);
 
-            // Nested Team Rows (Aligning directly under the parent headers)
+            // Nested Team Rows
             let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
             if (overallMode === 'PTS') {
                 playerTeams.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
@@ -1081,10 +1111,9 @@
             `;
             tbody.appendChild(tr);
 
-            // Nested Team Rows (Aligning directly under the parent headers)
+            // Nested Team Rows
             let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
             
-            // Sort inner teams by diff so highest diff shows at top
             playerTeams.sort((a, b) => {
                 const diffA = (draftPicks[a.team] || 20) - (teamRankMap[a.team] || 20);
                 const diffB = (draftPicks[b.team] || 20) - (teamRankMap[b.team] || 20);
