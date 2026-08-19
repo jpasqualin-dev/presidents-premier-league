@@ -215,16 +215,19 @@
             font-size: 1.4rem;
         }
 
-        /* Smaller Font for Division Tables to Prevent Scrolling */
+        /* Highly Compact Division Tables to Match "Red and Blue" Width */
         #divisions-container table {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
         }
         #divisions-container th, #divisions-container td {
-            padding: 10px 4px;
+            padding: 8px 3px;
+        }
+        #divisions-container .team-inline {
+            gap: 5px;
         }
         #divisions-container .team-inline .team-icon {
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
         }
 
         .toggle-switch {
@@ -462,7 +465,10 @@
             h2, .plain-table-title, .division-header-container h2, .overall-header-container h2 { font-size: 1.1rem; }
             .draft-title { font-size: 1rem; }
             .toggle-btn { padding: 4px 12px; font-size: 0.75rem; }
-            #divisions-container table { font-size: 0.75rem; }
+            
+            /* Further compression for mobile division tables */
+            #divisions-container table { font-size: 0.68rem; }
+            #divisions-container th, #divisions-container td { padding: 6px 2px; }
         }
     </style>
 </head>
@@ -831,7 +837,7 @@
                 else if (displayName === "Manchester United") displayName = "Man United";
                 else if (displayName === "Nottingham Forest") displayName = "Nottm Forest";
                 
-                const teamCellHTML = `<div class="team-inline">${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="crest">` : ''}<div style="line-height: 1.2;"><div style="font-weight: 600; color: #1a1a1a;">${displayName}</div><div style="font-size: 0.75rem; color: #888;">${t.owner}</div></div></div>`;
+                const teamCellHTML = `<div class="team-inline">${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="crest">` : ''}<div style="line-height: 1.2;"><div style="font-weight: 600; color: #1a1a1a;">${displayName}</div><div style="font-size: 0.70rem; color: #888;">${t.owner}</div></div></div>`;
 
                 if (mode === 'PTS') {
                     html += `<tr><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PL}</td><td>${t.W}</td><td>${t.D}</td><td>${t.L}</td><td>${t.GF}-${t.GA}</td><td>${t.GD > 0 ? '+' + t.GD : t.GD}</td><td><strong>${t.PTS}</strong></td></tr>`;
