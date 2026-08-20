@@ -227,6 +227,33 @@
             height: 16px;
         }
 
+        /* Anchor Standings & Divisions table columns proportionally */
+        #standings-table th:nth-child(1), #standings-table td:nth-child(1),
+        #divisions-container table th:nth-child(1), #divisions-container table td:nth-child(1) {
+            width: 8%;
+        }
+        #standings-table th:nth-child(2), #standings-table td:nth-child(2),
+        #divisions-container table th:nth-child(2), #divisions-container table td:nth-child(2) {
+            width: 38%;
+            white-space: normal;
+        }
+
+        /* Freezes Draft Value Performance By Player columns so they align with tables above */
+        #draft-player-table {
+            table-layout: fixed;
+            width: 100%;
+        }
+        #draft-player-table th:nth-child(1), #draft-player-table td:nth-child(1) {
+            width: 8%; /* Matches standings table alignment */
+        }
+        #draft-player-table th:nth-child(2), #draft-player-table td:nth-child(2) {
+            width: 67%; /* Ensures spacing for no-wrap nested rows */
+            white-space: normal;
+        }
+        #draft-player-table th:nth-child(3), #draft-player-table td:nth-child(3) {
+            width: 25%;
+        }
+
         .toggle-switch {
             display: inline-flex;
             background-color: #e5e5ea;
@@ -463,6 +490,22 @@
             .draft-title { font-size: 1rem; }
             .toggle-btn { padding: 4px 12px; font-size: 0.75rem; }
             #divisions-container table { font-size: 0.75rem; }
+            
+            #standings-table th:nth-child(1), #standings-table td:nth-child(1),
+            #divisions-container table th:nth-child(1), #divisions-container table td:nth-child(1) {
+                width: 10%;
+            }
+            #standings-table th:nth-child(2), #standings-table td:nth-child(2),
+            #divisions-container table th:nth-child(2), #divisions-container table td:nth-child(2) {
+                width: 35%;
+            }
+            
+            #draft-player-table th:nth-child(1), #draft-player-table td:nth-child(1) {
+                width: 10%;
+            }
+            #draft-player-table th:nth-child(2), #draft-player-table td:nth-child(2) {
+                width: 65%;
+            }
         }
     </style>
 </head>
@@ -515,7 +558,7 @@
         <table id="draft-rank-table">
             <thead>
                 <tr class="title-row">
-                    <th colspan="6" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
+                    <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
                         <h2 class="plain-table-title draft-title">Draft Value Performance</h2>
                     </th>
                 </tr>
@@ -538,8 +581,7 @@
         <table id="draft-player-table">
             <thead>
                 <tr class="title-row">
-                    <!-- FIX: Set Colspan to exactly 3 -->
-                    <th colspan="3" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
+                    <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
                         <h2 class="plain-table-title draft-title">Draft Value Performance by Player</h2>
                     </th>
                 </tr>
@@ -700,11 +742,9 @@
 
         const primaryTable = document.getElementById('standings-table');
         
-        // FIX: Bound Colspan to the specific table's column width based on the mode
-        const colCount = overallMode === 'PTS' ? 9 : 6;
         let theadHtml = `
             <tr class="title-row">
-                <th colspan="${colCount}" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
+                <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
                     <div class="overall-header-container">
                         <h2>Overall Standings</h2>
                         <div class="toggle-switch">
@@ -810,11 +850,9 @@
             if (mode === 'PTS') teamsInDiv.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
             else teamsInDiv.sort((a, b) => b.ptsPga - a.ptsPga || b.PGA - a.PGA);
 
-            // FIX: Bound Colspan to the specific table's column width based on the mode
-            const colCount = mode === 'PTS' ? 9 : 6;
             let html = `<div class="table-wrapper"><table><thead>
                 <tr class="title-row">
-                    <th colspan="${colCount}" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
+                    <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
                         <div class="division-header-container">
                             <h2>${divName}</h2>
                             <div class="toggle-switch">
@@ -1080,7 +1118,7 @@
             `;
             tbody.appendChild(tr);
 
-            // Nested Team Rows (Aligning directly under the parent headers)
+            // Nested Team Rows
             let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
             
             // Sort inner teams by diff so highest diff shows at top
@@ -1108,12 +1146,13 @@
                 const nestedTr = document.createElement('tr');
                 nestedTr.className = `nested-table-row ${targetClass}`;
 
+                // Updated with class="text-left", zero padding, and white-space: nowrap
                 nestedTr.innerHTML = `
                     <td></td>
-                    <td class="text-left">
-                        <div style="display: flex; align-items: center; gap: 8px; padding-left: 10px;">
+                    <td class="text-left" style="padding-left: 0;">
+                        <div style="display: flex; align-items: center; gap: 6px; white-space: nowrap;">
                             ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="${t.team}">` : ''}
-                            <span>${displayName}</span>
+                            <span style="color: #4a5568; font-weight: 500;">${displayName}</span>
                             <span style="color:#888; font-size: 0.75rem;">(Pick: ${pick}, Rank: ${rank})</span>
                         </div>
                     </td>
