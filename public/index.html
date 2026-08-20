@@ -104,7 +104,7 @@
         }
 
         .draft-title {
-            font-size: 1.15rem; /* Reduced slightly to prevent scrolling */
+            font-size: 1.15rem; 
         }
 
         .text-left {
@@ -155,7 +155,6 @@
             background-color: #fafafa;
         }
         
-        /* Remove highlight when expanded */
         .expandable-row.expanded,
         .expandable-row.expanded:hover {
             background-color: #ffffff !important; 
@@ -215,16 +214,52 @@
             font-size: 1.4rem;
         }
 
-        /* Smaller Font for Division Tables to Prevent Scrolling */
-        #divisions-container table {
-            font-size: 0.8rem;
+        /* Ensures Overall Standings and Division Tables align to identical proportions */
+        #standings-table, #divisions-container table {
+            table-layout: auto; 
         }
-        #divisions-container th, #divisions-container td {
-            padding: 10px 4px;
+        #standings-table th:nth-child(1), #standings-table td:nth-child(1),
+        #divisions-container table th:nth-child(1), #divisions-container table td:nth-child(1) {
+            width: 8%;
         }
-        #divisions-container .team-inline .team-icon {
-            width: 16px;
-            height: 16px;
+        #standings-table th:nth-child(2), #standings-table td:nth-child(2),
+        #divisions-container table th:nth-child(2), #divisions-container table td:nth-child(2) {
+            width: 38%;
+            white-space: normal;
+        }
+
+        /* Nested Row Specific Adjustments to prevent shifting */
+        .nested-table-row td:nth-child(2) {
+            padding-left: 0 !important; /* Shift left */
+        }
+        .nested-table-row .team-inline {
+            margin-left: -15px; /* Pull the name and icon back towards the number column */
+        }
+
+        /* Draft Value Performance by Player: use the same natural column behavior as test2 */
+        #draft-player-table {
+            width: 100%;
+            table-layout: auto;
+        }
+        #draft-player-table .nested-table-row td:nth-child(2) {
+            padding-left: 0 !important;
+        }
+        #draft-player-table .nested-table-row .team-inline {
+            margin-left: 0;
+        }
+
+        /* Allow division headers to flex wrap so the toggle button doesn't force a widened table */
+        #divisions-container .division-header-container {
+            align-items: center;
+            flex-wrap: wrap; 
+            gap: 8px;
+        }
+        
+        #divisions-container .division-header-container h2 {
+            font-size: 1.4rem; 
+            white-space: normal; 
+            line-height: 1.2;
+            flex: 1;
         }
 
         .toggle-switch {
@@ -233,6 +268,7 @@
             border-radius: 20px;
             padding: 4px;
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
+            flex-shrink: 0;
         }
 
         .toggle-btn {
@@ -327,7 +363,6 @@
             background-color: #fafafa;
         }
         
-        /* Remove highlight when expanded for awards cards */
         .stat-player-wrapper.expanded .stat-player-row,
         .stat-player-wrapper.expanded .stat-player-row:hover {
             background-color: #ffffff !important; 
@@ -459,10 +494,21 @@
             h1 { font-size: 1.3rem; }
             .lion-logo { height: 45px; }
             th, td { padding: 10px 4px; font-size: 0.8rem; }
-            h2, .plain-table-title, .division-header-container h2, .overall-header-container h2 { font-size: 1.1rem; }
+            h2, .plain-table-title, .overall-header-container h2 { font-size: 1.1rem; }
             .draft-title { font-size: 1rem; }
             .toggle-btn { padding: 4px 12px; font-size: 0.75rem; }
-            #divisions-container table { font-size: 0.75rem; }
+            
+            #divisions-container .division-header-container h2 { font-size: 1.1rem; } 
+            
+            /* Symmetrically anchor columns on mobile */
+            #standings-table th:nth-child(1), #standings-table td:nth-child(1),
+            #divisions-container table th:nth-child(1), #divisions-container table td:nth-child(1) {
+                width: 10%;
+            }
+            #standings-table th:nth-child(2), #standings-table td:nth-child(2),
+            #divisions-container table th:nth-child(2), #divisions-container table td:nth-child(2) {
+                width: 35%;
+            }
         }
     </style>
 </head>
@@ -476,25 +522,20 @@
 
     <div id="status-indicator">Initializing 2025/2026 season data...</div>
 
-    <!-- Overall Standings -->
     <div class="table-wrapper" style="margin-top: 0;">
         <table id="standings-table">
             <thead>
-                <!-- Populated dynamically via JS -->
-            </thead>
+                </thead>
             <tbody id="standings-body">
             </tbody>
         </table>
     </div>
 
-    <!-- Divisions Container -->
     <div id="divisions-container"></div>
     
-    <!-- Season Awards Section -->
     <h2>Season Awards</h2>
     <div id="season-awards-container" class="stats-grid"></div>
 
-    <!-- Team Stats External Link -->
     <h2>Team Stats</h2>
     <div class="fotmob-btn-container">
         <a href="https://www.fotmob.com/leagues/47/stats/premier-league/teams" target="_blank" class="fotmob-link-btn">
@@ -502,7 +543,6 @@
         </a>
     </div>
 
-    <!-- Player Stats External Link -->
     <h2>Player Stats</h2>
     <div class="fotmob-btn-container">
         <a href="https://www.fotmob.com/leagues/47/stats/premier-league/players" target="_blank" class="fotmob-link-btn">
@@ -510,7 +550,6 @@
         </a>
     </div>
 
-    <!-- Draft Value Performance -->
     <div class="table-wrapper">
         <table id="draft-rank-table">
             <thead>
@@ -533,12 +572,11 @@
         </table>
     </div>
 
-    <!-- Draft Value Performance by Player -->
     <div class="table-wrapper">
         <table id="draft-player-table">
             <thead>
                 <tr class="title-row">
-                    <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
+                    <th colspan="3" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
                         <h2 class="plain-table-title draft-title">Draft Value Performance by Player</h2>
                     </th>
                 </tr>
@@ -745,7 +783,7 @@
             }
             primaryTbody.appendChild(tr);
 
-            // Nested Team Rows (Aligning directly under the parent headers)
+            // Nested Team Rows
             let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
             if (overallMode === 'PTS') {
                 playerTeams.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
@@ -760,7 +798,7 @@
                 else if (displayName === "Nottingham Forest") displayName = "Nottm Forest";
 
                 const teamNameCell = `
-                    <div class="team-inline" style="padding-left: 10px;">
+                    <div class="team-inline">
                         ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="${t.team}">` : ''}
                         ${displayName}
                     </div>
@@ -831,12 +869,12 @@
                 else if (displayName === "Manchester United") displayName = "Man United";
                 else if (displayName === "Nottingham Forest") displayName = "Nottm Forest";
                 
-                const teamCellHTML = `<div class="team-inline">${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="crest">` : ''}<div style="line-height: 1.2;"><div style="font-weight: 600; color: #1a1a1a;">${displayName}</div><div style="font-size: 0.75rem; color: #888;">${t.owner}</div></div></div>`;
+                const teamCellHTML = `<div class="team-inline">${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="crest">` : ''}<div style="line-height: 1.2;"><div style="font-weight: 600; color: #1a1a1a;">${displayName}</div><div style="font-size: 0.70rem; color: #888;">${t.owner}</div></div></div>`;
 
                 if (mode === 'PTS') {
-                    html += `<tr><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PL}</td><td>${t.W}</td><td>${t.D}</td><td>${t.L}</td><td>${t.GF}-${t.GA}</td><td>${t.GD > 0 ? '+' + t.GD : t.GD}</td><td><strong>${t.PTS}</strong></td></tr>`;
+                    html += `<tr><td>${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PL}</td><td>${t.W}</td><td>${t.D}</td><td>${t.L}</td><td>${t.GF}-${t.GA}</td><td>${t.GD > 0 ? '+' + t.GD : t.GD}</td><td><strong>${t.PTS}</strong></td></tr>`;
                 } else {
-                    html += `<tr><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PTS}</td><td>${t.pvpWins}</td><td>${t.PGA > 0 ? '+' + t.PGA : t.PGA}</td><td class="highlight-col">${t.ptsPga}</td></tr>`;
+                    html += `<tr><td>${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PTS}</td><td>${t.pvpWins}</td><td>${t.PGA > 0 ? '+' + t.PGA : t.PGA}</td><td class="highlight-col">${t.ptsPga}</td></tr>`;
                 }
             });
 
@@ -1009,7 +1047,7 @@
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td class="fotmob-rank">${rank}</td>
+                <td>${rank}</td>
                 <td class="text-left">
                     <div class="team-inline">
                         ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="crest">` : ''}
@@ -1075,10 +1113,9 @@
             `;
             tbody.appendChild(tr);
 
-            // Nested Team Rows (Aligning directly under the parent headers)
+            // Nested Team Rows
             let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
             
-            // Sort inner teams by diff so highest diff shows at top
             playerTeams.sort((a, b) => {
                 const diffA = (draftPicks[a.team] || 20) - (teamRankMap[a.team] || 20);
                 const diffB = (draftPicks[b.team] || 20) - (teamRankMap[b.team] || 20);
