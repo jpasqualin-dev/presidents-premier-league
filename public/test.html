@@ -228,6 +228,14 @@
             white-space: normal;
         }
 
+        /* Nested Row Specific Adjustments to prevent shifting */
+        .nested-table-row td:nth-child(2) {
+            padding-left: 0 !important; /* Shift left */
+        }
+        .nested-table-row .team-inline {
+            margin-left: -15px; /* Pull the name and icon back towards the number column */
+        }
+
         /* Freezes Draft Value Performance By Player columns so they never shift when expanded */
         #draft-player-table {
             table-layout: fixed;
@@ -242,6 +250,8 @@
         }
         #draft-player-table th:nth-child(3), #draft-player-table td:nth-child(3) {
             width: 25%;
+            text-align: right;
+            padding-right: 16px;
         }
 
         /* Allow division headers to flex wrap so the toggle button doesn't force a widened table */
@@ -359,7 +369,6 @@
             background-color: #fafafa;
         }
         
-        /* Remove highlight when expanded for awards cards */
         .stat-player-wrapper.expanded .stat-player-row,
         .stat-player-wrapper.expanded .stat-player-row:hover {
             background-color: #ffffff !important; 
@@ -533,13 +542,17 @@
     <h2>Season Awards</h2>
     <div id="season-awards-container" class="stats-grid"></div>
 
-    <h2>View Stats on FotMob</h2>
-    <div class="fotmob-btn-container" style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <a href="https://www.fotmob.com/leagues/47/stats/premier-league/players" target="_blank" class="fotmob-link-btn">
-            Player Stats
-        </a>
+    <h2>Team Stats</h2>
+    <div class="fotmob-btn-container">
         <a href="https://www.fotmob.com/leagues/47/stats/premier-league/teams" target="_blank" class="fotmob-link-btn">
-            Team Stats
+            View Team Stats on FotMob
+        </a>
+    </div>
+
+    <h2>Player Stats</h2>
+    <div class="fotmob-btn-container">
+        <a href="https://www.fotmob.com/leagues/47/stats/premier-league/players" target="_blank" class="fotmob-link-btn">
+            View Player Stats on FotMob
         </a>
     </div>
 
@@ -547,7 +560,7 @@
         <table id="draft-rank-table">
             <thead>
                 <tr class="title-row">
-                    <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
+                    <th colspan="6" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
                         <h2 class="plain-table-title draft-title">Draft Value Performance</h2>
                     </th>
                 </tr>
@@ -569,14 +582,14 @@
         <table id="draft-player-table">
             <thead>
                 <tr class="title-row">
-                    <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
+                    <th colspan="3" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
                         <h2 class="plain-table-title draft-title">Draft Value Performance by Player</h2>
                     </th>
                 </tr>
                 <tr>
                     <th>#</th>
                     <th class="text-left">Player</th>
-                    <th>Total Diff</th>
+                    <th style="text-align: right; padding-right: 16px;">Total Diff</th>
                 </tr>
             </thead>
             <tbody id="draft-player-body">
@@ -770,9 +783,9 @@
             `;
 
             if (overallMode === 'PTS') {
-                tr.innerHTML = `<td>${index + 1}</td><td class="text-left">${playerCell}</td><td>${p.PL}</td><td>${p.W}</td><td>${p.D}</td><td>${p.L}</td><td>${p.GF}-${p.GA}</td><td>${p.GD > 0 ? '+' + p.GD : p.GD}</td><td><strong>${p.PTS}</strong></td>`;
+                tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${p.PL}</td><td>${p.W}</td><td>${p.D}</td><td>${p.L}</td><td>${p.GF}-${p.GA}</td><td>${p.GD > 0 ? '+' + p.GD : p.GD}</td><td><strong>${p.PTS}</strong></td>`;
             } else {
-                tr.innerHTML = `<td>${index + 1}</td><td class="text-left">${playerCell}</td><td>${p.PTS}</td><td>${p.pvpWins}</td><td>${p.pga > 0 ? '+' + p.pga : p.pga}</td><td class="highlight-col">${p.ptsPga}</td>`;
+                tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${p.PTS}</td><td>${p.pvpWins}</td><td>${p.pga > 0 ? '+' + p.pga : p.pga}</td><td class="highlight-col">${p.ptsPga}</td>`;
             }
             primaryTbody.appendChild(tr);
 
@@ -865,9 +878,9 @@
                 const teamCellHTML = `<div class="team-inline">${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="crest">` : ''}<div style="line-height: 1.2;"><div style="font-weight: 600; color: #1a1a1a;">${displayName}</div><div style="font-size: 0.70rem; color: #888;">${t.owner}</div></div></div>`;
 
                 if (mode === 'PTS') {
-                    html += `<tr><td>${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PL}</td><td>${t.W}</td><td>${t.D}</td><td>${t.L}</td><td>${t.GF}-${t.GA}</td><td>${t.GD > 0 ? '+' + t.GD : t.GD}</td><td><strong>${t.PTS}</strong></td></tr>`;
+                    html += `<tr><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PL}</td><td>${t.W}</td><td>${t.D}</td><td>${t.L}</td><td>${t.GF}-${t.GA}</td><td>${t.GD > 0 ? '+' + t.GD : t.GD}</td><td><strong>${t.PTS}</strong></td></tr>`;
                 } else {
-                    html += `<tr><td>${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PTS}</td><td>${t.pvpWins}</td><td>${t.PGA > 0 ? '+' + t.PGA : t.PGA}</td><td class="highlight-col">${t.ptsPga}</td></tr>`;
+                    html += `<tr><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PTS}</td><td>${t.pvpWins}</td><td>${t.PGA > 0 ? '+' + t.PGA : t.PGA}</td><td class="highlight-col">${t.ptsPga}</td></tr>`;
                 }
             });
 
@@ -1040,7 +1053,7 @@
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td>${rank}</td>
+                <td class="fotmob-rank">${rank}</td>
                 <td class="text-left">
                     <div class="team-inline">
                         ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="crest">` : ''}
@@ -1100,8 +1113,8 @@
             else if (p.totalDraftDiff < 0) { overallPillClass = 'pill-red'; overallFormattedDiff = `${p.totalDraftDiff}`; }
 
             tr.innerHTML = `
-                <td>${idx + 1}</td>
-                <td class="text-left">${playerCell}</td>
+                <td class="fotmob-rank">${idx + 1}</td>
+                <td class="fotmob-player">${playerCell}</td>
                 <td><span class="stat-value ${overallPillClass}">${overallFormattedDiff}</span></td>
             `;
             tbody.appendChild(tr);
