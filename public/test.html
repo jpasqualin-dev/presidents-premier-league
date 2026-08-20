@@ -228,6 +228,14 @@
             white-space: normal;
         }
 
+        /* Nested Row Specific Adjustments to prevent shifting */
+        .nested-table-row td:nth-child(2) {
+            padding-left: 0 !important; /* Shift left */
+        }
+        .nested-table-row .team-inline {
+            margin-left: -15px; /* Pull the name and icon back towards the number column */
+        }
+
         /* Freezes Draft Value Performance By Player columns so they never shift when expanded */
         #draft-player-table {
             table-layout: fixed;
@@ -773,9 +781,9 @@
             `;
 
             if (overallMode === 'PTS') {
-                tr.innerHTML = `<td>${index + 1}</td><td class="text-left">${playerCell}</td><td>${p.PL}</td><td>${p.W}</td><td>${p.D}</td><td>${p.L}</td><td>${p.GF}-${p.GA}</td><td>${p.GD > 0 ? '+' + p.GD : p.GD}</td><td><strong>${p.PTS}</strong></td>`;
+                tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${p.PL}</td><td>${p.W}</td><td>${p.D}</td><td>${p.L}</td><td>${p.GF}-${p.GA}</td><td>${p.GD > 0 ? '+' + p.GD : p.GD}</td><td><strong>${p.PTS}</strong></td>`;
             } else {
-                tr.innerHTML = `<td>${index + 1}</td><td class="text-left">${playerCell}</td><td>${p.PTS}</td><td>${p.pvpWins}</td><td>${p.pga > 0 ? '+' + p.pga : p.pga}</td><td class="highlight-col">${p.ptsPga}</td>`;
+                tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${p.PTS}</td><td>${p.pvpWins}</td><td>${p.pga > 0 ? '+' + p.pga : p.pga}</td><td class="highlight-col">${p.ptsPga}</td>`;
             }
             primaryTbody.appendChild(tr);
 
@@ -794,7 +802,7 @@
                 else if (displayName === "Nottingham Forest") displayName = "Nottm Forest";
 
                 const teamNameCell = `
-                    <div class="team-inline" style="padding-left: 10px;">
+                    <div class="team-inline">
                         ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="${t.team}">` : ''}
                         ${displayName}
                     </div>
@@ -1136,13 +1144,14 @@
                 const nestedTr = document.createElement('tr');
                 nestedTr.className = `nested-table-row ${targetClass}`;
 
+                // Align the text under the player column and ensure the value lands under Total Diff
                 nestedTr.innerHTML = `
                     <td></td>
                     <td class="text-left">
-                        <div style="display: flex; align-items: center; gap: 8px; padding-left: 10px; flex-wrap: wrap;">
+                        <div class="team-inline" style="padding-left: 10px;">
                             ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="${t.team}">` : ''}
                             <span>${displayName}</span>
-                            <span style="color:#888; font-size: 0.75rem; white-space: nowrap;">(Pick: ${pick}, Rank: ${rank})</span>
+                            <span style="color:#888; font-size: 0.75rem;">(Pick: ${pick}, Rank: ${rank})</span>
                         </div>
                     </td>
                     <td><span class="stat-value ${pillClass}" style="transform: scale(0.9); opacity: 0.9;">${formattedDiff}</span></td>
