@@ -236,20 +236,16 @@
             margin-left: -15px; /* Pull the name and icon back towards the number column */
         }
 
-        /* Freezes Draft Value Performance By Player columns so they never shift when expanded */
+        /* Draft Value Performance by Player: use the same natural column behavior as test2 */
         #draft-player-table {
-            table-layout: fixed;
             width: 100%;
+            table-layout: auto;
         }
-        #draft-player-table th:nth-child(1), #draft-player-table td:nth-child(1) {
-            width: 15%;
+        #draft-player-table .nested-table-row td:nth-child(2) {
+            padding-left: 0 !important;
         }
-        #draft-player-table th:nth-child(2), #draft-player-table td:nth-child(2) {
-            width: 60%;
-            white-space: normal;
-        }
-        #draft-player-table th:nth-child(3), #draft-player-table td:nth-child(3) {
-            width: 25%;
+        #draft-player-table .nested-table-row .team-inline {
+            margin-left: 0;
         }
 
         /* Allow division headers to flex wrap so the toggle button doesn't force a widened table */
@@ -1111,8 +1107,8 @@
             else if (p.totalDraftDiff < 0) { overallPillClass = 'pill-red'; overallFormattedDiff = `${p.totalDraftDiff}`; }
 
             tr.innerHTML = `
-                <td>${idx + 1}</td>
-                <td class="text-left">${playerCell}</td>
+                <td class="fotmob-rank">${idx + 1}</td>
+                <td class="fotmob-player">${playerCell}</td>
                 <td><span class="stat-value ${overallPillClass}">${overallFormattedDiff}</span></td>
             `;
             tbody.appendChild(tr);
@@ -1144,11 +1140,10 @@
                 const nestedTr = document.createElement('tr');
                 nestedTr.className = `nested-table-row ${targetClass}`;
 
-                // Align the text under the player column and ensure the value lands under Total Diff
                 nestedTr.innerHTML = `
                     <td></td>
                     <td class="text-left">
-                        <div class="team-inline" style="padding-left: 10px;">
+                        <div style="display: flex; align-items: center; gap: 8px; padding-left: 10px;">
                             ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="${t.team}">` : ''}
                             <span>${displayName}</span>
                             <span style="color:#888; font-size: 0.75rem;">(Pick: ${pick}, Rank: ${rank})</span>
