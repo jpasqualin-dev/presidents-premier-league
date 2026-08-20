@@ -214,32 +214,34 @@
             font-size: 1.4rem;
         }
 
-        /* Highly Compact & Fixed Division Tables */
-        #divisions-container table {
-            font-size: 0.75rem;
-            table-layout: fixed; /* Forces uniform column widths across all tables */
-            word-wrap: break-word;
+        /* Ensures Overall Standings and Division Tables align to identical proportions */
+        #standings-table, #divisions-container table {
+            table-layout: auto; 
         }
-        
-        /* Explicit Column Widths to Ensure Exact Alignment */
-        #divisions-container th:nth-child(1), #divisions-container td:nth-child(1) { width: 8%; } /* Rank Column */
-        #divisions-container th:nth-child(2), #divisions-container td:nth-child(2) { width: 42%; } /* Team/Owner Column */
-        #divisions-container th:nth-child(n+3), #divisions-container td:nth-child(n+3) { width: auto; } /* Divides remaining space equally among stats */
+        #standings-table th:nth-child(1), #standings-table td:nth-child(1),
+        #divisions-container table th:nth-child(1), #divisions-container table td:nth-child(1) {
+            width: 8%;
+        }
+        #standings-table th:nth-child(2), #standings-table td:nth-child(2),
+        #divisions-container table th:nth-child(2), #divisions-container table td:nth-child(2) {
+            width: 38%;
+            white-space: normal;
+        }
 
-        #divisions-container th, #divisions-container td {
-            padding: 8px 3px;
-            overflow: hidden; 
-            text-overflow: ellipsis; 
+        /* Freezes Draft Value Performance By Player columns so they never shift when expanded */
+        #draft-player-table {
+            table-layout: fixed;
+            width: 100%;
         }
-        
-        #divisions-container .team-inline {
-            gap: 5px;
+        #draft-player-table th:nth-child(1), #draft-player-table td:nth-child(1) {
+            width: 15%;
         }
-        
-        #divisions-container .team-inline .team-icon {
-            width: 14px;
-            height: 14px;
-            flex-shrink: 0; /* Prevents icons from squishing */
+        #draft-player-table th:nth-child(2), #draft-player-table td:nth-child(2) {
+            width: 60%;
+            white-space: normal;
+        }
+        #draft-player-table th:nth-child(3), #draft-player-table td:nth-child(3) {
+            width: 25%;
         }
 
         /* Allow division headers to flex wrap so the toggle button doesn't force a widened table */
@@ -250,8 +252,8 @@
         }
         
         #divisions-container .division-header-container h2 {
-            font-size: 1.05rem; /* Significantly reduced to fit long names */
-            white-space: normal; /* Allow title to wrap if necessary */
+            font-size: 1.4rem; 
+            white-space: normal; 
             line-height: 1.2;
             flex: 1;
         }
@@ -492,13 +494,17 @@
             .draft-title { font-size: 1rem; }
             .toggle-btn { padding: 4px 12px; font-size: 0.75rem; }
             
-            /* Further compression for mobile division tables */
-            #divisions-container table { font-size: 0.68rem; }
-            #divisions-container th, #divisions-container td { padding: 6px 2px; }
-            #divisions-container .division-header-container h2 { font-size: 0.9rem; } /* Tiny font for longest division names on mobile */
+            #divisions-container .division-header-container h2 { font-size: 1.1rem; } 
             
-            #divisions-container th:nth-child(1), #divisions-container td:nth-child(1) { width: 10%; } 
-            #divisions-container th:nth-child(2), #divisions-container td:nth-child(2) { width: 44%; } 
+            /* Symmetrically anchor columns on mobile */
+            #standings-table th:nth-child(1), #standings-table td:nth-child(1),
+            #divisions-container table th:nth-child(1), #divisions-container table td:nth-child(1) {
+                width: 10%;
+            }
+            #standings-table th:nth-child(2), #standings-table td:nth-child(2),
+            #divisions-container table th:nth-child(2), #divisions-container table td:nth-child(2) {
+                width: 35%;
+            }
         }
     </style>
 </head>
@@ -512,25 +518,20 @@
 
     <div id="status-indicator">Initializing 2025/2026 season data...</div>
 
-    <!-- Overall Standings -->
     <div class="table-wrapper" style="margin-top: 0;">
         <table id="standings-table">
             <thead>
-                <!-- Populated dynamically via JS -->
-            </thead>
+                </thead>
             <tbody id="standings-body">
             </tbody>
         </table>
     </div>
 
-    <!-- Divisions Container -->
     <div id="divisions-container"></div>
     
-    <!-- Season Awards Section -->
     <h2>Season Awards</h2>
     <div id="season-awards-container" class="stats-grid"></div>
 
-    <!-- Team Stats External Link -->
     <h2>Team Stats</h2>
     <div class="fotmob-btn-container">
         <a href="https://www.fotmob.com/leagues/47/stats/premier-league/teams" target="_blank" class="fotmob-link-btn">
@@ -538,7 +539,6 @@
         </a>
     </div>
 
-    <!-- Player Stats External Link -->
     <h2>Player Stats</h2>
     <div class="fotmob-btn-container">
         <a href="https://www.fotmob.com/leagues/47/stats/premier-league/players" target="_blank" class="fotmob-link-btn">
@@ -546,7 +546,6 @@
         </a>
     </div>
 
-    <!-- Draft Value Performance -->
     <div class="table-wrapper">
         <table id="draft-rank-table">
             <thead>
@@ -569,7 +568,6 @@
         </table>
     </div>
 
-    <!-- Draft Value Performance by Player -->
     <div class="table-wrapper">
         <table id="draft-player-table">
             <thead>
@@ -775,9 +773,9 @@
             `;
 
             if (overallMode === 'PTS') {
-                tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${p.PL}</td><td>${p.W}</td><td>${p.D}</td><td>${p.L}</td><td>${p.GF}-${p.GA}</td><td>${p.GD > 0 ? '+' + p.GD : p.GD}</td><td><strong>${p.PTS}</strong></td>`;
+                tr.innerHTML = `<td>${index + 1}</td><td class="text-left">${playerCell}</td><td>${p.PL}</td><td>${p.W}</td><td>${p.D}</td><td>${p.L}</td><td>${p.GF}-${p.GA}</td><td>${p.GD > 0 ? '+' + p.GD : p.GD}</td><td><strong>${p.PTS}</strong></td>`;
             } else {
-                tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${p.PTS}</td><td>${p.pvpWins}</td><td>${p.pga > 0 ? '+' + p.pga : p.pga}</td><td class="highlight-col">${p.ptsPga}</td>`;
+                tr.innerHTML = `<td>${index + 1}</td><td class="text-left">${playerCell}</td><td>${p.PTS}</td><td>${p.pvpWins}</td><td>${p.pga > 0 ? '+' + p.pga : p.pga}</td><td class="highlight-col">${p.ptsPga}</td>`;
             }
             primaryTbody.appendChild(tr);
 
@@ -870,9 +868,9 @@
                 const teamCellHTML = `<div class="team-inline">${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="crest">` : ''}<div style="line-height: 1.2;"><div style="font-weight: 600; color: #1a1a1a;">${displayName}</div><div style="font-size: 0.70rem; color: #888;">${t.owner}</div></div></div>`;
 
                 if (mode === 'PTS') {
-                    html += `<tr><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PL}</td><td>${t.W}</td><td>${t.D}</td><td>${t.L}</td><td>${t.GF}-${t.GA}</td><td>${t.GD > 0 ? '+' + t.GD : t.GD}</td><td><strong>${t.PTS}</strong></td></tr>`;
+                    html += `<tr><td>${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PL}</td><td>${t.W}</td><td>${t.D}</td><td>${t.L}</td><td>${t.GF}-${t.GA}</td><td>${t.GD > 0 ? '+' + t.GD : t.GD}</td><td><strong>${t.PTS}</strong></td></tr>`;
                 } else {
-                    html += `<tr><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PTS}</td><td>${t.pvpWins}</td><td>${t.PGA > 0 ? '+' + t.PGA : t.PGA}</td><td class="highlight-col">${t.ptsPga}</td></tr>`;
+                    html += `<tr><td>${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PTS}</td><td>${t.pvpWins}</td><td>${t.PGA > 0 ? '+' + t.PGA : t.PGA}</td><td class="highlight-col">${t.ptsPga}</td></tr>`;
                 }
             });
 
@@ -1045,7 +1043,7 @@
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td class="fotmob-rank">${rank}</td>
+                <td>${rank}</td>
                 <td class="text-left">
                     <div class="team-inline">
                         ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="crest">` : ''}
@@ -1105,8 +1103,8 @@
             else if (p.totalDraftDiff < 0) { overallPillClass = 'pill-red'; overallFormattedDiff = `${p.totalDraftDiff}`; }
 
             tr.innerHTML = `
-                <td class="fotmob-rank">${idx + 1}</td>
-                <td class="fotmob-player">${playerCell}</td>
+                <td>${idx + 1}</td>
+                <td class="text-left">${playerCell}</td>
                 <td><span class="stat-value ${overallPillClass}">${overallFormattedDiff}</span></td>
             `;
             tbody.appendChild(tr);
@@ -1141,10 +1139,10 @@
                 nestedTr.innerHTML = `
                     <td></td>
                     <td class="text-left">
-                        <div style="display: flex; align-items: center; gap: 8px; padding-left: 10px;">
+                        <div style="display: flex; align-items: center; gap: 8px; padding-left: 10px; flex-wrap: wrap;">
                             ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="${t.team}">` : ''}
                             <span>${displayName}</span>
-                            <span style="color:#888; font-size: 0.75rem;">(Pick: ${pick}, Rank: ${rank})</span>
+                            <span style="color:#888; font-size: 0.75rem; white-space: nowrap;">(Pick: ${pick}, Rank: ${rank})</span>
                         </div>
                     </td>
                     <td><span class="stat-value ${pillClass}" style="transform: scale(0.9); opacity: 0.9;">${formattedDiff}</span></td>
