@@ -239,19 +239,7 @@
         /* Draft Value Performance by Player: use the same natural column behavior as test2 */
         #draft-player-table {
             width: 100%;
-            table-layout: fixed;
-        }
-        #draft-player-table th:nth-child(1),
-        #draft-player-table td:nth-child(1) {
-            width: 15%;
-        }
-        #draft-player-table th:nth-child(2),
-        #draft-player-table td:nth-child(2) {
-            width: 60%;
-        }
-        #draft-player-table th:nth-child(3),
-        #draft-player-table td:nth-child(3) {
-            width: 25%;
+            table-layout: auto;
         }
         #draft-player-table .nested-table-row td:nth-child(2) {
             padding-left: 0 !important;
@@ -1119,9 +1107,9 @@
             else if (p.totalDraftDiff < 0) { overallPillClass = 'pill-red'; overallFormattedDiff = `${p.totalDraftDiff}`; }
 
             tr.innerHTML = `
-                <td><span class="stat-value ${overallPillClass}">${overallFormattedDiff}</span></td>
                 <td class="fotmob-rank">${idx + 1}</td>
                 <td class="fotmob-player">${playerCell}</td>
+                <td><span class="stat-value ${overallPillClass}">${overallFormattedDiff}</span></td>
             `;
             tbody.appendChild(tr);
 
@@ -1153,7 +1141,6 @@
                 nestedTr.className = `nested-table-row ${targetClass}`;
 
                 nestedTr.innerHTML = `
-                    <td><span class="stat-value ${pillClass}" style="transform: scale(0.9); opacity: 0.9;">${formattedDiff}</span></td>
                     <td></td>
                     <td class="text-left">
                         <div style="display: flex; align-items: center; gap: 8px; padding-left: 10px;">
@@ -1162,6 +1149,7 @@
                             <span style="color:#888; font-size: 0.75rem;">(Pick: ${pick}, Rank: ${rank})</span>
                         </div>
                     </td>
+                    <td><span class="stat-value ${pillClass}" style="transform: scale(0.9); opacity: 0.9;">${formattedDiff}</span></td>
                 `;
                 tbody.appendChild(nestedTr);
             });
