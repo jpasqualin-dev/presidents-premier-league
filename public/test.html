@@ -230,10 +230,10 @@
 
         /* Nested Row Specific Adjustments to prevent shifting */
         .nested-table-row td:nth-child(2) {
-            padding-left: 0 !important; /* Shift left */
+            padding-left: 0 !important; 
         }
         .nested-table-row .team-inline {
-            margin-left: -15px; /* Pull the name and icon back towards the number column */
+            margin-left: -15px; 
         }
 
         /* Freezes Draft Value Performance By Player columns so they never shift when expanded */
@@ -542,17 +542,13 @@
     <h2>Season Awards</h2>
     <div id="season-awards-container" class="stats-grid"></div>
 
-    <h2>Team Stats</h2>
-    <div class="fotmob-btn-container">
-        <a href="https://www.fotmob.com/leagues/47/stats/premier-league/teams" target="_blank" class="fotmob-link-btn">
-            View Team Stats on FotMob
-        </a>
-    </div>
-
-    <h2>Player Stats</h2>
-    <div class="fotmob-btn-container">
+    <h2>View Stats on FotMob</h2>
+    <div class="fotmob-btn-container" style="display: flex; gap: 10px; flex-wrap: wrap;">
         <a href="https://www.fotmob.com/leagues/47/stats/premier-league/players" target="_blank" class="fotmob-link-btn">
-            View Player Stats on FotMob
+            Player Stats
+        </a>
+        <a href="https://www.fotmob.com/leagues/47/stats/premier-league/teams" target="_blank" class="fotmob-link-btn">
+            Team Stats
         </a>
     </div>
 
