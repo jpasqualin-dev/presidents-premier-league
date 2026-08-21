@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jordan's Results - Fantasy Soccer</title>
+    <style>
+        /* FotMob-inspired baseline styling */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f2f3f5;
+            color: #111;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .page-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        /* Header Section */
+        .header {
+            padding: 24px;
+            background-color: #111;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .total-points {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #00ff87; /* Neon accent */
+        }
+
+        /* Table Container for Sticky Scrolling */
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 75vh;
+            overflow-y: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 800px; /* Forces scroll on small devices */
+        }
+
+        th, td {
+            border: 1px solid #e2e2e2;
+            padding: 16px 10px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        /* Sticky Headers & Columns */
+        th {
+            background: #ffffff;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #333;
+            box-shadow: 0 1px 0 #e2e2e2;
+        }
+
+        /* Sticky Matchweek Column */
+        th:first-child {
+            left: 0;
+            z-index: 3;
+            width: 80px;
+        }
+
+        td:first-child {
+            position: sticky;
+            left: 0;
+            background: #fafafa;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #555;
+            z-index: 1;
+            box-shadow: 1px 0 0 #e2e2e2;
+        }
+
+        /* FotMob Style Match Cells */
+        .fixture-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .opponent-info {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #111;
+        }
+
+        .manager-name {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: #666;
+            margin-top: -4px;
+        }
+
+        /* W/D/L Badges */
+        .score-badge {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            min-width: 44px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
+
+        .win { background-color: #00a667; }
+        .loss { background-color: #f34f49; }
+        .draw { background-color: #8c9297; }
+        .upcoming { 
+            background-color: #e6e8ea; 
+            color: #111; 
+            font-weight: 600; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-container">
+    <div class="header">
+        <h1>Jordan's Season Results</h1>
+        <div class="total-points">Total Pts: 42</div>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>MW</th>
+                    <th>Arsenal</th>
+                    <th>Aston Villa</th>
+                    <th>Brighton</th>
+                    <th>Fulham</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Matchweek 1 -->
+                <tr>
+                    <td>Week 1</td>
+                    <td>
+                        <div class="fixture-cell">
+                            <span class="opponent-info">vs WOL</span>
+                            <span class="manager-name">(Chris)</span>
+                            <span class="score-badge win">2 - 0</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fixture-cell">
+                            <span class="opponent-info">@ WHU</span>
+                            <span class="manager-name">(Dave)</span>
+                            <span class="score-badge win">2 - 1</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fixture-cell">
+                            <span class="opponent-info">@ EVE</span>
+                            <span class="manager-name">(Mike)</span>
+                            <span class="score-badge win">3 - 0</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fixture-cell">
+                            <span class="opponent-info">@ MUN</span>
+                            <span class="manager-name">(Sarah)</span>
+                            <span class="score-badge loss">0 - 1</span>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Matchweek 2 -->
+                <tr>
+                    <td>Week 2</td>
+                    <td>
+                        <div class="fixture-cell">
+                            <span class="opponent-info">@ AVL</span>
+                            <span class="manager-name">(Jordan)</span>
+                            <span class="score-badge win">2 - 0</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fixture-cell">
+                            <span class="opponent-info">vs ARS</span>
+                            <span class="manager-name">(Jordan)</span>
+                            <span class="score-badge loss">0 - 2</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fixture-cell">
+                            <span class="opponent-info">vs MUN</span>
+                            <span class="manager-name">(Sarah)</span>
+                            <span class="score-badge win">2 - 1</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fixture-cell">
+                            <span class="opponent-info">vs LEI</span>
+                            <span class="manager-name">(Free Agent)</span>
+                            <span class="score-badge win">2 - 1</span>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Matchweek 3 -->
+                <tr>
+                    <td>Week 3</td>
+                    <td>
+                        <div class="fixture-cell">
+                            <span class="opponent-info">vs BHA</span>
+                            <span class="manager-name">(Jordan)</span>
+                            <span class="score-badge draw">1 - 1</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fixture-cell">
+                            <span class="opponent-info">@ LEI</span>
+                            <span class="manager-name">(Free Agent)</span>
+                            <span class="score-badge win">2 - 1</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fixture-cell">
+                            <span class="opponent-info">@ ARS</span>
+                            <span class="manager-name">(Jordan)</span>
+                            <span class="score-badge draw">1 - 1</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fixture-cell">
+                            <span class="opponent-info">@ IPS</span>
+                            <span class="manager-name">(Chris)</span>
+                            <span class="score-badge draw">1 - 1</span>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Matchweek 4 (Upcoming) -->
+                <tr>
+                    <td>Week 4</td>
+                    <td>
+                        <div class="fixture-cell">
+                            <span class="opponent-info">@ TOT</span>
+                            <span class="manager-name">(Mike)</span>
+                            <span class="score-badge upcoming">9:00 AM</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fixture-cell">
+                            <span class="opponent-info">vs EVE</span>
+                            <span class="manager-name">(Mike)</span>
+                            <span class="score-badge upcoming">12:30 PM</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fixture-cell">
+                            <span class="opponent-info">vs IPS</span>
+                            <span class="manager-name">(Chris)</span>
+                            <span class="score-badge upcoming">10:00 AM</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="fixture-cell">
+                            <span class="opponent-info">vs WHU</span>
+                            <span class="manager-name">(Dave)</span>
+                            <span class="score-badge upcoming">10:00 AM</span>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>
