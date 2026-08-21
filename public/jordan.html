@@ -3,242 +3,246 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jordan's Dashboard - La Liga de Los Presidentes</title>
+    <title>Jordan's Results | La Liga de Los Presidentes</title>
     <style>
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #f4f6f8;
             color: #333;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1100px;
+            padding: 16px;
+            max-width: 600px; 
             margin: 0 auto;
-            background: #fff;
-            padding: 24px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        .header-container {
+        /* Navigation / Back Button */
+        .nav-bar {
+            margin-bottom: 16px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #38003c;
+            text-decoration: none;
+            background: #ffffff;
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+            transition: background-color 0.2s;
+        }
+
+        .back-button:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Top Profile Header (Sticky) */
+        .profile-card {
+            position: sticky;
+            top: 12px;
+            z-index: 10;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #38003c;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
+            border: 1px solid #e2e8f0;
+            border-left: 5px solid #38003c;
         }
 
-        h1 {
-            margin: 0;
+        .profile-info h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
             color: #1a1a1a;
-            font-size: 2rem;
         }
 
-        .lion-logo {
-            height: 65px;
-            width: auto;
-            object-fit: contain;
-        }
-
-        h2 {
-            margin-top: 35px;
-            margin-bottom: 0;
-            color: #1a1a1a;
-            border-bottom: 2px solid #00ff87;
-            padding-bottom: 8px;
-            font-size: 1.4rem;
-        }
-
-        #status-indicator {
-            padding: 12px 16px;
-            border-radius: 6px;
-            background-color: #e8f4fd;
-            color: #0c5460;
-            margin-bottom: 20px;
-            font-size: 0.95rem;
-        }
-
-        .table-wrapper {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin-top: 20px;
-            margin-bottom: 10px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 0;
-            background: #fff;
-            font-size: 0.9rem;
-            white-space: nowrap;
-        }
-
-        th, td {
-            padding: 12px 6px;
-            text-align: center;
-            border-bottom: 1px solid #eaeaea;
-        }
-
-        th {
-            background-color: #fff;
+        .profile-info p {
+            font-size: 0.825rem;
             color: #666;
-            font-weight: 500;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            border-bottom: 2px solid #eaeaea;
+            margin-top: 2px;
         }
 
-        .text-left { text-align: left !important; }
-        .fotmob-rank { width: 25px; font-weight: 600; color: #1a1a1a; }
-        .fotmob-player { text-align: left; font-weight: 600; color: #1a1a1a; }
-        .highlight-col { font-weight: bold; color: #38003c; }
-        
-        .jordan-highlight {
-            background-color: #e6f7ff !important;
-            border-left: 4px solid #00ff87;
+        .points-badge {
+            background: #00ff87;
+            color: #38003c;
+            padding: 8px 14px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .points-badge .label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            display: block;
+        }
+
+        .points-badge .value {
+            font-size: 1.15rem;
+            font-weight: 900;
+        }
+
+        /* Matchweek Card Container */
+        .mw-card {
+            background: #ffffff;
+            border-radius: 12px;
+            margin-bottom: 14px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+        }
+
+        .mw-header {
+            background-color: #fcfcfc;
+            padding: 10px 14px;
+            border-bottom: 1px solid #eaeaea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mw-title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #38003c;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .mw-points {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #276749;
+        }
+
+        /* Fixture Row Item */
+        .fixture-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .fixture-item:last-child {
+            border-bottom: none;
+        }
+
+        .match-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .my-team {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .team-icon {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             object-fit: contain;
             vertical-align: middle;
         }
 
-        .team-inline {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+        .venue-tag {
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: #666;
+            background: #f1f5f9;
+            padding: 1px 6px;
+            border-radius: 4px;
         }
 
-        tr:hover { background-color: #f8f9fa; }
+        .opponent-line {
+            font-size: 0.8rem;
+            color: #4a5568;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
 
-        /* Pill Styles */
-        .pill-blue { background-color: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
-        .pill-red { background-color: #fff5f5; color: #c53030; border: 1px solid #fed7d7; }
-        .pill-green { background-color: #f0fff4; color: #276749; border: 1px solid #c6f6d5; }
-        .pill-gray { background-color: #f7fafc; color: #4a5568; border: 1px solid #e2e8f0; }
-        
-        .stat-value {
-            padding: 4px 10px;
-            border-radius: 12px;
+        .manager-tag {
+            font-size: 0.75rem;
+            color: #888;
+            font-weight: 500;
+        }
+
+        /* FotMob Result Badges */
+        .result-badge {
+            min-width: 56px;
+            padding: 6px 8px;
+            border-radius: 6px;
             font-size: 0.85rem;
             font-weight: 700;
-            display: inline-block;
-            min-width: 32px;
             text-align: center;
+            color: #ffffff;
+            letter-spacing: 0.5px;
         }
 
-        .nav-btn-container {
-            margin-top: 20px;
-            text-align: left;
-        }
-
-        .nav-link-btn {
-            display: inline-block;
-            background-color: #e5e5ea;
-            color: #333;
-            padding: 10px 20px;
-            border-radius: 8px;
-            text-decoration: none;
+        .win { background-color: #00a667; }
+        .loss { background-color: #e53e3e; }
+        .draw { background-color: #718096; }
+        .upcoming { 
+            background-color: #f1f5f9; 
+            color: #333; 
+            font-size: 0.75rem;
             font-weight: 600;
-            font-size: 0.95rem;
-            transition: all 0.2s;
+            border: 1px solid #cbd5e1;
         }
-
-        .nav-link-btn:hover {
-            background-color: #d1d1d6;
-        }
-
-        @media (max-width: 768px) {
-            body { padding: 10px; }
-            .container { padding: 12px; }
-            h1 { font-size: 1.3rem; }
-            .lion-logo { height: 45px; }
-            th, td { padding: 10px 4px; font-size: 0.8rem; }
-            h2 { font-size: 1.1rem; }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="header-container">
-        <h1>Jordan's Franchise Dashboard</h1>
-        <img src="https://logos-world.net/wp-content/uploads/2023/08/Premier-League-New-Logo.png" alt="Premier League Lion Logo" class="lion-logo">
+    <!-- Nav Back to Main Standings -->
+    <div class="nav-bar">
+        <a href="index.html" class="back-button">← Back to Standings Hub</a>
     </div>
 
-    <div id="status-indicator">Initializing 2025/2026 season data...</div>
-
-    <h2>Manager Overview (League Standings)</h2>
-    <div class="table-wrapper">
-        <table id="standings-table">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th class="text-left">Player</th>
-                    <th>PL</th>
-                    <th>W</th>
-                    <th>D</th>
-                    <th>L</th>
-                    <th>+/-</th>
-                    <th>GD</th>
-                    <th>PTS</th>
-                    <th>PvP</th>
-                    <th>PGA</th>
-                </tr>
-            </thead>
-            <tbody id="standings-body"></tbody>
-        </table>
+    <!-- Sticky User Profile Header -->
+    <div class="profile-card">
+        <div class="profile-info">
+            <h1>Jordan's Results</h1>
+            <p>Matchweek Performance Feed</p>
+        </div>
+        <div class="points-badge">
+            <span class="label">Total Pts</span>
+            <span class="value" id="total-pts">--</span>
+        </div>
     </div>
 
-    <h2>Jordan's Teams Performance</h2>
-    <div class="table-wrapper">
-        <table id="teams-table">
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th class="text-left">Team</th>
-                    <th>PL</th>
-                    <th>W</th>
-                    <th>D</th>
-                    <th>L</th>
-                    <th>+/-</th>
-                    <th>GD</th>
-                    <th>PTS</th>
-                </tr>
-            </thead>
-            <tbody id="teams-body"></tbody>
-        </table>
+    <!-- Matchweek Container -->
+    <div id="fixtures-container">
+        <div class="loading">Loading matchweek data...</div>
     </div>
-
-    <h2>Jordan's Draft Value Performance</h2>
-    <div class="table-wrapper">
-        <table id="draft-table">
-            <thead>
-                <tr>
-                    <th>Team</th>
-                    <th>Draft Pick</th>
-                    <th>Current Rank</th>
-                    <th>Diff</th>
-                </tr>
-            </thead>
-            <tbody id="draft-body"></tbody>
-        </table>
-    </div>
-
-    <div class="nav-btn-container">
-        <a href="index.html" class="nav-link-btn">← Back to Main League Hub</a>
-    </div>
-</div>
 
 <script>
-    // Core data mappings from the main site
+    // 1. Integrated data mappings directly from your main site configuration
     const draftData = {
         "Hef": ["Arsenal", "Bournemouth", "Nottingham Forest", "Hull City"],
         "Jordan": ["Manchester City", "Brighton", "Brentford", "Ipswich Town"],
@@ -247,589 +251,182 @@
         "Jamey": ["Chelsea", "Tottenham", "Crystal Palace", "Leeds United"]
     };
 
-    const draftPicks = {
-        "Arsenal": 1, "Manchester City": 2, "Liverpool": 3, "Manchester United": 4, "Chelsea": 5,
-        "Tottenham": 6, "Aston Villa": 7, "Newcastle": 8, "Brighton": 9, "Bournemouth": 10,
-        "Nottingham Forest": 11, "Brentford": 12, "Sunderland": 13, "Everton": 14, "Crystal Palace": 15,
-        "Leeds United": 16, "Fulham": 17, "Coventry City": 18, "Ipswich Town": 19, "Hull City": 20
-    };
-
     const teamLogos = {
-        "Manchester City": "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg",
-        "Brighton": "https://crests.football-data.org/397.png",
-        "Brentford": "https://upload.wikimedia.org/wikipedia/en/2/2a/Brentford_FC_crest.svg",
-        "Ipswich Town": "https://upload.wikimedia.org/wikipedia/en/4/43/Ipswich_Town.svg",
         "Arsenal": "https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg",
+        "Manchester City": "https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg",
         "Liverpool": "https://upload.wikimedia.org/wikipedia/en/0/0c/Liverpool_FC.svg",
         "Manchester United": "https://upload.wikimedia.org/wikipedia/en/7/7a/Manchester_United_FC_crest.svg",
         "Chelsea": "https://upload.wikimedia.org/wikipedia/en/c/cc/Chelsea_FC.svg",
         "Tottenham": "https://upload.wikimedia.org/wikipedia/en/b/b4/Tottenham_Hotspur.svg",
         "Aston Villa": "https://crests.football-data.org/58.png",
         "Newcastle": "https://upload.wikimedia.org/wikipedia/en/5/56/Newcastle_United_Logo.svg",
+        "Brighton": "https://crests.football-data.org/397.png",
         "Bournemouth": "https://upload.wikimedia.org/wikipedia/en/e/e5/AFC_Bournemouth_%282013%29.svg",
         "Nottingham Forest": "https://upload.wikimedia.org/wikipedia/en/e/e5/Nottingham_Forest_F.C._logo.svg",
+        "Brentford": "https://upload.wikimedia.org/wikipedia/en/2/2a/Brentford_FC_crest.svg",
         "Sunderland": "https://upload.wikimedia.org/wikipedia/en/7/77/Logo_Sunderland.svg",
         "Everton": "https://crests.football-data.org/62.png",
         "Crystal Palace": "https://upload.wikimedia.org/wikipedia/en/a/a2/Crystal_Palace_FC_logo_%282022%29.svg",
         "Leeds United": "https://upload.wikimedia.org/wikipedia/en/5/54/Leeds_United_F.C._logo.svg",
         "Fulham": "https://upload.wikimedia.org/wikipedia/en/e/eb/Fulham_FC_%28shield%29.svg",
         "Coventry City": "https://crests.football-data.org/1076.png",
+        "Ipswich Town": "https://upload.wikimedia.org/wikipedia/en/4/43/Ipswich_Town.svg",
         "Hull City": "https://upload.wikimedia.org/wikipedia/en/5/54/Hull_City_A.F.C._logo.svg"
     };
 
-    function initializePlayerStats() {
-        let stats = {};
-        for (let player in draftData) {
-            stats[player] = {
-                player: player, teams: draftData[player],
-                PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0,
-                pvpWins: 0, pga: 0
-            };
-        }
-        return stats;
-    }
-
-    function initializeTeamStats() {
-        let stats = {};
-        for (let player in draftData) {
-            draftData[player].forEach(team => {
-                stats[team] = {
-                    team: team, owner: player,
-                    PL: 0, W: 0, D: 0, L: 0, GF: 0, GAHere is the complete HTML file customized to serve as a dedicated dashboard for Jordan's franchise. 
-
-This version retains the exact API data-fetching logic and data configurations from the main site[cite: 1]. It processes the entire league's data but filters the visual presentation to exclusively display Jordan's aggregated manager stats, his specific roster of teams (Manchester City, Brighton, Brentford, and Ipswich Town), and his unique draft value performance[cite: 1]. 
-
-You can save this as `jordan.html` in the same directory as your `index.html`.
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jordan's Dashboard - Fantasy EPL (2025/2026)</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f6f8;
-            color: #333;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 24px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .header-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #38003c;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
-        }
-
-        h1 {
-            margin: 0;
-            color: #1a1a1a;
-            font-size: 2rem;
-        }
-
-        .lion-logo {
-            height: 65px;
-            width: auto;
-            object-fit: contain;
-        }
-
-        h2 {
-            margin-top: 35px;
-            margin-bottom: 0;
-            color: #1a1a1a;
-            border-bottom: 2px solid #00ff87;
-            padding-bottom: 8px;
-            font-size: 1.4rem;
-        }
-
-        #status-indicator {
-            padding: 12px 16px;
-            border-radius: 6px;
-            background-color: #e8f4fd;
-            color: #0c5460;
-            margin-bottom: 20px;
-            font-size: 0.95rem;
-        }
-
-        .table-wrapper {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin-top: 20px;
-            margin-bottom: 10px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 0;
-            background: #fff;
-            font-size: 0.95rem;
-            white-space: nowrap;
-        }
-
-        th, td {
-            padding: 14px 10px;
-            text-align: center;
-            border-bottom: 1px solid #eaeaea;
-        }
-
-        th {
-            background-color: #fcfcfc;
-            color: #666;
-            font-weight: 600;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            border-bottom: 2px solid #eaeaea;
-        }
-
-        .text-left {
-            text-align: left !important;
-        }
-
-        .team-inline {
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 600;
-            color: #1a1a1a;
-        }
-
-        .team-icon {
-            width: 24px;
-            height: 24px;
-            object-fit: contain;
-            vertical-align: middle;
-        }
-
-        tr:hover {
-            background-color: #f8f9fa;
-        }
-
-        /* Pill Styles */
-        .pill-blue { background-color: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
-        .pill-red { background-color: #fff5f5; color: #c53030; border: 1px solid #fed7d7; }
-        .pill-green { background-color: #f0fff4; color: #276749; border: 1px solid #c6f6d5; }
-        .pill-gray { background-color: #f7fafc; color: #4a5568; border: 1px solid #e2e8f0; }
-
-        .stat-value {
-            padding: 6px 12px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            display: inline-block;
-            min-width: 32px;
-            text-align: center;
-        }
-
-        .highlight-row {
-            background-color: #faf5ff !important;
-            border-left: 4px solid #6b46c1;
-        }
-        
-        .jordan-hero {
-            background: linear-gradient(135deg, #38003c 0%, #6b46c1 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-around;
-            text-align: center;
-        }
-        
-        .hero-stat {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .hero-label {
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #00ff87;
-        }
-
-        .hero-value {
-            font-size: 2rem;
-            font-weight: bold;
-        }
-
-        @media (max-width: 768px) {
-            body { padding: 10px; }
-            .container { padding: 12px; }
-            h1 { font-size: 1.5rem; }
-            th, td { padding: 10px 6px; font-size: 0.85rem; }
-            .jordan-hero { flex-direction: column; gap: 15px; }
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <div class="header-container">
-        <h1>Jordan's Franchise Dashboard</h1>
-        <img src="[https://logos-world.net/wp-content/uploads/2023/08/Premier-League-New-Logo.png](https://logos-world.net/wp-content/uploads/2023/08/Premier-League-New-Logo.png)" alt="Premier League Lion Logo" class="lion-logo">
-    </div>
-
-    <div id="status-indicator">Initializing Jordan's 2025/2026 match data...</div>
-
-    <div id="jordan-hero-container" class="jordan-hero" style="display: none;">
-        <div class="hero-stat">
-            <span class="hero-label">Total Points</span>
-            <span class="hero-value" id="hero-pts">0</span>
-        </div>
-        <div class="hero-stat">
-            <span class="hero-label">Goal Diff</span>
-            <span class="hero-value" id="hero-gd">0</span>
-        </div>
-        <div class="hero-stat">
-            <span class="hero-label">PvP Wins</span>
-            <span class="hero-value" id="hero-pvp">0</span>
-        </div>
-    </div>
-
-    <h2>Roster Performance</h2>
-    <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th class="text-left">Team</th>
-                    <th>PL</th>
-                    <th>W</th>
-                    <th>D</th>
-                    <th>L</th>
-                    <th>GF-GA</th>
-                    <th>GD</th>
-                    <th>PTS</th>
-                </tr>
-            </thead>
-            <tbody id="jordan-teams-body">
-            </tbody>
-        </table>
-    </div>
-
-    <h2>Draft Value Performance</h2>
-    <div class="table-wrapper">
-        <table>
-            <thead>
-                <tr>
-                    <th class="text-left">Team</th>
-                    <th>Current Rank</th>
-                    <th>Draft Pick</th>
-                    <th>Net Difference</th>
-                </tr>
-            </thead>
-            <tbody id="jordan-draft-body">
-            </tbody>
-        </table>
-    </div>
-    
-    <div style="margin-top: 30px; text-align: center;">
-        <a href="index.html" style="color: #38003c; font-weight: bold; text-decoration: none; border-bottom: 2px solid #00ff87;">← Back to Main League Standings</a>
-    </div>
-
-</div>
-
-<script>
-    // Configuration Data seamlessly imported from the main site
-    const draftData = {
-        "Hef": ["Arsenal", "Bournemouth", "Nottingham Forest", "Hull City"],
-        "Jordan": ["Manchester City", "Brighton", "Brentford", "Ipswich Town"],
-        "Wes": ["Liverpool", "Newcastle", "Sunderland", "Coventry City"],
-        "Nate": ["Manchester United", "Aston Villa", "Everton", "Fulham"],
-        "Jamey": ["Chelsea", "Tottenham", "Crystal Palace", "Leeds United"]
-    };
-
-    const draftPicks = {
-        "Arsenal": 1, "Manchester City": 2, "Liverpool": 3, "Manchester United": 4, "Chelsea": 5,
-        "Tottenham": 6, "Aston Villa": 7, "Newcastle": 8, "Brighton": 9, "Bournemouth": 10,
-        "Nottingham Forest": 11, "Brentford": 12, "Sunderland": 13, "Everton": 14, "Crystal Palace": 15,
-        "Leeds United": 16, "Fulham": 17, "Coventry City": 18, "Ipswich Town": 19, "Hull City": 20
-    };
-
-    const teamLogos = {
-        "Arsenal": "[https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg](https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg)",
-        "Manchester City": "[https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg](https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg)",
-        "Liverpool": "[https://upload.wikimedia.org/wikipedia/en/0/0c/Liverpool_FC.svg](https://upload.wikimedia.org/wikipedia/en/0/0c/Liverpool_FC.svg)",
-        "Manchester United": "[https://upload.wikimedia.org/wikipedia/en/7/7a/Manchester_United_FC_crest.svg](https://upload.wikimedia.org/wikipedia/en/7/7a/Manchester_United_FC_crest.svg)",
-        "Chelsea": "[https://upload.wikimedia.org/wikipedia/en/c/cc/Chelsea_FC.svg](https://upload.wikimedia.org/wikipedia/en/c/cc/Chelsea_FC.svg)",
-        "Tottenham": "[https://upload.wikimedia.org/wikipedia/en/b/b4/Tottenham_Hotspur.svg](https://upload.wikimedia.org/wikipedia/en/b/b4/Tottenham_Hotspur.svg)",
-        "Aston Villa": "[https://crests.football-data.org/58.png](https://crests.football-data.org/58.png)",
-        "Newcastle": "[https://upload.wikimedia.org/wikipedia/en/5/56/Newcastle_United_Logo.svg](https://upload.wikimedia.org/wikipedia/en/5/56/Newcastle_United_Logo.svg)",
-        "Brighton": "[https://crests.football-data.org/397.png](https://crests.football-data.org/397.png)",
-        "Bournemouth": "[https://upload.wikimedia.org/wikipedia/en/e/e5/AFC_Bournemouth_%282013%29.svg](https://upload.wikimedia.org/wikipedia/en/e/e5/AFC_Bournemouth_%282013%29.svg)",
-        "Nottingham Forest": "[https://upload.wikimedia.org/wikipedia/en/e/e5/Nottingham_Forest_F.C._logo.svg](https://upload.wikimedia.org/wikipedia/en/e/e5/Nottingham_Forest_F.C._logo.svg)",
-        "Brentford": "[https://upload.wikimedia.org/wikipedia/en/2/2a/Brentford_FC_crest.svg](https://upload.wikimedia.org/wikipedia/en/2/2a/Brentford_FC_crest.svg)",
-        "Sunderland": "[https://upload.wikimedia.org/wikipedia/en/7/77/Logo_Sunderland.svg](https://upload.wikimedia.org/wikipedia/en/7/77/Logo_Sunderland.svg)",
-        "Everton": "[https://crests.football-data.org/62.png](https://crests.football-data.org/62.png)",
-        "Crystal Palace": "[https://upload.wikimedia.org/wikipedia/en/a/a2/Crystal_Palace_FC_logo_%282022%29.svg](https://upload.wikimedia.org/wikipedia/en/a/a2/Crystal_Palace_FC_logo_%282022%29.svg)",
-        "Leeds United": "[https://upload.wikimedia.org/wikipedia/en/5/54/Leeds_United_F.C._logo.svg](https://upload.wikimedia.org/wikipedia/en/5/54/Leeds_United_F.C._logo.svg)",
-        "Fulham": "[https://upload.wikimedia.org/wikipedia/en/e/eb/Fulham_FC_%28shield%29.svg](https://upload.wikimedia.org/wikipedia/en/e/eb/Fulham_FC_%28shield%29.svg)",
-        "Coventry City": "[https://crests.football-data.org/1076.png](https://crests.football-data.org/1076.png)",
-        "Ipswich Town": "[https://upload.wikimedia.org/wikipedia/en/4/43/Ipswich_Town.svg](https://upload.wikimedia.org/wikipedia/en/4/43/Ipswich_Town.svg)",
-        "Hull City": "[https://upload.wikimedia.org/wikipedia/en/5/54/Hull_City_A.F.C._logo.svg](https://upload.wikimedia.org/wikipedia/en/5/54/Hull_City_A.F.C._logo.svg)"
-    };
-
-    const divisionData = {
-        "Red and Blue Division": ["Arsenal", "Manchester City", "Liverpool", "Manchester United", "Chelsea"],
-        "Birds and Beasts Division": ["Tottenham", "Aston Villa", "Newcastle", "Brighton", "Bournemouth"],
-        "Field and Forest Division": ["Nottingham Forest", "Brentford", "Sunderland", "Everton", "Crystal Palace"],
-        "Cottage and Country Division": ["Leeds United", "Fulham", "Coventry City", "Ipswich Town", "Hull City"]
-    };
-
-    function initializePlayerStats() {
-        let stats = {};
-        for (let player in draftData) {
-            stats[player] = {
-                player: player, teams: draftData[player], PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0, pvpWins: 0, pga: 0
-            };
-        }
-        return stats;
-    }
-
-    function initializeTeamStats() {
-        let stats = {};
-        for (let divName in divisionData) {
-            divisionData[divName].forEach(team => {
-                const owner = getOwnerOfTeam(team);
-                stats[team] = {
-                    team: team, owner: owner || "Unassigned", PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0, PGA: 0
-                };
-            });
-        }
-        return stats;
-    }
-
+    // Helper to find which manager owns a given team name from the API
     function getOwnerOfTeam(teamName) {
         for (let player in draftData) {
-            if (draftData[player].some(t => teamName.toLowerCase().includes(t.toLowerCase()) || t.toLowerCase().includes(teamName.toLowerCase()))) return player;
+            if (draftData[player].some(t => teamName.toLowerCase().includes(t.toLowerCase()) || t.toLowerCase().includes(teamName.toLowerCase()))) {
+                return player;
+            }
         }
-        return null;
+        return "Free Agent / Unassigned";
     }
 
-    function findPlayerByTeam(teamName, playerStats) {
-        for (let player in playerStats) {
-            if (playerStats[player].teams.some(t => teamName.toLowerCase().includes(t.toLowerCase()) || t.toLowerCase().includes(teamName.toLowerCase()))) return player;
+    // Shorten names for cleaner mobile display
+    function cleanName(name) {
+        return name
+            .replace(" FC", "")
+            .replace(" & Hove Albion", "")
+            .replace(" Hotspur", "")
+            .replace("A.F.C. ", "");
+    }
+
+    function addFixtureToMatchweek(mwObj, match, myTeam, oppTeam, venue, isHome) {
+        let score = "";
+        let result = "upcoming";
+        let points = 0;
+
+        if (["FINISHED", "IN_PLAY", "PAUSED"].includes(match.status)) {
+            const myScore = isHome ? match.score.fullTime.home : match.score.fullTime.away;
+            const oppScore = isHome ? match.score.fullTime.away : match.score.fullTime.home;
+            score = `${myScore} - ${oppScore}`;
+
+            if (myScore > oppScore) { result = "win"; points = 3; } 
+            else if (myScore < oppScore) { result = "loss"; points = 0; } 
+            else { result = "draw"; points = 1; }
+        } else {
+            const date = new Date(match.utcDate);
+            score = date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
         }
-        return null;
+
+        mwObj.weeklyPoints += points;
+        mwObj.fixtures.push({
+            team: cleanName(myTeam),
+            teamFull: myTeam,
+            venue: venue,
+            opp: cleanName(oppTeam),
+            oppFull: oppTeam,
+            manager: getOwnerOfTeam(oppTeam),
+            score: score,
+            result: result
+        });
     }
 
-    function findTeamKey(teamName, teamStats) {
-        for (let teamKey in teamStats) {
-            if (teamName.toLowerCase().includes(teamKey.toLowerCase()) || teamKey.toLowerCase().includes(teamName.toLowerCase())) return teamKey;
-        }
-        return null;
-    }
-
-    function renderJordanDashboard(playerStatsObj, teamStatsObj) {
-        // 1. Render Hero Stats
-        const jordanStats = playerStatsObj["Jordan"];
-        document.getElementById('jordan-hero-container').style.display = 'flex';
-        document.getElementById('hero-pts').textContent = jordanStats.PTS;
-        document.getElementById('hero-gd').textContent = jordanStats.GD > 0 ? '+' + jordanStats.GD : jordanStats.GD;
-        document.getElementById('hero-pvp').textContent = jordanStats.pvpWins;
-
-        // 2. Render Team Roster Performance
-        const teamsBody = document.getElementById('jordan-teams-body');
-        teamsBody.innerHTML = '';
-        
-        let jordanTeams = jordanStats.teams.map(t => teamStatsObj[t]).filter(Boolean);
-        jordanTeams.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
-
-        jordanTeams.forEach(t => {
-            let displayName = t.team === "Manchester City" ? "Man City" : t.team;
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="text-left">
-                    <div class="team-inline">
-                        ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="${t.team}">` : ''}
-                        ${displayName}
-                    </div>
-                </td>
-                <td>${t.PL}</td>
-                <td>${t.W}</td>
-                <td>${t.D}</td>
-                <td>${t.L}</td>
-                <td>${t.GF}-${t.GA}</td>
-                <td>${t.GD > 0 ? '+'+t.GD : t.GD}</td>
-                <td><strong>${t.PTS}</strong></td>
-            `;
-            teamsBody.appendChild(tr);
-        });
-
-        // 3. Render Draft Value Performance
-        const draftBody = document.getElementById('jordan-draft-body');
-        draftBody.innerHTML = '';
-
-        // Calculate League-wide ranks first to get accurate differences
-        const allTeamsArray = Object.values(teamStatsObj).sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
-        const teamRankMap = {};
-        allTeamsArray.forEach((t, idx) => { teamRankMap[t.team] = idx + 1; });
-
-        // Sort Jordan's teams by draft value diff
-        jordanTeams.sort((a, b) => {
-            const diffA = (draftPicks[a.team] || 20) - (teamRankMap[a.team] || 20);
-            const diffB = (draftPicks[b.team] || 20) - (teamRankMap[b.team] || 20);
-            return diffB - diffA; 
-        });
-
-        let totalDraftDiff = 0;
-
-        jordanTeams.forEach(t => {
-            const rank = teamRankMap[t.team] || 20;
-            const pick = draftPicks[t.team] || 20;
-            const diff = pick - rank;
-            totalDraftDiff += diff;
-            
-            let pillClass = 'pill-gray';
-            let formattedDiff = '0';
-            if (diff > 0) { pillClass = 'pill-green'; formattedDiff = `+${diff}`; }
-            else if (diff < 0) { pillClass = 'pill-red'; formattedDiff = `${diff}`; }
-
-            let displayName = t.team === "Manchester City" ? "Man City" : t.team;
-
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="text-left">
-                    <div class="team-inline">
-                        ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="${t.team}">` : ''}
-                        ${displayName}
-                    </div>
-                </td>
-                <td>${rank}</td>
-                <td>${pick}</td>
-                <td><span class="stat-value ${pillClass}">${formattedDiff}</span></td>
-            `;
-            draftBody.appendChild(tr);
-        });
-
-        // Add Total Summary Row
-        let totalPillClass = 'pill-gray';
-        let totalFormattedDiff = '0';
-        if (totalDraftDiff > 0) { totalPillClass = 'pill-green'; totalFormattedDiff = `+${totalDraftDiff}`; }
-        else if (totalDraftDiff < 0) { totalPillClass = 'pill-red'; totalFormattedDiff = `${totalDraftDiff}`; }
-
-        const summaryTr = document.createElement('tr');
-        summaryTr.className = 'highlight-row';
-        summaryTr.innerHTML = `
-            <td class="text-left" colspan="3" style="font-weight: 800;">Jordan's Total Draft Value Difference</td>
-            <td><span class="stat-value ${totalPillClass}">${totalFormattedDiff}</span></td>
-        `;
-        draftBody.appendChild(summaryTr);
-    }
-
-    async function fetchAndUpdateStandings() {
-        let playerStats = initializePlayerStats();
-        let teamStats = initializeTeamStats();
-        const statusEl = document.getElementById('status-indicator');
-
-        const cacheKey = 'pl_match_data';
-        const cacheTimeKey = 'pl_match_data_time';
-        const cacheDuration = 5 * 60 * 1000;
+    // Fetch fixtures through your secure Vercel endpoint route
+    async function fetchJordanFixtures() {
+        const url = '/api/standings'; 
+        const myTeams = draftData["Jordan"];
 
         try {
-            let data;
-            const now = new Date().getTime();
-            const cachedTime = localStorage.getItem(cacheTimeKey);
-            const cachedData = localStorage.getItem(cacheKey);
-
-            if (cachedData && cachedTime && (now - cachedTime < cacheDuration)) {
-                data = JSON.parse(cachedData);
-            } else {
-                const response = await fetch('/api/standings');
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                data = await response.json();
-                localStorage.setItem(cacheKey, JSON.stringify(data));
-                localStorage.setItem(cacheTimeKey, now.toString());
-            }
-
-            let gamesProcessed = 0;
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            
+            const data = await response.json();
+            const matchweeks = {};
 
             if (data.matches) {
                 data.matches.forEach(match => {
-                    if (match.status === 'FINISHED') {
-                        gamesProcessed++;
-                        const homeTeamName = match.homeTeam.name;
-                        const awayTeamName = match.awayTeam.name;
-                        const homeScore = match.score.fullTime.home;
-                        const awayScore = match.score.fullTime.away;
+                    const home = match.homeTeam.name;
+                    const away = match.awayTeam.name;
+                    
+                    const isHomeMyTeam = myTeams.some(t => home.toLowerCase().includes(t.toLowerCase()));
+                    const isAwayMyTeam = myTeams.some(t => away.toLowerCase().includes(t.toLowerCase()));
 
-                        const homePlayer = findPlayerByTeam(homeTeamName, playerStats);
-                        const awayPlayer = findPlayerByTeam(awayTeamName, playerStats);
-                        const homeTeamKey = findTeamKey(homeTeamName, teamStats);
-                        const awayTeamKey = findTeamKey(awayTeamName, teamStats);
-
-                        // Update Player Stats
-                        if (homePlayer) {
-                            let pStat = playerStats[homePlayer];
-                            pStat.PL += 1; pStat.GF += homeScore; pStat.GA += awayScore;
-                            if (homeScore > awayScore) { pStat.W += 1; pStat.PTS += 3; }
-                            else if (homeScore === awayScore) { pStat.D += 1; pStat.PTS += 1; }
-                            else pStat.L += 1;
-                        }
-                        if (awayPlayer) {
-                            let pStat = playerStats[awayPlayer];
-                            pStat.PL += 1; pStat.GF += awayScore; pStat.GA += homeScore;
-                            if (awayScore > homeScore) { pStat.W += 1; pStat.PTS += 3; }
-                            else if (awayScore === homeScore) { pStat.D += 1; pStat.PTS += 1; }
-                            else pStat.L += 1;
+                    if (isHomeMyTeam || isAwayMyTeam) {
+                        const mw = match.matchday;
+                        if (!matchweeks[mw]) {
+                            matchweeks[mw] = { matchweek: mw, weeklyPoints: 0, fixtures: [] };
                         }
 
-                        // PvP Logic
-                        if (homePlayer && awayPlayer && homePlayer !== awayPlayer) {
-                            if (homeScore > awayScore) playerStats[homePlayer].pvpWins += 1;
-                            else if (awayScore > homeScore) playerStats[awayPlayer].pvpWins += 1;
-                        }
-
-                        // Update Team Stats
-                        if (homeTeamKey) {
-                            let t = teamStats[homeTeamKey];
-                            t.PL += 1; t.GF += homeScore; t.GA += awayScore;
-                            if (homeScore > awayScore) { t.W += 1; t.PTS += 3; }
-                            else if (homeScore === awayScore) { t.D += 1; t.PTS += 1; }
-                            else t.L += 1;
-                        }
-                        if (awayTeamKey) {
-                            let t = teamStats[awayTeamKey];
-                            t.PL += 1; t.GF += awayScore; t.GA += homeScore;
-                            if (awayScore > homeScore) { t.W += 1; t.PTS += 3; }
-                            else if (awayScore === homeScore) { t.D += 1; t.PTS += 1; }
-                            else t.L += 1;
+                        if (isHomeMyTeam && isAwayMyTeam) {
+                            addFixtureToMatchweek(matchweeks[mw], match, home, away, "HOME", true);
+                            addFixtureToMatchweek(matchweeks[mw], match, away, home, "AWAY", false);
+                        } else if (isHomeMyTeam) {
+                            addFixtureToMatchweek(matchweeks[mw], match, home, away, "HOME", true);
+                        } else {
+                            addFixtureToMatchweek(matchweeks[mw], match, away, home, "AWAY", false);
                         }
                     }
                 });
             }
 
-            // Calc GD
-            for (let player in playerStats) { playerStats[player].GD = playerStats[player].GF - playerStats[player].GA; }
-            for (let teamKey in teamStats) { teamStats[teamKey].GD = teamStats[teamKey].GF - teamStats[teamKey].GA; }
-
-            renderJordanDashboard(playerStats, teamStats);
-            statusEl.style.display = 'none';
+            const processedData = Object.values(matchweeks).sort((a, b) => a.matchweek - b.matchweek);
+            renderPage(processedData);
 
         } catch (error) {
-            console.error("Error fetching match data:", error);
-            statusEl.textContent = "Unable to load data. Check console for details.";
+            console.error('Fetch error:', error);
+            document.getElementById('fixtures-container').innerHTML = 
+                '<div class="loading">Unable to load match data. Please check your backend route connection.</div>';
         }
     }
 
-    document.addEventListener('DOMContentLoaded', fetchAndUpdateStandings);
+    function renderPage(data) {
+        const container = document.getElementById('fixtures-container');
+        let totalPts = 0;
+        container.innerHTML = '';
+
+        if (data.length === 0) {
+            container.innerHTML = '<div class="loading">No matchweek fixtures found.</div>';
+            return;
+        }
+
+        data.forEach(mw => {
+            totalPts += mw.weeklyPoints;
+            const card = document.createElement('div');
+            card.className = 'mw-card';
+
+            let fixturesHTML = '';
+            mw.fixtures.forEach(fix => {
+                // Find matching logo if available from main config dictionary
+                let logoHtml = '';
+                for (let key in teamLogos) {
+                    if (fix.oppFull.toLowerCase().includes(key.toLowerCase())) {
+                        logoHtml = `<img src="${teamLogos[key]}" class="team-icon" alt="${key}">`;
+                        break;
+                    }
+                }
+
+                fixturesHTML += `
+                    <div class="fixture-item">
+                        <div class="match-details">
+                            <div class="my-team">
+                                ${fix.team} <span class="venue-tag">${fix.venue}</span>
+                            </div>
+                            <div class="opponent-line">
+                                vs ${logoHtml} ${fix.opp} <span class="manager-tag">(${fix.manager})</span>
+                            </div>
+                        </div>
+                        <div class="result-badge ${fix.result}">${fix.score}</div>
+                    </div>
+                `;
+            });
+
+            card.innerHTML = `
+                <div class="mw-header">
+                    <span class="mw-title">Matchweek ${mw.matchweek}</span>
+                    <span class="mw-points">+${mw.weeklyPoints} PTS</span>
+                </div>
+                <div>${fixturesHTML}</div>
+            `;
+            container.appendChild(card);
+        });
+
+        document.getElementById('total-pts').textContent = totalPts;
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchJordanFixtures);
 </script>
 
 </body>
