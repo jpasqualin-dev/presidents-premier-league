@@ -233,7 +233,33 @@
             max-width: 180px;
             white-space: normal;
         }
+        /* === INSERT MOBILE OVERRIDE HERE === */
+    @media (max-width: 600px) {
+        #standings-table th:nth-child(1), #standings-table td:nth-child(1),
+        #divisions-container table th:nth-child(1), #divisions-container table td:nth-child(1) {
+            width: 28px;
+            min-width: 28px;
+            max-width: 28px;
+            padding-left: 2px;
+            padding-right: 2px;
+        }
 
+        #standings-table th:nth-child(2), #standings-table td:nth-child(2),
+        #divisions-container table th:nth-child(2), #divisions-container table td:nth-child(2) {
+            width: 110px;
+            min-width: 110px;
+            max-width: 110px;
+            font-size: 0.82rem;
+            padding-left: 4px;
+            padding-right: 4px;
+        }
+
+        #standings-table th, #standings-table td,
+        #divisions-container table th, #divisions-container table td {
+            padding-left: 3px;
+            padding-right: 3px;
+        }
+}
         /* Nested Row Specific Adjustments to prevent shifting */
         .nested-table-row td:nth-child(2) {
             padding-left: 0 !important; 
