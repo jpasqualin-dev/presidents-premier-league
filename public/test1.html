@@ -214,52 +214,34 @@
             font-size: 1.4rem;
         }
 
-        /* Keeps overall table layout dynamic to prevent text squishing/overlap */
+        /* 1. Allow the table to size dynamically to fit the screen */
         #standings-table, #divisions-container table {
             table-layout: auto; 
-        }
-        /* Lock Rank (Column 1) to an exact, unyielding pixel width */
-        #standings-table th:nth-child(1), #standings-table td:nth-child(1),
-        #divisions-container table th:nth-child(1), #divisions-container table td:nth-child(1) {
-            width: 45px;
-            min-width: 45px;
-            max-width: 45px;
-        }
-        /* Lock Player (Column 2) to an exact, unyielding pixel width */
-        #standings-table th:nth-child(2), #standings-table td:nth-child(2),
-        #divisions-container table th:nth-child(2), #divisions-container table td:nth-child(2) {
-            width: 180px;
-            min-width: 180px;
-            max-width: 180px;
-            white-space: normal;
-        }
-        /* === INSERT MOBILE OVERRIDE HERE === */
-    @media (max-width: 600px) {
-        #standings-table th:nth-child(1), #standings-table td:nth-child(1),
-        #divisions-container table th:nth-child(1), #divisions-container table td:nth-child(1) {
-            width: 28px;
-            min-width: 28px;
-            max-width: 28px;
-            padding-left: 2px;
-            padding-right: 2px;
+            width: 100%;
         }
 
-        #standings-table th:nth-child(2), #standings-table td:nth-child(2),
-        #divisions-container table th:nth-child(2), #divisions-container table td:nth-child(2) {
-            width: 110px;
-            min-width: 110px;
-            max-width: 110px;
-            font-size: 0.82rem;
-            padding-left: 4px;
-            padding-right: 4px;
+        /* 2. Shrink-wrap the Rank column so it refuses extra space */
+        #standings-table th:nth-child(1), #standings-table td:nth-child(1),
+        #divisions-container table th:nth-child(1), #divisions-container table td:nth-child(1) {
+            width: 1%;
+            white-space: nowrap;
         }
 
-        #standings-table th, #standings-table td,
-        #divisions-container table th, #divisions-container table td {
-            padding-left: 3px;
-            padding-right: 3px;
+        /* 3. Let the Player column act as a sponge for all remaining space */
+        #standings-table th:nth-child(2), #standings-table td:nth-child(2),
+        #divisions-container table th:nth-child(2), #divisions-container table td:nth-child(2) {
+            width: auto;
+            text-align: left;
+            white-space: normal; /* Allows very long player names to wrap if necessary */
         }
+
+/* 4. Shrink-wrap all dynamic data columns (Columns 3 and onward) */
+#standings-table th:nth-child(n+3), #standings-table td:nth-child(n+3),
+#divisions-container table th:nth-child(n+3), #divisions-container table td:nth-child(n+3) {
+    width: 1%;
+    white-space: nowrap;
 }
+
         /* Nested Row Specific Adjustments to prevent shifting */
         .nested-table-row td:nth-child(2) {
             padding-left: 0 !important; 
@@ -280,16 +262,16 @@
         }
 
         #draft-player-table tr:nth-child(2) th:nth-child(2), 
-    #draft-player-table td:nth-child(2) {
-        width: 69%;
-        white-space: normal;
-    }
+        #draft-player-table td:nth-child(2) {
+            width: 69%;
+            white-space: normal;
+        }
 
-    #draft-player-table tr:nth-child(2) th:nth-child(3), 
-    #draft-player-table td:nth-child(3) {
-        width: 25%;
-        text-align: right;
-        padding-right: 16px;
+        #draft-player-table tr:nth-child(2) th:nth-child(3), 
+        #draft-player-table td:nth-child(3) {
+            width: 25%;
+            text-align: right;
+            padding-right: 16px;
 }
 
         /* Allow division headers to flex wrap so the toggle button doesn't force a widened table */
