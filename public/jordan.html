@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jordan's Results | Fantasy Soccer</title>
     <style>
-        /* Modern FotMob-inspired Mobile Baseline */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
         }
 
         body {
@@ -17,17 +16,44 @@
             background-color: #f4f5f7;
             color: #1c1c1e;
             padding: 12px;
-            max-width: 600px; /* Constrains view for optimal mobile reading */
+            max-width: 600px; 
             margin: 0 auto;
         }
 
-        /* Top Profile Header */
+        /* Navigation / Back Button */
+        .nav-bar {
+            margin-bottom: 12px;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #4b5563;
+            text-decoration: none;
+            background: #ffffff;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+        }
+
+        .back-button:active {
+            background-color: #f3f4f6;
+        }
+
+        /* Top Profile Header (Sticky) */
         .profile-card {
+            position: sticky;
+            top: 12px;
+            z-index: 10;
             background: #ffffff;
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 16px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -49,7 +75,7 @@
         .points-badge {
             background: #10b981;
             color: #ffffff;
-            padding: 8px 12px;
+            padding: 8px 14px;
             border-radius: 8px;
             text-align: center;
         }
@@ -113,7 +139,6 @@
             border-bottom: none;
         }
 
-        /* Team & Match Info */
         .match-details {
             display: flex;
             flex-direction: column;
@@ -171,15 +196,27 @@
             font-weight: 600;
             border: 1px solid #d1d5db;
         }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
 
-    <!-- User Header -->
+    <!-- Nav Back to Main Standings -->
+    <div class="nav-bar">
+        <a href="index.html" class="back-button">← Back to Standings</a>
+    </div>
+
+    <!-- Sticky User Profile Header -->
     <div class="profile-card">
         <div class="profile-info">
             <h1>Jordan's Squad</h1>
-            <p>Drafted Teams & Fixtures</p>
+            <p>Drafted Teams & Results</p>
         </div>
         <div class="points-badge">
             <span class="label">Total</span>
@@ -187,64 +224,142 @@
         </div>
     </div>
 
-    <!-- Matchweek Container (Populated dynamically or via static fallback) -->
+    <!-- Matchweek Container -->
     <div id="fixtures-container">
-        <!-- Rendered by JavaScript -->
+        <div class="loading">Loading live fixtures...</div>
     </div>
 
 <script>
-    // 1. Jordan's Drafted Premier League Teams & Opposing Fantasy Managers
-    const myDraftedTeams = {
-        "Arsenal": { manager: "Chris" },
-        "Aston Villa": { manager: "Dave" },
-        "Brighton": { manager: "Mike" },
-        "Fulham": { manager: "Sarah" }
-    };
-
-    // 2. Sample Data Structure (Matches the format returned by football-data.org API)
-    const mockApiData = [
-        {
-            matchweek: 1,
-            weeklyPoints: 9,
-            fixtures: [
-                { team: "Arsenal", venue: "HOME", opp: "Wolves", manager: "Chris", score: "2 - 0", result: "win" },
-                { team: "Aston Villa", venue: "AWAY", opp: "West Ham", manager: "Dave", score: "2 - 1", result: "win" },
-                { team: "Brighton", venue: "AWAY", opp: "Everton", manager: "Mike", score: "3 - 0", result: "win" },
-                { team: "Fulham", venue: "AWAY", opp: "Man United", manager: "Sarah", score: "0 - 1", result: "loss" }
-            ]
-        },
-        {
-            matchweek: 2,
-            weeklyPoints: 9,
-            fixtures: [
-                { team: "Arsenal", venue: "AWAY", opp: "Aston Villa", manager: "Jordan (Head-to-Head)", score: "2 - 0", result: "win" },
-                { team: "Aston Villa", venue: "HOME", opp: "Arsenal", manager: "Jordan (Head-to-Head)", score: "0 - 2", result: "loss" },
-                { team: "Brighton", venue: "HOME", opp: "Man United", manager: "Sarah", score: "2 - 1", result: "win" },
-                { team: "Fulham", venue: "HOME", opp: "Leicester", manager: "Free Agent", score: "2 - 1", result: "win" }
-            ]
-        },
-        {
-            matchweek: 3,
-            weeklyPoints: 0,
-            fixtures: [
-                { team: "Arsenal", venue: "HOME", opp: "Tottenham", manager: "Chris", score: "Sat 12:30", result: "upcoming" },
-                { team: "Aston Villa", venue: "HOME", opp: "Everton", manager: "Mike", score: "Sat 15:00", result: "upcoming" },
-                { team: "Brighton", venue: "HOME", opp: "Ipswich", manager: "Free Agent", score: "Sat 15:00", result: "upcoming" },
-                { team: "Fulham", venue: "AWAY", opp: "West Ham", manager: "Dave", score: "Sun 14:00", result: "upcoming" }
-            ]
-        }
+    // 1. Jordan's drafted Premier League teams (Official API Names)
+    const myTeams = [
+        "Arsenal FC", 
+        "Aston Villa FC", 
+        "Brighton & Hove Albion FC", 
+        "Fulham FC"
     ];
 
-    // 3. Function to Render Fixtures in FotMob Mobile Format
-    function renderJordanPage(data) {
+    // 2. Map opposing Premier League teams to fantasy managers
+    const managerMap = {
+        "Wolverhampton Wanderers FC": "Chris",
+        "West Ham United FC": "Dave",
+        "Everton FC": "Mike",
+        "Manchester United FC": "Sarah",
+        "Tottenham Hotspur FC": "Chris",
+        "Ipswich Town FC": "Free Agent",
+        "Leicester City FC": "Free Agent",
+        "Southampton FC": "Free Agent",
+        "Chelsea FC": "Mike",
+        "Liverpool FC": "Dave",
+        "Manchester City FC": "Sarah",
+        "Newcastle United FC": "Chris",
+        "Brentford FC": "Sarah",
+        "A.F.C. Bournemouth": "Mike",
+        "Nottingham Forest FC": "Dave",
+        "Crystal Palace FC": "Free Agent"
+    };
+
+    function getManager(teamName) {
+        if (myTeams.includes(teamName)) return "Jordan (H2H)";
+        return managerMap[teamName] || "Unassigned";
+    }
+
+    // 3. Helper to clean team names for display
+    function cleanName(name) {
+        return name
+            .replace(" FC", "")
+            .replace(" & Hove Albion", "")
+            .replace(" Hotspur", "")
+            .replace("A.F.C. ", "");
+    }
+
+    // 4. Build individual fixture object and score
+    function addFixtureToMatchweek(mwObj, match, myTeam, oppTeam, venue, isHome) {
+        let score = "";
+        let result = "upcoming";
+        let points = 0;
+
+        if (["FINISHED", "IN_PLAY", "PAUSED"].includes(match.status)) {
+            const myScore = isHome ? match.score.fullTime.home : match.score.fullTime.away;
+            const oppScore = isHome ? match.score.fullTime.away : match.score.fullTime.home;
+            score = `${myScore} - ${oppScore}`;
+
+            if (myScore > oppScore) { result = "win"; points = 3; } 
+            else if (myScore < oppScore) { result = "loss"; points = 0; } 
+            else { result = "draw"; points = 1; }
+        } else {
+            const date = new Date(match.utcDate);
+            score = date.toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
+        }
+
+        mwObj.weeklyPoints += points;
+        mwObj.fixtures.push({
+            team: cleanName(myTeam),
+            venue: venue,
+            opp: cleanName(oppTeam),
+            manager: getManager(oppTeam),
+            score: score,
+            result: result
+        });
+    }
+
+    // 5. Fetch live matches through your Vercel backend proxy
+    async function fetchLiveFixtures() {
+        // Adjust endpoint URL to match your Vercel route name (e.g., '/api/matches')
+        const url = '/api/matches'; 
+
+        try {
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const matchweeks = {};
+
+            // Filter for Jordan's teams
+            data.matches.forEach(match => {
+                const home = match.homeTeam.name;
+                const away = match.awayTeam.name;
+                const isHomeMyTeam = myTeams.includes(home);
+                const isAwayMyTeam = myTeams.includes(away);
+
+                if (isHomeMyTeam || isAwayMyTeam) {
+                    const mw = match.matchday;
+                    if (!matchweeks[mw]) {
+                        matchweeks[mw] = { matchweek: mw, weeklyPoints: 0, fixtures: [] };
+                    }
+
+                    if (isHomeMyTeam && isAwayMyTeam) {
+                        // Head-to-Head match: add both team perspectives
+                        addFixtureToMatchweek(matchweeks[mw], match, home, away, "HOME", true);
+                        addFixtureToMatchweek(matchweeks[mw], match, away, home, "AWAY", false);
+                    } else if (isHomeMyTeam) {
+                        addFixtureToMatchweek(matchweeks[mw], match, home, away, "HOME", true);
+                    } else {
+                        addFixtureToMatchweek(matchweeks[mw], match, away, home, "AWAY", false);
+                    }
+                }
+            });
+
+            const processedData = Object.values(matchweeks).sort((a, b) => a.matchweek - b.matchweek);
+            renderPage(processedData);
+
+        } catch (error) {
+            console.error('Fetch error:', error);
+            document.getElementById('fixtures-container').innerHTML = 
+                '<div class="loading">Unable to load live matches. Please check backend connection.</div>';
+        }
+    }
+
+    // 6. Render elements to DOM
+    function renderPage(data) {
         const container = document.getElementById('fixtures-container');
         let totalPts = 0;
         container.innerHTML = '';
 
         data.forEach(mw => {
             totalPts += mw.weeklyPoints;
-
-            // Create Matchweek Card
             const card = document.createElement('div');
             card.className = 'mw-card';
 
@@ -254,8 +369,7 @@
                     <div class="fixture-item">
                         <div class="match-details">
                             <div class="my-team">
-                                ${fix.team}
-                                <span class="venue-tag">${fix.venue}</span>
+                                ${fix.team} <span class="venue-tag">${fix.venue}</span>
                             </div>
                             <div class="opponent-line">
                                 vs ${fix.opp} <span class="manager-tag">(${fix.manager})</span>
@@ -269,23 +383,18 @@
             card.innerHTML = `
                 <div class="mw-header">
                     <span class="mw-title">Matchweek ${mw.matchweek}</span>
-                    <span class="mw-pts">+${mw.weeklyPoints} PTS</span>
+                    <span class="mw-points">+${mw.weeklyPoints} PTS</span>
                 </div>
-                <div class="fixture-list">
-                    ${fixturesHTML}
-                </div>
+                <div>${fixturesHTML}</div>
             `;
-
             container.appendChild(card);
         });
 
         document.getElementById('total-pts').textContent = totalPts;
     }
 
-    // Initialize page on load
-    document.addEventListener('DOMContentLoaded', () => {
-        renderJordanPage(mockApiData);
-    });
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', fetchLiveFixtures);
 </script>
 
 </body>
