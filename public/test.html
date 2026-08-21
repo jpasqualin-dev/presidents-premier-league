@@ -216,7 +216,7 @@
 
         /* Ensures Overall Standings and Division Tables align to identical proportions */
         #standings-table, #divisions-container table {
-            table-layout: auto; 
+            table-layout: fixed; 
         }
         #standings-table th:nth-child(1), #standings-table td:nth-child(1),
         #divisions-container table th:nth-child(1), #divisions-container table td:nth-child(1) {
@@ -248,16 +248,16 @@
         }
 
         #draft-player-table tr:nth-child(2) th:nth-child(2), 
-        #draft-player-table td:nth-child(2) {
-            width: 69%;
-            white-space: normal;
-        }
+    #draft-player-table td:nth-child(2) {
+        width: 69%;
+        white-space: normal;
+    }
 
-        #draft-player-table tr:nth-child(2) th:nth-child(3), 
-        #draft-player-table td:nth-child(3) {
-            width: 25%;
-            text-align: right;
-            padding-right: 16px;
+    #draft-player-table tr:nth-child(2) th:nth-child(3), 
+    #draft-player-table td:nth-child(3) {
+        width: 25%;
+        text-align: right;
+        padding-right: 16px;
 }
 
         /* Allow division headers to flex wrap so the toggle button doesn't force a widened table */
