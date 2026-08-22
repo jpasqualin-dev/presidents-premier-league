@@ -25,9 +25,9 @@ export default async function handler(req, res) {
         const data = await response.json();
 
         // 4. Implement Caching Strategy (Step 3 recommendation)
-        // s-maxage=300 tells Vercel's Edge Network to cache this exact response for 5 minutes (300 seconds).
+        // s-maxage=60 tells Vercel's Edge Network to cache this exact response for 1 minutes (60) seconds).
         // stale-while-revalidate=59 allows serving the slightly stale cache while fetching fresh data in the background.
-        res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=59');
+        res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=59');
 
         // 5. Send the successful, cached data back to your frontend website
         res.status(200).json(data);

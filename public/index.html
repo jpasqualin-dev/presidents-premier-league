@@ -1182,7 +1182,7 @@
 
         const cacheKey = 'pl_match_data';
         const cacheTimeKey = 'pl_match_data_time';
-        const cacheDuration = 5 * 60 * 1000;
+        const cacheDuration = 60 * 1000;
 
         try {
             let data;
@@ -1317,6 +1317,9 @@
     }
 
     document.addEventListener('DOMContentLoaded', fetchAndUpdateStandings);
+    
+    // Auto-refresh the standings every 60 seconds
+    setInterval(fetchAndUpdateStandings, 60000);
 </script>
 
 </body>
