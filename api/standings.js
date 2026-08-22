@@ -1,8 +1,8 @@
 export default async function handler(req, res) {
-    // 1. Define the target URL for the 2025/2026 PL season
+    // 1. Target URL for the 2026/2027 PL season
     const targetUrl = 'https://api.football-data.org/v4/competitions/PL/matches?season=2026';
     
-    // 2. Securely access the API key from Vercel's Environment Variables
+    // 2. Access the API key securely from Vercel Environment Variables
     const apiKey = process.env.API_KEY;
 
     if (!apiKey) {
@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     }
 
     try {
-        // 3. Fetch the data from football-data.org securely on the server
+        // 3. Fetch data from football-data.org
         const response = await fetch(targetUrl, {
             headers: { 
                 'X-Auth-Token': apiKey,
@@ -24,12 +24,10 @@ export default async function handler(req, res) {
 
         const data = await response.json();
 
-        // 4. Implement Caching Strategy (Step 3 recommendation)
-        // s-maxage=60 tells Vercel's Edge Network to cache this exact response for 1 minutes (60) seconds).
-        // stale-while-revalidate=59 allows serving the slightly stale cache while fetching fresh data in the background.
-        res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=59');
+        // 4. Edge Caching Strategy: Cache for 30s to prevent exceeding API rate limits during live polling
+        res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=29');
 
-        // 5. Send the successful, cached data back to your frontend website
+        // 5. Return match payload to frontend
         res.status(200).json(data);
 
     } catch (error) {

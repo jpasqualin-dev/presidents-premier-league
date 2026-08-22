@@ -43,7 +43,7 @@
             object-fit: contain;
         }
 
-        /* FotMob Style Today Matches Card */
+        /* FotMob Style Today Matches Card - UPDATED */
         .today-card {
             background: #ffffff;
             border-radius: 12px;
@@ -54,20 +54,20 @@
         }
 
         .today-header {
-            background-color: #f8f9fa;
-            padding: 12px 18px;
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: #1a1a1a;
-            border-bottom: 1px solid #edf2f7;
+            background-color: #ffffff;
+            padding: 16px 20px 8px 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #718096; /* Gray text matching FotMob */
+            border-bottom: none;
         }
 
         .today-fixture {
             display: flex;
             align-items: center;
-            padding: 12px 18px;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 0.9rem;
+            padding: 16px 20px;
+            border-bottom: 1px solid #f8f9fa; /* Extremely faint separator */
+            position: relative;
         }
 
         .today-fixture:last-child {
@@ -75,7 +75,7 @@
         }
 
         .today-status-badge-col {
-            width: 42px;
+            width: 45px;
             display: flex;
             align-items: center;
             justify-content: flex-start;
@@ -86,12 +86,25 @@
             background-color: #00a667;
             color: #ffffff;
             font-weight: 700;
-            font-size: 0.75rem;
-            border-radius: 12px;
-            padding: 2px 7px;
-            display: inline-block;
-            text-align: center;
-            min-width: 22px;
+            font-size: 0.85rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+        }
+
+        .live-badge.oval {
+            border-radius: 14px;
+            padding: 0 8px;
+            width: auto;
+        }
+
+        .ft-badge {
+            font-size: 0.95rem;
+            color: #718096;
+            font-weight: 500;
         }
 
         .today-match-content {
@@ -99,45 +112,82 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 16px;
+        }
+
+        .today-team-home, .today-team-away {
+            flex: 1;
+            display: flex;
+            align-items: center;
             gap: 12px;
         }
 
         .today-team-home {
-            flex: 1;
-            display: flex;
-            align-items: center;
             justify-content: flex-end;
-            gap: 8px;
-            text-align: right;
-            font-weight: 600;
-            color: #1a1a1a;
         }
 
         .today-team-away {
-            flex: 1;
-            display: flex;
-            align-items: center;
             justify-content: flex-start;
-            gap: 8px;
-            text-align: left;
-            font-weight: 600;
+        }
+
+        .team-info-home {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .team-info-away {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .team-name {
+            font-size: 1.1rem;
+            font-weight: 400;
             color: #1a1a1a;
+        }
+
+        .player-name {
+            font-size: 0.75rem;
+            color: #a0aec0;
+            font-weight: 600;
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .today-score-time {
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 1.3rem; /* Larger scores */
             color: #1a1a1a;
-            min-width: 75px;
+            min-width: 65px;
             text-align: center;
-            padding: 0 4px;
+            display: flex;
+            justify-content: center;
+            gap: 6px;
         }
 
         .today-team-icon {
-            width: 22px;
-            height: 22px;
+            width: 32px; /* Larger crests */
+            height: 32px;
             object-fit: contain;
             flex-shrink: 0;
+        }
+
+        .action-icons {
+            position: absolute;
+            bottom: 8px;
+            right: 20px;
+            display: flex;
+            gap: 8px;
+            opacity: 0.35;
+        }
+
+        .action-icons svg {
+            width: 14px;
+            height: 14px;
+            fill: #718096;
         }
 
         .no-matches-today {
@@ -885,41 +935,77 @@
             const awayName = getShortTeamName(match.awayTeam.name);
             const homeLogo = getLogoByName(match.homeTeam.name) || match.homeTeam.crest || '';
             const awayLogo = getLogoByName(match.awayTeam.name) || match.awayTeam.crest || '';
+            
+            // Get fantasy owner names
+            const homeOwner = getOwnerOfTeam(match.homeTeam.name) || 'Unassigned';
+            const awayOwner = getOwnerOfTeam(match.awayTeam.name) || 'Unassigned';
 
             let badgeHtml = '';
             let centerText = '';
 
             if (['IN_PLAY', 'PAUSED'].includes(match.status)) {
+                // Use API match.minute if available, otherwise fallback
                 const minuteDisplay = match.minute ? `${match.minute}` : (match.status === 'PAUSED' ? 'HT' : 'LIVE');
-                badgeHtml = `<span class="live-badge">${minuteDisplay}</span>`;
+                const isNumber = !isNaN(minuteDisplay);
+                const badgeClass = isNumber ? 'live-badge' : 'live-badge oval';
+                badgeHtml = `<span class="${badgeClass}">${minuteDisplay}</span>`;
+                
                 const hScore = match.score?.fullTime?.home ?? 0;
                 const aScore = match.score?.fullTime?.away ?? 0;
-                centerText = `${hScore} - ${aScore}`;
+                centerText = `<span>${hScore}</span><span>-</span><span>${aScore}</span>`;
             } else if (match.status === 'FINISHED') {
-                badgeHtml = `<span style="font-size: 0.75rem; color: #718096; font-weight: 700;">FT</span>`;
+                badgeHtml = `<span class="ft-badge">FT</span>`;
                 const hScore = match.score?.fullTime?.home ?? 0;
                 const aScore = match.score?.fullTime?.away ?? 0;
-                centerText = `${hScore} - ${aScore}`;
+                centerText = `<span>${hScore}</span><span>-</span><span>${aScore}</span>`;
             } else {
                 badgeHtml = '';
                 const mTime = new Date(match.utcDate);
-                centerText = mTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                const timeString = mTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                
+                // Split standard time to stack vertically (e.g. "11:30" over "AM")
+                const timeParts = timeString.split(' ');
+                const timeVal = timeParts[0];
+                const amPm = timeParts[1] || '';
+                
+                centerText = `
+                    <div style="display: flex; flex-direction: column; line-height: 1.1; font-size: 1.1rem; color: #718096; font-weight: 500;">
+                        <span>${timeVal}</span>
+                        <span style="font-size: 0.85rem;">${amPm}</span>
+                    </div>
+                `;
             }
+
+            // Subdued decorative icons matching the FotMob UI
+            const decorativeIcons = `
+                <div class="action-icons">
+                    <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+                    <svg viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg>
+                    <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0-9 9v7c0 1.1.9 2 2 2h4v-8H5v-1c0-3.87 3.13-7 7-7s7 3.13 7 7v1h-4v8h4c1.1 0 2-.9 2-2v-7a9 9 0 0 0-9-9z"/></svg>
+                </div>
+            `;
 
             return `
                 <div class="today-fixture">
                     <div class="today-status-badge-col">${badgeHtml}</div>
                     <div class="today-match-content">
                         <div class="today-team-home">
-                            <span>${homeName}</span>
-                            ${homeLogo ? `<img src="${homeLogo}" class="today-team-icon" alt="${homeName}">` : ''}
+                            <div class="team-info-home">
+                                <span class="team-name">${homeName}</span>
+                                <span class="player-name">${homeOwner}</span>
+                            </div>
+                            ${homeLogo ? \`<img src="\${homeLogo}" class="today-team-icon" alt="\${homeName}">\` : ''}
                         </div>
                         <div class="today-score-time">${centerText}</div>
                         <div class="today-team-away">
-                            ${awayLogo ? `<img src="${awayLogo}" class="today-team-icon" alt="${awayName}">` : ''}
-                            <span>${awayName}</span>
+                            ${awayLogo ? \`<img src="\${awayLogo}" class="today-team-icon" alt="\${awayName}">\` : ''}
+                            <div class="team-info-away">
+                                <span class="team-name">${awayName}</span>
+                                <span class="player-name">${awayOwner}</span>
+                            </div>
                         </div>
                     </div>
+                    ${decorativeIcons}
                 </div>
             `;
         }).join('');
@@ -931,7 +1017,6 @@
             </div>
         `;
     }
-
     // Toggle TR rows that share the target class
     function toggleNestedTableTRs(rowEl, targetClass) {
         rowEl.classList.toggle('expanded');
