@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
     // 1. Define the target URL for the 2025/2026 PL season
-    const targetUrl = 'https://api.football-data.org/v4/competitions/PL/matches?season=2025';
+    const targetUrl = 'https://api.football-data.org/v4/competitions/PL/matches?season=2026';
     
     // 2. Securely access the API key from Vercel's Environment Variables
     const apiKey = process.env.API_KEY;
