@@ -43,7 +43,7 @@
             object-fit: contain;
         }
 
-        /* FotMob Style Today Matches Card (Updated) */
+        /* FotMob Style Today Matches Card (Horizontal Layout) */
         .today-card {
             background: #ffffff;
             border-radius: 12px;
@@ -76,8 +76,8 @@
 
         .today-match-row {
             display: flex;
-            align-items: stretch;
-            padding: 12px 16px;
+            align-items: center;
+            padding: 14px 16px;
             border-bottom: 1px solid #f1f5f9;
             text-decoration: none;
             color: inherit;
@@ -92,79 +92,112 @@
             border-bottom: none;
         }
 
-        .match-time-status {
-            width: 50px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+        /* Layout Structure */
+        .match-status {
+            width: 40px;
             flex-shrink: 0;
-            border-right: 1px solid #e2e8f0;
-            padding-right: 16px;
-            margin-right: 16px;
-        }
-
-        .match-time {
-            font-size: 0.85rem;
-            color: #1a1a1a;
-        }
-
-        .live-status-container {
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            gap: 2px;
+            align-items: center;
         }
 
-        .live-badge {
-            color: #00a667;
-            font-weight: 700;
-            font-size: 0.85rem;
-        }
-
-        .match-teams {
+        .match-content {
             flex-grow: 1;
             display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .team-block {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            gap: 12px;
+        }
+
+        .team-home {
+            justify-content: flex-end;
+            text-align: right;
+        }
+
+        .team-away {
+            justify-content: flex-start;
+            text-align: left;
+        }
+
+        .team-info {
+            display: flex;
             flex-direction: column;
             justify-content: center;
-            gap: 8px;
         }
 
-        .team-line {
+        /* Typography & Visuals */
+        .live-badge {
+            background-color: #00a667;
+            color: #ffffff;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
             display: flex;
+            justify-content: center;
             align-items: center;
-            justify-content: space-between;
+            font-size: 0.75rem;
+            font-weight: 700;
         }
 
-        .team-name-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .live-badge-text {
+            color: #00a667;
+            font-size: 0.8rem;
+            font-weight: 700;
         }
 
-        .today-team-icon {
-            width: 20px;
-            height: 20px;
-            object-fit: contain;
+        .ft-text {
+            color: #718096;
+            font-size: 0.85rem;
+            font-weight: 600;
         }
 
         .team-name-text {
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-weight: 600;
             color: #1a1a1a;
+            line-height: 1.2;
         }
 
         .team-owner {
             font-size: 0.75rem;
-            color: #888;
+            color: #718096;
             font-weight: 400;
+            line-height: 1.2;
+            margin-top: 2px;
         }
 
-        .team-score {
-            font-size: 0.95rem;
+        .team-logo-img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .match-score-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 55px;
+            font-size: 1.15rem;
             font-weight: 700;
             color: #1a1a1a;
+            white-space: nowrap;
+        }
+
+        .time-text {
+            font-size: 0.85rem;
+            color: #718096;
+            text-align: center;
+            font-weight: 500;
+            line-height: 1.2;
         }
 
         .no-matches-today {
@@ -345,7 +378,6 @@
             font-size: 1.4rem;
         }
 
-        /* Ensures Overall Standings and Division Tables align to identical proportions */
         #standings-table, #divisions-container table {
             table-layout: auto; 
         }
@@ -359,7 +391,6 @@
             white-space: normal;
         }
 
-        /* Nested Row Specific Adjustments to prevent shifting */
         .nested-table-row td:nth-child(2) {
             padding-left: 0 !important; 
         }
@@ -367,30 +398,17 @@
             margin-left: -15px; 
         }
 
-        /* Freezes Draft Value Performance By Player columns so they never shift when expanded */
         #draft-player-table {
             table-layout: fixed;
             width: 100%;
         }
         #draft-player-table tr:nth-child(2) th:nth-child(1), 
-        #draft-player-table td:nth-child(1) {
-            width: 6%;
-        }
-
+        #draft-player-table td:nth-child(1) { width: 6%; }
         #draft-player-table tr:nth-child(2) th:nth-child(2), 
-        #draft-player-table td:nth-child(2) {
-            width: 69%;
-            white-space: normal;
-        }
-
+        #draft-player-table td:nth-child(2) { width: 69%; white-space: normal; }
         #draft-player-table tr:nth-child(2) th:nth-child(3), 
-        #draft-player-table td:nth-child(3) {
-            width: 25%;
-            text-align: right;
-            padding-right: 16px;
-        }
+        #draft-player-table td:nth-child(3) { width: 25%; text-align: right; padding-right: 16px; }
 
-        /* Allow division headers to flex wrap so the toggle button doesn't force a widened table */
         #divisions-container .division-header-container {
             align-items: center;
             flex-wrap: wrap; 
@@ -432,7 +450,6 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 0 1px rgba(0,0,0,0.05);
         }
 
-        /* Season Awards Cards with Nested Support */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -639,18 +656,21 @@
             h2, .plain-table-title, .overall-header-container h2 { font-size: 1.1rem; }
             .draft-title { font-size: 1rem; }
             .toggle-btn { padding: 4px 12px; font-size: 0.75rem; }
-            
             #divisions-container .division-header-container h2 { font-size: 1.1rem; } 
             
-            /* Symmetrically anchor columns on mobile */
+            /* Responsive Matches adjustments */
+            .team-name-text { font-size: 0.85rem; }
+            .team-owner { font-size: 0.65rem; }
+            .match-score-block { font-size: 1.0rem; min-width: 45px; }
+            .team-logo-img { width: 24px; height: 24px; }
+            .match-status { width: 32px; }
+            .team-block { gap: 6px; }
+            .match-content { gap: 8px; }
+
             #standings-table th:nth-child(1), #standings-table td:nth-child(1),
-            #divisions-container table th:nth-child(1), #divisions-container table td:nth-child(1) {
-                width: 10%;
-            }
+            #divisions-container table th:nth-child(1), #divisions-container table td:nth-child(1) { width: 10%; }
             #standings-table th:nth-child(2), #standings-table td:nth-child(2),
-            #divisions-container table th:nth-child(2), #divisions-container table td:nth-child(2) {
-                width: 35%;
-            }
+            #divisions-container table th:nth-child(2), #divisions-container table td:nth-child(2) { width: 35%; }
         }
     </style>
 </head>
@@ -662,7 +682,7 @@
         <img src="https://logos-world.net/wp-content/uploads/2023/08/Premier-League-New-Logo.png" alt="Premier League Lion Logo" class="lion-logo">
     </div>
 
-    <!-- FotMob Style In-Progress & Scheduled Fixtures Card -->
+    <!-- FotMob Style Matches Card -->
     <div id="today-matches-container"></div>
 
     <div id="status-indicator">Initializing 2026/2027 season data...</div>
@@ -894,7 +914,6 @@
             return isMatchToday || isLive;
         });
 
-        // Format date like "Saturday, August 22"
         const dateOptions = { weekday: 'long', month: 'long', day: 'numeric' };
         const formattedDate = today.toLocaleDateString('en-US', dateOptions);
 
@@ -926,52 +945,54 @@
             const awayOwner = getOwnerOfTeam(match.awayTeam.name) || 'Unassigned';
 
             let statusHtml = '';
-            let homeScore = '';
-            let awayScore = '';
+            let scoreHtml = '';
 
             if (['IN_PLAY', 'PAUSED'].includes(match.status)) {
-                let liveText = match.status === 'PAUSED' ? 'HT' : match.minute ? `${match.minute}'` : 'LIVE';
-                statusHtml = `
-                    <div class="live-status-container">
-                        <span class="live-badge">${liveText}</span>
-                    </div>
-                `;
-                homeScore = match.score?.fullTime?.home ?? 0;
-                awayScore = match.score?.fullTime?.away ?? 0;
+                let liveText = match.status === 'PAUSED' ? 'HT' : match.minute ? match.minute : '';
+                statusHtml = liveText ? `<div class="live-badge">${liveText}</div>` : `<div class="live-badge-text">LIVE</div>`;
+                scoreHtml = `${match.score?.fullTime?.home ?? 0} - ${match.score?.fullTime?.away ?? 0}`;
             } else if (match.status === 'FINISHED') {
-                statusHtml = `<span style="font-size: 0.85rem; color: #718096; font-weight: 600;">FT</span>`;
-                homeScore = match.score?.fullTime?.home ?? 0;
-                awayScore = match.score?.fullTime?.away ?? 0;
+                statusHtml = `<div class="ft-text">FT</div>`;
+                scoreHtml = `${match.score?.fullTime?.home ?? 0} - ${match.score?.fullTime?.away ?? 0}`;
             } else {
                 const mTime = new Date(match.utcDate);
-                statusHtml = `<span class="match-time">${mTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>`;
-                homeScore = '-';
-                awayScore = '-';
+                const timeStr = mTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                const timeParts = timeStr.split(' ');
+                
+                if (timeParts.length === 2) {
+                    scoreHtml = `<div class="time-text">${timeParts[0]}<br>${timeParts[1]}</div>`;
+                } else {
+                    scoreHtml = `<div class="time-text">${timeStr}</div>`;
+                }
+                statusHtml = ``;
             }
 
             return `
                 <div class="today-match-row">
-                    <div class="match-time-status">
-                        ${statusHtml}
-                    </div>
+                    <div class="match-status">${statusHtml}</div>
                     
-                    <div class="match-teams">
-                        <div class="team-line">
-                            <div class="team-name-info">
-                                ${homeLogo ? `<img src="${homeLogo}" class="today-team-icon" alt="${homeName}">` : ''}
+                    <div class="match-content">
+                        <!-- Home Team -->
+                        <div class="team-block team-home">
+                            <div class="team-info">
                                 <span class="team-name-text">${homeName}</span>
                                 <span class="team-owner">${homeOwner}</span>
                             </div>
-                            <div class="team-score">${homeScore}</div>
+                            ${homeLogo ? `<img src="${homeLogo}" class="team-logo-img" alt="${homeName}">` : ''}
                         </div>
                         
-                        <div class="team-line">
-                            <div class="team-name-info">
-                                ${awayLogo ? `<img src="${awayLogo}" class="today-team-icon" alt="${awayName}">` : ''}
+                        <!-- Score / Time -->
+                        <div class="match-score-block">
+                            ${scoreHtml}
+                        </div>
+                        
+                        <!-- Away Team -->
+                        <div class="team-block team-away">
+                            ${awayLogo ? `<img src="${awayLogo}" class="team-logo-img" alt="${awayName}">` : ''}
+                            <div class="team-info">
                                 <span class="team-name-text">${awayName}</span>
                                 <span class="team-owner">${awayOwner}</span>
                             </div>
-                            <div class="team-score">${awayScore}</div>
                         </div>
                     </div>
                 </div>
@@ -994,7 +1015,6 @@
         `;
     }
 
-    // Toggle TR rows that share the target class
     function toggleNestedTableTRs(rowEl, targetClass) {
         rowEl.classList.toggle('expanded');
         document.querySelectorAll(`.${targetClass}`).forEach(el => {
@@ -1069,7 +1089,6 @@
             }
             primaryTbody.appendChild(tr);
 
-            // Nested Team Rows
             let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
             if (overallMode === 'PTS') {
                 playerTeams.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
@@ -1387,7 +1406,6 @@
             `;
             tbody.appendChild(tr);
 
-            // Nested Team Rows
             let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
             
             playerTeams.sort((a, b) => {
@@ -1577,8 +1595,6 @@
     }
 
     document.addEventListener('DOMContentLoaded', fetchAndUpdateStandings);
-
-    // Auto-refresh the standings every 60 seconds
     setInterval(fetchAndUpdateStandings, 60000);
 </script>
 
