@@ -1,283 +1,534 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premier League Fixtures</title>
-    <!-- Tailwind CSS for modern, responsive styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .fotmob-purple { background-color: #4c1d95; }
-        .fotmob-purple-light { background-color: #5b21b6; }
-        .score-badge { background-color: #059669; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fixtures Sub-page</title>
+<style>
+    /* CSS Variables matching the app theme */
+    :root {
+        --bg-color: #f2f2f4;
+        --card-bg: #ffffff;
+        --text-main: #111111;
+        --text-muted: #666666;
+        --pill-bg: #e5e5ea;
+        --pill-active-bg: #ffffff;
+        --win-color: #00b074;
+        --loss-color: #e2383f;
+        --draw-color: #8e8e93;
+        --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: var(--font-family);
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    .fixtures-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 16px;
+        position: relative;
+        min-height: 100vh;
+    }
+
+    /* Navigation Pills */
+    .pills-nav {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .pill {
+        padding: 8px 16px;
+        border-radius: 20px;
+        background-color: var(--pill-bg);
+        color: var(--text-main);
+        font-size: 14px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .pill.active {
+        background-color: var(--pill-active-bg);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .pill.team-selected-pill {
+        padding: 4px 12px 4px 4px;
+        background-color: var(--pill-active-bg);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .pill-logo {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        object-fit: contain;
+    }
+
+    .close-icon {
+        font-size: 12px;
+        background: #333;
+        color: #fff;
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 4px;
+    }
+
+    /* Cards */
+    .fixture-card {
+        background-color: var(--card-bg);
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .card-header {
+        font-weight: 700;
+        font-size: 16px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* Fixture Rows */
+    .fixture-row {
+        display: grid;
+        grid-template-columns: 1fr 70px 1fr;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .fixture-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .team-block {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .team-block.home {
+        justify-content: flex-end;
+        text-align: right;
+    }
+
+    .team-block.away {
+        justify-content: flex-start;
+        text-align: left;
+    }
+
+    .team-text {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .team-name {
+        font-size: 15px;
+        font-weight: 500;
+    }
+
+    .player-name {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 2px;
+    }
+
+    .team-logo {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background-color: #eee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: bold;
+        overflow: hidden;
+    }
+
+    .team-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Score & Time */
+    .score-time-block {
+        text-align: center;
+        font-size: 15px;
+        font-weight: 700;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .score-pill {
+        padding: 4px 10px;
+        border-radius: 6px;
+        color: #fff;
+    }
+
+    .future-time {
+        color: var(--text-muted);
+        font-weight: 500;
+        font-size: 14px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Team View Specifics */
+    .team-view-row-header {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 16px;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        font-weight: 600;
+    }
+    .team-view-row-header:first-child {
+        margin-top: 0;
+    }
+
+    /* Dropdown Modal */
+    .dropdown-modal {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--bg-color);
+        z-index: 100;
+        flex-direction: column;
+    }
+
+    .dropdown-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        background: var(--card-bg);
+        border-radius: 0 0 16px 16px;
+        font-weight: 600;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .btn-done {
+        color: var(--win-color);
+        background: none;
+        border: none;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .team-list {
+        background: var(--card-bg);
+        margin-top: 16px;
+        border-radius: 16px;
+        overflow-y: auto;
+    }
+
+    .team-list-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+    }
+
+    .team-list-item:last-child {
+        border-bottom: none;
+    }
+</style>
 </head>
-<body class="bg-gray-100 font-sans text-gray-900 antialiased">
+<body>
 
-    <!-- App Container -->
-    <div class="max-w-md mx-auto bg-gray-50 min-h-screen shadow-xl flex flex-col">
-
-        <!-- Header Section -->
-        <header class="fotmob-purple text-white p-4 pb-3">
-            <div class="flex items-center justify-between mb-3">
-                <div class="flex items-center space-x-3">
-                    <button class="p-1 rounded-full hover:bg-white/10 transition">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-                    </button>
-                    <div>
-                        <h1 class="font-bold text-lg leading-tight">Premier League</h1>
-                        <span class="text-xs text-purple-200">England</span>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <div class="bg-purple-900/80 px-3 py-1 rounded-full text-sm font-medium flex items-center space-x-1 border border-purple-700">
-                        <span>2026/27</span>
-                        <svg class="w-4 h-4 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </div>
-                    <button class="p-2 rounded-full hover:bg-white/10 transition">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path></svg>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Sub Navigation Tabs -->
-            <div class="flex space-x-6 text-sm overflow-x-auto no-scrollbar border-b border-purple-800/50 pb-2 text-purple-200">
-                <button class="hover:text-white transition">Table</button>
-                <button class="text-white font-bold border-b-2 border-white pb-2 -mb-2">Fixtures</button>
-                <button class="hover:text-white transition">News</button>
-                <button class="hover:text-white transition">Player stats</button>
-                <button class="hover:text-white transition">Teams</button>
-            </div>
-        </header>
-
-        <!-- Pill Controls Bar -->
-        <div class="bg-white px-4 py-3 border-b border-gray-200 flex items-center space-x-2 shadow-sm">
-            <button onclick="switchView('date')" id="btn-date" class="px-4 py-1.5 rounded-full text-sm font-medium bg-gray-900 text-white transition">Date</button>
-            <button onclick="switchView('round')" id="btn-round" class="px-4 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition">Round</button>
-            <button onclick="openTeamModal()" id="btn-team" class="px-4 py-1.5 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 flex items-center space-x-1 transition">
-                <span id="team-btn-text">Team</span>
-                <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </button>
-        </div>
-
-        <!-- Main Content Area -->
-        <main id="main-content" class="p-4 space-y-4 flex-1">
-            <!-- Dynamic content injected via JavaScript -->
-        </main>
+<div class="fixtures-container">
+    
+    <!-- Top Navigation Pills -->
+    <div class="pills-nav" id="main-nav">
+        <button class="pill active" id="btn-date" onclick="setView('date')">Date</button>
+        <button class="pill" id="btn-round" onclick="setView('round')">Round</button>
+        <button class="pill" id="btn-team" onclick="openTeamDropdown()">Team <span>&#x25BE;</span></button>
     </div>
+
+    <!-- Content Area where dynamic cards will be injected -->
+    <div id="content-area"></div>
 
     <!-- Team Selection Modal -->
-    <div id="team-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex flex-col justify-end max-w-md mx-auto">
-        <div class="bg-white rounded-t-2xl max-h-[85vh] flex flex-col">
-            <div class="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
-                <h3 class="font-bold text-lg">Team</h3>
-                <button onclick="closeTeamModal()" class="text-emerald-600 font-semibold text-sm">Done</button>
-            </div>
-            <div class="overflow-y-auto p-2 space-y-1">
-                <!-- Team list items generated dynamically or statically -->
-                <div id="modal-team-list" class="divide-y divide-gray-100">
-                    <!-- Populated by JS -->
-                </div>
-            </div>
+    <div class="dropdown-modal" id="team-modal">
+        <div class="dropdown-header">
+            <span>Team</span>
+            <button class="btn-done" onclick="closeTeamDropdown()">Done</button>
+        </div>
+        <div class="team-list" id="team-list-container">
+            <!-- Team list injected via JS -->
         </div>
     </div>
 
-    <script>
-        // Mock Data for Premier League Fixtures 2026/27
-        const fixturesData = [
-            { id: 1, dateGroup: "Yesterday", round: "Round 1", homeTeam: "Arsenal", homeLogo: "🔴", homeScorers: "Saka 12', Havertz 44', Jesus 78'", awayTeam: "Coventry City", awayLogo: "🔵", awayScorers: "", scoreOrTime: "3 - 0", status: "finished" },
-            { id: 2, dateGroup: "Today", round: "Round 1", homeTeam: "Hull City", homeLogo: "🟠", homeScorers: "Belloumi 25', Carvalho 60'", awayTeam: "Man United", awayLogo: "🔴", awayScorers: "", scoreOrTime: "2 - 0", status: "finished" },
-            { id: 3, dateGroup: "Today", round: "Round 1", homeTeam: "Everton", homeLogo: "🔷", homeScorers: "Calvert-Lewin 10', McNeil 82'", awayTeam: "Crystal Palace", awayLogo: "🦅", awayScorers: "", scoreOrTime: "2 - 0", status: "finished" },
-            { id: 4, dateGroup: "Today", round: "Round 1", homeTeam: "Ipswich", homeLogo: "🚜", homeScorers: "Delap 34', Hutchinson 71'", awayTeam: "Sunderland", awayLogo: "⚪", awayScorers: "Clarke 19'", scoreOrTime: "2 - 1", status: "finished" },
-            { id: 5, dateGroup: "Today", round: "Round 1", homeTeam: "Nottm Forest", homeLogo: "🌲", homeScorers: "", awayTeam: "Leeds", awayLogo: "💛", awayScorers: "Piroe 45+2'", scoreOrTime: "0 - 1", status: "finished" },
-            { id: 6, dateGroup: "Today", round: "Round 1", homeTeam: "Brentford", homeLogo: "🐝", homeScorers: "Toney 14', 55', Mbeumo 89'", awayTeam: "Tottenham", awayLogo: "🐓", awayScorers: "", scoreOrTime: "3 - 0", status: "finished" },
-            { id: 7, dateGroup: "Tomorrow", round: "Round 1", homeTeam: "Brighton", homeLogo: "🌊", homeScorers: "", awayTeam: "Aston Villa", awayLogo: "🦁", awayScorers: "", scoreOrTime: "8:00 AM", status: "upcoming" },
-            { id: 8, dateGroup: "Tomorrow", round: "Round 1", homeTeam: "Man City", homeLogo: " sky", homeScorers: "", awayTeam: "Bournemouth", awayLogo: "🍒", awayScorers: "", scoreOrTime: "8:00 AM", status: "upcoming" },
-            { id: 9, dateGroup: "Mon, Aug 31", round: "Round 2", homeTeam: "Aston Villa", homeLogo: "🦁", homeScorers: "", awayTeam: "Arsenal", awayLogo: "🔴", awayScorers: "", scoreOrTime: "2:00 PM", status: "upcoming" },
-            { id: 10, dateGroup: "Sun, Sep 6", round: "Round 3", homeTeam: "Arsenal", homeLogo: "🔴", homeScorers: "", awayTeam: "Chelsea", awayLogo: "🦁", awayScorers: "", scoreOrTime: "10:30 AM", status: "upcoming" },
-            { id: 11, dateGroup: "Sat, Sep 12", round: "Round 4", homeTeam: "Sunderland", awayLogo: "🔴", homeLogo: "⚪", homeScorers: "", awayTeam: "Arsenal", awayLogo: "🔴", awayScorers: "", scoreOrTime: "2:00 PM", status: "upcoming" }
-        ];
+</div>
 
-        const teamsList = [
-            "AFC Bournemouth", "Arsenal", "Aston Villa", "Brentford", "Brighton & Hove Albion", 
-            "Chelsea", "Coventry City", "Crystal Palace", "Everton", "Fulham", 
-            "Hull City", "Ipswich Town", "Leeds United", "Liverpool", "Manchester City", 
-            "Manchester United", "Newcastle United", "Nottingham Forest", "Sunderland", "Tottenham Hotspur"
-        ];
+<script>
+    // --- Mock Data ---
+    // Logos are generated using a placeholder service for demonstration purposes.
+    const teamsData = {
+        "Arsenal": { logo: "https://placehold.co/100/e2383f/fff?text=A" },
+        "Coventry": { logo: "https://placehold.co/100/5fa5d9/fff?text=C" },
+        "Hull": { logo: "https://placehold.co/100/f5a623/000?text=H" },
+        "Man United": { logo: "https://placehold.co/100/e2383f/fff?text=M" },
+        "Everton": { logo: "https://placehold.co/100/003399/fff?text=E" },
+        "Crystal Palace": { logo: "https://placehold.co/100/1b4a8f/fff?text=C" },
+        "Ipswich": { logo: "https://placehold.co/100/00205b/fff?text=I" },
+        "Sunderland": { logo: "https://placehold.co/100/e2383f/fff?text=S" },
+        "Nottm Forest": { logo: "https://placehold.co/100/e2383f/fff?text=N" },
+        "Leeds": { logo: "https://placehold.co/100/ffcd00/000?text=L" },
+        "Brighton": { logo: "https://placehold.co/100/0057b8/fff?text=B" },
+        "Aston Villa": { logo: "https://placehold.co/100/670e36/fff?text=A" }
+    };
 
-        let currentView = 'date'; // 'date', 'round', 'team'
-        let selectedTeam = 'Arsenal';
+    const fixtures = [
+        { id: 1, dateLabel: "Yesterday", round: "Round 1", isPast: true, home: "Arsenal", homePlayer: "Saka", homeScore: 3, away: "Coventry", awayPlayer: "Simms", awayScore: 0, time: "FT" },
+        { id: 2, dateLabel: "Today", round: "Round 1", isPast: true, home: "Hull", homePlayer: "Philogene", homeScore: 2, away: "Man United", awayPlayer: "Rashford", awayScore: 0, time: "FT" },
+        { id: 3, dateLabel: "Today", round: "Round 1", isPast: true, home: "Everton", homePlayer: "Calvert-Lewin", homeScore: 2, away: "Crystal Palace", awayPlayer: "Eze", awayScore: 0, time: "FT" },
+        { id: 4, dateLabel: "Today", round: "Round 1", isPast: true, home: "Ipswich", homePlayer: "Chaplin", homeScore: 2, away: "Sunderland", awayPlayer: "Clarke", awayScore: 1, time: "FT" },
+        { id: 5, dateLabel: "Today", round: "Round 1", isPast: true, home: "Nottm Forest", homePlayer: "Gibbs-White", homeScore: 0, away: "Leeds", awayPlayer: "Summerville", awayScore: 1, time: "FT" },
+        { id: 6, dateLabel: "Tomorrow", round: "Round 2", isPast: false, home: "Brighton", homePlayer: "Mitoma", homeScore: null, away: "Aston Villa", awayPlayer: "Watkins", awayScore: null, time: "8:00 AM" },
+        { id: 7, dateLabel: "Mon, Aug 31", round: "Round 2", isPast: false, home: "Aston Villa", homePlayer: "Watkins", homeScore: null, away: "Arsenal", awayPlayer: "Odegaard", awayScore: null, time: "2:00 PM" },
+        { id: 8, dateLabel: "Sun, Sep 6", round: "Round 3", isPast: false, home: "Arsenal", homePlayer: "Rice", homeScore: null, away: "Everton", awayPlayer: "Onana", awayScore: null, time: "10:30 AM" },
+        { id: 9, dateLabel: "Sat, Sep 12", round: "Round 4", isPast: false, home: "Sunderland", homePlayer: "Roberts", homeScore: null, away: "Arsenal", awayPlayer: "Martinelli", awayScore: null, time: "2:00 PM" }
+    ];
 
-        function renderApp() {
-            const container = document.getElementById('main-content');
-            container.innerHTML = '';
+    let currentView = 'date';
+    let selectedTeam = null;
 
-            // Update button styles
-            document.getElementById('btn-date').className = `px-4 py-1.5 rounded-full text-sm font-medium transition ${currentView === 'date' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`;
-            document.getElementById('btn-round').className = `px-4 py-1.5 rounded-full text-sm font-medium transition ${currentView === 'round' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`;
-            document.getElementById('btn-team').className = `px-4 py-1.5 rounded-full text-sm font-medium transition ${currentView === 'team' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`;
+    // --- Core Logic & Rendering ---
 
-            if (currentView === 'date') {
-                renderDateView(container);
-            } else if (currentView === 'round') {
-                renderRoundView(container);
-            } else if (currentView === 'team') {
-                renderTeamView(container);
+    function init() {
+        populateTeamDropdown();
+        renderView();
+    }
+
+    function setView(viewMode) {
+        currentView = viewMode;
+        selectedTeam = null; // Clear selected team when switching to default tabs
+        updateNavUI();
+        renderView();
+    }
+
+    function selectTeam(teamName) {
+        selectedTeam = teamName;
+        currentView = 'team';
+        closeTeamDropdown();
+        updateNavUI();
+        renderView();
+    }
+
+    function updateNavUI() {
+        document.getElementById('btn-date').classList.remove('active');
+        document.getElementById('btn-round').classList.remove('active');
+        
+        const btnTeam = document.getElementById('btn-team');
+        btnTeam.classList.remove('active', 'team-selected-pill');
+
+        if (currentView === 'date') document.getElementById('btn-date').classList.add('active');
+        if (currentView === 'round') document.getElementById('btn-round').classList.add('active');
+        
+        if (currentView === 'team' && selectedTeam) {
+            btnTeam.classList.add('team-selected-pill');
+            btnTeam.innerHTML = `
+                <img src="${teamsData[selectedTeam].logo}" class="pill-logo">
+                <div class="close-icon" onclick="event.stopPropagation(); setView('date')">✕</div>
+            `;
+        } else {
+            btnTeam.innerHTML = `Team <span>&#x25BE;</span>`;
+        }
+    }
+
+    function renderView() {
+        const container = document.getElementById('content-area');
+        container.innerHTML = '';
+
+        if (currentView === 'date') {
+            const grouped = groupBy(fixtures, 'dateLabel');
+            for (let [date, matches] of Object.entries(grouped)) {
+                container.appendChild(createListCard(date, matches));
             }
+        } else if (currentView === 'round') {
+            const grouped = groupBy(fixtures, 'round');
+            for (let [round, matches] of Object.entries(grouped)) {
+                container.appendChild(createListCard(round, matches));
+            }
+        } else if (currentView === 'team') {
+            container.appendChild(createTeamCard(selectedTeam));
+        }
+    }
+
+    // --- HTML Generators ---
+
+    function createListCard(headerTitle, matches) {
+        const card = document.createElement('div');
+        card.className = 'fixture-card';
+        
+        const header = document.createElement('div');
+        header.className = 'card-header';
+        header.textContent = headerTitle;
+        card.appendChild(header);
+
+        matches.forEach(match => {
+            card.appendChild(createFixtureRow(match, false));
+        });
+
+        return card;
+    }
+
+    function createTeamCard(teamName) {
+        const card = document.createElement('div');
+        card.className = 'fixture-card';
+
+        // Team Header
+        const header = document.createElement('div');
+        header.className = 'card-header';
+        header.innerHTML = `
+            <div class="team-logo"><img src="${teamsData[teamName].logo}"></div>
+            <span>${teamName}</span>
+        `;
+        card.appendChild(header);
+
+        // Filter matches for team
+        const teamMatches = fixtures.filter(m => m.home === teamName || m.away === teamName);
+
+        teamMatches.forEach(match => {
+            // Row Headers for Date and Round
+            const rowHeader = document.createElement('div');
+            rowHeader.className = 'team-view-row-header';
+            rowHeader.innerHTML = `<span>${match.dateLabel}</span> <span>${match.round}</span>`;
+            card.appendChild(rowHeader);
+
+            card.appendChild(createFixtureRow(match, true, teamName));
+        });
+
+        return card;
+    }
+
+    function createFixtureRow(match, isTeamView, selectedTeam = null) {
+        const row = document.createElement('div');
+        row.className = 'fixture-row';
+
+        // Score logic
+        let scoreHTML = '';
+        if (match.isPast) {
+            if (isTeamView) {
+                // Apply background colors to pill based on team win/loss
+                let isWin = false;
+                let isLoss = false;
+                if (match.home === selectedTeam) {
+                    isWin = match.homeScore > match.awayScore;
+                    isLoss = match.homeScore < match.awayScore;
+                } else {
+                    isWin = match.awayScore > match.homeScore;
+                    isLoss = match.awayScore < match.homeScore;
+                }
+                const bgColor = isWin ? 'var(--win-color)' : (isLoss ? 'var(--loss-color)' : 'var(--draw-color)');
+                scoreHTML = `<div class="score-pill" style="background: ${bgColor}">${match.homeScore} - ${match.awayScore}</div>`;
+            } else {
+                // Standard bold text for general view
+                scoreHTML = `<div>${match.homeScore} - ${match.awayScore}</div>`;
+            }
+        } else {
+            scoreHTML = `<div class="future-time">
+                <span>${match.time.split(' ')[0]}</span>
+                <span>${match.time.split(' ')[1] || ''}</span>
+            </div>`;
         }
 
-        function renderDateView(container) {
-            const groups = groupBy(fixturesData, 'dateGroup');
-            for (const [date, fixtures] of Object.entries(groups)) {
-                const section = document.createElement('div');
-                section.innerHTML = `
-                    <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 px-1">${date}</h2>
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 divide-y divide-gray-100 overflow-hidden mb-4">
-                        ${fixtures.map(f => fixtureCardHTML(f)).join('')}
-                    </div>
-                `;
-                container.appendChild(section);
-            }
-        }
-
-        function renderRoundView(container) {
-            const groups = groupBy(fixturesData, 'round');
-            for (const [round, fixtures] of Object.entries(groups)) {
-                const section = document.createElement('div');
-                section.innerHTML = `
-                    <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 px-1">${round}</h2>
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 divide-y divide-gray-100 overflow-hidden mb-4">
-                        ${fixtures.map(f => fixtureCardHTML(f)).join('')}
-                    </div>
-                `;
-                container.appendChild(section);
-            }
-        }
-
-        function renderTeamView(container) {
-            const teamFixtures = fixturesData.filter(f => f.homeTeam === selectedTeam || f.awayTeam === selectedTeam);
+        row.innerHTML = `
+            <div class="team-block home">
+                <div class="team-text">
+                    <span class="team-name">${match.home}</span>
+                    <span class="player-name">${match.homePlayer}</span>
+                </div>
+                <div class="team-logo"><img src="${teamsData[match.home].logo}"></div>
+            </div>
             
-            const card = document.createElement('div');
-            card.innerHTML = `
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="p-4 border-b border-gray-100 flex items-center space-x-3 bg-gray-50/50">
-                        <span class="text-2xl">⚽</span>
-                        <h2 class="font-bold text-base text-gray-900">${selectedTeam}</h2>
-                    </div>
-                    <div class="divide-y divide-gray-100">
-                        ${teamFixtures.map(f => {
-                            const dateLabel = f.dateGroup;
-                            return `
-                                <div class="p-3 hover:bg-gray-50 transition">
-                                    <div class="text-[11px] font-semibold text-gray-400 mb-1">${dateLabel}</div>
-                                    <div class="flex items-center justify-between">
-                                        <!-- Home Team Stacked -->
-                                        <div class="flex items-center space-x-2 w-2/5">
-                                            <span class="text-lg">${f.homeLogo}</span>
-                                            <div class="overflow-hidden">
-                                                <div class="text-sm font-medium truncate ${f.homeTeam === selectedTeam ? 'font-bold text-purple-900' : 'text-gray-800'}">${f.homeTeam}</div>
-                                                <div class="text-[10px] text-gray-400 truncate">${f.homeScorers || ''}</div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Score or Time -->
-                                        <div class="w-1/5 text-center">
-                                            ${f.status === 'finished' 
-                                                ? `<span class="score-badge text-white text-xs px-2 py-0.5 rounded font-bold">${f.scoreOrTime}</span>`
-                                                : `<span class="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded">${f.scoreOrTime}</span>`
-                                            }
-                                        </div>
-
-                                        <!-- Away Team Stacked -->
-                                        <div class="flex items-center justify-end space-x-2 w-2/5 text-right">
-                                            <div class="overflow-hidden">
-                                                <div class="text-sm font-medium truncate ${f.awayTeam === selectedTeam ? 'font-bold text-purple-900' : 'text-gray-800'}">${f.awayTeam}</div>
-                                                <div class="text-[10px] text-gray-400 truncate">${f.awayScorers || ''}</div>
-                                            </div>
-                                            <span class="text-lg">${f.awayLogo}</span>
-                                        </div>
-                                    </div>
-                                    <div class="mt-2 text-right">
-                                        <span class="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">${f.round}</span>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
+            <div class="score-time-block">
+                ${scoreHTML}
+            </div>
+            
+            <div class="team-block away">
+                <div class="team-logo"><img src="${teamsData[match.away].logo}"></div>
+                <div class="team-text">
+                    <span class="team-name">${match.away}</span>
+                    <span class="player-name">${match.awayPlayer}</span>
                 </div>
+            </div>
+        `;
+        return row;
+    }
+
+    // --- Modal Logic ---
+
+    function openTeamDropdown() {
+        document.getElementById('team-modal').style.display = 'flex';
+    }
+
+    function closeTeamDropdown() {
+        document.getElementById('team-modal').style.display = 'none';
+    }
+
+    function populateTeamDropdown() {
+        const container = document.getElementById('team-list-container');
+        Object.keys(teamsData).sort().forEach(team => {
+            const item = document.createElement('div');
+            item.className = 'team-list-item';
+            item.innerHTML = `
+                <div class="team-logo"><img src="${teamsData[team].logo}"></div>
+                <span style="font-weight: 500;">${team}</span>
             `;
-            container.appendChild(card);
-        }
+            item.onclick = () => selectTeam(team);
+            container.appendChild(item);
+        });
+    }
 
-        function fixtureCardHTML(f) {
-            return `
-                <div class="p-3.5 flex items-center justify-between hover:bg-gray-50/80 transition">
-                    <!-- Home Team -->
-                    <div class="flex items-center space-x-2.5 w-5/12">
-                        <span class="text-lg flex-shrink-0">${f.homeLogo}</span>
-                        <div class="overflow-hidden">
-                            <div class="text-sm font-medium text-gray-800 truncate">${f.homeTeam}</div>
-                            <div class="text-[10px] text-gray-400 truncate leading-tight">${f.homeScorers}</div>
-                        </div>
-                    </div>
+    // --- Helpers ---
+    
+    function groupBy(array, key) {
+        return array.reduce((result, currentValue) => {
+            (result[currentValue[key]] = result[currentValue[key]] || []).push(currentValue);
+            return result;
+        }, {});
+    }
 
-                    <!-- Score / Time Badge -->
-                    <div class="w-2/13 text-center flex-shrink-0 px-1">
-                        ${f.status === 'finished' 
-                            ? `<span class="score-badge text-white text-xs px-2 py-1 rounded font-bold tracking-wide">${f.scoreOrTime}</span>`
-                            : `<span class="text-xs font-medium text-gray-600 whitespace-nowrap">${f.scoreOrTime}</span>`
-                        }
-                    </div>
+    // Initialize application on load
+    init();
 
-                    <!-- Away Team -->
-                    <div class="flex items-center justify-end space-x-2.5 w-5/12 text-right">
-                        <div class="overflow-hidden">
-                            <div class="text-sm font-medium text-gray-800 truncate">${f.awayTeam}</div>
-                            <div class="text-[10px] text-gray-400 truncate leading-tight">${f.awayScorers}</div>
-                        </div>
-                        <span class="text-lg flex-shrink-0">${f.awayLogo}</span>
-                    </div>
-                </div>
-            `;
-        }
-
-        function switchView(view) {
-            currentView = view;
-            renderApp();
-        }
-
-        function openTeamModal() {
-            const listEl = document.getElementById('modal-team-list');
-            listEl.innerHTML = teamsList.map(team => `
-                <button onclick="selectTeam('${team}')" class="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center space-x-3 transition">
-                    <span class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">⚽</span>
-                    <span class="text-sm font-medium text-gray-800">${team}</span>
-                </button>
-            `).join('');
-            document.getElementById('team-modal').classList.remove('hidden');
-        }
-
-        function closeTeamModal() {
-            document.getElementById('team-modal').classList.add('hidden');
-        }
-
-        function selectTeam(team) {
-            selectedTeam = team;
-            currentView = 'team';
-            document.getElementById('team-btn-text').innerText = team;
-            closeTeamModal();
-            renderApp();
-        }
-
-        function groupBy(array, key) {
-            return array.reduce((result, currentValue) => {
-                (result[currentValue[key]] = result[currentValue[key]] || []).push(currentValue);
-                return result;
-            }, {});
-        }
-
-        // Initial Load
-        renderApp();
-    </script>
+</script>
 </body>
 </html>
