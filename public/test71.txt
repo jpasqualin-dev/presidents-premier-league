@@ -75,11 +75,19 @@
         }
 
         .today-status-badge-col {
-            width: 42px;
+            width: 50px;
             display: flex;
             align-items: center;
             justify-content: flex-start;
             flex-shrink: 0;
+        }
+
+        .live-status-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
         }
 
         .live-badge {
@@ -92,6 +100,12 @@
             display: inline-block;
             text-align: center;
             min-width: 22px;
+        }
+
+        .live-minute {
+            font-size: 0.75rem;
+            color: #00a667;
+            font-weight: 700;
         }
 
         .today-match-content {
@@ -109,8 +123,6 @@
             justify-content: flex-end;
             gap: 8px;
             text-align: right;
-            font-weight: 600;
-            color: #1a1a1a;
         }
 
         .today-team-away {
@@ -120,8 +132,31 @@
             justify-content: flex-start;
             gap: 8px;
             text-align: left;
+        }
+
+        .team-info-home {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            line-height: 1.2;
+        }
+
+        .team-info-away {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            line-height: 1.2;
+        }
+
+        .team-name {
             font-weight: 600;
             color: #1a1a1a;
+        }
+
+        .owner-name {
+            font-size: 0.70rem;
+            color: #888;
+            font-weight: 400;
         }
 
         .today-score-time {
@@ -131,6 +166,9 @@
             min-width: 75px;
             text-align: center;
             padding: 0 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .today-team-icon {
@@ -885,13 +923,24 @@
             const awayName = getShortTeamName(match.awayTeam.name);
             const homeLogo = getLogoByName(match.homeTeam.name) || match.homeTeam.crest || '';
             const awayLogo = getLogoByName(match.awayTeam.name) || match.awayTeam.crest || '';
+            
+            // Get owners for the updated layout
+            const homeOwner = getOwnerOfTeam(match.homeTeam.name) || 'Unassigned';
+            const awayOwner = getOwnerOfTeam(match.awayTeam.name) || 'Unassigned';
 
             let badgeHtml = '';
             let centerText = '';
 
             if (['IN_PLAY', 'PAUSED'].includes(match.status)) {
-                const minuteDisplay = match.minute ? `${match.minute}` : (match.status === 'PAUSED' ? 'HT' : 'LIVE');
-                badgeHtml = `<span class="live-badge">${minuteDisplay}</span>`;
+                let liveText = match.status === 'PAUSED' ? 'HT' : 'LIVE';
+                let subText = match.minute ? `${match.minute}'` : '';
+                
+                badgeHtml = `
+                    <div class="live-status-container">
+                        <span class="live-badge">${liveText}</span>
+                        ${subText ? `<span class="live-minute">${subText}</span>` : ''}
+                    </div>
+                `;
                 const hScore = match.score?.fullTime?.home ?? 0;
                 const aScore = match.score?.fullTime?.away ?? 0;
                 centerText = `${hScore} - ${aScore}`;
@@ -911,13 +960,19 @@
                     <div class="today-status-badge-col">${badgeHtml}</div>
                     <div class="today-match-content">
                         <div class="today-team-home">
-                            <span>${homeName}</span>
+                            <div class="team-info-home">
+                                <span class="team-name">${homeName}</span>
+                                <span class="owner-name">${homeOwner}</span>
+                            </div>
                             ${homeLogo ? `<img src="${homeLogo}" class="today-team-icon" alt="${homeName}">` : ''}
                         </div>
                         <div class="today-score-time">${centerText}</div>
                         <div class="today-team-away">
                             ${awayLogo ? `<img src="${awayLogo}" class="today-team-icon" alt="${awayName}">` : ''}
-                            <span>${awayName}</span>
+                            <div class="team-info-away">
+                                <span class="team-name">${awayName}</span>
+                                <span class="owner-name">${awayOwner}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
