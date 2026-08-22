@@ -43,7 +43,7 @@
             object-fit: contain;
         }
 
-        /* FotMob Style Today Matches Card */
+        /* FotMob Style Today Matches Card (Horizontal Layout) */
         .today-card {
             background: #ffffff;
             border-radius: 12px;
@@ -54,61 +54,54 @@
         }
 
         .today-header {
-            background-color: #f8f9fa;
-            padding: 12px 18px;
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: #1a1a1a;
-            border-bottom: 1px solid #edf2f7;
-        }
-
-        .today-fixture {
             display: flex;
             align-items: center;
-            padding: 12px 18px;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 0.9rem;
+            gap: 8px;
+            padding: 12px 16px;
+            border-bottom: 1px solid #edf2f7;
+            background-color: #f8f9fa;
         }
 
-        .today-fixture:last-child {
+        .today-header-icon {
+            width: 18px;
+            height: 18px;
+            color: #1a1a1a;
+        }
+
+        .today-header-text {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .today-match-row {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            text-decoration: none;
+            color: inherit;
+            transition: background-color 0.15s;
+        }
+
+        .today-match-row:hover {
+            background-color: #f8f9fa;
+        }
+
+        .today-match-row:last-child {
             border-bottom: none;
         }
 
-        .today-status-badge-col {
-            width: 50px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
+        /* Layout Structure */
+        .match-status {
+            width: 40px;
             flex-shrink: 0;
-        }
-
-        .live-status-container {
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            gap: 2px;
+            align-items: center;
         }
 
-        .live-badge {
-            background-color: #00a667;
-            color: #ffffff;
-            font-weight: 700;
-            font-size: 0.75rem;
-            border-radius: 12px;
-            padding: 2px 7px;
-            display: inline-block;
-            text-align: center;
-            min-width: 22px;
-        }
-
-        .live-minute {
-            font-size: 0.75rem;
-            color: #00a667;
-            font-weight: 700;
-        }
-
-        .today-match-content {
+        .match-content {
             flex-grow: 1;
             display: flex;
             align-items: center;
@@ -116,70 +109,99 @@
             gap: 12px;
         }
 
-        .today-team-home {
-            flex: 1;
+        .team-block {
             display: flex;
             align-items: center;
+            flex: 1;
+            gap: 12px;
+        }
+
+        .team-home {
             justify-content: flex-end;
-            gap: 8px;
             text-align: right;
         }
 
-        .today-team-away {
-            flex: 1;
-            display: flex;
-            align-items: center;
+        .team-away {
             justify-content: flex-start;
-            gap: 8px;
             text-align: left;
         }
 
-        .team-info-home {
+        .team-info {
             display: flex;
             flex-direction: column;
-            align-items: flex-end;
-            line-height: 1.2;
+            justify-content: center;
         }
 
-        .team-info-away {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            line-height: 1.2;
-        }
-
-        .team-name {
-            font-weight: 600;
-            color: #1a1a1a;
-        }
-
-        .owner-name {
-            font-size: 0.70rem;
-            color: #888;
-            font-weight: 400;
-        }
-
-        .today-score-time {
-            font-weight: 700;
-            font-size: 0.95rem;
-            color: #1a1a1a;
-            min-width: 75px;
-            text-align: center;
-            padding: 0 4px;
+        /* Typography & Visuals */
+        .live-badge {
+            background-color: #00a667;
+            color: #ffffff;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
             display: flex;
             justify-content: center;
             align-items: center;
+            font-size: 0.75rem;
+            font-weight: 700;
         }
 
-        .today-team-icon {
-            width: 22px;
-            height: 22px;
+        .live-badge-text {
+            color: #00a667;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .ft-text {
+            color: #718096;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .team-name-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            line-height: 1.2;
+        }
+
+        .team-owner {
+            font-size: 0.75rem;
+            color: #718096;
+            font-weight: 400;
+            line-height: 1.2;
+            margin-top: 2px;
+        }
+
+        .team-logo-img {
+            width: 32px;
+            height: 32px;
             object-fit: contain;
             flex-shrink: 0;
         }
 
+        .match-score-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 55px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            white-space: nowrap;
+        }
+
+        .time-text {
+            font-size: 0.85rem;
+            color: #718096;
+            text-align: center;
+            font-weight: 500;
+            line-height: 1.2;
+        }
+
         .no-matches-today {
-            padding: 18px;
+            padding: 16px;
             text-align: center;
             color: #718096;
             font-size: 0.9rem;
@@ -356,7 +378,6 @@
             font-size: 1.4rem;
         }
 
-        /* Ensures Overall Standings and Division Tables align to identical proportions */
         #standings-table, #divisions-container table {
             table-layout: auto; 
         }
@@ -370,7 +391,6 @@
             white-space: normal;
         }
 
-        /* Nested Row Specific Adjustments to prevent shifting */
         .nested-table-row td:nth-child(2) {
             padding-left: 0 !important; 
         }
@@ -378,30 +398,17 @@
             margin-left: -15px; 
         }
 
-        /* Freezes Draft Value Performance By Player columns so they never shift when expanded */
         #draft-player-table {
             table-layout: fixed;
             width: 100%;
         }
         #draft-player-table tr:nth-child(2) th:nth-child(1), 
-        #draft-player-table td:nth-child(1) {
-            width: 6%;
-        }
-
+        #draft-player-table td:nth-child(1) { width: 6%; }
         #draft-player-table tr:nth-child(2) th:nth-child(2), 
-        #draft-player-table td:nth-child(2) {
-            width: 69%;
-            white-space: normal;
-        }
-
+        #draft-player-table td:nth-child(2) { width: 69%; white-space: normal; }
         #draft-player-table tr:nth-child(2) th:nth-child(3), 
-        #draft-player-table td:nth-child(3) {
-            width: 25%;
-            text-align: right;
-            padding-right: 16px;
-        }
+        #draft-player-table td:nth-child(3) { width: 25%; text-align: right; padding-right: 16px; }
 
-        /* Allow division headers to flex wrap so the toggle button doesn't force a widened table */
         #divisions-container .division-header-container {
             align-items: center;
             flex-wrap: wrap; 
@@ -443,7 +450,6 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 0 1px rgba(0,0,0,0.05);
         }
 
-        /* Season Awards Cards with Nested Support */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -650,21 +656,21 @@
             h2, .plain-table-title, .overall-header-container h2 { font-size: 1.1rem; }
             .draft-title { font-size: 1rem; }
             .toggle-btn { padding: 4px 12px; font-size: 0.75rem; }
-            
             #divisions-container .division-header-container h2 { font-size: 1.1rem; } 
-
-            .today-fixture { padding: 10px 12px; font-size: 0.85rem; }
-            .today-team-home, .today-team-away { font-size: 0.85rem; }
             
-            /* Symmetrically anchor columns on mobile */
+            /* Responsive Matches adjustments */
+            .team-name-text { font-size: 0.85rem; }
+            .team-owner { font-size: 0.65rem; }
+            .match-score-block { font-size: 1.0rem; min-width: 45px; }
+            .team-logo-img { width: 24px; height: 24px; }
+            .match-status { width: 32px; }
+            .team-block { gap: 6px; }
+            .match-content { gap: 8px; }
+
             #standings-table th:nth-child(1), #standings-table td:nth-child(1),
-            #divisions-container table th:nth-child(1), #divisions-container table td:nth-child(1) {
-                width: 10%;
-            }
+            #divisions-container table th:nth-child(1), #divisions-container table td:nth-child(1) { width: 10%; }
             #standings-table th:nth-child(2), #standings-table td:nth-child(2),
-            #divisions-container table th:nth-child(2), #divisions-container table td:nth-child(2) {
-                width: 35%;
-            }
+            #divisions-container table th:nth-child(2), #divisions-container table td:nth-child(2) { width: 35%; }
         }
     </style>
 </head>
@@ -676,7 +682,7 @@
         <img src="https://logos-world.net/wp-content/uploads/2023/08/Premier-League-New-Logo.png" alt="Premier League Lion Logo" class="lion-logo">
     </div>
 
-    <!-- FotMob Style In-Progress & Scheduled Fixtures Card -->
+    <!-- FotMob Style Matches Card -->
     <div id="today-matches-container"></div>
 
     <div id="status-indicator">Initializing 2026/2027 season data...</div>
@@ -886,6 +892,7 @@
         if (n.includes("Leeds United")) return "Leeds";
         if (n.includes("Hull City")) return "Hull";
         if (n.includes("Ipswich Town")) return "Ipswich";
+        if (n.includes("Sunderland")) return "Sunderland"; // Added this line
         return n.replace(" FC", "").replace(" & Hove Albion", "").replace("A.F.C. ", "").trim();
     }
 
@@ -908,10 +915,21 @@
             return isMatchToday || isLive;
         });
 
+        const dateOptions = { weekday: 'long', month: 'long', day: 'numeric' };
+        const formattedDate = today.toLocaleDateString('en-US', dateOptions);
+
         if (todayMatches.length === 0) {
             container.innerHTML = `
                 <div class="today-card">
-                    <div class="today-header">Today</div>
+                    <div class="today-header">
+                        <svg class="today-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <span class="today-header-text">${formattedDate}</span>
+                    </div>
                     <div class="no-matches-today">No matches scheduled for today</div>
                 </div>
             `;
@@ -924,54 +942,57 @@
             const homeLogo = getLogoByName(match.homeTeam.name) || match.homeTeam.crest || '';
             const awayLogo = getLogoByName(match.awayTeam.name) || match.awayTeam.crest || '';
             
-            // Get owners for the updated layout
             const homeOwner = getOwnerOfTeam(match.homeTeam.name) || 'Unassigned';
             const awayOwner = getOwnerOfTeam(match.awayTeam.name) || 'Unassigned';
 
-            let badgeHtml = '';
-            let centerText = '';
+            let statusHtml = '';
+            let scoreHtml = '';
 
             if (['IN_PLAY', 'PAUSED'].includes(match.status)) {
-                let liveText = match.status === 'PAUSED' ? 'HT' : 'LIVE';
-                let subText = match.minute ? `${match.minute}'` : '';
-                
-                badgeHtml = `
-                    <div class="live-status-container">
-                        <span class="live-badge">${liveText}</span>
-                        ${subText ? `<span class="live-minute">${subText}</span>` : ''}
-                    </div>
-                `;
-                const hScore = match.score?.fullTime?.home ?? 0;
-                const aScore = match.score?.fullTime?.away ?? 0;
-                centerText = `${hScore} - ${aScore}`;
+                let liveText = match.status === 'PAUSED' ? 'HT' : match.minute ? match.minute : '';
+                statusHtml = liveText ? `<div class="live-badge">${liveText}</div>` : `<div class="live-badge-text">LIVE</div>`;
+                scoreHtml = `${match.score?.fullTime?.home ?? 0} - ${match.score?.fullTime?.away ?? 0}`;
             } else if (match.status === 'FINISHED') {
-                badgeHtml = `<span style="font-size: 0.75rem; color: #718096; font-weight: 700;">FT</span>`;
-                const hScore = match.score?.fullTime?.home ?? 0;
-                const aScore = match.score?.fullTime?.away ?? 0;
-                centerText = `${hScore} - ${aScore}`;
+                statusHtml = `<div class="ft-text">FT</div>`;
+                scoreHtml = `${match.score?.fullTime?.home ?? 0} - ${match.score?.fullTime?.away ?? 0}`;
             } else {
-                badgeHtml = '';
                 const mTime = new Date(match.utcDate);
-                centerText = mTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                const timeStr = mTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                const timeParts = timeStr.split(' ');
+                
+                if (timeParts.length === 2) {
+                    scoreHtml = `<div class="time-text">${timeParts[0]}<br>${timeParts[1]}</div>`;
+                } else {
+                    scoreHtml = `<div class="time-text">${timeStr}</div>`;
+                }
+                statusHtml = ``;
             }
 
             return `
-                <div class="today-fixture">
-                    <div class="today-status-badge-col">${badgeHtml}</div>
-                    <div class="today-match-content">
-                        <div class="today-team-home">
-                            <div class="team-info-home">
-                                <span class="team-name">${homeName}</span>
-                                <span class="owner-name">${homeOwner}</span>
+                <div class="today-match-row">
+                    <div class="match-status">${statusHtml}</div>
+                    
+                    <div class="match-content">
+                        <!-- Home Team -->
+                        <div class="team-block team-home">
+                            <div class="team-info">
+                                <span class="team-name-text">${homeName}</span>
+                                <span class="team-owner">${homeOwner}</span>
                             </div>
-                            ${homeLogo ? `<img src="${homeLogo}" class="today-team-icon" alt="${homeName}">` : ''}
+                            ${homeLogo ? `<img src="${homeLogo}" class="team-logo-img" alt="${homeName}">` : ''}
                         </div>
-                        <div class="today-score-time">${centerText}</div>
-                        <div class="today-team-away">
-                            ${awayLogo ? `<img src="${awayLogo}" class="today-team-icon" alt="${awayName}">` : ''}
-                            <div class="team-info-away">
-                                <span class="team-name">${awayName}</span>
-                                <span class="owner-name">${awayOwner}</span>
+                        
+                        <!-- Score / Time -->
+                        <div class="match-score-block">
+                            ${scoreHtml}
+                        </div>
+                        
+                        <!-- Away Team -->
+                        <div class="team-block team-away">
+                            ${awayLogo ? `<img src="${awayLogo}" class="team-logo-img" alt="${awayName}">` : ''}
+                            <div class="team-info">
+                                <span class="team-name-text">${awayName}</span>
+                                <span class="team-owner">${awayOwner}</span>
                             </div>
                         </div>
                     </div>
@@ -981,13 +1002,20 @@
 
         container.innerHTML = `
             <div class="today-card">
-                <div class="today-header">Today</div>
+                <div class="today-header">
+                    <svg class="today-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <span class="today-header-text">${formattedDate}</span>
+                </div>
                 ${fixturesHtml}
             </div>
         `;
     }
 
-    // Toggle TR rows that share the target class
     function toggleNestedTableTRs(rowEl, targetClass) {
         rowEl.classList.toggle('expanded');
         document.querySelectorAll(`.${targetClass}`).forEach(el => {
@@ -1062,7 +1090,6 @@
             }
             primaryTbody.appendChild(tr);
 
-            // Nested Team Rows
             let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
             if (overallMode === 'PTS') {
                 playerTeams.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
@@ -1380,7 +1407,6 @@
             `;
             tbody.appendChild(tr);
 
-            // Nested Team Rows
             let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
             
             playerTeams.sort((a, b) => {
@@ -1570,8 +1596,6 @@
     }
 
     document.addEventListener('DOMContentLoaded', fetchAndUpdateStandings);
-
-    // Auto-refresh the standings every 60 seconds
     setInterval(fetchAndUpdateStandings, 60000);
 </script>
 
