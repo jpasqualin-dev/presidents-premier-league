@@ -1446,6 +1446,20 @@
         });
     }
 
+    async function refreshMatchdayCard() {
+        try {
+            const response = await fetch('/api/standings');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            
+            if (data.matches) {
+                renderTodayMatches(data.matches);
+            }
+        } catch (error) {
+            console.error("Error refreshing matchday card:", error);
+        }
+    }
+
     async function fetchAndUpdateStandings() {
         let playerStats = initializePlayerStats();
         let teamStats = initializeTeamStats();
@@ -1596,7 +1610,9 @@
     }
 
     document.addEventListener('DOMContentLoaded', fetchAndUpdateStandings);
-    setInterval(fetchAndUpdateStandings, 60000);
+
+// Now this will ONLY trigger the matchday card update every 30 seconds
+setInterval(refreshMatchdayCard, 30000);
 </script>
 
 </body>
