@@ -3,192 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Liga de Los Presidentes - Fantasy EPL (2026/2027 Season)</title>
+    <title>La Liga de Los Presidentes - Fantasy EPL (2026/2026 Season)</title>
     <style>
-        :root {
-            --fotmob-purple: #38003c;
-            --fotmob-purple-dark: #2a002d;
-            --fotmob-nav: #4f1d52;
-            --fotmob-accent: #00ff87;
-        }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #f4f6f8;
             color: #333;
             margin: 0;
-            padding: 0;
-            padding-top: 200px; /* Space for the fixed header */
-        }
-
-        /* FotMob Header Styles */
-        .fotmob-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: var(--fotmob-purple);
-            color: white;
-            z-index: 1000;
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .header-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 15px 20px 5px 20px;
-            transition: all 0.3s ease;
-        }
-
-        .header-controls {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .header-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .header-icon {
-            width: 32px;
-            height: 32px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        .header-middle {
-            display: flex;
-            align-items: center;
-            padding: 10px 20px 15px 20px;
-            gap: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .header-middle img {
-            height: 65px;
-            width: auto;
-            object-fit: contain;
-            transition: all 0.3s ease;
-        }
-
-        .header-titles {
-            display: flex;
-            flex-direction: column;
-            transition: all 0.3s ease;
-        }
-
-        .header-titles h1 {
-            margin: 0;
-            color: white;
-            font-size: 1.6rem;
-            line-height: 1.2;
-            transition: font-size 0.3s ease;
-        }
-
-        .header-titles span {
-            font-size: 0.9rem;
-            color: #d1b3d4;
-        }
-
-        .header-nav {
-            display: flex;
-            background-color: var(--fotmob-nav);
-            overflow-x: auto;
-            padding: 0 20px;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .nav-item {
-            color: white;
-            text-decoration: none;
-            padding: 14px 18px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            white-space: nowrap;
-            cursor: pointer;
-            transition: color 0.2s;
-            display: flex;
-            align-items: center;
-        }
-
-        .nav-item:hover {
-            color: var(--fotmob-accent);
-        }
-
-        /* Player Dropdown Styles */
-        .dropdown {
-            position: relative;
-        }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background-color: white;
-            min-width: 160px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-            border-radius: 0 0 8px 8px;
-            overflow: hidden;
-            z-index: 1001;
-        }
-
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
-
-        .dropdown-content a {
-            color: #333;
-            display: block;
-            padding: 12px 16px;
-            text-decoration: none;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
-
-        .dropdown-content a:hover {
-            background-color: #f4f6f8;
-            color: var(--fotmob-purple);
-        }
-
-        /* Header Shrunk State Classes */
-        .fotmob-header.shrunk .header-top {
-            padding: 10px 20px 0 20px;
-        }
-        
-        .fotmob-header.shrunk .header-middle {
-            padding: 0px 20px 10px 20px;
-            margin-top: -35px;
-            margin-left: 40px; /* Make room for back button */
-        }
-
-        .fotmob-header.shrunk .header-middle img {
-            height: 35px; /* Shrink logo */
-        }
-
-        .fotmob-header.shrunk .header-titles h1 {
-            font-size: 1.1rem; /* Shrink title */
-        }
-        
-        .fotmob-header.shrunk .header-titles span {
-            font-size: 0.75rem;
+            padding: 20px;
         }
 
         .container {
@@ -200,20 +22,28 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        /* Swipe Transition Instructions */
-        .swipe-hint {
-            text-align: center;
-            font-size: 0.75rem;
-            color: #a0aec0;
-            margin-top: -10px;
-            margin-bottom: 20px;
+        .header-container {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            gap: 15px;
+            border-bottom: 2px solid #38003c;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
         }
 
-        /* Matchday Card (Retained your styling) */
+        h1 {
+            margin: 0;
+            color: #1a1a1a;
+            font-size: 2rem;
+        }
+
+        .lion-logo {
+            height: 65px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        /* FotMob Style Matchday Card */
         .today-card {
             background: #ffffff;
             border-radius: 12px;
@@ -221,8 +51,7 @@
             margin-bottom: 20px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.04);
             overflow: hidden;
-            touch-action: pan-y; /* Important for horizontal swiping */
-            user-select: none;
+            touch-action: pan-y; /* Allows vertical scrolling, captures horizontal swipes */
         }
 
         .today-header {
@@ -233,8 +62,8 @@
             border-bottom: 1px solid #edf2f7;
             background-color: #f8f9fa;
         }
-
-        .today-header-title {
+        
+        .today-header-left {
             display: flex;
             align-items: center;
             gap: 8px;
@@ -252,11 +81,36 @@
             color: #1a1a1a;
         }
 
-        .nav-arrows {
+        /* Matchday Navigation Buttons */
+        .matchday-nav {
             display: flex;
             gap: 12px;
-            color: #718096;
+        }
+
+        .nav-btn {
+            background: #edf2f7;
+            border: none;
+            font-size: 1rem;
+            color: #1a1a1a;
             cursor: pointer;
+            padding: 4px 12px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-btn:hover:not(.disabled) {
+            background-color: #e2e8f0;
+            color: #38003c;
+        }
+
+        .nav-btn.disabled {
+            color: #a0aec0;
+            background: #f8f9fa;
+            cursor: not-allowed;
+            opacity: 0.6;
         }
 
         .today-match-row {
@@ -269,69 +123,242 @@
             transition: background-color 0.15s;
         }
 
-        .today-match-row:hover { background-color: #f8f9fa; }
-        .today-match-row:last-child { border-bottom: none; }
+        .today-match-row:hover {
+            background-color: #f8f9fa;
+        }
 
-        .match-status { width: 40px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; }
-        .match-content { flex-grow: 1; display: flex; align-items: center; justify-content: center; gap: 12px; }
-        .team-block { display: flex; align-items: center; flex: 1; gap: 12px; }
-        .team-home { justify-content: flex-end; text-align: right; }
-        .team-away { justify-content: flex-start; text-align: left; }
-        .team-info { display: flex; flex-direction: column; justify-content: center; }
-        
-        .live-badge { background-color: #00a667; color: #ffffff; border-radius: 50%; width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; font-size: 0.75rem; font-weight: 700; }
-        .live-badge-text { color: #00a667; font-size: 0.8rem; font-weight: 700; }
-        .ft-text { color: #718096; font-size: 0.85rem; font-weight: 600; }
-        .team-name-text { font-size: 1rem; font-weight: 600; color: #1a1a1a; line-height: 1.2; }
-        .team-owner { font-size: 0.75rem; color: #718096; font-weight: 400; line-height: 1.2; margin-top: 2px; }
-        .team-logo-img { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
-        .match-score-block { display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 55px; font-size: 1.15rem; font-weight: 700; color: #1a1a1a; white-space: nowrap; }
-        .time-text { font-size: 0.85rem; color: #718096; text-align: center; font-weight: 500; line-height: 1.2; }
-        .no-matches-today { padding: 16px; text-align: center; color: #718096; font-size: 0.9rem; }
+        .today-match-row:last-child {
+            border-bottom: none;
+        }
 
-        h2 { margin-top: 35px; margin-bottom: 0; color: #1a1a1a; border-bottom: 2px solid #00ff87; padding-bottom: 8px; font-size: 1.4rem; }
-        #status-indicator { padding: 12px 16px; border-radius: 6px; background-color: #e8f4fd; color: #0c5460; margin-bottom: 20px; font-size: 0.95rem; }
+        .match-status {
+            width: 40px;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-        .table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 35px; margin-bottom: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 0; background: #fff; font-size: 0.9rem; white-space: nowrap; }
-        th, td { padding: 12px 6px; text-align: center; border-bottom: 1px solid #eaeaea; }
-        th { background-color: #fff; color: #666; font-weight: 500; font-size: 0.8rem; text-transform: uppercase; border-bottom: 2px solid #eaeaea; }
+        .match-content {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
 
-        .plain-table-title { margin: 0; padding: 0 0 8px 0; border-bottom: none; font-size: 1.4rem; color: #1a1a1a; text-align: left; }
+        .team-block {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            gap: 12px;
+        }
+
+        .team-home {
+            justify-content: flex-end;
+            text-align: right;
+        }
+
+        .team-away {
+            justify-content: flex-start;
+            text-align: left;
+        }
+
+        .team-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .live-badge {
+            background-color: #00a667;
+            color: #ffffff;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .live-badge-text {
+            color: #00a667;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .ft-text {
+            color: #718096;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .team-name-text {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            line-height: 1.2;
+        }
+
+        .team-owner {
+            font-size: 0.75rem;
+            color: #718096;
+            font-weight: 400;
+            line-height: 1.2;
+            margin-top: 2px;
+        }
+
+        .team-logo-img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .match-score-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 55px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            white-space: nowrap;
+        }
+
+        .time-text {
+            font-size: 0.85rem;
+            color: #718096;
+            text-align: center;
+            font-weight: 500;
+            line-height: 1.2;
+        }
+
+        .no-matches-today {
+            padding: 16px;
+            text-align: center;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        h2 {
+            margin-top: 35px;
+            margin-bottom: 0;
+            color: #1a1a1a;
+            border-bottom: 2px solid #00ff87;
+            padding-bottom: 8px;
+            font-size: 1.4rem;
+        }
+
+        #status-indicator {
+            padding: 12px 16px;
+            border-radius: 6px;
+            background-color: #e8f4fd;
+            color: #0c5460;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        /* Tables & Expandables */
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 35px;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0;
+            background: #fff;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        th, td {
+            padding: 12px 6px;
+            text-align: center;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        th {
+            background-color: #fff;
+            color: #666;
+            font-weight: 500;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            border-bottom: 2px solid #eaeaea;
+        }
+
+        .plain-table-title {
+            margin: 0;
+            padding: 0 0 8px 0;
+            border-bottom: none;
+            font-size: 1.4rem;
+            color: #1a1a1a;
+            text-align: left;
+        }
+
         .draft-title { font-size: 1.15rem; }
         .text-left { text-align: left !important; }
         .fotmob-rank { width: 25px; font-weight: 600; color: #1a1a1a; }
         .fotmob-player { text-align: left; font-weight: 600; color: #1a1a1a; }
+        
         .icons-container { display: flex; gap: 4px; margin-top: 4px; }
         .team-icon { width: 18px; height: 18px; object-fit: contain; vertical-align: middle; }
         .team-inline { display: inline-flex; align-items: center; gap: 8px; }
 
         tr:hover { background-color: #f8f9fa; }
+
         .expandable-row { cursor: pointer; transition: background-color 0.15s ease; }
         .expandable-row:hover { background-color: #fafafa; }
         .expandable-row.expanded, .expandable-row.expanded:hover { background-color: #ffffff !important; }
+
         .table-chevron { color: #a0aec0; font-size: 0.75rem; transition: transform 0.2s ease; margin-left: 6px; display: inline-block; }
         .expandable-row.expanded .table-chevron { transform: rotate(90deg); }
+
         .nested-table-row { display: none; background-color: #fcfcfc; }
         .nested-table-row.expanded { display: table-row; }
         .nested-table-row td { font-size: 0.85rem; color: #555; padding-top: 8px; padding-bottom: 8px; border-bottom: 1px dashed #eaeaea; }
         .nested-table-row:hover { background-color: #f4f6f8; }
+
+        .highlight-col { font-weight: bold; color: #38003c; }
+
+        .division-header-container, .overall-header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-bottom: 8px;
+            margin-top: 0;
+            text-align: left;
+        }
+
+        .division-header-container h2, .overall-header-container h2 {
+            margin: 0;
+            border-bottom: none;
+            padding-bottom: 0;
+            font-size: 1.4rem;
+        }
+
+        #standings-table, #divisions-container table { table-layout: auto; }
+        #standings-table th:nth-child(1), #standings-table td:nth-child(1),
+        #divisions-container table th:nth-child(1), #divisions-container table td:nth-child(1) { width: 8%; }
+        #standings-table th:nth-child(2), #standings-table td:nth-child(2),
+        #divisions-container table th:nth-child(2), #divisions-container table td:nth-child(2) { width: 38%; white-space: normal; }
+
         .nested-table-row td:nth-child(2) { padding-left: 0 !important; }
         .nested-table-row .team-inline { margin-left: -15px; }
 
-        .highlight-col { font-weight: bold; color: #38003c; }
-        .division-header-container, .overall-header-container { display: flex; justify-content: space-between; align-items: flex-end; padding-bottom: 8px; margin-top: 0; text-align: left; }
-        .division-header-container h2, .overall-header-container h2 { margin: 0; border-bottom: none; padding-bottom: 0; font-size: 1.4rem; }
-        
-        #standings-table, #divisions-container table { table-layout: auto; }
-        #standings-table th:nth-child(1), #standings-table td:nth-child(1), #divisions-container table th:nth-child(1), #divisions-container table td:nth-child(1) { width: 8%; }
-        #standings-table th:nth-child(2), #standings-table td:nth-child(2), #divisions-container table th:nth-child(2), #divisions-container table td:nth-child(2) { width: 38%; white-space: normal; }
-        
         #draft-player-table { table-layout: fixed; width: 100%; }
         #draft-player-table tr:nth-child(2) th:nth-child(1), #draft-player-table td:nth-child(1) { width: 6%; }
         #draft-player-table tr:nth-child(2) th:nth-child(2), #draft-player-table td:nth-child(2) { width: 69%; white-space: normal; }
         #draft-player-table tr:nth-child(2) th:nth-child(3), #draft-player-table td:nth-child(3) { width: 25%; text-align: right; padding-right: 16px; }
-        
+
         #divisions-container .division-header-container { align-items: center; flex-wrap: wrap; gap: 8px; }
         #divisions-container .division-header-container h2 { font-size: 1.4rem; white-space: normal; line-height: 1.2; flex: 1; }
 
@@ -343,6 +370,7 @@
         .stat-card { background: #ffffff; color: #1a1a1a; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); transition: all 0.2s ease; }
         .stat-card-title { font-size: 1rem; font-weight: 700; color: #1a1a1a; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
         .stat-card-title:hover { color: #38003c; }
+        
         .chevron { color: #718096; font-size: 0.85rem; transition: transform 0.25s ease; display: inline-block; }
         .stat-card.expanded > .stat-card-title .chevron { transform: rotate(90deg); }
         .stat-card-body { margin-top: 10px; }
@@ -350,24 +378,29 @@
         .stat-player-wrapper { border-bottom: 1px solid #f0f0f0; }
         .stat-player-wrapper:last-child { border-bottom: none; }
         .stat-card.collapsed .stat-player-wrapper:nth-child(n+2) { display: none; }
+        
         .stat-player-row { display: flex; align-items: center; padding: 8px 0; cursor: pointer; transition: background-color 0.15s ease; border-radius: 4px; }
         .stat-player-row:hover { background-color: #fafafa; }
         .stat-player-wrapper.expanded .stat-player-row, .stat-player-wrapper.expanded .stat-player-row:hover { background-color: #ffffff !important; }
+
         .stat-rank { width: 24px; font-size: 0.85rem; color: #718096; font-weight: 600; padding-left: 4px; }
         .stat-player-info { flex-grow: 1; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.95rem; color: #1a1a1a; }
         .stat-player-icons { display: inline-flex; gap: 3px; align-items: center; }
         .stat-player-icons .team-icon { width: 16px; height: 16px; object-fit: contain; }
+
         .chevron-small { color: #a0aec0; font-size: 0.75rem; transition: transform 0.2s ease; margin-left: auto; margin-right: 12px; }
         .stat-player-wrapper.expanded .chevron-small { transform: rotate(90deg); }
-        .stat-value { padding: 4px 10px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; display: inline-block; min-width: 32px; text-align: center; }
         
+        .stat-value { padding: 4px 10px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; display: inline-block; min-width: 32px; text-align: center; }
         .nested-teams-container { display: none; background-color: #fcfcfc; padding: 8px 16px 10px 36px; border-radius: 6px; margin-bottom: 8px; }
         .stat-player-wrapper.expanded .nested-teams-container { display: block; }
+
         .nested-team-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; font-size: 0.85rem; border-bottom: 1px dashed #e2e8f0; }
         .nested-team-row:last-child { border-bottom: none; }
         .nested-team-name { display: flex; align-items: center; gap: 8px; color: #4a5568; font-weight: 500; }
         .nested-team-icon { width: 16px; height: 16px; object-fit: contain; }
 
+        /* Pill Styles */
         .pill-blue { background-color: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
         .pill-red { background-color: #fff5f5; color: #c53030; border: 1px solid #fed7d7; }
         .pill-green { background-color: #f0fff4; color: #276749; border: 1px solid #c6f6d5; }
@@ -379,14 +412,17 @@
         .fotmob-link-btn:hover { opacity: 0.85; }
 
         @media (max-width: 768px) {
-            body { padding-top: 180px; padding-left: 10px; padding-right: 10px; }
+            body { padding: 10px; }
             .container { padding: 12px; }
+            h1 { font-size: 1.3rem; }
+            .lion-logo { height: 45px; }
             th, td { padding: 10px 4px; font-size: 0.8rem; }
             h2, .plain-table-title, .overall-header-container h2 { font-size: 1.1rem; }
             .draft-title { font-size: 1rem; }
             .toggle-btn { padding: 4px 12px; font-size: 0.75rem; }
             #divisions-container .division-header-container h2 { font-size: 1.1rem; } 
             
+            /* Responsive Matches adjustments */
             .team-name-text { font-size: 0.85rem; }
             .team-owner { font-size: 0.65rem; }
             .match-score-block { font-size: 1.0rem; min-width: 45px; }
@@ -404,71 +440,21 @@
 </head>
 <body>
 
-<!-- Dynamic FotMob Style Header -->
-<header id="main-header" class="fotmob-header">
-    <div class="header-top">
-        <div class="header-icon">
-            <!-- Back Arrow SVG -->
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-        </div>
-        <div class="header-controls">
-            <button class="header-btn">
-                2026/27 
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-            </button>
-            <button class="header-btn" style="background: white; color: var(--fotmob-purple);">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none">
-                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                </svg>
-                Following
-            </button>
-        </div>
-    </div>
-    <div class="header-middle">
-        <img src="https://logos-world.net/wp-content/uploads/2023/08/Premier-League-New-Logo.png" alt="League Logo" id="header-logo">
-        <div class="header-titles">
-            <h1>La Liga de Los Presidentes</h1>
-            <span>England</span>
-        </div>
-    </div>
-    <div class="header-nav">
-        <a href="table.html" class="nav-item">Table</a>
-        <a href="fixtures.html" class="nav-item">Fixtures</a>
-        <a href="stats.html" class="nav-item">Stats</a>
-        <div class="nav-item dropdown">
-            Player Results ▾
-            <div class="dropdown-content">
-                <a href="hef.html">Hef</a>
-                <a href="jamey.html">Jamey</a>
-                <a href="jordan.html">Jordan</a>
-                <a href="nate.html">Nate</a>
-                <a href="wes.html">Wes</a>
-            </div>
-        </div>
-    </div>
-</header>
-
 <div class="container">
-    <!-- Matchday Card with Swipe functionality -->
-    <div id="today-matches-container"></div>
-    <div class="swipe-hint">
-        <span>← Swipe Back (Prev Day)</span>
-        <span>Swipe Right (Next Day) →</span>
+    <div class="header-container">
+        <h1>La Liga de Los Presidentes</h1>
+        <img src="https://logos-world.net/wp-content/uploads/2023/08/Premier-League-New-Logo.png" alt="Premier League Lion Logo" class="lion-logo">
     </div>
+
+    <!-- Matchday Card Container -->
+    <div id="today-matches-container"></div>
 
     <div id="status-indicator">Initializing 2026/2027 season data...</div>
 
     <div class="table-wrapper" style="margin-top: 0;">
         <table id="standings-table">
-            <thead>
-            </thead>
-            <tbody id="standings-body">
-            </tbody>
+            <thead></thead>
+            <tbody id="standings-body"></tbody>
         </table>
     </div>
 
@@ -479,12 +465,8 @@
 
     <h2>View Stats on FotMob</h2>
     <div class="fotmob-btn-container" style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <a href="https://www.fotmob.com/leagues/47/stats/premier-league/players" target="_blank" class="fotmob-link-btn">
-            Player Stats
-        </a>
-        <a href="https://www.fotmob.com/leagues/47/stats/premier-league/teams" target="_blank" class="fotmob-link-btn">
-            Team Stats
-        </a>
+        <a href="https://www.fotmob.com/leagues/47/stats/premier-league/players" target="_blank" class="fotmob-link-btn">Player Stats</a>
+        <a href="https://www.fotmob.com/leagues/47/stats/premier-league/teams" target="_blank" class="fotmob-link-btn">Team Stats</a>
     </div>
 
     <div class="table-wrapper">
@@ -504,8 +486,7 @@
                     <th>Diff</th>
                 </tr>
             </thead>
-            <tbody id="draft-rank-body">
-            </tbody>
+            <tbody id="draft-rank-body"></tbody>
         </table>
     </div>
 
@@ -528,31 +509,12 @@
                     <th style="text-align: right; padding-right: 16px;">Total Diff</th>
                 </tr>
             </thead>
-            <tbody id="draft-player-body">
-            </tbody>
+            <tbody id="draft-player-body"></tbody>
         </table>
     </div>
-
 </div>
 
 <script>
-    /* --- Scroll & Header Mechanics --- */
-    let lastScrollTop = 0;
-    const header = document.getElementById('main-header');
-    
-    window.addEventListener('scroll', function() {
-        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        if (scrollTop > lastScrollTop && scrollTop > 50) {
-            // Scrolling down
-            header.classList.add('shrunk');
-        } else if (scrollTop < lastScrollTop) {
-            // Scrolling up
-            header.classList.remove('shrunk');
-        }
-        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; 
-    });
-
-    /* --- Data Structures --- */
     const draftData = {
         "Hef": ["Arsenal", "Bournemouth", "Nottingham Forest", "Hull City"],
         "Jordan": ["Manchester City", "Brighton", "Brentford", "Ipswich Town"],
@@ -609,186 +571,91 @@
         "Cottage and Country Division": 'PTS'
     };
 
-    /* --- Matchday Navigation Mechanics --- */
-    let globalMatches = [];
-    let currentViewDate = new Date();
+    // --- SWIPE / MATCHDAY CARD GLOBALS ---
+    let allMatchesData = [];
+    let matchDates = []; 
+    let currentMatchDateIndex = -1;
 
-    function navigateMatchDay(direction) {
-        if (!globalMatches || globalMatches.length === 0) return;
+    function processMatchDates(matches) {
+        allMatchesData = matches || [];
+        const datesMap = new Map();
 
-        // Get unique sorted dates containing matches
-        const uniqueDates = [...new Set(globalMatches.map(m => new Date(m.utcDate).toDateString()))]
-            .map(dStr => new Date(dStr))
-            .sort((a, b) => a - b);
+        allMatchesData.forEach(match => {
+            if (!match.utcDate) return;
+            const mDate = new Date(match.utcDate);
+            // Group by local midnight timestamp
+            const midnight = new Date(mDate.getFullYear(), mDate.getMonth(), mDate.getDate()).getTime();
+            datesMap.set(midnight, true);
+        });
 
-        if (uniqueDates.length === 0) return;
+        matchDates = Array.from(datesMap.keys()).sort((a, b) => a - b);
 
-        let currentIndex = uniqueDates.findIndex(d => d.toDateString() === currentViewDate.toDateString());
-
-        if (currentIndex === -1) {
-            // Find the closest available matchday if current day has no matches
-            const ts = currentViewDate.getTime();
-            if (direction === 1) { // Next
-                const nextD = uniqueDates.find(d => d.getTime() > ts);
-                currentViewDate = nextD ? nextD : uniqueDates[uniqueDates.length - 1];
-            } else { // Previous
-                const prevDates = uniqueDates.filter(d => d.getTime() < ts);
-                currentViewDate = prevDates.length > 0 ? prevDates[prevDates.length - 1] : uniqueDates[0];
-            }
-        } else {
-            let nextIndex = currentIndex + direction;
-            if (nextIndex >= 0 && nextIndex < uniqueDates.length) {
-                currentViewDate = uniqueDates[nextIndex];
-            }
-        }
-        renderMatchesForDate(currentViewDate);
-    }
-
-    /* --- Swipe Logic Listener --- */
-    document.addEventListener('DOMContentLoaded', () => {
-        const matchContainer = document.getElementById('today-matches-container');
-        let touchstartX = 0;
-        let touchendX = 0;
-        
-        matchContainer.addEventListener('touchstart', e => {
-            touchstartX = e.changedTouches[0].screenX;
-        }, { passive: true });
-
-        matchContainer.addEventListener('touchend', e => {
-            touchendX = e.changedTouches[0].screenX;
-            handleSwipe();
-        }, { passive: true });
-
-        function handleSwipe() {
-            const swipeThreshold = 50; 
-            // Swiped Right -> Next Day
-            if (touchendX > touchstartX + swipeThreshold) {
-                navigateMatchDay(1); 
-            } 
-            // Swiped Back (Left) -> Prev Day
-            else if (touchendX < touchstartX - swipeThreshold) {
-                navigateMatchDay(-1);
+        if (currentMatchDateIndex === -1 && matchDates.length > 0) {
+            const now = new Date();
+            const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+            
+            const foundIdx = matchDates.indexOf(todayMidnight);
+            if (foundIdx !== -1) {
+                currentMatchDateIndex = foundIdx;
+            } else {
+                const nextIdx = matchDates.findIndex(t => t > todayMidnight);
+                currentMatchDateIndex = nextIdx !== -1 ? nextIdx : matchDates.length - 1;
             }
         }
-    });
-
-    /* --- Helper & Render Functions --- */
-    function initializePlayerStats() {
-        let stats = {};
-        for (let player in draftData) {
-            stats[player] = {
-                player: player, teams: draftData[player],
-                PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0,
-                goldenBoot: 0, goldenGloves: 0, ppm: 0, gpm: 0, gcpm: 0,
-                pvpWins: 0, pga: 0, ptsPga: 0
-            };
-        }
-        return stats;
     }
 
-    function initializeTeamStats() {
-        let stats = {};
-        for (let divName in divisionData) {
-            divisionData[divName].forEach(team => {
-                const owner = getOwnerOfTeam(team);
-                stats[team] = {
-                    team: team, division: divName, owner: owner || "Unassigned",
-                    PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0, PGA: 0, pvpWins: 0, ptsPga: 0,
-                    goldenGloves: 0
-                };
-            });
-        }
-        return stats;
-    }
-
-    function getOwnerOfTeam(teamName) {
-        for (let player in draftData) {
-            if (draftData[player].some(t => teamName.toLowerCase().includes(t.toLowerCase()) || t.toLowerCase().includes(teamName.toLowerCase()))) return player;
-        }
-        return null;
-    }
-
-    function findPlayerByTeam(teamName, playerStats) {
-        for (let player in playerStats) {
-            if (playerStats[player].teams.some(t => teamName.toLowerCase().includes(t.toLowerCase()) || t.toLowerCase().includes(teamName.toLowerCase()))) return player;
-        }
-        return null;
-    }
-
-    function findTeamKey(teamName, teamStats) {
-        for (let teamKey in teamStats) {
-            if (teamName.toLowerCase().includes(teamKey.toLowerCase()) || teamKey.toLowerCase().includes(teamName.toLowerCase())) return teamKey;
-        }
-        return null;
-    }
-
-    function getLogoByName(teamName) {
-        for (let key in teamLogos) {
-            if (teamName.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(teamName.toLowerCase())) return teamLogos[key];
-        }
-        return '';
-    }
-
-    function getShortTeamName(name) {
-        let n = name;
-        if (n.includes("Manchester City")) return "Man City";
-        if (n.includes("Manchester United")) return "Man United";
-        if (n.includes("Nottingham Forest")) return "Nottm Forest";
-        if (n.includes("Tottenham Hotspur") || n === "Tottenham") return "Tottenham";
-        if (n.includes("Leeds United")) return "Leeds";
-        if (n.includes("Hull City")) return "Hull";
-        if (n.includes("Ipswich Town")) return "Ipswich";
-        if (n.includes("Sunderland")) return "Sunderland";
-        return n.replace(" FC", "").replace(" & Hove Albion", "").replace("A.F.C. ", "").trim();
-    }
-
-    function renderMatchesForDate(targetDate) {
+    function renderMatchdayCard() {
         const container = document.getElementById('today-matches-container');
         if (!container) return;
 
-        if (!globalMatches || globalMatches.length === 0) {
-            container.innerHTML = '';
-            return;
-        }
-
-        const dateStr = targetDate.toDateString();
-        const dateMatches = globalMatches.filter(match => {
-            return new Date(match.utcDate).toDateString() === dateStr;
-        });
-
-        const dateOptions = { weekday: 'long', month: 'long', day: 'numeric' };
-        const formattedDate = targetDate.toLocaleDateString('en-US', dateOptions);
-        
-        let navArrows = `
-            <div class="nav-arrows">
-                <svg onclick="navigateMatchDay(-1)" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                <svg onclick="navigateMatchDay(1)" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-            </div>
-        `;
-
-        if (dateMatches.length === 0) {
+        if (matchDates.length === 0) {
+            const today = new Date();
+            const formattedDate = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
             container.innerHTML = `
                 <div class="today-card">
                     <div class="today-header">
-                        <div class="today-header-title">
+                        <div class="today-header-left">
                             <svg class="today-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                             <span class="today-header-text">${formattedDate}</span>
                         </div>
-                        ${navArrows}
                     </div>
-                    <div class="no-matches-today">No matches scheduled for this date</div>
-                </div>
-            `;
+                    <div class="no-matches-today">No matches scheduled for today</div>
+                </div>`;
             return;
         }
 
-        let fixturesHtml = dateMatches.map(match => {
+        const targetTime = matchDates[currentMatchDateIndex];
+        const targetDate = new Date(targetTime);
+        const today = new Date();
+        
+        const isTargetToday = targetDate.getFullYear() === today.getFullYear() &&
+                              targetDate.getMonth() === today.getMonth() &&
+                              targetDate.getDate() === today.getDate();
+
+        const dateOptions = { weekday: 'long', month: 'long', day: 'numeric' };
+        const formattedDate = targetDate.toLocaleDateString('en-US', dateOptions);
+
+        const dayMatches = allMatchesData.filter(match => {
+            const mDate = new Date(match.utcDate);
+            const isMatchOnTargetDay = mDate.getFullYear() === targetDate.getFullYear() &&
+                                       mDate.getMonth() === targetDate.getMonth() &&
+                                       mDate.getDate() === targetDate.getDate();
+            
+            return isMatchOnTargetDay || (isTargetToday && ['IN_PLAY', 'PAUSED'].includes(match.status));
+        });
+
+        const disablePrev = currentMatchDateIndex === 0;
+        const disableNext = currentMatchDateIndex === matchDates.length - 1;
+
+        let fixturesHtml = dayMatches.map(match => {
             const homeName = getShortTeamName(match.homeTeam.name);
             const awayName = getShortTeamName(match.awayTeam.name);
             const homeLogo = getLogoByName(match.homeTeam.name) || match.homeTeam.crest || '';
             const awayLogo = getLogoByName(match.awayTeam.name) || match.awayTeam.crest || '';
+            
             const homeOwner = getOwnerOfTeam(match.homeTeam.name) || 'Unassigned';
             const awayOwner = getOwnerOfTeam(match.awayTeam.name) || 'Unassigned';
+
             let statusHtml = '';
             let scoreHtml = '';
 
@@ -809,6 +676,7 @@
                 } else {
                     scoreHtml = `<div class="time-text">${timeStr}</div>`;
                 }
+                statusHtml = ``;
             }
 
             return `
@@ -835,539 +703,742 @@
             `;
         }).join('');
 
+        if (dayMatches.length === 0) {
+            fixturesHtml = `<div class="no-matches-today">No matches found for this date.</div>`;
+        }
+
         container.innerHTML = `
             <div class="today-card">
                 <div class="today-header">
-                    <div class="today-header-title">
+                    <div class="today-header-left">
                         <svg class="today-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                         <span class="today-header-text">${formattedDate}</span>
                     </div>
-                    ${navArrows}
+                    <div class="matchday-nav">
+                        <button class="nav-btn ${disablePrev ? 'disabled' : ''}" onclick="changeMatchday(-1)" ${disablePrev ? 'disabled' : ''}>❮</button>
+                        <button class="nav-btn ${disableNext ? 'disabled' : ''}" onclick="changeMatchday(1)" ${disableNext ? 'disabled' : ''}>❯</button>
+                    </div>
                 </div>
                 ${fixturesHtml}
             </div>
         `;
     }
 
-    /* Core Data Processing Function (Retained as is for logic) */
-    async function fetchAndUpdateStandings() {
-        const ind = document.getElementById('status-indicator');
-        ind.textContent = "Loading 2026/27 season data...";
-        
-        try {
-            const url = 'https://raw.githubusercontent.com/hef-x/EPL-Fantasy/main/data/standings_2026.json';
-            const response = await fetch(url, { cache: 'no-store' });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    // Exposed for Chevron Clicks
+    window.changeMatchday = function(direction) {
+        if (direction === -1 && currentMatchDateIndex > 0) {
+            currentMatchDateIndex--;
+            renderMatchdayCard();
+        } else if (direction === 1 && currentMatchDateIndex < matchDates.length - 1) {
+            currentMatchDateIndex++;
+            renderMatchdayCard();
+        }
+    };
+
+    // Setup Swipe Listeners
+    function setupSwipeListeners() {
+        const container = document.getElementById('today-matches-container');
+        let touchstartX = 0;
+        let touchendX = 0;
+
+        container.addEventListener('touchstart', e => {
+            touchstartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        container.addEventListener('touchend', e => {
+            touchendX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, { passive: true });
+
+        function handleSwipe() {
+            const threshold = 50; // Minimum pixel drag to count as swipe
             
+            if (touchendX > touchstartX + threshold) {
+                // Swiped right -> Next Day (Per user request mapping)
+                changeMatchday(1);
+            } else if (touchendX < touchstartX - threshold) {
+                // Swiped left/back -> Previous Day
+                changeMatchday(-1);
+            }
+        }
+    }
+
+    function initializePlayerStats() {
+        let stats = {};
+        for (let player in draftData) {
+            stats[player] = {
+                player: player,
+                teams: draftData[player],
+                PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0,
+                goldenBoot: 0, goldenGloves: 0, ppm: 0, gpm: 0, gcpm: 0,
+                pvpWins: 0, pga: 0, ptsPga: 0
+            };
+        }
+        return stats;
+    }
+
+    function initializeTeamStats() {
+        let stats = {};
+        for (let divName in divisionData) {
+            divisionData[divName].forEach(team => {
+                const owner = getOwnerOfTeam(team);
+                stats[team] = {
+                    team: team,
+                    division: divName,
+                    owner: owner || "Unassigned",
+                    PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0, PGA: 0, pvpWins: 0, ptsPga: 0,
+                    goldenGloves: 0
+                };
+            });
+        }
+        return stats;
+    }
+
+    function getOwnerOfTeam(teamName) {
+        for (let player in draftData) {
+            if (draftData[player].some(t => teamName.toLowerCase().includes(t.toLowerCase()) || t.toLowerCase().includes(teamName.toLowerCase()))) {
+                return player;
+            }
+        }
+        return null;
+    }
+
+    function findPlayerByTeam(teamName, playerStats) {
+        for (let player in playerStats) {
+            if (playerStats[player].teams.some(t => teamName.toLowerCase().includes(t.toLowerCase()) || t.toLowerCase().includes(teamName.toLowerCase()))) {
+                return player;
+            }
+        }
+        return null;
+    }
+
+    function findTeamKey(teamName, teamStats) {
+        for (let teamKey in teamStats) {
+            if (teamName.toLowerCase().includes(teamKey.toLowerCase()) || teamKey.toLowerCase().includes(teamName.toLowerCase())) {
+                return teamKey;
+            }
+        }
+        return null;
+    }
+
+    function getLogoByName(teamName) {
+        for (let key in teamLogos) {
+            if (teamName.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(teamName.toLowerCase())) {
+                return teamLogos[key];
+            }
+        }
+        return '';
+    }
+
+    function getShortTeamName(name) {
+        let n = name;
+        if (n.includes("Manchester City")) return "Man City";
+        if (n.includes("Manchester United")) return "Man United";
+        if (n.includes("Nottingham Forest")) return "Nottm Forest";
+        if (n.includes("Tottenham Hotspur") || n === "Tottenham") return "Tottenham";
+        if (n.includes("Leeds United")) return "Leeds";
+        if (n.includes("Hull City")) return "Hull";
+        if (n.includes("Ipswich Town")) return "Ipswich";
+        if (n.includes("Sunderland")) return "Sunderland"; 
+        return n.replace(" FC", "").replace(" & Hove Albion", "").replace("A.F.C. ", "").trim();
+    }
+
+    function toggleNestedTableTRs(rowEl, targetClass) {
+        rowEl.classList.toggle('expanded');
+        document.querySelectorAll(`.${targetClass}`).forEach(el => {
+            el.classList.toggle('expanded');
+        });
+    }
+
+    function setOverallMode(mode) {
+        overallMode = mode;
+        if (cachedPlayerStats && cachedTeamStats) renderPrimaryTable(cachedPlayerStats, cachedTeamStats);
+    }
+
+    function toggleDivisionMode(divName, mode) {
+        divisionModes[divName] = mode;
+        if (cachedTeamStats) renderDivisions(cachedTeamStats);
+    }
+
+    function renderPrimaryTable(playerStatsObj, teamStatsObj) {
+        let playerStatsArray = Object.values(playerStatsObj);
+        
+        if (overallMode === 'PTS') {
+            playerStatsArray.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
+        } else {
+            playerStatsArray.sort((a, b) => b.ptsPga - a.ptsPga || b.pga - a.pga);
+        }
+
+        const primaryTable = document.getElementById('standings-table');
+        
+        let theadHtml = `
+            <tr class="title-row">
+                <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
+                    <div class="overall-header-container">
+                        <h2>Overall Standings</h2>
+                        <div class="toggle-switch">
+                            <button class="toggle-btn ${overallMode === 'PTS' ? 'active' : ''}" onclick="setOverallMode('PTS')">PTS</button>
+                            <button class="toggle-btn ${overallMode === 'PGA' ? 'active' : ''}" onclick="setOverallMode('PGA')">PGA</button>
+                        </div>
+                    </div>
+                </th>
+            </tr>
+        `;
+
+        if (overallMode === 'PTS') {
+            theadHtml += `<tr><th>#</th><th class="text-left">Player</th><th>PL</th><th>W</th><th>D</th><th>L</th><th>+/-</th><th>GD</th><th>PTS</th></tr>`;
+        } else {
+            theadHtml += `<tr><th>#</th><th class="text-left">Player</th><th>PTS</th><th>PvP Wins</th><th>PGA</th><th>PTS+PGA</th></tr>`;
+        }
+        primaryTable.querySelector('thead').innerHTML = theadHtml;
+
+        const primaryTbody = document.getElementById('standings-body');
+        primaryTbody.innerHTML = '';
+
+        playerStatsArray.forEach((p, index) => {
+            const targetClass = `nested-overall-${index}`;
+            const tr = document.createElement('tr');
+            tr.className = 'expandable-row';
+            tr.onclick = function() { toggleNestedTableTRs(this, targetClass); };
+
+            const iconsHtml = p.teams.map(t => teamLogos[t] ? `<img src="${teamLogos[t]}" class="team-icon" alt="${t} crest">` : '').join('');
+            
+            const playerCell = `
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    ${p.player} <span class="table-chevron">❯</span>
+                </div>
+                <div class="icons-container">${iconsHtml}</div>
+            `;
+
+            if (overallMode === 'PTS') {
+                tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${p.PL}</td><td>${p.W}</td><td>${p.D}</td><td>${p.L}</td><td>${p.GF}-${p.GA}</td><td>${p.GD > 0 ? '+' + p.GD : p.GD}</td><td><strong>${p.PTS}</strong></td>`;
+            } else {
+                tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${p.PTS}</td><td>${p.pvpWins}</td><td>${p.pga > 0 ? '+' + p.pga : p.pga}</td><td class="highlight-col">${p.ptsPga}</td>`;
+            }
+            primaryTbody.appendChild(tr);
+
+            let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
+            if (overallMode === 'PTS') {
+                playerTeams.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
+            } else {
+                playerTeams.sort((a, b) => b.ptsPga - a.ptsPga || b.PGA - a.PGA);
+            }
+
+            playerTeams.forEach(t => {
+                let displayName = getShortTeamName(t.team);
+
+                const teamNameCell = `
+                    <div class="team-inline" style="padding-left: 10px;">
+                        ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="${t.team}">` : ''}
+                        ${displayName}
+                    </div>
+                `;
+
+                const nestedTr = document.createElement('tr');
+                nestedTr.className = `nested-table-row ${targetClass}`;
+
+                if (overallMode === 'PTS') {
+                    nestedTr.innerHTML = `
+                        <td></td>
+                        <td class="text-left">${teamNameCell}</td>
+                        <td>${t.PL}</td>
+                        <td>${t.W}</td>
+                        <td>${t.D}</td>
+                        <td>${t.L}</td>
+                        <td>${t.GF}-${t.GA}</td>
+                        <td>${t.GD > 0 ? '+'+t.GD : t.GD}</td>
+                        <td><strong>${t.PTS}</strong></td>
+                    `;
+                } else {
+                    nestedTr.innerHTML = `
+                        <td></td>
+                        <td class="text-left">${teamNameCell}</td>
+                        <td>${t.PTS}</td>
+                        <td>${t.pvpWins}</td>
+                        <td>${t.PGA > 0 ? '+'+t.PGA : t.PGA}</td>
+                        <td><strong>${t.ptsPga}</strong></td>
+                    `;
+                }
+                primaryTbody.appendChild(nestedTr);
+            });
+        });
+    }
+
+    function renderDivisions(teamStatsObj) {
+        const container = document.getElementById('divisions-container');
+        container.innerHTML = '';
+
+        for (let divName in divisionData) {
+            const mode = divisionModes[divName];
+            const teamsInDiv = divisionData[divName].map(t => teamStatsObj[t]).filter(Boolean);
+
+            if (mode === 'PTS') teamsInDiv.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
+            else teamsInDiv.sort((a, b) => b.ptsPga - a.ptsPga || b.PGA - a.PGA);
+
+            let html = `<div class="table-wrapper"><table><thead>
+                <tr class="title-row">
+                    <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
+                        <div class="division-header-container">
+                            <h2>${divName}</h2>
+                            <div class="toggle-switch">
+                                <button class="toggle-btn ${mode === 'PTS' ? 'active' : ''}" onclick="toggleDivisionMode('${divName}', 'PTS')">PTS</button>
+                                <button class="toggle-btn ${mode === 'PGA' ? 'active' : ''}" onclick="toggleDivisionMode('${divName}', 'PGA')">PGA</button>
+                            </div>
+                        </div>
+                    </th>
+                </tr>`;
+
+            if (mode === 'PTS') html += `<tr><th>#</th><th class="text-left">Team</th><th>PL</th><th>W</th><th>D</th><th>L</th><th>+/-</th><th>GD</th><th>PTS</th></tr>`;
+            else html += `<tr><th>#</th><th class="text-left">Team</th><th>PTS</th><th>PvP Wins</th><th>PGA</th><th>PTS+PGA</th></tr>`;
+
+            html += `</thead><tbody>`;
+
+            teamsInDiv.forEach((t, idx) => {
+                let displayName = getShortTeamName(t.team);
+                
+                const teamCellHTML = `<div class="team-inline">${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="crest">` : ''}<div style="line-height: 1.2;"><div style="font-weight: 600; color: #1a1a1a;">${displayName}</div><div style="font-size: 0.70rem; color: #888;">${t.owner}</div></div></div>`;
+
+                if (mode === 'PTS') {
+                    html += `<tr><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PL}</td><td>${t.W}</td><td>${t.D}</td><td>${t.L}</td><td>${t.GF}-${t.GA}</td><td>${t.GD > 0 ? '+' + t.GD : t.GD}</td><td><strong>${t.PTS}</strong></td></tr>`;
+                } else {
+                    html += `<tr><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PTS}</td><td>${t.pvpWins}</td><td>${t.PGA > 0 ? '+' + t.PGA : t.PGA}</td><td class="highlight-col">${t.ptsPga}</td></tr>`;
+                }
+            });
+
+            html += `</tbody></table></div>`;
+            container.innerHTML += html;
+        }
+    }
+
+    function toggleCard(titleEl) {
+        const card = titleEl.closest('.stat-card');
+        if (card.classList.contains('collapsed')) {
+            card.classList.remove('collapsed');
+            card.classList.add('expanded');
+        } else {
+            card.classList.remove('expanded');
+            card.classList.add('collapsed');
+        }
+    }
+
+    function toggleNestedPlayer(playerRowEl) {
+        const wrapper = playerRowEl.closest('.stat-player-wrapper');
+        wrapper.classList.toggle('expanded');
+    }
+
+    function renderSeasonAwards(playerStatsObj, teamStatsObj) {
+        const container = document.getElementById('season-awards-container');
+        container.innerHTML = '';
+        const players = Object.values(playerStatsObj);
+
+        function buildAwardCard(config) {
+            const card = document.createElement('div');
+            card.className = 'stat-card collapsed';
+
+            let html = `
+                <div class="stat-card-title" onclick="toggleCard(this)">
+                    <span>${config.title}</span>
+                    <span class="chevron">❯</span>
+                </div>
+                <div class="stat-card-body">
+            `;
+
+            config.players.forEach((p, idx) => {
+                const iconsHtml = p.teams.map(t => teamLogos[t] ? `<img src="${teamLogos[t]}" class="team-icon" title="${t}" alt="${t}">` : '').join('');
+
+                let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
+                playerTeams.sort((a, b) => (config.teamRaw(b) - config.teamRaw(a)) * (config.sortDir || 1));
+
+                let teamsHtml = '';
+                playerTeams.forEach(t => {
+                    let displayName = getShortTeamName(t.team);
+
+                    teamsHtml += `
+                        <div class="nested-team-row">
+                            <div class="nested-team-name">
+                                ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="nested-team-icon" alt="${t.team}">` : ''}
+                                ${displayName}
+                            </div>
+                            <div class="stat-value ${config.pillClass}" style="transform: scale(0.9); opacity: 0.9;">
+                                ${config.teamVal(t)}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                    <div class="stat-player-wrapper">
+                        <div class="stat-player-row" onclick="toggleNestedPlayer(this)">
+                            <div class="stat-rank">${idx + 1}</div>
+                            <div class="stat-player-info">
+                                <span>${p.player}</span>
+                                <div class="stat-player-icons">${iconsHtml}</div>
+                            </div>
+                            <div class="chevron-small">❯</div>
+                            <div class="stat-value ${config.pillClass}">${config.playerVal(p)}</div>
+                        </div>
+                        <div class="nested-teams-container">
+                            ${teamsHtml}
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            card.innerHTML = html;
+            return card;
+        }
+
+        const awardConfigs = [
+            {
+                title: "Golden Boot",
+                players: [...players].sort((a,b) => b.goldenBoot - a.goldenBoot || b.PTS - a.PTS),
+                playerVal: p => p.goldenBoot, teamVal: t => t.GF, teamRaw: t => t.GF,
+                pillClass: "pill-green", sortDir: 1
+            },
+            {
+                title: "Golden Gloves (Clean Sheets)",
+                players: [...players].sort((a,b) => b.goldenGloves - a.goldenGloves || b.PTS - a.PTS),
+                playerVal: p => p.goldenGloves, teamVal: t => t.goldenGloves, teamRaw: t => t.goldenGloves,
+                pillClass: "pill-blue", sortDir: 1
+            },
+            {
+                title: "PTS per match",
+                players: [...players].sort((a,b) => b.ppm - a.ppm || b.PTS - a.PTS),
+                playerVal: p => p.ppm.toFixed(2), teamVal: t => (t.PL > 0 ? (t.PTS / t.PL) : 0).toFixed(2), teamRaw: t => (t.PL > 0 ? (t.PTS / t.PL) : 0),
+                pillClass: "pill-purple", sortDir: 1
+            },
+            {
+                title: "Goals per match",
+                players: [...players].sort((a,b) => b.gpm - a.gpm || b.PTS - a.PTS),
+                playerVal: p => p.gpm.toFixed(2), teamVal: t => (t.PL > 0 ? (t.GF / t.PL) : 0).toFixed(2), teamRaw: t => (t.PL > 0 ? (t.GF / t.PL) : 0),
+                pillClass: "pill-blue", sortDir: 1
+            },
+            {
+                title: "Goals conceded per match",
+                players: [...players].sort((a,b) => a.gcpm - b.gcpm || b.PTS - a.PTS),
+                playerVal: p => p.gcpm.toFixed(2), teamVal: t => (t.PL > 0 ? (t.GA / t.PL) : 0).toFixed(2), teamRaw: t => (t.PL > 0 ? (t.GA / t.PL) : 0),
+                pillClass: "pill-red", sortDir: -1
+            },
+            {
+                title: "Goal difference",
+                players: [...players].sort((a,b) => b.GD - a.GD || b.PTS - a.PTS),
+                playerVal: p => (p.GD > 0 ? '+' + p.GD : p.GD), teamVal: t => (t.GD > 0 ? '+' + t.GD : t.GD), teamRaw: t => t.GD,
+                pillClass: "pill-gray", sortDir: 1
+            },
+            {
+                title: "PvP wins",
+                players: [...players].sort((a,b) => b.pvpWins - a.pvpWins || b.PTS - a.PTS),
+                playerVal: p => p.pvpWins, teamVal: t => t.pvpWins, teamRaw: t => t.pvpWins,
+                pillClass: "pill-purple", sortDir: 1
+            },
+            {
+                title: "PGA",
+                players: [...players].sort((a,b) => b.pga - a.pga || b.PTS - a.PTS),
+                playerVal: p => (p.pga > 0 ? '+' + p.pga : p.pga), teamVal: t => (t.PGA > 0 ? '+' + t.PGA : t.PGA), teamRaw: t => t.PGA,
+                pillClass: "pill-green", sortDir: 1
+            },
+            {
+                title: "PTS + PGA",
+                players: [...players].sort((a,b) => b.ptsPga - a.ptsPga || b.PTS - a.PTS),
+                playerVal: p => p.ptsPga, teamVal: t => t.ptsPga, teamRaw: t => t.ptsPga,
+                pillClass: "pill-blue", sortDir: 1
+            }
+        ];
+
+        awardConfigs.forEach(config => container.appendChild(buildAwardCard(config)));
+    }
+
+    function renderDraftRankTable(teamStatsObj) {
+        const teamsArray = Object.values(teamStatsObj).sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
+        const tbody = document.getElementById('draft-rank-body');
+        tbody.innerHTML = '';
+
+        teamsArray.forEach((t, idx) => {
+            const rank = idx + 1;
+            const pick = draftPicks[t.team] || rank;
+            const diff = pick - rank;
+
+            let pillClass = 'pill-gray';
+            let formattedDiff = '0';
+            if (diff > 0) { pillClass = 'pill-green'; formattedDiff = `+${diff}`; }
+            else if (diff < 0) { pillClass = 'pill-red'; formattedDiff = `${diff}`; }
+
+            let displayName = getShortTeamName(t.team);
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td class="fotmob-rank">${rank}</td>
+                <td class="text-left">
+                    <div class="team-inline">
+                        ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="crest">` : ''}
+                        <div style="line-height: 1.2;">
+                            <div style="font-weight: 600; color: #1a1a1a;">${displayName}</div>
+                            <div style="font-size: 0.75rem; color: #888;">${t.owner}</div>
+                        </div>
+                    </div>
+                </td>
+                <td><strong>${t.PTS}</strong></td>
+                <td>${t.GD > 0 ? '+' + t.GD : t.GD}</td>
+                <td>${pick}</td>
+                <td><span class="stat-value ${pillClass}">${formattedDiff}</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderPlayerDraftValueTable(playerStatsObj, teamStatsObj) {
+        const teamsArray = Object.values(teamStatsObj).sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
+        const teamRankMap = {};
+        teamsArray.forEach((t, idx) => { teamRankMap[t.team] = idx + 1; });
+
+        const players = Object.values(playerStatsObj);
+        players.forEach(p => {
+            let totalDiff = 0;
+            p.teams.forEach(teamName => {
+                const rank = teamRankMap[teamName] || 20; 
+                const pick = draftPicks[teamName] || 20;
+                totalDiff += (pick - rank);
+            });
+            p.totalDraftDiff = totalDiff;
+        });
+
+        players.sort((a, b) => b.totalDraftDiff - a.totalDraftDiff);
+        const tbody = document.getElementById('draft-player-body');
+        tbody.innerHTML = '';
+
+        players.forEach((p, idx) => {
+            const targetClass = `nested-draft-${idx}`;
+            const tr = document.createElement('tr');
+            tr.className = 'expandable-row';
+            tr.onclick = function() { toggleNestedTableTRs(this, targetClass); };
+
+            const iconsHtml = p.teams.map(t => teamLogos[t] ? `<img src="${teamLogos[t]}" class="team-icon" alt="crest">` : '').join('');
+            
+            const playerCell = `
+                <div style="display: flex; align-items: center; gap: 4px;">
+                    ${p.player} <span class="table-chevron">❯</span>
+                </div>
+                <div class="icons-container">${iconsHtml}</div>
+            `;
+
+            let overallPillClass = 'pill-gray';
+            let overallFormattedDiff = '0';
+            if (p.totalDraftDiff > 0) { overallPillClass = 'pill-green'; overallFormattedDiff = `+${p.totalDraftDiff}`; }
+            else if (p.totalDraftDiff < 0) { overallPillClass = 'pill-red'; overallFormattedDiff = `${p.totalDraftDiff}`; }
+
+            tr.innerHTML = `
+                <td class="fotmob-rank">${idx + 1}</td>
+                <td class="fotmob-player">${playerCell}</td>
+                <td><span class="stat-value ${overallPillClass}">${overallFormattedDiff}</span></td>
+            `;
+            tbody.appendChild(tr);
+
+            let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
+            
+            playerTeams.sort((a, b) => {
+                const diffA = (draftPicks[a.team] || 20) - (teamRankMap[a.team] || 20);
+                const diffB = (draftPicks[b.team] || 20) - (teamRankMap[b.team] || 20);
+                return diffB - diffA; 
+            });
+
+            playerTeams.forEach(t => {
+                const rank = teamRankMap[t.team] || 20;
+                const pick = draftPicks[t.team] || 20;
+                const diff = pick - rank;
+                
+                let pillClass = 'pill-gray';
+                let formattedDiff = '0';
+                if (diff > 0) { pillClass = 'pill-green'; formattedDiff = `+${diff}`; }
+                else if (diff < 0) { pillClass = 'pill-red'; formattedDiff = `${diff}`; }
+
+                let displayName = getShortTeamName(t.team);
+
+                const nestedTr = document.createElement('tr');
+                nestedTr.className = `nested-table-row ${targetClass}`;
+
+                nestedTr.innerHTML = `
+                    <td></td>
+                    <td class="text-left">
+                        <div style="display: flex; align-items: center; gap: 8px; padding-left: 10px; flex-wrap: wrap;">
+                            ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="${t.team}">` : ''}
+                            <span>${displayName}</span>
+                            <span style="color:#888; font-size: 0.75rem; white-space: nowrap;">(Pick: ${pick}, Rank: ${rank})</span>
+                        </div>
+                    </td>
+                    <td><span class="stat-value ${pillClass}" style="transform: scale(0.9); opacity: 0.9;">${formattedDiff}</span></td>
+                `;
+                tbody.appendChild(nestedTr);
+            });
+        });
+    }
+
+    async function refreshMatchdayCard() {
+        try {
+            const response = await fetch('/api/standings');
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
             
             if (data.matches) {
-                globalMatches = data.matches;
-                renderMatchesForDate(currentViewDate);
+                // Update dates silently without overriding the currently selected swipe index
+                processMatchDates(data.matches); 
+                renderMatchdayCard(); 
             }
-            
-            const rawStandings = data.standings && data.standings[0]?.table ? data.standings[0].table : [];
-            let pStats = initializePlayerStats();
-            let tStats = initializeTeamStats();
-            
-            // Process basic stats
-            rawStandings.forEach(row => {
-                const teamName = row.team.name;
-                const p = findPlayerByTeam(teamName, pStats);
-                const t = findTeamKey(teamName, tStats);
-                
-                const pl = row.playedGames || 0;
-                const w = row.won || 0;
-                const d = row.draw || 0;
-                const l = row.lost || 0;
-                const gf = row.goalsFor || 0;
-                const ga = row.goalsAgainst || 0;
-                const gd = row.goalDifference || (gf - ga);
-                const pts = row.points || 0;
-                
-                if (p) {
-                    pStats[p].PL += pl; pStats[p].W += w; pStats[p].D += d; pStats[p].L += l;
-                    pStats[p].GF += gf; pStats[p].GA += ga; pStats[p].GD += gd; pStats[p].PTS += pts;
-                }
-                if (t) {
-                    tStats[t].PL = pl; tStats[t].W = w; tStats[t].D = d; tStats[t].L = l;
-                    tStats[t].GF = gf; tStats[t].GA = ga; tStats[t].GD = gd; tStats[t].PTS = pts;
-                }
-            });
-            
-            // Process extra data if available (Golden Boot/Gloves)
-            if (data.playerStats) {
-                for (let player in pStats) {
-                    if (data.playerStats[player]) {
-                        pStats[player].goldenBoot = data.playerStats[player].goldenBoot || 0;
-                        pStats[player].goldenGloves = data.playerStats[player].goldenGloves || 0;
-                        pStats[player].pvpWins = data.playerStats[player].pvpWins || 0;
-                    }
-                }
-            }
-            
-            for (let player in pStats) {
-                pStats[player].ppm = pStats[player].PL > 0 ? (pStats[player].PTS / pStats[player].PL).toFixed(2) : "0.00";
-                pStats[player].gpm = pStats[player].PL > 0 ? (pStats[player].GF / pStats[player].PL).toFixed(2) : "0.00";
-                pStats[player].gcpm = pStats[player].PL > 0 ? (pStats[player].GA / pStats[player].PL).toFixed(2) : "0.00";
-            }
-            
-            cachedPlayerStats = pStats;
-            cachedTeamStats = tStats;
-            
-            ind.textContent = "Season 2026/2027 live data loaded.";
-            ind.style.backgroundColor = "#e6ffed";
-            ind.style.color = "#008a38";
-            
-            renderOverallStandings();
-            renderDivisions();
-            renderDraftTables();
-            renderSeasonAwards();
-            
-        } catch (e) {
-            console.error("Fetch error:", e);
-            ind.textContent = "Error loading data. Showing empty tables.";
-            ind.style.backgroundColor = "#ffebeb";
-            ind.style.color = "#d92121";
-            
-            cachedPlayerStats = initializePlayerStats();
-            cachedTeamStats = initializeTeamStats();
-            renderOverallStandings();
-            renderDivisions();
-            renderDraftTables();
-            renderSeasonAwards();
+        } catch (error) {
+            console.error("Error refreshing matchday card:", error);
         }
     }
 
-    // Toggle Overall View
-    window.toggleOverallMode = function(mode) {
-        overallMode = mode;
-        const btnContainer = document.getElementById('overall-toggle');
-        if (btnContainer) {
-            btnContainer.querySelectorAll('.toggle-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.getAttribute('onclick').includes(`'${mode}'`)) {
-                    btn.classList.add('active');
-                }
-            });
-        }
-        renderOverallStandings();
-    };
+    async function fetchAndUpdateStandings() {
+        let playerStats = initializePlayerStats();
+        let teamStats = initializeTeamStats();
+        const statusEl = document.getElementById('status-indicator');
 
-    function renderOverallStandings() {
-        const thead = document.querySelector('#standings-table thead');
-        const tbody = document.getElementById('standings-body');
-        
-        let pArray = Object.values(cachedPlayerStats);
-        
-        if (overallMode === 'PTS') {
-            thead.innerHTML = `
-                <tr class="title-row">
-                    <th colspan="7" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
-                        <div class="overall-header-container">
-                            <h2 class="plain-table-title" style="margin:0; border:none; padding:0;">Overall Standings</h2>
-                            <div class="toggle-switch" id="overall-toggle">
-                                <button class="toggle-btn active" onclick="toggleOverallMode('PTS')">PTS</button>
-                                <button class="toggle-btn" onclick="toggleOverallMode('PVP')">PVP</button>
-                            </div>
-                        </div>
-                    </th>
-                </tr>
-                <tr><th>#</th><th class="text-left">Player</th><th>PL</th><th>GD</th><th>PTS</th><th style="color:#00ff87;">Boot</th><th style="color:#00ff87;">Glv</th></tr>
-            `;
-            pArray.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
-        } else {
-            thead.innerHTML = `
-                <tr class="title-row">
-                    <th colspan="7" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
-                        <div class="overall-header-container">
-                            <h2 class="plain-table-title" style="margin:0; border:none; padding:0;">Overall Standings</h2>
-                            <div class="toggle-switch" id="overall-toggle">
-                                <button class="toggle-btn" onclick="toggleOverallMode('PTS')">PTS</button>
-                                <button class="toggle-btn active" onclick="toggleOverallMode('PVP')">PVP</button>
-                            </div>
-                        </div>
-                    </th>
-                </tr>
-                <tr><th>#</th><th class="text-left">Player</th><th>W</th><th>D</th><th>L</th><th>Win%</th><th>PVP W</th></tr>
-            `;
-            pArray.sort((a, b) => b.pvpWins - a.pvpWins || b.PTS - a.PTS);
-        }
-        
-        let html = '';
-        pArray.forEach((p, index) => {
-            let rowId = `overall-p-${index}`;
-            let tList = p.teams.map(t => {
-                let logo = getLogoByName(t);
-                return logo ? `<img src="${logo}" class="team-icon" title="${t}" alt="${t}">` : `<span style="font-size:10px;">${t}</span>`;
-            }).join('');
-            
-            if (overallMode === 'PTS') {
-                html += `
-                    <tr class="expandable-row" onclick="toggleNestedTable('${rowId}')">
-                        <td class="fotmob-rank">${index + 1}</td>
-                        <td class="fotmob-player">
-                            ${p.player} <span class="table-chevron">▶</span>
-                            <div class="icons-container">${tList}</div>
-                        </td>
-                        <td>${p.PL}</td><td>${p.GD > 0 ? '+'+p.GD : p.GD}</td><td class="highlight-col">${p.PTS}</td>
-                        <td style="color:#00ff87; font-weight:bold;">${p.goldenBoot || '-'}</td><td style="color:#00ff87; font-weight:bold;">${p.goldenGloves || '-'}</td>
-                    </tr>
-                `;
-            } else {
-                let winPct = p.PL > 0 ? Math.round((p.W / p.PL) * 100) : 0;
-                html += `
-                    <tr class="expandable-row" onclick="toggleNestedTable('${rowId}')">
-                        <td class="fotmob-rank">${index + 1}</td>
-                        <td class="fotmob-player">
-                            ${p.player} <span class="table-chevron">▶</span>
-                            <div class="icons-container">${tList}</div>
-                        </td>
-                        <td>${p.W}</td><td>${p.D}</td><td>${p.L}</td><td>${winPct}%</td><td class="highlight-col">${p.pvpWins}</td>
-                    </tr>
-                `;
-            }
+        renderPrimaryTable(playerStats, teamStats);
+        renderDivisions(teamStats);
+        renderSeasonAwards(playerStats, teamStats);
+        renderDraftRankTable(teamStats);
+        renderPlayerDraftValueTable(playerStats, teamStats);
 
-            // Teams detail row
-            let teamsForPlayer = [];
-            for (let teamKey in cachedTeamStats) {
-                if (cachedTeamStats[teamKey].owner === p.player) {
-                    teamsForPlayer.push(cachedTeamStats[teamKey]);
-                }
-            }
-            if (overallMode === 'PTS') {
-                teamsForPlayer.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD);
-            } else {
-                teamsForPlayer.sort((a, b) => b.pvpWins - a.pvpWins || b.PTS - a.PTS);
-            }
+        const cacheKey = 'pl_match_data';
+        const cacheTimeKey = 'pl_match_data_time';
+        const cacheDuration = 60 * 1000;
 
-            let nestedHtml = '';
-            teamsForPlayer.forEach(t => {
-                let sName = getShortTeamName(t.team);
-                let logo = getLogoByName(t.team);
-                let nameHtml = logo ? `<div class="team-inline"><img src="${logo}" class="team-icon" alt="">${sName}</div>` : sName;
-                if (overallMode === 'PTS') {
-                    nestedHtml += `
-                        <tr class="nested-table-row ${rowId}">
-                            <td></td>
-                            <td class="text-left">${nameHtml}</td>
-                            <td>${t.PL}</td><td>${t.GD > 0 ? '+'+t.GD : t.GD}</td><td class="highlight-col" style="font-weight:600; color:#333;">${t.PTS}</td>
-                            <td>-</td><td>-</td>
-                        </tr>
-                    `;
-                } else {
-                    let tWinPct = t.PL > 0 ? Math.round((t.W / t.PL) * 100) : 0;
-                    nestedHtml += `
-                        <tr class="nested-table-row ${rowId}">
-                            <td></td>
-                            <td class="text-left">${nameHtml}</td>
-                            <td>${t.W}</td><td>${t.D}</td><td>${t.L}</td><td>${tWinPct}%</td><td class="highlight-col" style="font-weight:600; color:#333;">${t.pvpWins}</td>
-                        </tr>
-                    `;
-                }
-            });
-            html += nestedHtml;
-        });
-        tbody.innerHTML = html;
-    }
-
-    // Toggle Nested Tables
-    window.toggleNestedTable = function(rowId) {
-        let expanderRow = document.querySelector(`tr[onclick="toggleNestedTable('${rowId}')"]`);
-        if (expanderRow) expanderRow.classList.toggle('expanded');
-        let rows = document.querySelectorAll(`.${rowId}`);
-        rows.forEach(r => r.classList.toggle('expanded'));
-    };
-
-    window.toggleDivisionMode = function(divName, mode) {
-        divisionModes[divName] = mode;
-        renderDivisions();
-    };
-
-    function renderDivisions() {
-        const container = document.getElementById('divisions-container');
-        let html = '';
-        let divIndex = 0;
-        
-        for (let divName in divisionData) {
-            let mode = divisionModes[divName] || 'PTS';
-            let tArray = [];
-            divisionData[divName].forEach(tName => {
-                let tk = findTeamKey(tName, cachedTeamStats);
-                if (tk) tArray.push(cachedTeamStats[tk]);
-            });
-            
-            if (mode === 'PTS') {
-                tArray.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
-            } else {
-                tArray.sort((a, b) => b.pvpWins - a.pvpWins || b.PTS - a.PTS);
-            }
-            
-            let toggleHtml = `
-                <div class="toggle-switch">
-                    <button class="toggle-btn ${mode === 'PTS' ? 'active' : ''}" onclick="toggleDivisionMode('${divName}', 'PTS')">PTS</button>
-                    <button class="toggle-btn ${mode === 'PVP' ? 'active' : ''}" onclick="toggleDivisionMode('${divName}', 'PVP')">PVP</button>
-                </div>
-            `;
-            
-            html += `<div class="table-wrapper"><table class="division-table">`;
-            
-            if (mode === 'PTS') {
-                html += `
-                    <thead>
-                        <tr class="title-row">
-                            <th colspan="6" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
-                                <div class="division-header-container">
-                                    <h2>${divName}</h2>
-                                    ${toggleHtml}
-                                </div>
-                            </th>
-                        </tr>
-                        <tr><th>#</th><th class="text-left">Team / Owner</th><th>PL</th><th>GD</th><th>PTS</th><th style="color:#00ff87;">Glv</th></tr>
-                    </thead><tbody>
-                `;
-                
-                tArray.forEach((t, i) => {
-                    let logo = getLogoByName(t.team);
-                    let sName = getShortTeamName(t.team);
-                    let nameHtml = logo ? `<div class="team-inline"><img src="${logo}" class="team-icon" alt="">${sName}</div>` : sName;
-                    html += `
-                        <tr>
-                            <td class="fotmob-rank">${i + 1}</td>
-                            <td class="text-left">
-                                <div style="font-weight:600; color:#1a1a1a;">${nameHtml}</div>
-                                <div style="font-size:0.75rem; color:#718096; margin-top:2px;">${t.owner}</div>
-                            </td>
-                            <td>${t.PL}</td><td>${t.GD > 0 ? '+'+t.GD : t.GD}</td><td class="highlight-col">${t.PTS}</td>
-                            <td style="color:#00ff87; font-weight:bold;">${t.goldenGloves || '-'}</td>
-                        </tr>
-                    `;
-                });
-            } else {
-                html += `
-                    <thead>
-                        <tr class="title-row">
-                            <th colspan="7" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
-                                <div class="division-header-container">
-                                    <h2>${divName}</h2>
-                                    ${toggleHtml}
-                                </div>
-                            </th>
-                        </tr>
-                        <tr><th>#</th><th class="text-left">Team / Owner</th><th>W</th><th>D</th><th>L</th><th>Win%</th><th>PVP W</th></tr>
-                    </thead><tbody>
-                `;
-                
-                tArray.forEach((t, i) => {
-                    let logo = getLogoByName(t.team);
-                    let sName = getShortTeamName(t.team);
-                    let nameHtml = logo ? `<div class="team-inline"><img src="${logo}" class="team-icon" alt="">${sName}</div>` : sName;
-                    let winPct = t.PL > 0 ? Math.round((t.W / t.PL) * 100) : 0;
-                    html += `
-                        <tr>
-                            <td class="fotmob-rank">${i + 1}</td>
-                            <td class="text-left">
-                                <div style="font-weight:600; color:#1a1a1a;">${nameHtml}</div>
-                                <div style="font-size:0.75rem; color:#718096; margin-top:2px;">${t.owner}</div>
-                            </td>
-                            <td>${t.W}</td><td>${t.D}</td><td>${t.L}</td><td>${winPct}%</td><td class="highlight-col">${t.pvpWins}</td>
-                        </tr>
-                    `;
-                });
-            }
-            
-            html += `</tbody></table></div>`;
-            divIndex++;
-        }
-        container.innerHTML = html;
-    }
-
-    function renderDraftTables() {
-        let teamRanks = [];
-        for (let tk in cachedTeamStats) { teamRanks.push(cachedTeamStats[tk]); }
-        teamRanks.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD);
-        
-        let draftBodyHtml = '';
-        let pDiffMap = {};
-        for (let p in draftData) { pDiffMap[p] = 0; }
-        
-        teamRanks.forEach((t, i) => {
-            let actualRank = i + 1;
-            let pick = 20; 
-            let keyMatch = Object.keys(draftPicks).find(k => k.toLowerCase().includes(t.team.toLowerCase()) || t.team.toLowerCase().includes(k.toLowerCase()));
-            if (keyMatch) pick = draftPicks[keyMatch];
-            
-            let diff = pick - actualRank;
-            let diffStr = diff > 0 ? `<span style="color:#00a667; font-weight:bold;">+${diff}</span>` : diff < 0 ? `<span style="color:#e90052; font-weight:bold;">${diff}</span>` : `<span style="color:#718096;">0</span>`;
-            
-            let logo = getLogoByName(t.team);
-            let sName = getShortTeamName(t.team);
-            let nameHtml = logo ? `<div class="team-inline"><img src="${logo}" class="team-icon" alt="">${sName}</div>` : sName;
-            
-            draftBodyHtml += `
-                <tr>
-                    <td class="fotmob-rank">${actualRank}</td>
-                    <td class="text-left">
-                        <div style="font-weight:600; color:#1a1a1a;">${nameHtml}</div>
-                        <div style="font-size:0.75rem; color:#718096; margin-top:2px;">${t.owner}</div>
-                    </td>
-                    <td style="font-weight:bold;">${t.PTS}</td>
-                    <td>${t.GD > 0 ? '+'+t.GD : t.GD}</td>
-                    <td>${pick}</td>
-                    <td>${diffStr}</td>
-                </tr>
-            `;
-            
-            if (t.owner && pDiffMap[t.owner] !== undefined) {
-                pDiffMap[t.owner] += diff;
-            }
-        });
-        
-        document.getElementById('draft-rank-body').innerHTML = draftBodyHtml;
-        
-        let pDiffArr = [];
-        for (let p in pDiffMap) { pDiffArr.push({ p: p, diff: pDiffMap[p] }); }
-        pDiffArr.sort((a, b) => b.diff - a.diff);
-        
-        let draftPBodyHtml = '';
-        pDiffArr.forEach((item, i) => {
-            let diff = item.diff;
-            let diffStr = diff > 0 ? `<span style="color:#00a667; font-weight:bold;">+${diff}</span>` : diff < 0 ? `<span style="color:#e90052; font-weight:bold;">${diff}</span>` : `<span style="color:#718096;">0</span>`;
-            
-            let tList = cachedPlayerStats[item.p].teams.map(t => {
-                let l = getLogoByName(t);
-                return l ? `<img src="${l}" class="team-icon" title="${t}" alt="${t}">` : '';
-            }).join('');
-            
-            draftPBodyHtml += `
-                <tr>
-                    <td class="fotmob-rank">${i + 1}</td>
-                    <td class="fotmob-player">
-                        ${item.p}
-                        <div class="icons-container">${tList}</div>
-                    </td>
-                    <td style="text-align: right; padding-right: 16px; font-weight:bold;">${diffStr}</td>
-                </tr>
-            `;
-        });
-        document.getElementById('draft-player-body').innerHTML = draftPBodyHtml;
-    }
-
-    // Toggle Stat Card logic
-    window.toggleStatCard = function(element) {
-        element.parentElement.classList.toggle('collapsed');
-        element.parentElement.classList.toggle('expanded');
-    };
-    window.toggleStatPlayer = function(event, element) {
-        event.stopPropagation();
-        element.parentElement.classList.toggle('expanded');
-    };
-
-    function renderSeasonAwards() {
-        const cont = document.getElementById('season-awards-container');
-        let pArray = Object.values(cachedPlayerStats);
-        
-        const cardDefs = [
-            { id: 'best-offense', title: 'Best Offense (Goals For)', sort: (a,b) => b.GF - a.GF || b.PTS - a.PTS, valFmt: p => p.GF, classFmt: () => 'pill-blue', subTitle: 'GF' },
-            { id: 'best-defense', title: 'Best Defense (Goals Agst)', sort: (a,b) => a.GA - b.GA || b.PTS - a.PTS, valFmt: p => p.GA, classFmt: () => 'pill-red', subTitle: 'GA' },
-            { id: 'best-gd', title: 'Best Goal Diff (GD)', sort: (a,b) => b.GD - a.GD || b.PTS - a.PTS, valFmt: p => (p.GD > 0 ? '+'+p.GD : p.GD), classFmt: p => (p.GD > 0 ? 'pill-green' : 'pill-red'), subTitle: 'GD' },
-            { id: 'pts-per-match', title: 'Points Per Match (PPM)', sort: (a,b) => parseFloat(b.ppm) - parseFloat(a.ppm), valFmt: p => p.ppm, classFmt: () => 'pill-purple', subTitle: 'PPM' },
-            { id: 'golden-boot', title: 'Golden Boot Tracker', sort: (a,b) => (b.goldenBoot||0) - (a.goldenBoot||0) || b.PTS - a.PTS, valFmt: p => p.goldenBoot || 0, classFmt: () => 'pill-green', subTitle: 'Boots' },
-            { id: 'golden-glove', title: 'Golden Gloves Tracker', sort: (a,b) => (b.goldenGloves||0) - (a.goldenGloves||0) || b.PTS - a.PTS, valFmt: p => p.goldenGloves || 0, classFmt: () => 'pill-gray', subTitle: 'Glvs' }
-        ];
-        
-        let html = '';
-        cardDefs.forEach(def => {
-            let sorted = [...pArray].sort(def.sort);
-            let bodyHtml = '';
-            
-            sorted.forEach((p, i) => {
-                let tList = p.teams.map(t => {
-                    let l = getLogoByName(t);
-                    return l ? `<img src="${l}" class="team-icon" alt="">` : '';
-                }).join('');
-                
-                let pTeams = [];
-                for(let tk in cachedTeamStats) {
-                    if (cachedTeamStats[tk].owner === p.player) pTeams.push(cachedTeamStats[tk]);
-                }
-                
-                let nestedTeamsHtml = '';
-                if (def.id === 'best-offense') {
-                    pTeams.sort((a,b) => b.GF - a.GF);
-                    nestedTeamsHtml = pTeams.map(t => `<div class="nested-team-row"><span class="nested-team-name">${getLogoByName(t.team) ? `<img src="${getLogoByName(t.team)}" class="nested-team-icon">` : ''}${getShortTeamName(t.team)}</span><span class="stat-value" style="font-weight:600; color:#333;">${t.GF}</span></div>`).join('');
-                } else if (def.id === 'best-defense') {
-                    pTeams.sort((a,b) => a.GA - b.GA);
-                    nestedTeamsHtml = pTeams.map(t => `<div class="nested-team-row"><span class="nested-team-name">${getLogoByName(t.team) ? `<img src="${getLogoByName(t.team)}" class="nested-team-icon">` : ''}${getShortTeamName(t.team)}</span><span class="stat-value" style="font-weight:600; color:#333;">${t.GA}</span></div>`).join('');
-                } else if (def.id === 'best-gd') {
-                    pTeams.sort((a,b) => b.GD - a.GD);
-                    nestedTeamsHtml = pTeams.map(t => `<div class="nested-team-row"><span class="nested-team-name">${getLogoByName(t.team) ? `<img src="${getLogoByName(t.team)}" class="nested-team-icon">` : ''}${getShortTeamName(t.team)}</span><span class="stat-value" style="font-weight:600; color:#333;">${t.GD > 0 ? '+'+t.GD : t.GD}</span></div>`).join('');
-                } else if (def.id === 'pts-per-match') {
-                    pTeams.sort((a,b) => b.PTS - a.PTS);
-                    nestedTeamsHtml = pTeams.map(t => `<div class="nested-team-row"><span class="nested-team-name">${getLogoByName(t.team) ? `<img src="${getLogoByName(t.team)}" class="nested-team-icon">` : ''}${getShortTeamName(t.team)}</span><span class="stat-value" style="font-weight:600; color:#333;">${t.PL > 0 ? (t.PTS/t.PL).toFixed(2) : "0.00"}</span></div>`).join('');
-                } else if (def.id === 'golden-glove') {
-                    pTeams.sort((a,b) => (b.goldenGloves||0) - (a.goldenGloves||0));
-                    nestedTeamsHtml = pTeams.map(t => `<div class="nested-team-row"><span class="nested-team-name">${getLogoByName(t.team) ? `<img src="${getLogoByName(t.team)}" class="nested-team-icon">` : ''}${getShortTeamName(t.team)}</span><span class="stat-value" style="font-weight:600; color:#333;">${t.goldenGloves || 0}</span></div>`).join('');
-                } else {
-                    pTeams.sort((a,b) => b.GF - a.GF);
-                    nestedTeamsHtml = pTeams.map(t => `<div class="nested-team-row"><span class="nested-team-name">${getLogoByName(t.team) ? `<img src="${getLogoByName(t.team)}" class="nested-team-icon">` : ''}${getShortTeamName(t.team)}</span><span class="stat-value" style="font-weight:600; color:#ccc;">-</span></div>`).join('');
-                }
-                
-                bodyHtml += `
-                    <div class="stat-player-wrapper">
-                        <div class="stat-player-row" onclick="toggleStatPlayer(event, this)">
-                            <div class="stat-rank">${i+1}.</div>
-                            <div class="stat-player-info">
-                                ${p.player}
-                                <div class="stat-player-icons">${tList}</div>
-                            </div>
-                            <span class="chevron-small">▶</span>
-                            <div class="stat-value ${def.classFmt(p)}">${def.valFmt(p)}</div>
-                        </div>
-                        <div class="nested-teams-container">
-                            ${nestedTeamsHtml}
-                        </div>
-                    </div>
-                `;
-            });
-            
-            html += `
-                <div class="stat-card collapsed">
-                    <div class="stat-card-title" onclick="toggleStatCard(this)">
-                        ${def.title}
-                        <span class="chevron">▶</span>
-                    </div>
-                    <div class="stat-card-body">
-                        ${bodyHtml}
-                    </div>
-                </div>
-            `;
-        });
-        
-        cont.innerHTML = html;
-    }
-
-    // Refresh Matchday occasionally without resetting UI
-    async function refreshMatchdayCard() {
         try {
-            const url = 'https://raw.githubusercontent.com/hef-x/EPL-Fantasy/main/data/standings_2026.json';
-            const response = await fetch(url, { cache: 'no-store' });
-            if (response.ok) {
-                const data = await response.json();
-                if (data.matches) {
-                    globalMatches = data.matches;
-                    renderMatchesForDate(currentViewDate);
-                }
+            let data;
+            const now = new Date().getTime();
+            const cachedTime = localStorage.getItem(cacheTimeKey);
+            const cachedData = localStorage.getItem(cacheKey);
+
+            if (cachedData && cachedTime && (now - cachedTime < cacheDuration)) {
+                data = JSON.parse(cachedData);
+            } else {
+                const response = await fetch('/api/standings');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                data = await response.json();
+                localStorage.setItem(cacheKey, JSON.stringify(data));
+                localStorage.setItem(cacheTimeKey, now.toString());
             }
-        } catch (e) {
-            console.warn("Background match refresh failed", e);
+
+            let gamesProcessed = 0;
+
+            if (data.matches) {
+                processMatchDates(data.matches);
+                renderMatchdayCard();
+
+                data.matches.forEach(match => {
+                    if (match.status === 'FINISHED') {
+                        gamesProcessed++;
+                        const homeTeamName = match.homeTeam.name;
+                        const awayTeamName = match.awayTeam.name;
+                        const homeScore = match.score.fullTime.home;
+                        const awayScore = match.score.fullTime.away;
+
+                        const homePlayer = findPlayerByTeam(homeTeamName, playerStats);
+                        const awayPlayer = findPlayerByTeam(awayTeamName, playerStats);
+                        const homeTeamKey = findTeamKey(homeTeamName, teamStats);
+                        const awayTeamKey = findTeamKey(awayTeamName, teamStats);
+
+                        if (homePlayer) {
+                            let pStat = playerStats[homePlayer];
+                            pStat.PL += 1; pStat.GF += homeScore; pStat.GA += awayScore;
+                            pStat.goldenBoot += homeScore;
+                            if (awayScore === 0) pStat.goldenGloves += 1;
+
+                            if (homeScore > awayScore) { pStat.W += 1; pStat.PTS += 3; }
+                            else if (homeScore === awayScore) { pStat.D += 1; pStat.PTS += 1; }
+                            else pStat.L += 1;
+                        }
+
+                        if (awayPlayer) {
+                            let pStat = playerStats[awayPlayer];
+                            pStat.PL += 1; pStat.GF += awayScore; pStat.GA += homeScore;
+                            pStat.goldenBoot += awayScore;
+                            if (homeScore === 0) pStat.goldenGloves += 1;
+
+                            if (awayScore > homeScore) { pStat.W += 1; pStat.PTS += 3; }
+                            else if (awayScore === homeScore) { pStat.D += 1; pStat.PTS += 1; }
+                            else pStat.L += 1;
+                        }
+
+                        if (homePlayer && awayPlayer && homePlayer !== awayPlayer) {
+                            const diff = Math.abs(homeScore - awayScore);
+                            if (homeScore > awayScore) {
+                                playerStats[homePlayer].pvpWins += 1;
+                                playerStats[homePlayer].pga += diff;
+                            } else if (awayScore > homeScore) {
+                                playerStats[awayPlayer].pvpWins += 1;
+                                playerStats[awayPlayer].pga += diff;
+                            }
+                        }
+
+                        if (homeTeamKey) {
+                            let t = teamStats[homeTeamKey];
+                            t.PL += 1; t.GF += homeScore; t.GA += awayScore;
+                            if (awayScore === 0) t.goldenGloves += 1;
+                            
+                            if (homeScore > awayScore) {
+                                t.W += 1; t.PTS += 3;
+                                if (awayPlayer && awayPlayer !== t.owner) { t.PGA += (homeScore - awayScore); t.pvpWins += 1; }
+                            } else if (homeScore === awayScore) { t.D += 1; t.PTS += 1; }
+                            else t.L += 1;
+                        }
+
+                        if (awayTeamKey) {
+                            let t = teamStats[awayTeamKey];
+                            t.PL += 1; t.GF += awayScore; t.GA += homeScore;
+                            if (homeScore === 0) t.goldenGloves += 1;
+
+                            if (awayScore > homeScore) {
+                                t.W += 1; t.PTS += 3;
+                                if (homePlayer && homePlayer !== t.owner) { t.PGA += (awayScore - homeScore); t.pvpWins += 1; }
+                            } else if (homeScore === awayScore) { t.D += 1; t.PTS += 1; }
+                            else t.L += 1;
+                        }
+                    }
+                });
+            }
+
+            for (let player in playerStats) {
+                let p = playerStats[player];
+                p.GD = p.GF - p.GA;
+                p.ppm = p.PL > 0 ? (p.PTS / p.PL) : 0;
+                p.gpm = p.PL > 0 ? (p.GF / p.PL) : 0;
+                p.gcpm = p.PL > 0 ? (p.GA / p.PL) : 0;
+                p.ptsPga = p.PTS + p.pga;
+            }
+
+            for (let teamKey in teamStats) {
+                let t = teamStats[teamKey];
+                t.GD = t.GF - t.GA;
+                t.ptsPga = t.PTS + t.PGA;
+            }
+
+            cachedPlayerStats = playerStats;
+            cachedTeamStats = teamStats;
+
+            renderPrimaryTable(playerStats, teamStats);
+            renderDivisions(teamStats);
+            renderSeasonAwards(playerStats, teamStats);
+            renderDraftRankTable(teamStats);
+            renderPlayerDraftValueTable(playerStats, teamStats);
+
+            statusEl.textContent = `Successfully processed 2026/2027 season data (${gamesProcessed} completed matches evaluated).`;
+
+        } catch (error) {
+            console.error("Error fetching match data:", error);
+            statusEl.textContent = "Unable to load data. Check console for details.";
         }
     }
 
-    // Initialization
-    fetchAndUpdateStandings();
-    setInterval(refreshMatchdayCard, 120000); // 2 minutes
+    document.addEventListener('DOMContentLoaded', () => {
+        setupSwipeListeners();
+        fetchAndUpdateStandings();
+    });
 
+    // Auto-update ONLY the matchday card every 30 seconds
+    setInterval(refreshMatchdayCard, 30000);
 </script>
+
 </body>
 </html>
