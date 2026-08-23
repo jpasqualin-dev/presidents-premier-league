@@ -265,17 +265,10 @@
             font-weight: 700;
         }
 
-        /* View Headers */
+        /* Team View Headers */
         .team-view-row-header {
             display: flex;
             justify-content: space-between;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            padding: 16px 16px 4px 16px;
-            font-weight: 500;
-        }
-
-        .date-sub-header {
             font-size: 0.75rem;
             color: var(--text-muted);
             padding: 16px 16px 4px 16px;
@@ -534,7 +527,6 @@
                 round: `Round ${match.matchday || 1}`,
                 dateObj: matchDate,
                 dateLabel: formatGroupDate(matchDate),
-                rawDateLabel: matchDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }),
                 home: homeShort,
                 rawHome: match.homeTeam.name,
                 away: awayShort,
@@ -633,7 +625,7 @@
         } else if (currentView === 'round') {
             const grouped = groupBy(fixtures, 'round');
             for (let [round, matches] of Object.entries(grouped)) {
-                container.appendChild(createRoundCard(round, matches));
+                container.appendChild(createListCard(round, matches, false));
             }
         } else if (currentView === 'team') {
             container.appendChild(createTeamCard(selectedTeam));
@@ -657,32 +649,6 @@
 
         matches.forEach(match => {
             card.appendChild(createFixtureRow(match, isTeamView, null));
-        });
-
-        return card;
-    }
-
-    function createRoundCard(roundTitle, matches) {
-        const card = document.createElement('div');
-        card.className = 'fixture-card';
-
-        const header = document.createElement('div');
-        header.className = 'card-header';
-        header.textContent = roundTitle;
-        card.appendChild(header);
-
-        let currentDate = null;
-
-        matches.forEach(match => {
-            // Group by strict date string so headers match the format "Fri, Aug 28"
-            if (match.rawDateLabel !== currentDate) {
-                currentDate = match.rawDateLabel;
-                const dateSubHeader = document.createElement('div');
-                dateSubHeader.className = 'date-sub-header';
-                dateSubHeader.textContent = currentDate;
-                card.appendChild(dateSubHeader);
-            }
-            card.appendChild(createFixtureRow(match, false, null));
         });
 
         return card;
