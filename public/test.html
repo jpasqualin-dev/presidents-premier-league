@@ -1610,7 +1610,9 @@
     }
 
     document.addEventListener('DOMContentLoaded', fetchAndUpdateStandings);
-    setInterval(fetchAndUpdateStandings, 30000);
+
+// Now this will ONLY trigger the matchday card update every 30 seconds
+setInterval(refreshMatchdayCard, 30000);
 </script>
 
 </body>
