@@ -10,7 +10,7 @@
             background-color: #f4f6f8;
             color: #333;
             margin: 0;
-            padding: 20px;
+            padding: 130px 20px 20px 20px; /* Adjusted top padding for fixed header */
         }
 
         .container {
@@ -22,71 +22,159 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        /* --- NEW STICKY CARD HEADER --- */
-        .main-card-header {
-            position: sticky;
-            top: 10px;
-            z-index: 100;
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            border: 1px solid #e2e8f0;
-            border-top: 5px solid #38003c;
-            display: flex;
-            flex-direction: column;
-            transition: all 0.3s ease;
+        /* FotMob Style Header */
+        .fotmob-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #38003c; /* Premier League Purple */
+            color: #ffffff;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .header-top {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            padding: 12px 20px;
+            gap: 12px;
+            height: 50px;
+            transition: all 0.3s ease;
             overflow: hidden;
-            transition: max-height 0.3s ease, opacity 0.2s ease, margin-bottom 0.3s ease;
-            max-height: 100px;
-            opacity: 1;
-            border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 12px;
-            margin-bottom: 12px;
         }
 
-        .header-top.shrunk {
-            max-height: 0;
-            opacity: 0;
+        /* Class applied via JS on scroll down */
+        .header-top.shrink {
+            height: 0;
+            padding-top: 0;
             padding-bottom: 0;
-            margin-bottom: 0;
-            border-bottom: none;
+            opacity: 0;
         }
 
+        .header-logo {
+            height: 40px;
+            width: auto;
+            filter: brightness(0) invert(1); /* Turns the logo white */
+        }
+        .dropdown {
+            position: relative;
+            display: inline-block;
+            margin-left: 20px;
+        }
+
+        .dropbtn {
+            background-color: #38003c;
+            color: white;
+            padding: 10px 16px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #fff;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .dropdown-content a {
+            color: #333;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            border-bottom: 1px solid #eee;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f4f6f8;
+            color: #00ff87;
+            font-weight: bold;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown.open .dropdown-content {
+            display: block;
+        }
+
+        .dropdown:hover .dropbtn {
+            background-color: #5c0063;
+        }
+        .header-titles {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-titles h1 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .header-titles .subtitle {
+            font-size: 0.8rem;
+            color: #d8b4e2;
+        }
+
+        /* Navigation Menu */
         .header-nav {
             display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
+            gap: 20px;
+            padding: 0 20px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Hide scrollbar for Firefox */
+        }
+        
+        .header-nav::-webkit-scrollbar {
+            display: none; /* Hide scrollbar for Chrome/Safari */
         }
 
         .nav-link {
+            color: #e2e8f0;
             text-decoration: none;
-            font-size: 0.9rem;
             font-weight: 600;
-            color: #1a1a1a;
-            background: #f8f9fa;
-            padding: 8px 14px;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-            transition: all 0.2s ease;
-            cursor: pointer;
+            font-size: 0.95rem;
+            padding: 12px 0;
+            white-space: nowrap;
+            position: relative;
+            background: none;
+            border: none;
             font-family: inherit;
+            cursor: pointer;
         }
 
         .nav-link:hover {
-            background-color: #e2e8f0;
-            color: #38003c;
+            color: #ffffff;
         }
 
-        /* Dropdown Styles */
+        .nav-link.active {
+            color: #ffffff;
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #00ff87; /* Premier League Green highlight */
+            border-radius: 3px 3px 0 0;
+        }
+
+        /* Dropdown Menu */
         .dropdown {
             position: relative;
             display: inline-block;
@@ -96,15 +184,13 @@
             display: none;
             position: absolute;
             background-color: #ffffff;
-            min-width: 150px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            min-width: 140px;
+            box-shadow: 0px 8px 16px rgba(0,0,0,0.15);
+            z-index: 1;
             border-radius: 8px;
-            border: 1px solid #e2e8f0;
-            z-index: 101;
+            overflow: hidden;
             top: 100%;
             left: 0;
-            margin-top: 6px;
-            overflow: hidden;
         }
 
         .dropdown-content a {
@@ -112,12 +198,11 @@
             padding: 12px 16px;
             text-decoration: none;
             display: block;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: background-color 0.15s;
+            font-size: 0.9rem;
+            font-weight: 500;
             border-bottom: 1px solid #f1f5f9;
         }
-        
+
         .dropdown-content a:last-child {
             border-bottom: none;
         }
@@ -127,23 +212,9 @@
             color: #38003c;
         }
 
-        .dropdown:hover .dropdown-content,
-        .dropdown:focus-within .dropdown-content {
+        .dropdown:hover .dropdown-content {
             display: block;
         }
-
-        h1 {
-            margin: 0;
-            color: #1a1a1a;
-            font-size: 2rem;
-        }
-
-        .lion-logo {
-            height: 65px;
-            width: auto;
-            object-fit: contain;
-        }
-        /* --- END HEADER STYLES --- */
 
         /* FotMob Style Matchday Card */
         .today-card {
@@ -514,10 +585,10 @@
         .fotmob-link-btn:hover { opacity: 0.85; }
 
         @media (max-width: 768px) {
-            body { padding: 10px; }
+            body { padding: 110px 10px 10px 10px; } /* Prevent header overlap */
             .container { padding: 12px; }
-            h1 { font-size: 1.3rem; }
-            .lion-logo { height: 45px; }
+            .header-titles h1 { font-size: 1.1rem; }
+            .header-logo { height: 35px; }
             th, td { padding: 10px 4px; font-size: 0.8rem; }
             h2, .plain-table-title, .overall-header-container h2 { font-size: 1.1rem; }
             .draft-title { font-size: 1rem; }
@@ -537,18 +608,15 @@
             #divisions-container table th:nth-child(1), #divisions-container table td:nth-child(1) { width: 10%; }
             #standings-table th:nth-child(2), #standings-table td:nth-child(2),
             #divisions-container table th:nth-child(2), #divisions-container table td:nth-child(2) { width: 35%; }
-            
-            .header-top { padding-bottom: 8px; margin-bottom: 8px; }
-            .nav-link { padding: 6px 10px; font-size: 0.85rem; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <!-- Sticky Card Header with Scroll Animation and Dropdown -->
-    <header id="main-header" class="main-card-header">
-        <div id="header-top" class="header-top">
+<header id="fotmob-header" class="fotmob-header">
+    <div class="header-top" id="header-top">
+        <img src="https://logos-world.net/wp-content/uploads/2023/08/Premier-League-New-Logo.png" alt="Premier League Lion Logo" class="header-logo">
+        <div class="header-titles">
             <h1>La Liga de Los Presidentes</h1>
             <span class="subtitle">Fantasy EPL</span>
         </div>
@@ -560,8 +628,8 @@
         <a href="stats.html" class="nav-link">Stats</a>
         
         <div class="dropdown">
-            <button class="nav-link dropbtn">Player Results ▾</button>
-            <div class="dropdown-content">
+            <button class="nav-link dropbtn" type="button" aria-expanded="false" aria-haspopup="true">Player Results <span aria-hidden="true">▾</span></button>
+            <div class="dropdown-content" role="menu">
                 <a href="hef.html">Hef</a>
                 <a href="jamey.html">Jamey</a>
                 <a href="jordan.html">Jordan</a>
@@ -572,6 +640,7 @@
     </nav>
 </header>
 
+<div class="container">
     <!-- Matchday Card Container -->
     <div id="today-matches-container"></div>
 
@@ -641,31 +710,6 @@
 </div>
 
 <script>
-    // --- STICKY HEADER SCROLL LOGIC ---
-    let lastScrollTop = 0;
-    const headerTop = document.getElementById('header-top');
-    
-    window.addEventListener('scroll', function() {
-        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        
-        // Only trigger shrink effect if we've scrolled down a bit to prevent jitter
-        if (scrollTop > 50) {
-            if (scrollTop > lastScrollTop) {
-                // Scrolling Down -> Hide Title & Logo
-                headerTop.classList.add('shrunk');
-            } else {
-                // Scrolling Up -> Show Title & Logo
-                headerTop.classList.remove('shrunk');
-            }
-        } else {
-            // Near the absolute top -> Always show
-            headerTop.classList.remove('shrunk');
-        }
-        
-        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; 
-    }, { passive: true });
-    // --- END HEADER LOGIC ---
-
     const draftData = {
         "Hef": ["Arsenal", "Bournemouth", "Nottingham Forest", "Hull City"],
         "Jordan": ["Manchester City", "Brighton", "Brentford", "Ipswich Town"],
@@ -1590,12 +1634,35 @@
     // Auto-update ONLY the matchday card every 30 seconds
     setInterval(refreshMatchdayCard, 30000);
 
+    const playerMenu = document.querySelector('.dropdown');
+    const playerMenuButton = playerMenu.querySelector('.dropbtn');
+
+    playerMenuButton.addEventListener('click', () => {
+        const isOpen = playerMenu.classList.toggle('open');
+        playerMenuButton.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    document.addEventListener('click', event => {
+        if (!playerMenu.contains(event.target)) {
+            playerMenu.classList.remove('open');
+            playerMenuButton.setAttribute('aria-expanded', 'false');
+        }
+    });
+
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') {
+            playerMenu.classList.remove('open');
+            playerMenuButton.setAttribute('aria-expanded', 'false');
+            playerMenuButton.focus();
+        }
+    });
+
     // FotMob Style Header Scroll Logic
     let lastScrollTop = 0;
     const headerTop = document.getElementById('header-top');
 
     window.addEventListener('scroll', function() {
-        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const scrollTop = Math.max(0, window.pageYOffset || document.documentElement.scrollTop);
         
         // If scrolling down and past the threshold (50px)
         if (scrollTop > lastScrollTop && scrollTop > 50) {
@@ -1606,7 +1673,7 @@
             headerTop.classList.remove('shrink');
         }
         
-        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // For Mobile or negative scrolling
+        lastScrollTop = scrollTop;
     }, false);
 </script>
 
