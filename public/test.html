@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>La Liga de Los Presidentes - Fantasy EPL (2026/2026 Season)</title>
+    <title>La Liga de Los Presidentes - Fantasy EPL (2025/2026 Season)</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #f4f6f8;
             color: #333;
             margin: 0;
-            padding: 130px 20px 20px 20px; /* Adjusted top padding for fixed header */
+            padding: 20px;
         }
 
         .container {
@@ -22,56 +22,52 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        /* FotMob Style Header */
-        .fotmob-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: #38003c; /* Premier League Purple */
-            color: #ffffff;
-            z-index: 1000;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #38003c;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
         }
 
-        .header-top {
+        .header-left {
             display: flex;
             align-items: center;
-            padding: 12px 20px;
-            gap: 12px;
-            height: 50px;
-            transition: all 0.3s ease;
-            overflow: hidden;
+            gap: 20px;
         }
 
-        /* Class applied via JS on scroll down */
-        .header-top.shrink {
-            height: 0;
-            padding-top: 0;
-            padding-bottom: 0;
-            opacity: 0;
+        h1 {
+            margin: 0;
+            color: #1a1a1a;
+            font-size: 2rem;
         }
 
-        .header-logo {
-            height: 40px;
+        .lion-logo {
+            height: 65px;
             width: auto;
-            filter: brightness(0) invert(1); /* Turns the logo white */
+            object-fit: contain;
         }
+
+        /* Dropdown Menu Styles */
         .dropdown {
             position: relative;
             display: inline-block;
-            margin-left: 20px;
         }
 
         .dropbtn {
             background-color: #38003c;
             color: white;
             padding: 10px 16px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-weight: 600;
+        }
+
+        .dropbtn:hover {
+            background-color: #5c0063;
         }
 
         .dropdown-content {
@@ -80,7 +76,7 @@
             background-color: #fff;
             min-width: 160px;
             box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1;
+            z-index: 10;
             border-radius: 4px;
             overflow: hidden;
         }
@@ -91,335 +87,48 @@
             text-decoration: none;
             display: block;
             border-bottom: 1px solid #eee;
+            font-size: 0.9rem;
         }
 
         .dropdown-content a:hover {
             background-color: #f4f6f8;
-            color: #00ff87;
+            color: #38003c;
             font-weight: bold;
         }
 
-        .dropdown:hover .dropdown-content {
+        .show {
             display: block;
-        }
-
-        .dropdown:hover .dropbtn {
-            background-color: #5c0063;
-        }
-        .header-titles {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header-titles h1 {
-            margin: 0;
-            color: #ffffff;
-            font-size: 1.25rem;
-            font-weight: 700;
-        }
-
-        .header-titles .subtitle {
-            font-size: 0.8rem;
-            color: #d8b4e2;
-        }
-
-        /* Navigation Menu */
-        .header-nav {
-            display: flex;
-            gap: 20px;
-            padding: 0 20px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none; /* Hide scrollbar for Firefox */
-        }
-        
-        .header-nav::-webkit-scrollbar {
-            display: none; /* Hide scrollbar for Chrome/Safari */
-        }
-
-        .nav-link {
-            color: #e2e8f0;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.95rem;
-            padding: 12px 0;
-            white-space: nowrap;
-            position: relative;
-            background: none;
-            border: none;
-            font-family: inherit;
-            cursor: pointer;
-        }
-
-        .nav-link:hover {
-            color: #ffffff;
-        }
-
-        .nav-link.active {
-            color: #ffffff;
-        }
-
-        .nav-link.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background-color: #00ff87; /* Premier League Green highlight */
-            border-radius: 3px 3px 0 0;
-        }
-
-        /* Dropdown Menu */
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #ffffff;
-            min-width: 140px;
-            box-shadow: 0px 8px 16px rgba(0,0,0,0.15);
-            z-index: 1;
-            border-radius: 8px;
-            overflow: hidden;
-            top: 100%;
-            left: 0;
-        }
-
-        .dropdown-content a {
-            color: #1a1a1a;
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            font-size: 0.9rem;
-            font-weight: 500;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-        .dropdown-content a:last-child {
-            border-bottom: none;
-        }
-
-        .dropdown-content a:hover {
-            background-color: #f8f9fa;
-            color: #38003c;
-        }
-
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
-
-        /* FotMob Style Matchday Card */
-        .today-card {
-            background: #ffffff;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-            overflow: hidden;
-            touch-action: pan-y; /* Allows vertical scrolling, captures horizontal swipes */
-        }
-
-        .today-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            border-bottom: 1px solid #edf2f7;
-            background-color: #f8f9fa;
-        }
-        
-        .today-header-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .today-header-icon {
-            width: 18px;
-            height: 18px;
-            color: #1a1a1a;
-        }
-
-        .today-header-text {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #1a1a1a;
-        }
-
-        /* Matchday Navigation Buttons */
-        .matchday-nav {
-            display: flex;
-            gap: 12px;
-        }
-
-        .nav-btn {
-            background: #edf2f7;
-            border: none;
-            font-size: 1rem;
-            color: #1a1a1a;
-            cursor: pointer;
-            padding: 4px 12px;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .nav-btn:hover:not(.disabled) {
-            background-color: #e2e8f0;
-            color: #38003c;
-        }
-
-        .nav-btn.disabled {
-            color: #a0aec0;
-            background: #f8f9fa;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-
-        .today-match-row {
-            display: flex;
-            align-items: center;
-            padding: 14px 16px;
-            border-bottom: 1px solid #f1f5f9;
-            text-decoration: none;
-            color: inherit;
-            transition: background-color 0.15s;
-        }
-
-        .today-match-row:hover {
-            background-color: #f8f9fa;
-        }
-
-        .today-match-row:last-child {
-            border-bottom: none;
-        }
-
-        .match-status {
-            width: 40px;
-            flex-shrink: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .match-content {
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-        }
-
-        .team-block {
-            display: flex;
-            align-items: center;
-            flex: 1;
-            gap: 12px;
-        }
-
-        .team-home {
-            justify-content: flex-end;
-            text-align: right;
-        }
-
-        .team-away {
-            justify-content: flex-start;
-            text-align: left;
-        }
-
-        .team-info {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .live-badge {
-            background-color: #00a667;
-            color: #ffffff;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 0.75rem;
-            font-weight: 700;
-        }
-
-        .live-badge-text {
-            color: #00a667;
-            font-size: 0.8rem;
-            font-weight: 700;
-        }
-
-        .ft-text {
-            color: #718096;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .team-name-text {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #1a1a1a;
-            line-height: 1.2;
-        }
-
-        .team-owner {
-            font-size: 0.75rem;
-            color: #718096;
-            font-weight: 400;
-            line-height: 1.2;
-            margin-top: 2px;
-        }
-
-        .team-logo-img {
-            width: 32px;
-            height: 32px;
-            object-fit: contain;
-            flex-shrink: 0;
-        }
-
-        .match-score-block {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-width: 55px;
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: #1a1a1a;
-            white-space: nowrap;
-        }
-
-        .time-text {
-            font-size: 0.85rem;
-            color: #718096;
-            text-align: center;
-            font-weight: 500;
-            line-height: 1.2;
-        }
-
-        .no-matches-today {
-            padding: 16px;
-            text-align: center;
-            color: #718096;
-            font-size: 0.9rem;
         }
 
         h2 {
             margin-top: 35px;
-            margin-bottom: 0;
             color: #1a1a1a;
             border-bottom: 2px solid #00ff87;
             padding-bottom: 8px;
             font-size: 1.4rem;
+        }
+
+        .divisions-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .division-card {
+            background: #fafafa;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+            padding: 16px;
+        }
+
+        .division-card h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #38003c;
+            border-bottom: 1px solid #38003c;
+            padding-bottom: 6px;
+            font-size: 1.1rem;
         }
 
         #status-indicator {
@@ -431,294 +140,177 @@
             font-size: 0.95rem;
         }
 
-        /* Tables & Expandables */
-        .table-wrapper {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin-top: 35px;
-            margin-bottom: 10px;
-        }
-
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 0;
+            margin-top: 10px;
             background: #fff;
-            font-size: 0.9rem;
-            white-space: nowrap;
         }
 
         th, td {
-            padding: 12px 6px;
+            padding: 10px 8px;
             text-align: center;
-            border-bottom: 1px solid #eaeaea;
+            border-bottom: 1px solid #e1e4e8;
+            font-size: 0.88rem;
         }
 
         th {
-            background-color: #fff;
-            color: #666;
-            font-weight: 500;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            border-bottom: 2px solid #eaeaea;
+            background-color: #38003c;
+            color: #fff;
+            font-weight: 600;
         }
 
-        .plain-table-title {
-            margin: 0;
-            padding: 0 0 8px 0;
-            border-bottom: none;
-            font-size: 1.4rem;
-            color: #1a1a1a;
-            text-align: left;
+        .text-left {
+            text-align: left !important;
         }
 
-        .draft-title { font-size: 1.15rem; }
-        .text-left { text-align: left !important; }
-        .fotmob-rank { width: 25px; font-weight: 600; color: #1a1a1a; }
-        .fotmob-player { text-align: left; font-weight: 600; color: #1a1a1a; }
-        
-        .icons-container { display: flex; gap: 4px; margin-top: 4px; }
-        .team-icon { width: 18px; height: 18px; object-fit: contain; vertical-align: middle; }
-        .team-inline { display: inline-flex; align-items: center; gap: 8px; }
+        th button {
+            background: none;
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.88rem;
+            cursor: pointer;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-family: inherit;
+        }
 
-        tr:hover { background-color: #f8f9fa; }
+        th button:hover {
+            color: #00ff87;
+            text-decoration: underline;
+        }
 
-        .expandable-row { cursor: pointer; transition: background-color 0.15s ease; }
-        .expandable-row:hover { background-color: #fafafa; }
-        .expandable-row.expanded, .expandable-row.expanded:hover { background-color: #ffffff !important; }
+        tr:hover {
+            background-color: #f8f9fa;
+        }
 
-        .table-chevron { color: #a0aec0; font-size: 0.75rem; transition: transform 0.2s ease; margin-left: 6px; display: inline-block; }
-        .expandable-row.expanded .table-chevron { transform: rotate(90deg); }
-
-        .nested-table-row { display: none; background-color: #fcfcfc; }
-        .nested-table-row.expanded { display: table-row; }
-        .nested-table-row td { font-size: 0.85rem; color: #555; padding-top: 8px; padding-bottom: 8px; border-bottom: 1px dashed #eaeaea; }
-        .nested-table-row:hover { background-color: #f4f6f8; }
-
-        .highlight-col { font-weight: bold; color: #38003c; }
-
-        .division-header-container, .overall-header-container {
+        .teams-list {
+            font-size: 0.85rem;
+            color: #586069;
+            margin-top: 8px;
             display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            padding-bottom: 8px;
-            margin-top: 0;
-            text-align: left;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
         }
 
-        .division-header-container h2, .overall-header-container h2 {
-            margin: 0;
-            border-bottom: none;
-            padding-bottom: 0;
-            font-size: 1.4rem;
+        .team-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
         }
 
-        #standings-table, #divisions-container table { table-layout: auto; }
-        #standings-table th:nth-child(1), #standings-table td:nth-child(1),
-        #divisions-container table th:nth-child(1), #divisions-container table td:nth-child(1) { width: 8%; }
-        #standings-table th:nth-child(2), #standings-table td:nth-child(2),
-        #divisions-container table th:nth-child(2), #divisions-container table td:nth-child(2) { width: 38%; white-space: normal; }
+        .highlight-col {
+            font-weight: bold;
+            color: #38003c;
+        }
 
-        .nested-table-row td:nth-child(2) { padding-left: 0 !important; }
-        .nested-table-row .team-inline { margin-left: -15px; }
-
-        #draft-player-table { table-layout: fixed; width: 100%; }
-        #draft-player-table tr:nth-child(2) th:nth-child(1), #draft-player-table td:nth-child(1) { width: 6%; }
-        #draft-player-table tr:nth-child(2) th:nth-child(2), #draft-player-table td:nth-child(2) { width: 69%; white-space: normal; }
-        #draft-player-table tr:nth-child(2) th:nth-child(3), #draft-player-table td:nth-child(3) { width: 25%; text-align: right; padding-right: 16px; }
-
-        #divisions-container .division-header-container { align-items: center; flex-wrap: wrap; gap: 8px; }
-        #divisions-container .division-header-container h2 { font-size: 1.4rem; white-space: normal; line-height: 1.2; flex: 1; }
-
-        .toggle-switch { display: inline-flex; background-color: #e5e5ea; border-radius: 20px; padding: 4px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.08); flex-shrink: 0; }
-        .toggle-btn { background-color: transparent; color: #666; border: none; padding: 6px 16px; border-radius: 16px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.25s ease; font-family: inherit; }
-        .toggle-btn.active { background-color: #ffffff; color: #1a1a1a; box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 0 1px rgba(0,0,0,0.05); }
-
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-top: 20px; }
-        .stat-card { background: #ffffff; color: #1a1a1a; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); transition: all 0.2s ease; }
-        .stat-card-title { font-size: 1rem; font-weight: 700; color: #1a1a1a; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
-        .stat-card-title:hover { color: #38003c; }
-        
-        .chevron { color: #718096; font-size: 0.85rem; transition: transform 0.25s ease; display: inline-block; }
-        .stat-card.expanded > .stat-card-title .chevron { transform: rotate(90deg); }
-        .stat-card-body { margin-top: 10px; }
-        
-        .stat-player-wrapper { border-bottom: 1px solid #f0f0f0; }
-        .stat-player-wrapper:last-child { border-bottom: none; }
-        .stat-card.collapsed .stat-player-wrapper:nth-child(n+2) { display: none; }
-        
-        .stat-player-row { display: flex; align-items: center; padding: 8px 0; cursor: pointer; transition: background-color 0.15s ease; border-radius: 4px; }
-        .stat-player-row:hover { background-color: #fafafa; }
-        .stat-player-wrapper.expanded .stat-player-row, .stat-player-wrapper.expanded .stat-player-row:hover { background-color: #ffffff !important; }
-
-        .stat-rank { width: 24px; font-size: 0.85rem; color: #718096; font-weight: 600; padding-left: 4px; }
-        .stat-player-info { flex-grow: 1; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.95rem; color: #1a1a1a; }
-        .stat-player-icons { display: inline-flex; gap: 3px; align-items: center; }
-        .stat-player-icons .team-icon { width: 16px; height: 16px; object-fit: contain; }
-
-        .chevron-small { color: #a0aec0; font-size: 0.75rem; transition: transform 0.2s ease; margin-left: auto; margin-right: 12px; }
-        .stat-player-wrapper.expanded .chevron-small { transform: rotate(90deg); }
-        
-        .stat-value { padding: 4px 10px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; display: inline-block; min-width: 32px; text-align: center; }
-        .nested-teams-container { display: none; background-color: #fcfcfc; padding: 8px 16px 10px 36px; border-radius: 6px; margin-bottom: 8px; }
-        .stat-player-wrapper.expanded .nested-teams-container { display: block; }
-
-        .nested-team-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; font-size: 0.85rem; border-bottom: 1px dashed #e2e8f0; }
-        .nested-team-row:last-child { border-bottom: none; }
-        .nested-team-name { display: flex; align-items: center; gap: 8px; color: #4a5568; font-weight: 500; }
-        .nested-team-icon { width: 16px; height: 16px; object-fit: contain; }
-
-        /* Pill Styles */
-        .pill-blue { background-color: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
-        .pill-red { background-color: #fff5f5; color: #c53030; border: 1px solid #fed7d7; }
-        .pill-green { background-color: #f0fff4; color: #276749; border: 1px solid #c6f6d5; }
-        .pill-purple { background-color: #faf5ff; color: #6b46c1; border: 1px solid #e9d8fd; }
-        .pill-gray { background-color: #f7fafc; color: #4a5568; border: 1px solid #e2e8f0; }
-
-        .fotmob-btn-container { margin-top: 15px; text-align: left; }
-        .fotmob-link-btn { display: inline-block; background-color: #00ff87; color: #38003c; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.95rem; transition: opacity 0.2s; }
-        .fotmob-link-btn:hover { opacity: 0.85; }
-
-        @media (max-width: 768px) {
-            body { padding: 110px 10px 10px 10px; } /* Prevent header overlap */
-            .container { padding: 12px; }
-            .header-titles h1 { font-size: 1.1rem; }
-            .header-logo { height: 35px; }
-            th, td { padding: 10px 4px; font-size: 0.8rem; }
-            h2, .plain-table-title, .overall-header-container h2 { font-size: 1.1rem; }
-            .draft-title { font-size: 1rem; }
-            .toggle-btn { padding: 4px 12px; font-size: 0.75rem; }
-            #divisions-container .division-header-container h2 { font-size: 1.1rem; } 
-            
-            /* Responsive Matches adjustments */
-            .team-name-text { font-size: 0.85rem; }
-            .team-owner { font-size: 0.65rem; }
-            .match-score-block { font-size: 1.0rem; min-width: 45px; }
-            .team-logo-img { width: 24px; height: 24px; }
-            .match-status { width: 32px; }
-            .team-block { gap: 6px; }
-            .match-content { gap: 8px; }
-
-            #standings-table th:nth-child(1), #standings-table td:nth-child(1),
-            #divisions-container table th:nth-child(1), #divisions-container table td:nth-child(1) { width: 10%; }
-            #standings-table th:nth-child(2), #standings-table td:nth-child(2),
-            #divisions-container table th:nth-child(2), #divisions-container table td:nth-child(2) { width: 35%; }
+        .team-icon {
+            width: 18px;
+            height: 18px;
+            object-fit: contain;
+            vertical-align: middle;
         }
     </style>
 </head>
 <body>
 
-<header id="fotmob-header" class="fotmob-header">
-    <div class="header-top" id="header-top">
-        <img src="https://logos-world.net/wp-content/uploads/2023/08/Premier-League-New-Logo.png" alt="Premier League Lion Logo" class="header-logo">
-        <div class="header-titles">
+<div class="container">
+    <div class="header-container">
+        <div class="header-left">
             <h1>La Liga de Los Presidentes</h1>
-            <span class="subtitle">Fantasy EPL</span>
-        </div>
-    </div>
-    <nav class="header-nav">
-        <!-- Currently active page is set to Table -->
-        <a href="table.html" class="nav-link active">Table</a>
-        <a href="fixtures.html" class="nav-link">Fixtures</a>
-        <a href="stats.html" class="nav-link">Stats</a>
-        
-        <div class="dropdown">
-            <button class="nav-link dropbtn">Player Results ▾</button>
-            <div class="dropdown-content">
-                <a href="hef.html">Hef</a>
-                <a href="jamey.html">Jamey</a>
-                <a href="jordan.html">Jordan</a>
-                <a href="nate.html">Nate</a>
-                <a href="wes.html">Wes</a>
+            <!-- Dropdown Menu -->
+            <div class="dropdown">
+                <button onclick="toggleDropdown()" class="dropbtn">Player Results ▼</button>
+                <div id="playerDropdown" class="dropdown-content">
+                    <a href="hef.html">Hef</a>
+                    <a href="jordan.html">Jordan</a>
+                    <a href="wes.html">Wes</a>
+                    <a href="nate.html">Nate</a>
+                    <a href="jamey.html">Jamey</a>
+                </div>
             </div>
         </div>
-    </nav>
-</header>
-
-<div class="container">
-    <!-- Matchday Card Container -->
-    <div id="today-matches-container"></div>
-
-    <div id="status-indicator">Initializing 2026/2027 season data...</div>
-
-    <div class="table-wrapper" style="margin-top: 0;">
-        <table id="standings-table">
-            <thead></thead>
-            <tbody id="standings-body"></tbody>
-        </table>
+        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/f/f2/Premier_League_Logo.svg/1200px-Premier_League_Logo.svg.png" alt="Premier League Lion Logo" class="lion-logo">
     </div>
 
-    <div id="divisions-container"></div>
-    
-    <h2>Season Awards</h2>
-    <div id="season-awards-container" class="stats-grid"></div>
+    <div id="status-indicator">Initializing 2025/2026 season data...</div>
 
-    <h2>View Stats on FotMob</h2>
-    <div class="fotmob-btn-container" style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <a href="https://www.fotmob.com/leagues/47/stats/premier-league/players" target="_blank" class="fotmob-link-btn">Player Stats</a>
-        <a href="https://www.fotmob.com/leagues/47/stats/premier-league/teams" target="_blank" class="fotmob-link-btn">Team Stats</a>
-    </div>
+    <h2>Standings</h2>
+    <table id="standings-table">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th class="text-left">Player & Teams</th>
+                <th>PL</th>
+                <th>W</th>
+                <th>D</th>
+                <th>L</th>
+                <th>GF</th>
+                <th>GA</th>
+                <th>GD</th>
+                <th>PTS</th>
+            </tr>
+        </thead>
+        <tbody id="standings-body">
+        </tbody>
+    </table>
 
-    <div class="table-wrapper">
-        <table id="draft-rank-table">
-            <thead>
-                <tr class="title-row">
-                    <th colspan="6" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
-                        <h2 class="plain-table-title draft-title">Draft Value Performance</h2>
-                    </th>
-                </tr>
-                <tr>
-                    <th>Rank</th>
-                    <th class="text-left">Team</th>
-                    <th>PTS</th>
-                    <th>GD</th>
-                    <th>Pick</th>
-                    <th>Diff</th>
-                </tr>
-            </thead>
-            <tbody id="draft-rank-body"></tbody>
-        </table>
-    </div>
+    <h2>Statistics</h2>
+    <table id="secondary-table">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th class="text-left">Player</th>
+                <th><button onclick="sortSecondaryTable('goldenBoot')">Golden Boot (GF) ↕</button></th>
+                <th><button onclick="sortSecondaryTable('goldenGloves')">Golden Gloves ↕</button></th>
+                <th><button onclick="sortSecondaryTable('GD')">Goal Diff ↕</button></th>
+                <th><button onclick="sortSecondaryTable('ppm')">Points/Match ↕</button></th>
+                <th><button onclick="sortSecondaryTable('defense')">Defense (GA/M) ↕</button></th>
+                <th><button onclick="sortSecondaryTable('offense')">Offense (GF/M) ↕</button></th>
+                <th><button onclick="sortSecondaryTable('pvpWins')">PvP Wins ↕</button></th>
+                <th><button onclick="sortSecondaryTable('pga')">PGA ↕</button></th>
+                <th><button onclick="sortSecondaryTable('ptsPga')">PTS + PGA ↕</button></th>
+            </tr>
+        </thead>
+        <tbody id="secondary-body">
+        </tbody>
+    </table>
 
-    <div class="table-wrapper">
-        <table id="draft-player-table">
-            <colgroup>
-                <col style="width: 6%;">
-                <col style="width: 69%;">
-                <col style="width: 25%;">
-            </colgroup>
-            <thead>
-                <tr class="title-row">
-                    <th colspan="3" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
-                        <h2 class="plain-table-title draft-title">Draft Value Performance by Player</h2>
-                    </th>
-                </tr>
-                <tr>
-                    <th>#</th>
-                    <th class="text-left">Player</th>
-                    <th style="text-align: right; padding-right: 16px;">Total Diff</th>
-                </tr>
-            </thead>
-            <tbody id="draft-player-body"></tbody>
-        </table>
+    <h2>Divisions</h2>
+    <div class="divisions-grid" id="divisions-container">
     </div>
 </div>
 
 <script>
+    // Dropdown toggle logic
+    function toggleDropdown() {
+        document.getElementById("playerDropdown").classList.toggle("show");
+    }
+
+    // Close the dropdown if the user clicks outside of it
+    window.onclick = function(event) {
+        if (!event.target.matches('.dropbtn')) {
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            for (var i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.classList.contains('show')) {
+                    openDropdown.classList.remove('show');
+                }
+            }
+        }
+    }
+
     const draftData = {
         "Hef": ["Arsenal", "Bournemouth", "Nottingham Forest", "Hull City"],
         "Jordan": ["Manchester City", "Brighton", "Brentford", "Ipswich Town"],
         "Wes": ["Liverpool", "Newcastle", "Sunderland", "Coventry City"],
         "Nate": ["Manchester United", "Aston Villa", "Everton", "Fulham"],
         "Jamey": ["Chelsea", "Tottenham", "Crystal Palace", "Leeds United"]
-    };
-
-    const draftPicks = {
-        "Arsenal": 1, "Manchester City": 2, "Liverpool": 3, "Manchester United": 4, "Chelsea": 5,
-        "Tottenham": 6, "Aston Villa": 7, "Newcastle": 8, "Brighton": 9, "Bournemouth": 10,
-        "Nottingham Forest": 11, "Brentford": 12, "Sunderland": 13, "Everton": 14, "Crystal Palace": 15,
-        "Leeds United": 16, "Fulham": 17, "Coventry City": 18, "Ipswich Town": 19, "Hull City": 20
     };
 
     const teamLogos = {
@@ -753,206 +345,15 @@
 
     let cachedPlayerStats = null;
     let cachedTeamStats = null;
-    let overallMode = 'PTS';
+    let currentSecondarySortMetric = 'ptsPga';
+    let currentSecondarySortAscending = false;
 
-    let divisionModes = {
+    let divisionSortState = {
         "Red and Blue Division": 'PTS',
         "Birds and Beasts Division": 'PTS',
         "Field and Forest Division": 'PTS',
         "Cottage and Country Division": 'PTS'
     };
-
-    // --- SWIPE / MATCHDAY CARD GLOBALS ---
-    let allMatchesData = [];
-    let matchDates = []; 
-    let currentMatchDateIndex = -1;
-
-    function processMatchDates(matches) {
-        allMatchesData = matches || [];
-        const datesMap = new Map();
-
-        allMatchesData.forEach(match => {
-            if (!match.utcDate) return;
-            const mDate = new Date(match.utcDate);
-            // Group by local midnight timestamp
-            const midnight = new Date(mDate.getFullYear(), mDate.getMonth(), mDate.getDate()).getTime();
-            datesMap.set(midnight, true);
-        });
-
-        matchDates = Array.from(datesMap.keys()).sort((a, b) => a - b);
-
-        if (currentMatchDateIndex === -1 && matchDates.length > 0) {
-            const now = new Date();
-            const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-            
-            const foundIdx = matchDates.indexOf(todayMidnight);
-            if (foundIdx !== -1) {
-                currentMatchDateIndex = foundIdx;
-            } else {
-                const nextIdx = matchDates.findIndex(t => t > todayMidnight);
-                currentMatchDateIndex = nextIdx !== -1 ? nextIdx : matchDates.length - 1;
-            }
-        }
-    }
-
-    function renderMatchdayCard() {
-        const container = document.getElementById('today-matches-container');
-        if (!container) return;
-
-        if (matchDates.length === 0) {
-            const today = new Date();
-            const formattedDate = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-            container.innerHTML = `
-                <div class="today-card">
-                    <div class="today-header">
-                        <div class="today-header-left">
-                            <svg class="today-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                            <span class="today-header-text">${formattedDate}</span>
-                        </div>
-                    </div>
-                    <div class="no-matches-today">No matches scheduled for today</div>
-                </div>`;
-            return;
-        }
-
-        const targetTime = matchDates[currentMatchDateIndex];
-        const targetDate = new Date(targetTime);
-        const today = new Date();
-        
-        const isTargetToday = targetDate.getFullYear() === today.getFullYear() &&
-                              targetDate.getMonth() === today.getMonth() &&
-                              targetDate.getDate() === today.getDate();
-
-        const dateOptions = { weekday: 'long', month: 'long', day: 'numeric' };
-        const formattedDate = targetDate.toLocaleDateString('en-US', dateOptions);
-
-        const dayMatches = allMatchesData.filter(match => {
-            const mDate = new Date(match.utcDate);
-            const isMatchOnTargetDay = mDate.getFullYear() === targetDate.getFullYear() &&
-                                       mDate.getMonth() === targetDate.getMonth() &&
-                                       mDate.getDate() === targetDate.getDate();
-            
-            return isMatchOnTargetDay || (isTargetToday && ['IN_PLAY', 'PAUSED'].includes(match.status));
-        });
-
-        const disablePrev = currentMatchDateIndex === 0;
-        const disableNext = currentMatchDateIndex === matchDates.length - 1;
-
-        let fixturesHtml = dayMatches.map(match => {
-            const homeName = getShortTeamName(match.homeTeam.name);
-            const awayName = getShortTeamName(match.awayTeam.name);
-            const homeLogo = getLogoByName(match.homeTeam.name) || match.homeTeam.crest || '';
-            const awayLogo = getLogoByName(match.awayTeam.name) || match.awayTeam.crest || '';
-            
-            const homeOwner = getOwnerOfTeam(match.homeTeam.name) || 'Unassigned';
-            const awayOwner = getOwnerOfTeam(match.awayTeam.name) || 'Unassigned';
-
-            let statusHtml = '';
-            let scoreHtml = '';
-
-            if (['IN_PLAY', 'PAUSED'].includes(match.status)) {
-                let liveText = match.status === 'PAUSED' ? 'HT' : match.minute ? match.minute : '';
-                statusHtml = liveText ? `<div class="live-badge">${liveText}</div>` : `<div class="live-badge-text">LIVE</div>`;
-                scoreHtml = `${match.score?.fullTime?.home ?? 0} - ${match.score?.fullTime?.away ?? 0}`;
-            } else if (match.status === 'FINISHED') {
-                statusHtml = `<div class="ft-text">FT</div>`;
-                scoreHtml = `${match.score?.fullTime?.home ?? 0} - ${match.score?.fullTime?.away ?? 0}`;
-            } else {
-                const mTime = new Date(match.utcDate);
-                const timeStr = mTime.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-                const timeParts = timeStr.split(' ');
-                
-                if (timeParts.length === 2) {
-                    scoreHtml = `<div class="time-text">${timeParts[0]}<br>${timeParts[1]}</div>`;
-                } else {
-                    scoreHtml = `<div class="time-text">${timeStr}</div>`;
-                }
-                statusHtml = ``;
-            }
-
-            return `
-                <div class="today-match-row">
-                    <div class="match-status">${statusHtml}</div>
-                    <div class="match-content">
-                        <div class="team-block team-home">
-                            <div class="team-info">
-                                <span class="team-name-text">${homeName}</span>
-                                <span class="team-owner">${homeOwner}</span>
-                            </div>
-                            ${homeLogo ? `<img src="${homeLogo}" class="team-logo-img" alt="${homeName}">` : ''}
-                        </div>
-                        <div class="match-score-block">${scoreHtml}</div>
-                        <div class="team-block team-away">
-                            ${awayLogo ? `<img src="${awayLogo}" class="team-logo-img" alt="${awayName}">` : ''}
-                            <div class="team-info">
-                                <span class="team-name-text">${awayName}</span>
-                                <span class="team-owner">${awayOwner}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-
-        if (dayMatches.length === 0) {
-            fixturesHtml = `<div class="no-matches-today">No matches found for this date.</div>`;
-        }
-
-        container.innerHTML = `
-            <div class="today-card">
-                <div class="today-header">
-                    <div class="today-header-left">
-                        <svg class="today-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                        <span class="today-header-text">${formattedDate}</span>
-                    </div>
-                    <div class="matchday-nav">
-                        <button class="nav-btn ${disablePrev ? 'disabled' : ''}" onclick="changeMatchday(-1)" ${disablePrev ? 'disabled' : ''}>❮</button>
-                        <button class="nav-btn ${disableNext ? 'disabled' : ''}" onclick="changeMatchday(1)" ${disableNext ? 'disabled' : ''}>❯</button>
-                    </div>
-                </div>
-                ${fixturesHtml}
-            </div>
-        `;
-    }
-
-    // Exposed for Chevron Clicks
-    window.changeMatchday = function(direction) {
-        if (direction === -1 && currentMatchDateIndex > 0) {
-            currentMatchDateIndex--;
-            renderMatchdayCard();
-        } else if (direction === 1 && currentMatchDateIndex < matchDates.length - 1) {
-            currentMatchDateIndex++;
-            renderMatchdayCard();
-        }
-    };
-
-    // Setup Swipe Listeners
-    function setupSwipeListeners() {
-        const container = document.getElementById('today-matches-container');
-        let touchstartX = 0;
-        let touchendX = 0;
-
-        container.addEventListener('touchstart', e => {
-            touchstartX = e.changedTouches[0].screenX;
-        }, { passive: true });
-
-        container.addEventListener('touchend', e => {
-            touchendX = e.changedTouches[0].screenX;
-            handleSwipe();
-        }, { passive: true });
-
-        function handleSwipe() {
-            const threshold = 50; // Minimum pixel drag to count as swipe
-            
-            if (touchendX > touchstartX + threshold) {
-                // Swiped right -> Next Day (Per user request mapping)
-                changeMatchday(1);
-            } else if (touchendX < touchstartX - threshold) {
-                // Swiped left/back -> Previous Day
-                changeMatchday(-1);
-            }
-        }
-    }
 
     function initializePlayerStats() {
         let stats = {};
@@ -961,7 +362,7 @@
                 player: player,
                 teams: draftData[player],
                 PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0,
-                goldenBoot: 0, goldenGloves: 0, ppm: 0, gpm: 0, gcpm: 0,
+                goldenBoot: 0, goldenGloves: 0, ppm: 0, defense: 0, offense: 0,
                 pvpWins: 0, pga: 0, ptsPga: 0
             };
         }
@@ -977,8 +378,7 @@
                     team: team,
                     division: divName,
                     owner: owner || "Unassigned",
-                    PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0, PGA: 0, pvpWins: 0, ptsPga: 0,
-                    goldenGloves: 0
+                    PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0, PGA: 0, ptsPga: 0
                 };
             });
         }
@@ -987,18 +387,22 @@
 
     function getOwnerOfTeam(teamName) {
         for (let player in draftData) {
-            if (draftData[player].some(t => teamName.toLowerCase().includes(t.toLowerCase()) || t.toLowerCase().includes(teamName.toLowerCase()))) {
-                return player;
-            }
+            let matched = draftData[player].some(t => 
+                teamName.toLowerCase().includes(t.toLowerCase()) || 
+                t.toLowerCase().includes(teamName.toLowerCase())
+            );
+            if (matched) return player;
         }
         return null;
     }
 
     function findPlayerByTeam(teamName, playerStats) {
         for (let player in playerStats) {
-            if (playerStats[player].teams.some(t => teamName.toLowerCase().includes(t.toLowerCase()) || t.toLowerCase().includes(teamName.toLowerCase()))) {
-                return player;
-            }
+            let matched = playerStats[player].teams.some(t => 
+                teamName.toLowerCase().includes(t.toLowerCase()) || 
+                t.toLowerCase().includes(teamName.toLowerCase())
+            );
+            if (matched) return player;
         }
         return null;
     }
@@ -1012,146 +416,94 @@
         return null;
     }
 
-    function getLogoByName(teamName) {
-        for (let key in teamLogos) {
-            if (teamName.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(teamName.toLowerCase())) {
-                return teamLogos[key];
-            }
+    function sortSecondaryTable(metric) {
+        if (currentSecondarySortMetric === metric) {
+            currentSecondarySortAscending = !currentSecondarySortAscending;
+        } else {
+            currentSecondarySortMetric = metric;
+            currentSecondarySortAscending = (metric === 'defense');
         }
-        return '';
+        if (cachedPlayerStats) {
+            renderSecondaryTable(cachedPlayerStats);
+        }
     }
 
-    function getShortTeamName(name) {
-        let n = name;
-        if (n.includes("Manchester City")) return "Man City";
-        if (n.includes("Manchester United")) return "Man United";
-        if (n.includes("Nottingham Forest")) return "Nottm Forest";
-        if (n.includes("Tottenham Hotspur") || n === "Tottenham") return "Tottenham";
-        if (n.includes("Leeds United")) return "Leeds";
-        if (n.includes("Hull City")) return "Hull";
-        if (n.includes("Ipswich Town")) return "Ipswich";
-        if (n.includes("Sunderland")) return "Sunderland"; 
-        return n.replace(" FC", "").replace(" & Hove Albion", "").replace("A.F.C. ", "").trim();
-    }
-
-    function toggleNestedTableTRs(rowEl, targetClass) {
-        rowEl.classList.toggle('expanded');
-        document.querySelectorAll(`.${targetClass}`).forEach(el => {
-            el.classList.toggle('expanded');
-        });
-    }
-
-    function setOverallMode(mode) {
-        overallMode = mode;
-        if (cachedPlayerStats && cachedTeamStats) renderPrimaryTable(cachedPlayerStats, cachedTeamStats);
-    }
-
-    function toggleDivisionMode(divName, mode) {
-        divisionModes[divName] = mode;
-        if (cachedTeamStats) renderDivisions(cachedTeamStats);
+    function toggleDivisionSort(divName, metric) {
+        divisionSortState[divName] = metric;
+        if (cachedTeamStats) {
+            renderDivisions(cachedTeamStats);
+        }
     }
 
     function renderPrimaryTable(playerStatsObj, teamStatsObj) {
         let playerStatsArray = Object.values(playerStatsObj);
-        
-        if (overallMode === 'PTS') {
-            playerStatsArray.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
-        } else {
-            playerStatsArray.sort((a, b) => b.ptsPga - a.ptsPga || b.pga - a.pga);
-        }
-
-        const primaryTable = document.getElementById('standings-table');
-        
-        let theadHtml = `
-            <tr class="title-row">
-                <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
-                    <div class="overall-header-container">
-                        <h2>Overall Standings</h2>
-                        <div class="toggle-switch">
-                            <button class="toggle-btn ${overallMode === 'PTS' ? 'active' : ''}" onclick="setOverallMode('PTS')">PTS</button>
-                            <button class="toggle-btn ${overallMode === 'PGA' ? 'active' : ''}" onclick="setOverallMode('PGA')">PGA</button>
-                        </div>
-                    </div>
-                </th>
-            </tr>
-        `;
-
-        if (overallMode === 'PTS') {
-            theadHtml += `<tr><th>#</th><th class="text-left">Player</th><th>PL</th><th>W</th><th>D</th><th>L</th><th>+/-</th><th>GD</th><th>PTS</th></tr>`;
-        } else {
-            theadHtml += `<tr><th>#</th><th class="text-left">Player</th><th>PTS</th><th>PvP Wins</th><th>PGA</th><th>PTS+PGA</th></tr>`;
-        }
-        primaryTable.querySelector('thead').innerHTML = theadHtml;
+        playerStatsArray.sort((a, b) => {
+            if (b.PTS !== a.PTS) return b.PTS - a.PTS;
+            if (b.GD !== a.GD) return b.GD - a.GD;
+            return b.GF - a.GF;
+        });
 
         const primaryTbody = document.getElementById('standings-body');
         primaryTbody.innerHTML = '';
 
         playerStatsArray.forEach((p, index) => {
-            const targetClass = `nested-overall-${index}`;
             const tr = document.createElement('tr');
-            tr.className = 'expandable-row';
-            tr.onclick = function() { toggleNestedTableTRs(this, targetClass); };
-
-            const iconsHtml = p.teams.map(t => teamLogos[t] ? `<img src="${teamLogos[t]}" class="team-icon" alt="${t} crest">` : '').join('');
             
-            const playerCell = `
-                <div style="display: flex; align-items: center; gap: 4px;">
-                    ${p.player} <span class="table-chevron">❯</span>
-                </div>
-                <div class="icons-container">${iconsHtml}</div>
+            const teamsWithIconsHtml = p.teams.map(t => {
+                const logoUrl = teamLogos[t] || '';
+                const teamPts = teamStatsObj && teamStatsObj[t] ? teamStatsObj[t].PTS : 0;
+                return `<span class="team-inline"><img src="${logoUrl}" class="team-icon" alt="${t} crest"> ${t} (${teamPts})</span>`;
+            }).join('');
+
+            tr.innerHTML = `
+                <td><strong>${index + 1}</strong></td>
+                <td class="text-left">
+                    <strong>${p.player}</strong>
+                    <div class="teams-list">${teamsWithIconsHtml}</div>
+                </td>
+                <td>${p.PL}</td>
+                <td>${p.W}</td>
+                <td>${p.D}</td>
+                <td>${p.L}</td>
+                <td>${p.GF}</td>
+                <td>${p.GA}</td>
+                <td>${p.GD}</td>
+                <td><strong>${p.PTS}</strong></td>
             `;
-
-            if (overallMode === 'PTS') {
-                tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${p.PL}</td><td>${p.W}</td><td>${p.D}</td><td>${p.L}</td><td>${p.GF}-${p.GA}</td><td>${p.GD > 0 ? '+' + p.GD : p.GD}</td><td><strong>${p.PTS}</strong></td>`;
-            } else {
-                tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${p.PTS}</td><td>${p.pvpWins}</td><td>${p.pga > 0 ? '+' + p.pga : p.pga}</td><td class="highlight-col">${p.ptsPga}</td>`;
-            }
             primaryTbody.appendChild(tr);
+        });
+    }
 
-            let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
-            if (overallMode === 'PTS') {
-                playerTeams.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
-            } else {
-                playerTeams.sort((a, b) => b.ptsPga - a.ptsPga || b.PGA - a.PGA);
+    function renderSecondaryTable(playerStatsObj) {
+        let playerStatsArray = Object.values(playerStatsObj);
+        playerStatsArray.sort((a, b) => {
+            let valA = a[currentSecondarySortMetric];
+            let valB = b[currentSecondarySortMetric];
+            if (valA !== valB) {
+                return currentSecondarySortAscending ? valA - valB : valB - valA;
             }
+            return b.PTS - a.PTS;
+        });
 
-            playerTeams.forEach(t => {
-                let displayName = getShortTeamName(t.team);
+        const secondaryTbody = document.getElementById('secondary-body');
+        secondaryTbody.innerHTML = '';
 
-                const teamNameCell = `
-                    <div class="team-inline" style="padding-left: 10px;">
-                        ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="${t.team}">` : ''}
-                        ${displayName}
-                    </div>
-                `;
-
-                const nestedTr = document.createElement('tr');
-                nestedTr.className = `nested-table-row ${targetClass}`;
-
-                if (overallMode === 'PTS') {
-                    nestedTr.innerHTML = `
-                        <td></td>
-                        <td class="text-left">${teamNameCell}</td>
-                        <td>${t.PL}</td>
-                        <td>${t.W}</td>
-                        <td>${t.D}</td>
-                        <td>${t.L}</td>
-                        <td>${t.GF}-${t.GA}</td>
-                        <td>${t.GD > 0 ? '+'+t.GD : t.GD}</td>
-                        <td><strong>${t.PTS}</strong></td>
-                    `;
-                } else {
-                    nestedTr.innerHTML = `
-                        <td></td>
-                        <td class="text-left">${teamNameCell}</td>
-                        <td>${t.PTS}</td>
-                        <td>${t.pvpWins}</td>
-                        <td>${t.PGA > 0 ? '+'+t.PGA : t.PGA}</td>
-                        <td><strong>${t.ptsPga}</strong></td>
-                    `;
-                }
-                primaryTbody.appendChild(nestedTr);
-            });
+        playerStatsArray.forEach((p, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${index + 1}</strong></td>
+                <td class="text-left"><strong>${p.player}</strong></td>
+                <td>${p.goldenBoot}</td>
+                <td>${p.goldenGloves}</td>
+                <td>${p.GD > 0 ? '+' + p.GD : p.GD}</td>
+                <td>${p.ppm.toFixed(2)}</td>
+                <td>${p.defense.toFixed(2)}</td>
+                <td>${p.offense.toFixed(2)}</td>
+                <td>${p.pvpWins}</td>
+                <td>${p.pga}</td>
+                <td class="highlight-col">${p.ptsPga}</td>
+            `;
+            secondaryTbody.appendChild(tr);
         });
     }
 
@@ -1160,323 +512,69 @@
         container.innerHTML = '';
 
         for (let divName in divisionData) {
-            const mode = divisionModes[divName];
+            const divCard = document.createElement('div');
+            divCard.className = 'division-card';
+
             const teamsInDiv = divisionData[divName].map(t => teamStatsObj[t]).filter(Boolean);
+            const sortMetric = divisionSortState[divName] || 'PTS';
 
-            if (mode === 'PTS') teamsInDiv.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
-            else teamsInDiv.sort((a, b) => b.ptsPga - a.ptsPga || b.PGA - a.PGA);
+            teamsInDiv.sort((a, b) => {
+                if (b[sortMetric] !== a[sortMetric]) {
+                    return b[sortMetric] - a[sortMetric];
+                }
+                return b.GD - a.GD;
+            });
 
-            let html = `<div class="table-wrapper"><table><thead>
-                <tr class="title-row">
-                    <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
-                        <div class="division-header-container">
-                            <h2>${divName}</h2>
-                            <div class="toggle-switch">
-                                <button class="toggle-btn ${mode === 'PTS' ? 'active' : ''}" onclick="toggleDivisionMode('${divName}', 'PTS')">PTS</button>
-                                <button class="toggle-btn ${mode === 'PGA' ? 'active' : ''}" onclick="toggleDivisionMode('${divName}', 'PGA')">PGA</button>
-                            </div>
-                        </div>
-                    </th>
-                </tr>`;
-
-            if (mode === 'PTS') html += `<tr><th>#</th><th class="text-left">Team</th><th>PL</th><th>W</th><th>D</th><th>L</th><th>+/-</th><th>GD</th><th>PTS</th></tr>`;
-            else html += `<tr><th>#</th><th class="text-left">Team</th><th>PTS</th><th>PvP Wins</th><th>PGA</th><th>PTS+PGA</th></tr>`;
-
-            html += `</thead><tbody>`;
+            let tableHTML = `
+                <h3>${divName}</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th class="text-left">Team (Owner)</th>
+                            <th>PL</th>
+                            <th>W</th>
+                            <th>D</th>
+                            <th>L</th>
+                            <th>GD</th>
+                            <th><button onclick="toggleDivisionSort('${divName}', 'PTS')">PTS ↕</button></th>
+                            <th>PGA</th>
+                            <th><button onclick="toggleDivisionSort('${divName}', 'ptsPga')">PTS+PGA ↕</button></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
 
             teamsInDiv.forEach((t, idx) => {
-                let displayName = getShortTeamName(t.team);
-                
-                const teamCellHTML = `<div class="team-inline">${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="crest">` : ''}<div style="line-height: 1.2;"><div style="font-weight: 600; color: #1a1a1a;">${displayName}</div><div style="font-size: 0.70rem; color: #888;">${t.owner}</div></div></div>`;
-
-                if (mode === 'PTS') {
-                    html += `<tr><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PL}</td><td>${t.W}</td><td>${t.D}</td><td>${t.L}</td><td>${t.GF}-${t.GA}</td><td>${t.GD > 0 ? '+' + t.GD : t.GD}</td><td><strong>${t.PTS}</strong></td></tr>`;
-                } else {
-                    html += `<tr><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PTS}</td><td>${t.pvpWins}</td><td>${t.PGA > 0 ? '+' + t.PGA : t.PGA}</td><td class="highlight-col">${t.ptsPga}</td></tr>`;
-                }
-            });
-
-            html += `</tbody></table></div>`;
-            container.innerHTML += html;
-        }
-    }
-
-    function toggleCard(titleEl) {
-        const card = titleEl.closest('.stat-card');
-        if (card.classList.contains('collapsed')) {
-            card.classList.remove('collapsed');
-            card.classList.add('expanded');
-        } else {
-            card.classList.remove('expanded');
-            card.classList.add('collapsed');
-        }
-    }
-
-    function toggleNestedPlayer(playerRowEl) {
-        const wrapper = playerRowEl.closest('.stat-player-wrapper');
-        wrapper.classList.toggle('expanded');
-    }
-
-    function renderSeasonAwards(playerStatsObj, teamStatsObj) {
-        const container = document.getElementById('season-awards-container');
-        container.innerHTML = '';
-        const players = Object.values(playerStatsObj);
-
-        function buildAwardCard(config) {
-            const card = document.createElement('div');
-            card.className = 'stat-card collapsed';
-
-            let html = `
-                <div class="stat-card-title" onclick="toggleCard(this)">
-                    <span>${config.title}</span>
-                    <span class="chevron">❯</span>
-                </div>
-                <div class="stat-card-body">
-            `;
-
-            config.players.forEach((p, idx) => {
-                const iconsHtml = p.teams.map(t => teamLogos[t] ? `<img src="${teamLogos[t]}" class="team-icon" title="${t}" alt="${t}">` : '').join('');
-
-                let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
-                playerTeams.sort((a, b) => (config.teamRaw(b) - config.teamRaw(a)) * (config.sortDir || 1));
-
-                let teamsHtml = '';
-                playerTeams.forEach(t => {
-                    let displayName = getShortTeamName(t.team);
-
-                    teamsHtml += `
-                        <div class="nested-team-row">
-                            <div class="nested-team-name">
-                                ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="nested-team-icon" alt="${t.team}">` : ''}
-                                ${displayName}
-                            </div>
-                            <div class="stat-value ${config.pillClass}" style="transform: scale(0.9); opacity: 0.9;">
-                                ${config.teamVal(t)}
-                            </div>
-                        </div>
-                    `;
-                });
-
-                html += `
-                    <div class="stat-player-wrapper">
-                        <div class="stat-player-row" onclick="toggleNestedPlayer(this)">
-                            <div class="stat-rank">${idx + 1}</div>
-                            <div class="stat-player-info">
-                                <span>${p.player}</span>
-                                <div class="stat-player-icons">${iconsHtml}</div>
-                            </div>
-                            <div class="chevron-small">❯</div>
-                            <div class="stat-value ${config.pillClass}">${config.playerVal(p)}</div>
-                        </div>
-                        <div class="nested-teams-container">
-                            ${teamsHtml}
-                        </div>
-                    </div>
+                const logoUrl = teamLogos[t.team] || '';
+                tableHTML += `
+                    <tr>
+                        <td><strong>${idx + 1}</strong></td>
+                        <td class="text-left">
+                            <span class="team-inline">
+                                ${logoUrl ? `<img src="${logoUrl}" class="team-icon" alt="${t.team} crest">` : ''}
+                                <strong>${t.team}</strong> <span style="font-size: 0.8rem; color: #586069;">(${t.owner})</span>
+                            </span>
+                        </td>
+                        <td>${t.PL}</td>
+                        <td>${t.W}</td>
+                        <td>${t.D}</td>
+                        <td>${t.L}</td>
+                        <td>${t.GD > 0 ? '+' + t.GD : t.GD}</td>
+                        <td><strong>${t.PTS}</strong></td>
+                        <td>${t.PGA}</td>
+                        <td class="highlight-col">${t.ptsPga}</td>
+                    </tr>
                 `;
             });
 
-            html += `</div>`;
-            card.innerHTML = html;
-            return card;
-        }
-
-        const awardConfigs = [
-            {
-                title: "Golden Boot",
-                players: [...players].sort((a,b) => b.goldenBoot - a.goldenBoot || b.PTS - a.PTS),
-                playerVal: p => p.goldenBoot, teamVal: t => t.GF, teamRaw: t => t.GF,
-                pillClass: "pill-green", sortDir: 1
-            },
-            {
-                title: "Golden Gloves (Clean Sheets)",
-                players: [...players].sort((a,b) => b.goldenGloves - a.goldenGloves || b.PTS - a.PTS),
-                playerVal: p => p.goldenGloves, teamVal: t => t.goldenGloves, teamRaw: t => t.goldenGloves,
-                pillClass: "pill-blue", sortDir: 1
-            },
-            {
-                title: "PTS per match",
-                players: [...players].sort((a,b) => b.ppm - a.ppm || b.PTS - a.PTS),
-                playerVal: p => p.ppm.toFixed(2), teamVal: t => (t.PL > 0 ? (t.PTS / t.PL) : 0).toFixed(2), teamRaw: t => (t.PL > 0 ? (t.PTS / t.PL) : 0),
-                pillClass: "pill-purple", sortDir: 1
-            },
-            {
-                title: "Goals per match",
-                players: [...players].sort((a,b) => b.gpm - a.gpm || b.PTS - a.PTS),
-                playerVal: p => p.gpm.toFixed(2), teamVal: t => (t.PL > 0 ? (t.GF / t.PL) : 0).toFixed(2), teamRaw: t => (t.PL > 0 ? (t.GF / t.PL) : 0),
-                pillClass: "pill-blue", sortDir: 1
-            },
-            {
-                title: "Goals conceded per match",
-                players: [...players].sort((a,b) => a.gcpm - b.gcpm || b.PTS - a.PTS),
-                playerVal: p => p.gcpm.toFixed(2), teamVal: t => (t.PL > 0 ? (t.GA / t.PL) : 0).toFixed(2), teamRaw: t => (t.PL > 0 ? (t.GA / t.PL) : 0),
-                pillClass: "pill-red", sortDir: -1
-            },
-            {
-                title: "Goal difference",
-                players: [...players].sort((a,b) => b.GD - a.GD || b.PTS - a.PTS),
-                playerVal: p => (p.GD > 0 ? '+' + p.GD : p.GD), teamVal: t => (t.GD > 0 ? '+' + t.GD : t.GD), teamRaw: t => t.GD,
-                pillClass: "pill-gray", sortDir: 1
-            },
-            {
-                title: "PvP wins",
-                players: [...players].sort((a,b) => b.pvpWins - a.pvpWins || b.PTS - a.PTS),
-                playerVal: p => p.pvpWins, teamVal: t => t.pvpWins, teamRaw: t => t.pvpWins,
-                pillClass: "pill-purple", sortDir: 1
-            },
-            {
-                title: "PGA",
-                players: [...players].sort((a,b) => b.pga - a.pga || b.PTS - a.PTS),
-                playerVal: p => (p.pga > 0 ? '+' + p.pga : p.pga), teamVal: t => (t.PGA > 0 ? '+' + t.PGA : t.PGA), teamRaw: t => t.PGA,
-                pillClass: "pill-green", sortDir: 1
-            },
-            {
-                title: "PTS + PGA",
-                players: [...players].sort((a,b) => b.ptsPga - a.ptsPga || b.PTS - a.PTS),
-                playerVal: p => p.ptsPga, teamVal: t => t.ptsPga, teamRaw: t => t.ptsPga,
-                pillClass: "pill-blue", sortDir: 1
-            }
-        ];
-
-        awardConfigs.forEach(config => container.appendChild(buildAwardCard(config)));
-    }
-
-    function renderDraftRankTable(teamStatsObj) {
-        const teamsArray = Object.values(teamStatsObj).sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
-        const tbody = document.getElementById('draft-rank-body');
-        tbody.innerHTML = '';
-
-        teamsArray.forEach((t, idx) => {
-            const rank = idx + 1;
-            const pick = draftPicks[t.team] || rank;
-            const diff = pick - rank;
-
-            let pillClass = 'pill-gray';
-            let formattedDiff = '0';
-            if (diff > 0) { pillClass = 'pill-green'; formattedDiff = `+${diff}`; }
-            else if (diff < 0) { pillClass = 'pill-red'; formattedDiff = `${diff}`; }
-
-            let displayName = getShortTeamName(t.team);
-
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td class="fotmob-rank">${rank}</td>
-                <td class="text-left">
-                    <div class="team-inline">
-                        ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="crest">` : ''}
-                        <div style="line-height: 1.2;">
-                            <div style="font-weight: 600; color: #1a1a1a;">${displayName}</div>
-                            <div style="font-size: 0.75rem; color: #888;">${t.owner}</div>
-                        </div>
-                    </div>
-                </td>
-                <td><strong>${t.PTS}</strong></td>
-                <td>${t.GD > 0 ? '+' + t.GD : t.GD}</td>
-                <td>${pick}</td>
-                <td><span class="stat-value ${pillClass}">${formattedDiff}</span></td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    function renderPlayerDraftValueTable(playerStatsObj, teamStatsObj) {
-        const teamsArray = Object.values(teamStatsObj).sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
-        const teamRankMap = {};
-        teamsArray.forEach((t, idx) => { teamRankMap[t.team] = idx + 1; });
-
-        const players = Object.values(playerStatsObj);
-        players.forEach(p => {
-            let totalDiff = 0;
-            p.teams.forEach(teamName => {
-                const rank = teamRankMap[teamName] || 20; 
-                const pick = draftPicks[teamName] || 20;
-                totalDiff += (pick - rank);
-            });
-            p.totalDraftDiff = totalDiff;
-        });
-
-        players.sort((a, b) => b.totalDraftDiff - a.totalDraftDiff);
-        const tbody = document.getElementById('draft-player-body');
-        tbody.innerHTML = '';
-
-        players.forEach((p, idx) => {
-            const targetClass = `nested-draft-${idx}`;
-            const tr = document.createElement('tr');
-            tr.className = 'expandable-row';
-            tr.onclick = function() { toggleNestedTableTRs(this, targetClass); };
-
-            const iconsHtml = p.teams.map(t => teamLogos[t] ? `<img src="${teamLogos[t]}" class="team-icon" alt="crest">` : '').join('');
-            
-            const playerCell = `
-                <div style="display: flex; align-items: center; gap: 4px;">
-                    ${p.player} <span class="table-chevron">❯</span>
-                </div>
-                <div class="icons-container">${iconsHtml}</div>
+            tableHTML += `
+                    </tbody>
+                </table>
             `;
 
-            let overallPillClass = 'pill-gray';
-            let overallFormattedDiff = '0';
-            if (p.totalDraftDiff > 0) { overallPillClass = 'pill-green'; overallFormattedDiff = `+${p.totalDraftDiff}`; }
-            else if (p.totalDraftDiff < 0) { overallPillClass = 'pill-red'; overallFormattedDiff = `${p.totalDraftDiff}`; }
-
-            tr.innerHTML = `
-                <td class="fotmob-rank">${idx + 1}</td>
-                <td class="fotmob-player">${playerCell}</td>
-                <td><span class="stat-value ${overallPillClass}">${overallFormattedDiff}</span></td>
-            `;
-            tbody.appendChild(tr);
-
-            let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
-            
-            playerTeams.sort((a, b) => {
-                const diffA = (draftPicks[a.team] || 20) - (teamRankMap[a.team] || 20);
-                const diffB = (draftPicks[b.team] || 20) - (teamRankMap[b.team] || 20);
-                return diffB - diffA; 
-            });
-
-            playerTeams.forEach(t => {
-                const rank = teamRankMap[t.team] || 20;
-                const pick = draftPicks[t.team] || 20;
-                const diff = pick - rank;
-                
-                let pillClass = 'pill-gray';
-                let formattedDiff = '0';
-                if (diff > 0) { pillClass = 'pill-green'; formattedDiff = `+${diff}`; }
-                else if (diff < 0) { pillClass = 'pill-red'; formattedDiff = `${diff}`; }
-
-                let displayName = getShortTeamName(t.team);
-
-                const nestedTr = document.createElement('tr');
-                nestedTr.className = `nested-table-row ${targetClass}`;
-
-                nestedTr.innerHTML = `
-                    <td></td>
-                    <td class="text-left">
-                        <div style="display: flex; align-items: center; gap: 8px; padding-left: 10px; flex-wrap: wrap;">
-                            ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="${t.team}">` : ''}
-                            <span>${displayName}</span>
-                            <span style="color:#888; font-size: 0.75rem; white-space: nowrap;">(Pick: ${pick}, Rank: ${rank})</span>
-                        </div>
-                    </td>
-                    <td><span class="stat-value ${pillClass}" style="transform: scale(0.9); opacity: 0.9;">${formattedDiff}</span></td>
-                `;
-                tbody.appendChild(nestedTr);
-            });
-        });
-    }
-
-    async function refreshMatchdayCard() {
-        try {
-            const response = await fetch('/api/standings');
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const data = await response.json();
-            
-            if (data.matches) {
-                // Update dates silently without overriding the currently selected swipe index
-                processMatchDates(data.matches); 
-                renderMatchdayCard(); 
-            }
-        } catch (error) {
-            console.error("Error refreshing matchday card:", error);
+            divCard.innerHTML = tableHTML;
+            container.appendChild(divCard);
         }
     }
 
@@ -1486,40 +584,29 @@
         const statusEl = document.getElementById('status-indicator');
 
         renderPrimaryTable(playerStats, teamStats);
+        renderSecondaryTable(playerStats);
         renderDivisions(teamStats);
-        renderSeasonAwards(playerStats, teamStats);
-        renderDraftRankTable(teamStats);
-        renderPlayerDraftValueTable(playerStats, teamStats);
 
-        const cacheKey = 'pl_match_data';
-        const cacheTimeKey = 'pl_match_data_time';
-        const cacheDuration = 60 * 1000;
+        const targetUrl = 'https://api.football-data.org/v4/competitions/PL/matches?season=2025';
+        const myApiKey = 'fd1641ba7ef0434bb6671c443aa8ec93';
 
         try {
-            let data;
-            const now = new Date().getTime();
-            const cachedTime = localStorage.getItem(cacheTimeKey);
-            const cachedData = localStorage.getItem(cacheKey);
+            const response = await fetch(targetUrl, {
+                headers: { 'X-Auth-Token': myApiKey }
+            });
 
-            if (cachedData && cachedTime && (now - cachedTime < cacheDuration)) {
-                data = JSON.parse(cachedData);
-            } else {
-                const response = await fetch('/api/standings');
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                data = await response.json();
-                localStorage.setItem(cacheKey, JSON.stringify(data));
-                localStorage.setItem(cacheTimeKey, now.toString());
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
+            const data = await response.json();
             let gamesProcessed = 0;
 
             if (data.matches) {
-                processMatchDates(data.matches);
-                renderMatchdayCard();
-
                 data.matches.forEach(match => {
                     if (match.status === 'FINISHED') {
                         gamesProcessed++;
+
                         const homeTeamName = match.homeTeam.name;
                         const awayTeamName = match.awayTeam.name;
                         const homeScore = match.score.fullTime.home;
@@ -1532,24 +619,40 @@
 
                         if (homePlayer) {
                             let pStat = playerStats[homePlayer];
-                            pStat.PL += 1; pStat.GF += homeScore; pStat.GA += awayScore;
+                            pStat.PL += 1;
+                            pStat.GF += homeScore;
+                            pStat.GA += awayScore;
                             pStat.goldenBoot += homeScore;
                             if (awayScore === 0) pStat.goldenGloves += 1;
 
-                            if (homeScore > awayScore) { pStat.W += 1; pStat.PTS += 3; }
-                            else if (homeScore === awayScore) { pStat.D += 1; pStat.PTS += 1; }
-                            else pStat.L += 1;
+                            if (homeScore > awayScore) {
+                                pStat.W += 1;
+                                pStat.PTS += 3;
+                            } else if (homeScore === awayScore) {
+                                pStat.D += 1;
+                                pStat.PTS += 1;
+                            } else {
+                                pStat.L += 1;
+                            }
                         }
 
                         if (awayPlayer) {
                             let pStat = playerStats[awayPlayer];
-                            pStat.PL += 1; pStat.GF += awayScore; pStat.GA += homeScore;
+                            pStat.PL += 1;
+                            pStat.GF += awayScore;
+                            pStat.GA += homeScore;
                             pStat.goldenBoot += awayScore;
                             if (homeScore === 0) pStat.goldenGloves += 1;
 
-                            if (awayScore > homeScore) { pStat.W += 1; pStat.PTS += 3; }
-                            else if (awayScore === homeScore) { pStat.D += 1; pStat.PTS += 1; }
-                            else pStat.L += 1;
+                            if (awayScore > homeScore) {
+                                pStat.W += 1;
+                                pStat.PTS += 3;
+                            } else if (awayScore === homeScore) {
+                                pStat.D += 1;
+                                pStat.PTS += 1;
+                            } else {
+                                pStat.L += 1;
+                            }
                         }
 
                         if (homePlayer && awayPlayer && homePlayer !== awayPlayer) {
@@ -1565,26 +668,40 @@
 
                         if (homeTeamKey) {
                             let t = teamStats[homeTeamKey];
-                            t.PL += 1; t.GF += homeScore; t.GA += awayScore;
-                            if (awayScore === 0) t.goldenGloves += 1;
-                            
+                            t.PL += 1;
+                            t.GF += homeScore;
+                            t.GA += awayScore;
                             if (homeScore > awayScore) {
-                                t.W += 1; t.PTS += 3;
-                                if (awayPlayer && awayPlayer !== t.owner) { t.PGA += (homeScore - awayScore); t.pvpWins += 1; }
-                            } else if (homeScore === awayScore) { t.D += 1; t.PTS += 1; }
-                            else t.L += 1;
+                                t.W += 1;
+                                t.PTS += 3;
+                                if (awayPlayer && awayPlayer !== t.owner) {
+                                    t.PGA += (homeScore - awayScore);
+                                }
+                            } else if (homeScore === awayScore) {
+                                t.D += 1;
+                                t.PTS += 1;
+                            } else {
+                                t.L += 1;
+                            }
                         }
 
                         if (awayTeamKey) {
                             let t = teamStats[awayTeamKey];
-                            t.PL += 1; t.GF += awayScore; t.GA += homeScore;
-                            if (homeScore === 0) t.goldenGloves += 1;
-
+                            t.PL += 1;
+                            t.GF += awayScore;
+                            t.GA += homeScore;
                             if (awayScore > homeScore) {
-                                t.W += 1; t.PTS += 3;
-                                if (homePlayer && homePlayer !== t.owner) { t.PGA += (awayScore - homeScore); t.pvpWins += 1; }
-                            } else if (homeScore === awayScore) { t.D += 1; t.PTS += 1; }
-                            else t.L += 1;
+                                t.W += 1;
+                                t.PTS += 3;
+                                if (homePlayer && homePlayer !== t.owner) {
+                                    t.PGA += (awayScore - homeScore);
+                                }
+                            } else if (awayScore === homeScore) {
+                                t.D += 1;
+                                t.PTS += 1;
+                            } else {
+                                t.L += 1;
+                            }
                         }
                     }
                 });
@@ -1594,8 +711,8 @@
                 let p = playerStats[player];
                 p.GD = p.GF - p.GA;
                 p.ppm = p.PL > 0 ? (p.PTS / p.PL) : 0;
-                p.gpm = p.PL > 0 ? (p.GF / p.PL) : 0;
-                p.gcpm = p.PL > 0 ? (p.GA / p.PL) : 0;
+                p.defense = p.PL > 0 ? (p.GA / p.PL) : 0;
+                p.offense = p.PL > 0 ? (p.GF / p.PL) : 0;
                 p.ptsPga = p.PTS + p.pga;
             }
 
@@ -1609,12 +726,10 @@
             cachedTeamStats = teamStats;
 
             renderPrimaryTable(playerStats, teamStats);
+            renderSecondaryTable(playerStats);
             renderDivisions(teamStats);
-            renderSeasonAwards(playerStats, teamStats);
-            renderDraftRankTable(teamStats);
-            renderPlayerDraftValueTable(playerStats, teamStats);
 
-            statusEl.textContent = `Successfully processed 2026/2027 season data (${gamesProcessed} completed matches evaluated).`;
+            statusEl.textContent = `Successfully processed 2025/2026 season data (${gamesProcessed} completed matches evaluated).`;
 
         } catch (error) {
             console.error("Error fetching match data:", error);
@@ -1622,32 +737,7 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        setupSwipeListeners();
-        fetchAndUpdateStandings();
-    });
-
-    // Auto-update ONLY the matchday card every 30 seconds
-    setInterval(refreshMatchdayCard, 30000);
-
-    // FotMob Style Header Scroll Logic
-    let lastScrollTop = 0;
-    const headerTop = document.getElementById('header-top');
-
-    window.addEventListener('scroll', function() {
-        let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        
-        // If scrolling down and past the threshold (50px)
-        if (scrollTop > lastScrollTop && scrollTop > 50) {
-            headerTop.classList.add('shrink');
-        } 
-        // If scrolling up
-        else if (scrollTop < lastScrollTop) {
-            headerTop.classList.remove('shrink');
-        }
-        
-        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // For Mobile or negative scrolling
-    }, false);
+    document.addEventListener('DOMContentLoaded', fetchAndUpdateStandings);
 </script>
 
 </body>
