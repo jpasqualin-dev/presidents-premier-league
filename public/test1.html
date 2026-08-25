@@ -24,22 +24,32 @@
 
         .header-container {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #38003c;
-            padding-bottom: 10px;
+            justify-content: space-between;
+            min-height: 60px;
+            padding: 0 14px;
             margin-bottom: 15px;
+            border-radius: 4px;
+            background-color: #f4f6f8;
+            background-image: url("header-background_new.png");
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
         }
 
         h1 {
             margin: 0;
-            color: #1a1a1a;
-            font-size: 2rem;
+            color: #38003c;
+            font-size: 1.45rem;
+            line-height: 1.05;
+            text-align: left;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.8);
         }
 
         .lion-logo {
-            height: 65px;
-            width: auto;
+            display: block;
+            width: 52px;
+            height: 52px;
             object-fit: contain;
         }
 
@@ -386,7 +396,7 @@
         #divisions-container .division-header-container { align-items: center; flex-wrap: wrap; gap: 8px; }
         #divisions-container .division-header-container h2 { font-size: 1.4rem; white-space: normal; line-height: 1.2; flex: 1; }
 
-        .toggle-switch { display: inline-flex; background-color: #e5e5ea; border-radius: 20px; padding: 4px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.08); flex-shrink: 0; }
+        .toggle-switch { display: inline-flex; background-color: #e5e5ea; border-radius: 20px; padding: 4px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.08); flex-shrink: 0; touch-action: pan-x; }
         .toggle-btn { background-color: transparent; color: #666; border: none; padding: 6px 16px; border-radius: 16px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.25s ease; font-family: inherit; }
         .toggle-btn.active { background-color: #ffffff; color: #1a1a1a; box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 0 1px rgba(0,0,0,0.05); }
 
@@ -466,8 +476,8 @@
 
 <div class="container">
     <div class="header-container">
-        <h1>La Liga de Los Presidentes</h1>
-        <img src="https://logos-world.net/wp-content/uploads/2023/08/Premier-League-New-Logo.png" alt="Premier League Lion Logo" class="lion-logo">
+        <h1>Presidents<br>Premier League</h1>
+        <img src="lion-logo.png" alt="Premier League Lion Logo" class="lion-logo">
     </div>
 
     <!-- Matchday Card Container -->
@@ -768,12 +778,19 @@
         const container = document.getElementById('today-matches-container');
         let touchstartX = 0;
         let touchendX = 0;
+        let ignoreTouch = false;
 
         container.addEventListener('touchstart', e => {
+            ignoreTouch = Boolean(e.target.closest('.toggle-switch'));
+            if (ignoreTouch) return;
             touchstartX = e.changedTouches[0].screenX;
         }, { passive: true });
 
         container.addEventListener('touchend', e => {
+            if (ignoreTouch) {
+                ignoreTouch = false;
+                return;
+            }
             touchendX = e.changedTouches[0].screenX;
             handleSwipe();
         }, { passive: true });
@@ -789,6 +806,45 @@
                 changeMatchday(1);
             }
         }
+    }
+
+    function setupToggleSwipeListeners() {
+        let activeToggle = null;
+        let touchstartX = 0;
+
+        document.addEventListener('touchstart', e => {
+            activeToggle = e.target.closest('.toggle-switch');
+            if (activeToggle) touchstartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', e => {
+            if (!activeToggle) return;
+
+            const toggle = activeToggle;
+            activeToggle = null;
+            const touchendX = e.changedTouches[0].screenX;
+            const distance = touchendX - touchstartX;
+
+            if (Math.abs(distance) < 50) return;
+
+            const mode = distance < 0 ? 'PTS' : 'PGA';
+            if (toggle.dataset.toggleGroup === 'overall') {
+                setOverallMode(mode);
+            } else {
+                toggleDivisionMode(toggle.dataset.toggleGroup, mode);
+            }
+
+            toggle.dataset.swipeClickSuppressed = 'true';
+        }, { passive: true });
+
+        document.addEventListener('click', e => {
+            const toggle = e.target.closest('.toggle-switch');
+            if (toggle?.dataset.swipeClickSuppressed !== 'true') return;
+
+            delete toggle.dataset.swipeClickSuppressed;
+            e.preventDefault();
+            e.stopPropagation();
+        }, true);
     }
 
     function initializePlayerStats() {
@@ -904,7 +960,7 @@
                 <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
                     <div class="overall-header-container">
                         <h2>Overall Standings</h2>
-                        <div class="toggle-switch">
+                        <div class="toggle-switch" data-toggle-group="overall">
                             <button class="toggle-btn ${overallMode === 'PTS' ? 'active' : ''}" onclick="setOverallMode('PTS')">PTS</button>
                             <button class="toggle-btn ${overallMode === 'PGA' ? 'active' : ''}" onclick="setOverallMode('PGA')">PGA</button>
                         </div>
@@ -1008,7 +1064,7 @@
                     <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
                         <div class="division-header-container">
                             <h2>${divName}</h2>
-                            <div class="toggle-switch">
+                            <div class="toggle-switch" data-toggle-group="${divName}">
                                 <button class="toggle-btn ${mode === 'PTS' ? 'active' : ''}" onclick="toggleDivisionMode('${divName}', 'PTS')">PTS</button>
                                 <button class="toggle-btn ${mode === 'PGA' ? 'active' : ''}" onclick="toggleDivisionMode('${divName}', 'PGA')">PGA</button>
                             </div>
@@ -1463,6 +1519,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         setupSwipeListeners();
+        setupToggleSwipeListeners();
         fetchAndUpdateStandings();
     });
 
