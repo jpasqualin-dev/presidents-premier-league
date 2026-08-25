@@ -299,7 +299,10 @@
         /* Tables */
         .table-wrapper {
             width: 100%;
-            overflow: visible;
+            max-height: calc(100vh - var(--table-header-top, 0px) - var(--card-header-height, 48px) - 16px);
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         table {
@@ -319,7 +322,7 @@
 
         thead {
             position: sticky;
-            top: calc(var(--table-header-top, 0px) + var(--card-header-height, 48px));
+            top: 0;
             z-index: 30;
         }
 
@@ -350,11 +353,8 @@
         }
 
         .content-area > .fixture-card:first-child .card-header {
-            position: sticky;
-            top: var(--table-header-top, 0px);
-            z-index: 29;
-            background: var(--bg-color);
-            box-shadow: 0 2px 0 var(--card-bg), 0 6px 10px -6px rgba(0,0,0,0.18);
+            background: var(--card-bg);
+            box-shadow: 0 2px 0 var(--card-bg);
         }
 
         .content-area > .fixture-card:first-child .card-header::before {
