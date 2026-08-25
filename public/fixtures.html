@@ -33,6 +33,18 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            height: var(--fixtures-header-top, 0px);
+            z-index: 39;
+            background: var(--bg-color);
+            pointer-events: none;
+        }
+
         .main-container {
             max-width: 800px;
             margin: 0 auto;
@@ -77,10 +89,9 @@
 
         .sticky-nav-wrapper {
             position: sticky;
-            top: 65px;
+            top: var(--fixtures-header-height, 65px);
             z-index: 40;
-            background-color: rgba(244, 246, 248, 0.95);
-            backdrop-filter: blur(8px);
+            background-color: var(--bg-color);
         }
 
         .site-menu {
@@ -944,8 +955,35 @@
         }
     }
 
-    // Initialize application on page load
-    document.addEventListener('DOMContentLoaded', fetchMatchData);
+    function updateFixturesHeaderOffset() {
+        const header = document.querySelector('.header-container');
+        const navControls = document.querySelector('.pills-nav-container');
+        if (!header || !navControls) return;
+
+        document.documentElement.style.setProperty(
+            '--fixtures-header-height',
+            `${Math.ceil(header.getBoundingClientRect().height)}px`
+        );
+        document.documentElement.style.setProperty(
+            '--fixtures-header-top',
+            `${Math.ceil(navControls.getBoundingClientRect().bottom)}px`
+        );
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        updateFixturesHeaderOffset();
+        window.addEventListener('resize', updateFixturesHeaderOffset);
+        window.addEventListener('scroll', updateFixturesHeaderOffset, { passive: true });
+
+        const header = document.querySelector('.header-container');
+        const navControls = document.querySelector('.pills-nav-container');
+        if ('ResizeObserver' in window) {
+            if (header) new ResizeObserver(updateFixturesHeaderOffset).observe(header);
+            if (navControls) new ResizeObserver(updateFixturesHeaderOffset).observe(navControls);
+        }
+
+        fetchMatchData();
+    });
 </script>
 </body>
 </html>
