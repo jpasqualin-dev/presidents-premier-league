@@ -364,6 +364,18 @@
             z-index: 1;
         }
 
+        .content-area > .fixture-card:first-child {
+            padding-bottom: calc(var(--card-header-height, 48px) + var(--table-header-height, 48px));
+        }
+
+        tbody tr:last-child td:first-child {
+            border-bottom-left-radius: 16px;
+        }
+
+        tbody tr:last-child td:last-child {
+            border-bottom-right-radius: 16px;
+        }
+
         .text-left { text-align: left !important; }
         .fotmob-rank { width: 25px; font-weight: 600; color: #1a1a1a; }
         .fotmob-player { text-align: left; font-weight: 600; color: #1a1a1a; }
@@ -809,7 +821,9 @@
         if (!navControls) return;
 
         const cardHeader = document.querySelector('.content-area > .fixture-card:first-child .card-header');
+        const tableHeader = document.querySelector('.content-area > .fixture-card:first-child thead');
         const cardHeaderHeight = cardHeader ? Math.ceil(cardHeader.getBoundingClientRect().height) : 48;
+        const tableHeaderHeight = tableHeader ? Math.ceil(tableHeader.getBoundingClientRect().height) : 48;
 
         document.documentElement.style.setProperty(
             '--table-header-top',
@@ -818,6 +832,10 @@
         document.documentElement.style.setProperty(
             '--card-header-height',
             `${cardHeaderHeight}px`
+        );
+        document.documentElement.style.setProperty(
+            '--table-header-height',
+            `${tableHeaderHeight}px`
         );
     }
 
