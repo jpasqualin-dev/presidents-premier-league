@@ -225,6 +225,26 @@
             gap: 12px;
         }
 
+        .dvp-player-table {
+            table-layout: fixed;
+        }
+
+        .dvp-player-table th:first-child,
+        .dvp-player-table td:first-child {
+            width: 4%;
+        }
+
+        .dvp-player-table th:nth-child(2),
+        .dvp-player-table td:nth-child(2) {
+            width: 78%;
+        }
+
+        .dvp-player-table th:last-child,
+        .dvp-player-table td:last-child {
+            width: 18%;
+            text-align: center;
+        }
+
         /* Content Area & Cards */
         .content-area {
             padding: 0 20px;
@@ -646,16 +666,12 @@
             });
             p.totalDraftDiff = totalDiff;
         });
-        if (dvpSort === 'diff') {
-            players.sort((a, b) => b.totalDraftDiff - a.totalDraftDiff);
-        }
-
         let playerHtml = `
             <div class="fixture-card">
                 <div class="card-header">Draft Value Performance by Player</div>
                 <div class="table-wrapper">
-                    <table>
-                        <thead><tr><th>#</th><th class="text-left">Player</th><th style="text-align: right; padding-right: 16px;">Total Diff</th></tr></thead>
+                    <table class="dvp-player-table">
+                        <thead><tr><th>#</th><th class="text-left">Player</th><th>Total Diff</th></tr></thead>
                         <tbody>
         `;
 
