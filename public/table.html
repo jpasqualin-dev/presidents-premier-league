@@ -30,6 +30,18 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            height: var(--table-header-top, 0px);
+            z-index: 39;
+            background: var(--bg-color);
+            pointer-events: none;
+        }
+
         .main-container {
             max-width: 800px;
             margin: 0 auto;
