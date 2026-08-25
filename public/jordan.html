@@ -20,6 +20,36 @@
             margin: 0 auto;
         }
 
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 60px;
+            padding: 0 14px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            background-color: #f4f6f8;
+            background-image: url("header-background_new.png");
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
+        }
+
+        .header-container h1 {
+            color: #38003c;
+            font-size: 1.45rem;
+            line-height: 1.05;
+            text-align: left;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+        }
+
+        .lion-logo {
+            display: block;
+            width: 52px;
+            height: 52px;
+            object-fit: contain;
+        }
+
         /* Navigation / Back Button */
         .nav-bar {
             margin-bottom: 16px;
@@ -51,11 +81,12 @@
             z-index: 20;
             display: flex;
             align-items: center;
+            height: 30px;
             gap: 2px;
             padding: 1px 3px;
-            margin-bottom: 16px;
-            background: rgba(255,255,255,0.96);
-            border: 1px solid #dfe5eb;
+            margin-bottom: 5px;
+            background: #38003c;
+            border: 1px solid #38003c;
             border-radius: 8px;
             box-shadow: 0 3px 10px rgba(56,0,60,0.08);
         }
@@ -70,7 +101,7 @@
             padding: 2px 6px;
             border: 1px solid transparent;
             border-radius: 4px;
-            color: #38003c;
+            color: #ffffff;
             font: inherit;
             font-size: 0.85rem;
             font-weight: 700;
@@ -82,8 +113,8 @@
         .site-menu a:hover,
         .players-menu summary:hover,
         .players-menu[open] summary {
-            background: #f0fff4;
-            border-color: #c6f6d5;
+            background: rgba(255,255,255,0.12);
+            border-color: rgba(255,255,255,0.24);
         }
 
         .site-menu a.active,
@@ -100,7 +131,7 @@
             left: 2px;
             height: 3px;
             border-radius: 999px;
-            background: #38003c;
+            background: #00ff87;
         }
 
         .players-menu {
@@ -148,7 +179,7 @@
         /* Top Profile Header (Sticky) */
         .profile-card {
             position: sticky;
-            top: 12px;
+            top: 40px;
             z-index: 10;
             background: #ffffff;
             border-radius: 12px;
@@ -318,6 +349,11 @@
     </style>
 </head>
 <body>
+
+    <div class="header-container">
+        <h1>Matchweek<br>Performance</h1>
+        <img src="lion-logo.png" alt="Premier League Lion Logo" class="lion-logo">
+    </div>
 
     <nav class="site-menu" aria-label="Primary navigation">
         <a href="index.html">Home</a>
