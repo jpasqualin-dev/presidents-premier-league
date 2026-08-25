@@ -258,8 +258,7 @@
         /* Tables */
         .table-wrapper {
             width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
+            overflow: visible;
         }
 
         table {
@@ -279,8 +278,8 @@
 
         thead {
             position: sticky;
-            top: var(--table-header-top, 0px);
-            z-index: 20;
+            top: calc(var(--table-header-top, 0px) + var(--card-header-height, 48px));
+            z-index: 30;
         }
 
         th {
@@ -291,6 +290,13 @@
             text-transform: uppercase;
             border-bottom: 2px solid #eaeaea;
             box-shadow: 0 2px 0 rgba(234, 234, 234, 0.9);
+        }
+
+        .content-area > .fixture-card:first-child .card-header {
+            position: sticky;
+            top: var(--table-header-top, 0px);
+            z-index: 29;
+            background: var(--card-bg);
         }
 
         .text-left { text-align: left !important; }
@@ -739,9 +745,16 @@
         const navControls = document.querySelector('.pills-nav-container');
         if (!navControls) return;
 
+        const cardHeader = document.querySelector('.content-area > .fixture-card:first-child .card-header');
+        const cardHeaderHeight = cardHeader ? cardHeader.getBoundingClientRect().height : 48;
+
         document.documentElement.style.setProperty(
             '--table-header-top',
             `${navControls.getBoundingClientRect().bottom}px`
+        );
+        document.documentElement.style.setProperty(
+            '--card-header-height',
+            `${cardHeaderHeight}px`
         );
     }
 
@@ -758,6 +771,8 @@
         else if (currentView === 'home') renderStandingsCard('Home Standings', Object.values(cachedStats.homeStats));
         else if (currentView === 'away') renderStandingsCard('Away Standings', Object.values(cachedStats.awayStats));
         else if (currentView === 'dvp') renderDvpCards(cachedStats.allStats);
+
+        updateTableHeaderOffset();
     }
 
     // Fetch matches from API (same caching strategy as other pages)
