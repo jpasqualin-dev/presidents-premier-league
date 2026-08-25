@@ -777,9 +777,18 @@
             }
         } else if (currentView === 'round') {
             const grouped = groupBy(fixtures, 'round');
-            for (let [round, matches] of Object.entries(grouped)) {
-                container.appendChild(createRoundCard(round, matches));
-            }
+            const roundEntries = Object.entries(grouped);
+            let latestActiveRoundIndex = -1;
+            roundEntries.forEach(([round, matches], index) => {
+                if (matches.some(match => match.isPast || match.isLive)) latestActiveRoundIndex = index;
+            });
+
+            roundEntries.forEach(([round, matches], index) => {
+                const card = createRoundCard(round, matches);
+                if (index === latestActiveRoundIndex) card.id = 'card-latest-active-round';
+                container.appendChild(card);
+            });
+            setTimeout(scrollToLatestActiveRound, 100);
         } else if (currentView === 'team') {
             container.appendChild(createTeamCard(selectedTeam));
             window.scrollTo(0, 0);
@@ -960,6 +969,16 @@
         if (latestCompletedCard && navControls) {
             const navBottom = navControls.getBoundingClientRect().bottom;
             const y = latestCompletedCard.getBoundingClientRect().top + window.pageYOffset - navBottom - 16;
+            window.scrollTo({top: y, behavior: 'smooth'});
+        }
+    }
+
+    function scrollToLatestActiveRound() {
+        const latestActiveRoundCard = document.getElementById('card-latest-active-round');
+        const navControls = document.querySelector('.pills-nav-container');
+        if (latestActiveRoundCard && navControls) {
+            const navBottom = navControls.getBoundingClientRect().bottom;
+            const y = latestActiveRoundCard.getBoundingClientRect().top + window.pageYOffset - navBottom - 16;
             window.scrollTo({top: y, behavior: 'smooth'});
         }
     }
