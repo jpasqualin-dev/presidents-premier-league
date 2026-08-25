@@ -86,7 +86,7 @@
 
         .sticky-nav-wrapper {
             position: sticky;
-            top: 65px;
+            top: var(--header-height, 65px);
             z-index: 40;
             background-color: var(--bg-color);
         }
@@ -362,10 +362,6 @@
         .content-area > .fixture-card:first-child .card-header > * {
             position: relative;
             z-index: 1;
-        }
-
-        .content-area > .fixture-card:first-child {
-            padding-bottom: calc(var(--card-header-height, 48px) + var(--table-header-height, 48px));
         }
 
         tbody tr:last-child td:first-child {
@@ -817,14 +813,19 @@
     }
 
     function updateTableHeaderOffset() {
+        const header = document.querySelector('.header-container');
         const navControls = document.querySelector('.pills-nav-container');
-        if (!navControls) return;
+        if (!header || !navControls) return;
 
         const cardHeader = document.querySelector('.content-area > .fixture-card:first-child .card-header');
         const tableHeader = document.querySelector('.content-area > .fixture-card:first-child thead');
         const cardHeaderHeight = cardHeader ? Math.ceil(cardHeader.getBoundingClientRect().height) : 48;
         const tableHeaderHeight = tableHeader ? Math.ceil(tableHeader.getBoundingClientRect().height) : 48;
 
+        document.documentElement.style.setProperty(
+            '--header-height',
+            `${Math.ceil(header.getBoundingClientRect().height)}px`
+        );
         document.documentElement.style.setProperty(
             '--table-header-top',
             `${Math.ceil(navControls.getBoundingClientRect().bottom)}px`
@@ -899,6 +900,10 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         updateTableHeaderOffset();
+        const header = document.querySelector('.header-container');
+        if (header && 'ResizeObserver' in window) {
+            new ResizeObserver(updateTableHeaderOffset).observe(header);
+        }
         window.addEventListener('resize', updateTableHeaderOffset);
         window.addEventListener('scroll', updateTableHeaderOffset, { passive: true });
         const navControls = document.querySelector('.pills-nav-container');
