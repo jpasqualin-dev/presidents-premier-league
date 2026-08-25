@@ -62,11 +62,10 @@
             display: flex;
             align-items: center;
             gap: 2px;
-            width: 100vw;
-            margin-left: calc(50% - 50vw);
-            margin-right: calc(50% - 50vw);
-            margin-bottom: 5px;
-            padding: 1px calc(3px + var(--page-pad) + var(--container-pad) + max(0px, (100vw - 2 * var(--page-pad) - 1100px) / 2));
+            margin-left: calc(-1 * var(--container-pad));
+            margin-right: calc(-1 * var(--container-pad));
+            margin-bottom: 0;
+            padding: 1px calc(3px + var(--container-pad));
             background: rgba(255,255,255,0.96);
             border-radius: 0;
             box-shadow: 0 3px 10px rgba(56,0,60,0.08);
