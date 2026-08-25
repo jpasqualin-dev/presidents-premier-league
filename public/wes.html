@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jordan's Results | La Liga de Los Presidentes</title>
+    <title>Wes's Results | La Liga de Los Presidentes</title>
     <style>
         * { 
             box-sizing: border-box; 
@@ -365,9 +365,9 @@
             <div class="players-dropdown">
                 <a href="hef.html">Hef</a>
                 <a href="jamey.html">Jamey</a>
-                <a href="jordan.html" aria-current="page">Jordan</a>
+                <a href="jordan.html">Jordan</a>
                 <a href="nate.html">Nate</a>
-                <a href="wes.html">Wes</a>
+                <a href="wes.html" aria-current="page">Wes</a>
             </div>
         </details>
     </nav>
@@ -375,7 +375,7 @@
     <!-- Sticky User Profile Header -->
     <div class="profile-card">
         <div class="profile-info">
-            <h1>Jordan's Results</h1>
+            <h1>Wes's Results</h1>
             <p>Matchweek Performance Feed</p>
         </div>
         <div class="points-badge">
@@ -473,9 +473,9 @@
     }
 
     // Fetch fixtures through your secure Vercel endpoint route
-    async function fetchJordanFixtures() {
+    async function fetchWesFixtures() {
         const url = '/api/standings'; 
-        const myTeams = draftData["Jordan"];
+        const myTeams = draftData["Wes"];
 
         try {
             const response = await fetch(url);
@@ -574,7 +574,7 @@
         document.getElementById('total-pts').textContent = totalPts;
     }
 
-    document.addEventListener('DOMContentLoaded', fetchJordanFixtures);
+    document.addEventListener('DOMContentLoaded', fetchWesFixtures);
 </script>
 
 </body>
