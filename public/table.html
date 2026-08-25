@@ -272,8 +272,8 @@
 
         th {
             position: sticky;
-            top: 150px;
-            z-index: 10;
+            top: var(--table-header-top, 0px);
+            z-index: 20;
             background-color: #fff;
             color: #666;
             font-weight: 500;
@@ -723,6 +723,16 @@
         renderView();
     }
 
+    function updateTableHeaderOffset() {
+        const stickyNav = document.querySelector('.sticky-nav-wrapper');
+        if (!stickyNav) return;
+
+        document.documentElement.style.setProperty(
+            '--table-header-top',
+            `${stickyNav.getBoundingClientRect().bottom}px`
+        );
+    }
+
     function updateNavUI() {
         ['all', 'home', 'away', 'dvp'].forEach(v => {
             document.getElementById(`btn-${v}`).classList.toggle('active', v === currentView);
@@ -768,7 +778,12 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', fetchTableData);
+    document.addEventListener('DOMContentLoaded', () => {
+        updateTableHeaderOffset();
+        window.addEventListener('resize', updateTableHeaderOffset);
+        window.addEventListener('scroll', updateTableHeaderOffset, { passive: true });
+        fetchTableData();
+    });
 </script>
 </body>
 </html>
