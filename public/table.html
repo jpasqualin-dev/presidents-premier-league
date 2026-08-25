@@ -204,6 +204,21 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.06);
         }
 
+        .dvp-sort-toggle {
+            display: inline-flex;
+            gap: 2px;
+            padding: 2px;
+            margin: 0 16px 12px;
+            background: #edf2f7;
+            border-radius: 20px;
+        }
+
+        .dvp-sort-toggle .pill {
+            min-width: 72px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
         /* Content Area & Cards */
         .content-area {
             padding: 0 20px;
@@ -256,12 +271,16 @@
         }
 
         th {
+            position: sticky;
+            top: 150px;
+            z-index: 10;
             background-color: #fff;
             color: #666;
             font-weight: 500;
             font-size: 0.8rem;
             text-transform: uppercase;
             border-bottom: 2px solid #eaeaea;
+            box-shadow: 0 2px 0 rgba(234, 234, 234, 0.9);
         }
 
         .text-left { text-align: left !important; }
@@ -534,21 +553,37 @@
     }
 
     function renderDvpCards(allStatsObj) {
-        const teamsArray = sortTeams(Object.values(allStatsObj));
+        const rankedTeams = sortTeams(Object.values(allStatsObj));
         const teamRankMap = {};
-        teamsArray.forEach((t, idx) => { teamRankMap[t.team] = idx + 1; });
+        rankedTeams.forEach((t, idx) => { teamRankMap[t.team] = idx + 1; });
+
+        const teamsArray = dvpSort === 'diff'
+            ? [...rankedTeams].sort((a, b) => {
+                const diffA = (draftPicks[a.team] || 20) - teamRankMap[a.team];
+                const diffB = (draftPicks[b.team] || 20) - teamRankMap[b.team];
+                return diffB - diffA;
+            })
+            : rankedTeams;
+
+        const sortToggleHtml = `
+            <div class="dvp-sort-toggle" role="group" aria-label="DVP table sort order">
+                <button class="pill${dvpSort === 'rank' ? ' active' : ''}" onclick="setDvpSort('rank')">Rank</button>
+                <button class="pill${dvpSort === 'diff' ? ' active' : ''}" onclick="setDvpSort('diff')">Diff</button>
+            </div>
+        `;
 
         let rankHtml = `
             <div class="fixture-card">
                 <div class="card-header">Draft Value Performance</div>
+                ${sortToggleHtml}
                 <div class="table-wrapper">
                     <table>
                         <thead><tr><th>Rank</th><th class="text-left">Team</th><th>PTS</th><th>GD</th><th>Pick</th><th>Diff</th></tr></thead>
                         <tbody>
         `;
 
-        teamsArray.forEach((t, idx) => {
-            const rank = idx + 1;
+        teamsArray.forEach(t => {
+            const rank = teamRankMap[t.team];
             const pick = draftPicks[t.team] || rank;
             const diff = pick - rank;
 
@@ -592,7 +627,9 @@
             });
             p.totalDraftDiff = totalDiff;
         });
-        players.sort((a, b) => b.totalDraftDiff - a.totalDraftDiff);
+        if (dvpSort === 'diff') {
+            players.sort((a, b) => b.totalDraftDiff - a.totalDraftDiff);
+        }
 
         let playerHtml = `
             <div class="fixture-card">
@@ -673,10 +710,16 @@
     // --- State & Rendering ---
     let cachedStats = null;
     let currentView = 'all';
+    let dvpSort = 'rank';
 
     function setView(view) {
         currentView = view;
         updateNavUI();
+        renderView();
+    }
+
+    function setDvpSort(sort) {
+        dvpSort = sort;
         renderView();
     }
 
