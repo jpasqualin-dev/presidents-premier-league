@@ -264,7 +264,8 @@
 
         table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             background: #fff;
             font-size: 0.9rem;
             white-space: nowrap;
@@ -276,10 +277,13 @@
             border-bottom: 1px solid #eaeaea;
         }
 
-        th {
+        thead {
             position: sticky;
             top: var(--table-header-top, 0px);
             z-index: 20;
+        }
+
+        th {
             background-color: #fff;
             color: #666;
             font-weight: 500;
