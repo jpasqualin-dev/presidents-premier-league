@@ -231,18 +231,26 @@
 
         .dvp-player-table th:first-child,
         .dvp-player-table td:first-child {
-            width: 4%;
+            width: 8%;
         }
 
         .dvp-player-table th:nth-child(2),
         .dvp-player-table td:nth-child(2) {
-            width: 78%;
+            width: 72%;
         }
 
         .dvp-player-table th:last-child,
         .dvp-player-table td:last-child {
-            width: 18%;
+            width: 20%;
+            max-width: 20%;
+            overflow: hidden;
             text-align: center;
+        }
+
+        .dvp-player-table .stat-value {
+            max-width: 100%;
+            padding-right: 6px;
+            padding-left: 6px;
         }
 
         /* Content Area & Cards */
@@ -673,7 +681,7 @@
                 <div class="card-header">Draft Value Performance by Player</div>
                 <div class="table-wrapper">
                     <table class="dvp-player-table">
-                        <thead><tr><th>#</th><th class="text-left">Player</th><th>Total Diff</th></tr></thead>
+                        <thead><tr><th>Rank</th><th class="text-left">Player</th><th>Total Diff</th></tr></thead>
                         <tbody>
         `;
 
