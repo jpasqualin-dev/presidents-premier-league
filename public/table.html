@@ -322,6 +322,14 @@
             box-shadow: 0 2px 0 rgba(234, 234, 234, 0.9);
         }
 
+        thead th:first-child {
+            border-top-left-radius: 10px;
+        }
+
+        thead th:last-child {
+            border-top-right-radius: 10px;
+        }
+
         .content-area > .fixture-card:first-child .card-header {
             position: sticky;
             top: var(--table-header-top, 0px);
@@ -395,7 +403,7 @@
         </nav>
 
         <div class="pills-nav-container" id="main-nav">
-            <button class="pill active" id="btn-all" onclick="setView('all')">ALL</button>
+            <button class="pill active" id="btn-all" onclick="setView('all')">All</button>
             <button class="pill" id="btn-home" onclick="setView('home')">Home</button>
             <button class="pill" id="btn-away" onclick="setView('away')">Away</button>
             <button class="pill" id="btn-dvp" onclick="setView('dvp')">DVP</button>
