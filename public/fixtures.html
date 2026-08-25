@@ -47,7 +47,7 @@
             justify-content: space-between;
             min-height: 60px;
             padding: 0 14px;
-            margin-bottom: 5px;
+            margin: 0 20px 5px;
             border-radius: 4px;
             background-color: var(--bg-color);
             background-image: url("header-background_new.png");
@@ -81,7 +81,7 @@
             gap: 2px;
             height: 30px;
             padding: 1px 3px;
-            margin: 5px 0 0;
+            margin: 5px 20px 0;
             background: rgba(255,255,255,0.96);
             border: 1px solid #dfe5eb;
             border-radius: 8px;
@@ -170,7 +170,7 @@
             top: 46px;
             background-color: rgba(244, 246, 248, 0.95);
             backdrop-filter: blur(8px);
-            padding: 12px 20px 8px;
+            padding: 0 20px 8px;
             z-index: 40;
             display: flex;
             gap: 8px;
@@ -596,7 +596,6 @@
     let fixtures = [];
     let currentView = 'date';
     let selectedTeam = null;
-    let initialLoad = true;
 
     // Fetch matches from API (same caching strategy as main index)
     async function fetchMatchData() {
@@ -672,8 +671,8 @@
             };
         });
 
-        // Ensure array is sorted by date
-        fixtures.sort((a, b) => a.dateObj - b.dateObj);
+        // Sort most recent first so the latest matches appear at the top on load
+        fixtures.sort((a, b) => b.dateObj - a.dateObj);
 
         populateTeamDropdown();
         renderView();
@@ -746,10 +745,6 @@
             const grouped = groupBy(fixtures, 'dateLabel');
             for (let [date, matches] of Object.entries(grouped)) {
                 container.appendChild(createListCard(date, matches, false));
-            }
-            if (initialLoad) {
-                setTimeout(scrollToToday, 100);
-                initialLoad = false;
             }
         } else if (currentView === 'round') {
             const grouped = groupBy(fixtures, 'round');
@@ -928,15 +923,6 @@
             (result[item[key]] = result[item[key]] || []).push(item);
             return result;
         }, {});
-    }
-
-    function scrollToToday() {
-        const todayCard = document.getElementById('card-today');
-        if (todayCard) {
-            const navHeight = 90;
-            const y = todayCard.getBoundingClientRect().top + window.pageYOffset - navHeight - 16;
-            window.scrollTo({top: y, behavior: 'smooth'});
-        }
     }
 
     // Initialize application on page load
