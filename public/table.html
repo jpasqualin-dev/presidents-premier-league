@@ -306,7 +306,7 @@
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            background: #fff;
+            background: transparent;
             font-size: 0.9rem;
             white-space: nowrap;
         }
@@ -339,6 +339,14 @@
 
         thead th:last-child {
             border-top-right-radius: 10px;
+        }
+
+        tbody tr {
+            background: var(--card-bg);
+        }
+
+        .content-area > .fixture-card:first-child {
+            background: transparent;
         }
 
         .content-area > .fixture-card:first-child .card-header {
