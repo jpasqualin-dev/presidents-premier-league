@@ -24,91 +24,223 @@
 
         .header-container {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #38003c;
-            padding-bottom: 10px;
-            margin-bottom: 15px;
+            justify-content: space-between;
+            min-height: 60px;
+            padding: 0 14px;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            background-color: #f4f6f8;
+            background-image: url("header-background_new.png");
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
         }
 
         h1 {
             margin: 0;
-            color: #1a1a1a;
-            font-size: 2rem;
+            color: #38003c;
+            font-size: 1.45rem;
+            line-height: 1.05;
+            text-align: left;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.8);
         }
 
         .lion-logo {
-            height: 65px;
-            width: auto;
+            display: block;
+            width: 52px;
+            height: 52px;
             object-fit: contain;
+        }
+
+        .site-menu {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            padding: 1px 3px;
+            margin-bottom: 5px;
+            background: rgba(255,255,255,0.96);
+            border: 1px solid #dfe5eb;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(56,0,60,0.08);
+        }
+
+        .site-menu a,
+        .players-menu summary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 20px;
+            flex: 1 1 0;
+            padding: 2px 6px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            color: #38003c;
+            font: inherit;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            list-style: none;
+        }
+
+        .site-menu a:hover,
+        .players-menu summary:hover,
+        .players-menu[open] summary {
+            background: #f0fff4;
+            border-color: #c6f6d5;
+        }
+
+        .site-menu a.active {
+            position: relative;
+        }
+
+        .site-menu a.active::after {
+            content: "";
+            position: absolute;
+            right: 8px;
+            bottom: -1px;
+            left: 8px;
+            height: 3px;
+            border-radius: 999px;
+            background: #38003c;
+        }
+
+        .players-menu {
+            position: relative;
+            flex: 1 1 0;
+        }
+
+        .players-menu summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .players-menu summary::after {
+            content: "▾";
+            margin-left: 6px;
+            font-size: 0.7rem;
+        }
+
+        .players-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            min-width: 145px;
+            padding: 6px;
+            background: #ffffff;
+            border: 1px solid #dfe5eb;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        .players-dropdown a {
+            flex: none;
+            display: flex;
+            justify-content: flex-start;
+            width: 100%;
+            min-height: 32px;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+        }
+
+        .players-dropdown a:hover {
+            background: #f4f6f8;
+            border-color: transparent;
         }
 
         /* FotMob Style Matchday Card */
         .today-card {
             background: #ffffff;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            border-radius: 8px;
+            border: 1px solid #dfe5eb;
+            margin-bottom: 18px;
+            box-shadow: 0 3px 10px rgba(56,0,60,0.08);
             overflow: hidden;
             touch-action: pan-y; /* Allows vertical scrolling, captures horizontal swipes */
         }
 
         .today-header {
-            display: flex;
+            display: grid;
+            grid-template-columns: 30px minmax(0, 1fr) 30px;
             align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            border-bottom: 1px solid #edf2f7;
-            background-color: #f8f9fa;
+            padding: 10px 12px;
+            border-bottom: 3px solid #00ff87;
+            background-color: #38003c;
+            color: #ffffff;
         }
         
         .today-header-left {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
+            grid-column: 2;
+            min-width: 0;
         }
 
         .today-header-icon {
             width: 18px;
             height: 18px;
-            color: #1a1a1a;
+            color: #00ff87;
         }
 
         .today-header-text {
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 700;
-            color: #1a1a1a;
+            color: #ffffff;
         }
 
         /* Matchday Navigation Buttons */
         .matchday-nav {
-            display: flex;
-            gap: 12px;
+            display: contents;
         }
 
         .nav-btn {
-            background: #edf2f7;
-            border: none;
-            font-size: 1rem;
-            color: #1a1a1a;
+            background: rgba(255,255,255,0.14);
+            border: 1px solid rgba(255,255,255,0.24);
+            font-size: 0.9rem;
+            color: #ffffff;
             cursor: pointer;
-            padding: 4px 12px;
-            border-radius: 6px;
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            border-radius: 4px;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .nav-btn:hover:not(.disabled) {
-            background-color: #e2e8f0;
-            color: #38003c;
+        .matchday-nav .nav-btn:first-child {
+            grid-column: 1;
+            grid-row: 1;
+        }
+
+        .matchday-nav .nav-btn:last-child {
+            grid-column: 3;
+            grid-row: 1;
+        }
+
+        @media (hover: hover) {
+            .nav-btn:hover:not(.disabled) {
+                background-color: #00ff87;
+                border-color: #00ff87;
+                color: #38003c;
+            }
+        }
+
+        .nav-btn:focus-visible:not(.disabled) {
+            outline: 2px solid #00ff87;
+            outline-offset: 2px;
         }
 
         .nav-btn.disabled {
-            color: #a0aec0;
-            background: #f8f9fa;
+            color: rgba(255,255,255,0.45);
+            background: rgba(255,255,255,0.06);
+            border-color: transparent;
             cursor: not-allowed;
             opacity: 0.6;
         }
@@ -116,7 +248,7 @@
         .today-match-row {
             display: flex;
             align-items: center;
-            padding: 14px 16px;
+            padding: 11px 12px;
             border-bottom: 1px solid #f1f5f9;
             text-decoration: none;
             color: inherit;
@@ -132,7 +264,7 @@
         }
 
         .match-status {
-            width: 40px;
+            width: 34px;
             flex-shrink: 0;
             display: flex;
             justify-content: center;
@@ -174,8 +306,8 @@
             background-color: #00a667;
             color: #ffffff;
             border-radius: 50%;
-            width: 28px;
-            height: 28px;
+            width: 26px;
+            height: 26px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -196,7 +328,7 @@
         }
 
         .team-name-text {
-            font-size: 1rem;
+            font-size: 0.92rem;
             font-weight: 600;
             color: #1a1a1a;
             line-height: 1.2;
@@ -211,8 +343,8 @@
         }
 
         .team-logo-img {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             object-fit: contain;
             flex-shrink: 0;
         }
@@ -222,8 +354,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-width: 55px;
-            font-size: 1.15rem;
+            min-width: 52px;
+            font-size: 1.05rem;
             font-weight: 700;
             color: #1a1a1a;
             white-space: nowrap;
@@ -362,7 +494,7 @@
         #divisions-container .division-header-container { align-items: center; flex-wrap: wrap; gap: 8px; }
         #divisions-container .division-header-container h2 { font-size: 1.4rem; white-space: normal; line-height: 1.2; flex: 1; }
 
-        .toggle-switch { display: inline-flex; background-color: #e5e5ea; border-radius: 20px; padding: 4px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.08); flex-shrink: 0; }
+        .toggle-switch { display: inline-flex; background-color: #e5e5ea; border-radius: 20px; padding: 4px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.08); flex-shrink: 0; touch-action: pan-x; }
         .toggle-btn { background-color: transparent; color: #666; border: none; padding: 6px 16px; border-radius: 16px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.25s ease; font-family: inherit; }
         .toggle-btn.active { background-color: #ffffff; color: #1a1a1a; box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 0 1px rgba(0,0,0,0.05); }
 
@@ -442,9 +574,26 @@
 
 <div class="container">
     <div class="header-container">
-        <h1>La Liga de Los Presidentes</h1>
-        <img src="https://logos-world.net/wp-content/uploads/2023/08/Premier-League-New-Logo.png" alt="Premier League Lion Logo" class="lion-logo">
+        <h1>Presidents<br>Premier League</h1>
+        <img src="lion-logo.png" alt="Premier League Lion Logo" class="lion-logo">
     </div>
+
+    <nav class="site-menu" aria-label="Primary navigation">
+        <a href="index.html" class="active" aria-current="page">Home</a>
+        <a href="table.html">Table</a>
+        <a href="fixtures.html">Fixtures</a>
+        <a href="stats.html">Stats</a>
+        <details class="players-menu">
+            <summary>Players</summary>
+            <div class="players-dropdown">
+                <a href="hef.html">Hef</a>
+                <a href="jamey.html">Jamey</a>
+                <a href="jordan.html">Jordan</a>
+                <a href="nate.html">Nate</a>
+                <a href="wes.html">Wes</a>
+            </div>
+        </details>
+    </nav>
 
     <!-- Matchday Card Container -->
     <div id="today-matches-container"></div>
@@ -618,6 +767,10 @@
                             <svg class="today-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                             <span class="today-header-text">${formattedDate}</span>
                         </div>
+                        <div class="matchday-nav">
+                            <button class="nav-btn disabled" disabled>❮</button>
+                            <button class="nav-btn disabled" disabled>❯</button>
+                        </div>
                     </div>
                     <div class="no-matches-today">No matches scheduled for today</div>
                 </div>`;
@@ -740,12 +893,19 @@
         const container = document.getElementById('today-matches-container');
         let touchstartX = 0;
         let touchendX = 0;
+        let ignoreTouch = false;
 
         container.addEventListener('touchstart', e => {
+            ignoreTouch = Boolean(e.target.closest('.toggle-switch'));
+            if (ignoreTouch) return;
             touchstartX = e.changedTouches[0].screenX;
         }, { passive: true });
 
         container.addEventListener('touchend', e => {
+            if (ignoreTouch) {
+                ignoreTouch = false;
+                return;
+            }
             touchendX = e.changedTouches[0].screenX;
             handleSwipe();
         }, { passive: true });
@@ -754,13 +914,52 @@
             const threshold = 50; // Minimum pixel drag to count as swipe
             
             if (touchendX > touchstartX + threshold) {
-                // Swiped right -> Next Day (Per user request mapping)
-                changeMatchday(1);
-            } else if (touchendX < touchstartX - threshold) {
-                // Swiped left/back -> Previous Day
+                // Swiped right -> Previous Day
                 changeMatchday(-1);
+            } else if (touchendX < touchstartX - threshold) {
+                // Swiped left -> Next Day
+                changeMatchday(1);
             }
         }
+    }
+
+    function setupToggleSwipeListeners() {
+        let activeToggle = null;
+        let touchstartX = 0;
+
+        document.addEventListener('touchstart', e => {
+            activeToggle = e.target.closest('.toggle-switch');
+            if (activeToggle) touchstartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', e => {
+            if (!activeToggle) return;
+
+            const toggle = activeToggle;
+            activeToggle = null;
+            const touchendX = e.changedTouches[0].screenX;
+            const distance = touchendX - touchstartX;
+
+            if (Math.abs(distance) < 50) return;
+
+            const mode = distance < 0 ? 'PTS' : 'PGA';
+            if (toggle.dataset.toggleGroup === 'overall') {
+                setOverallMode(mode);
+            } else {
+                toggleDivisionMode(toggle.dataset.toggleGroup, mode);
+            }
+
+            toggle.dataset.swipeClickSuppressed = 'true';
+        }, { passive: true });
+
+        document.addEventListener('click', e => {
+            const toggle = e.target.closest('.toggle-switch');
+            if (toggle?.dataset.swipeClickSuppressed !== 'true') return;
+
+            delete toggle.dataset.swipeClickSuppressed;
+            e.preventDefault();
+            e.stopPropagation();
+        }, true);
     }
 
     function initializePlayerStats() {
@@ -876,7 +1075,7 @@
                 <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
                     <div class="overall-header-container">
                         <h2>Overall Standings</h2>
-                        <div class="toggle-switch">
+                        <div class="toggle-switch" data-toggle-group="overall">
                             <button class="toggle-btn ${overallMode === 'PTS' ? 'active' : ''}" onclick="setOverallMode('PTS')">PTS</button>
                             <button class="toggle-btn ${overallMode === 'PGA' ? 'active' : ''}" onclick="setOverallMode('PGA')">PGA</button>
                         </div>
@@ -980,7 +1179,7 @@
                     <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
                         <div class="division-header-container">
                             <h2>${divName}</h2>
-                            <div class="toggle-switch">
+                            <div class="toggle-switch" data-toggle-group="${divName}">
                                 <button class="toggle-btn ${mode === 'PTS' ? 'active' : ''}" onclick="toggleDivisionMode('${divName}', 'PTS')">PTS</button>
                                 <button class="toggle-btn ${mode === 'PGA' ? 'active' : ''}" onclick="toggleDivisionMode('${divName}', 'PGA')">PGA</button>
                             </div>
@@ -1299,6 +1498,7 @@
         renderSeasonAwards(playerStats, teamStats);
         renderDraftRankTable(teamStats);
         renderPlayerDraftValueTable(playerStats, teamStats);
+        renderMatchdayCard();
 
         const cacheKey = 'pl_match_data';
         const cacheTimeKey = 'pl_match_data_time';
@@ -1427,12 +1627,14 @@
 
         } catch (error) {
             console.error("Error fetching match data:", error);
+            renderMatchdayCard();
             statusEl.textContent = "Unable to load data. Check console for details.";
         }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
         setupSwipeListeners();
+        setupToggleSwipeListeners();
         fetchAndUpdateStandings();
     });
 
