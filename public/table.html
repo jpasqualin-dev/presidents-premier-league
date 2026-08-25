@@ -334,7 +334,7 @@
             top: var(--table-header-top, 0px);
             z-index: 29;
             background: var(--bg-color);
-            box-shadow: 0 2px 0 var(--card-bg);
+            box-shadow: 0 2px 0 var(--card-bg), 0 6px 10px -6px rgba(0,0,0,0.18);
             border-top-left-radius: 16px;
             border-top-right-radius: 16px;
         }
@@ -799,16 +799,26 @@
         if (!navControls) return;
 
         const cardHeader = document.querySelector('.content-area > .fixture-card:first-child .card-header');
-        const cardHeaderHeight = cardHeader ? cardHeader.getBoundingClientRect().height : 48;
+        const cardHeaderHeight = cardHeader ? Math.ceil(cardHeader.getBoundingClientRect().height) : 48;
 
         document.documentElement.style.setProperty(
             '--table-header-top',
-            `${navControls.getBoundingClientRect().bottom}px`
+            `${Math.ceil(navControls.getBoundingClientRect().bottom)}px`
         );
         document.documentElement.style.setProperty(
             '--card-header-height',
             `${cardHeaderHeight}px`
         );
+    }
+
+    let cardHeaderResizeObserver = null;
+
+    function observeCardHeaderResize() {
+        const cardHeader = document.querySelector('.content-area > .fixture-card:first-child .card-header');
+        if (!cardHeader || !('ResizeObserver' in window)) return;
+        if (cardHeaderResizeObserver) cardHeaderResizeObserver.disconnect();
+        cardHeaderResizeObserver = new ResizeObserver(updateTableHeaderOffset);
+        cardHeaderResizeObserver.observe(cardHeader);
     }
 
     function updateNavUI() {
@@ -826,6 +836,7 @@
         else if (currentView === 'dvp') renderDvpCards(cachedStats.allStats);
 
         updateTableHeaderOffset();
+        observeCardHeaderResize();
     }
 
     // Fetch matches from API (same caching strategy as other pages)
