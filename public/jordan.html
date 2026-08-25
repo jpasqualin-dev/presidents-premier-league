@@ -45,6 +45,106 @@
             background-color: #f8f9fa;
         }
 
+        .site-menu {
+            position: sticky;
+            top: 5px;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            padding: 1px 3px;
+            margin-bottom: 16px;
+            background: rgba(255,255,255,0.96);
+            border: 1px solid #dfe5eb;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(56,0,60,0.08);
+        }
+
+        .site-menu a,
+        .players-menu summary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 20px;
+            flex: 1 1 0;
+            padding: 2px 6px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            color: #38003c;
+            font: inherit;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            list-style: none;
+        }
+
+        .site-menu a:hover,
+        .players-menu summary:hover,
+        .players-menu[open] summary {
+            background: #f0fff4;
+            border-color: #c6f6d5;
+        }
+
+        .site-menu a.active,
+        .players-menu summary.active {
+            position: relative;
+        }
+
+        .site-menu a.active::after,
+        .players-menu summary.active::before {
+            content: "";
+            position: absolute;
+            right: 2px;
+            bottom: -1px;
+            left: 2px;
+            height: 3px;
+            border-radius: 999px;
+            background: #38003c;
+        }
+
+        .players-menu {
+            position: relative;
+            flex: 1 1 0;
+        }
+
+        .players-menu summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .players-menu summary::after {
+            content: "▾";
+            margin-left: 6px;
+            font-size: 0.7rem;
+        }
+
+        .players-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            min-width: 145px;
+            padding: 6px;
+            background: #ffffff;
+            border: 1px solid #dfe5eb;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        .players-dropdown a {
+            flex: none;
+            display: flex;
+            justify-content: flex-start;
+            width: 100%;
+            min-height: 32px;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+        }
+
+        .players-dropdown a:hover {
+            background: #f4f6f8;
+            border-color: transparent;
+        }
+
         /* Top Profile Header (Sticky) */
         .profile-card {
             position: sticky;
@@ -219,10 +319,22 @@
 </head>
 <body>
 
-    <!-- Nav Back to Main Standings -->
-    <div class="nav-bar">
-        <a href="index.html" class="back-button">← Back to Standings Hub</a>
-    </div>
+    <nav class="site-menu" aria-label="Primary navigation">
+        <a href="index.html">Home</a>
+        <a href="table.html">Table</a>
+        <a href="fixtures.html">Fixtures</a>
+        <a href="stats.html">Stats</a>
+        <details class="players-menu">
+            <summary class="active">Players</summary>
+            <div class="players-dropdown">
+                <a href="hef.html">Hef</a>
+                <a href="jamey.html">Jamey</a>
+                <a href="jordan.html" aria-current="page">Jordan</a>
+                <a href="nate.html">Nate</a>
+                <a href="wes.html">Wes</a>
+            </div>
+        </details>
+    </nav>
 
     <!-- Sticky User Profile Header -->
     <div class="profile-card">
