@@ -760,11 +760,19 @@
 
         if (currentView === 'date') {
             const grouped = groupBy(fixtures, 'dateLabel');
-            for (let [date, matches] of Object.entries(grouped)) {
-                container.appendChild(createListCard(date, matches, false));
-            }
+            const dateEntries = Object.entries(grouped);
+            let latestCompletedIndex = -1;
+            dateEntries.forEach(([date, matches], index) => {
+                if (matches.some(match => match.isPast)) latestCompletedIndex = index;
+            });
+
+            dateEntries.forEach(([date, matches], index) => {
+                const card = createListCard(date, matches, false);
+                if (index === latestCompletedIndex) card.id = 'card-latest-completed';
+                container.appendChild(card);
+            });
             if (initialLoad) {
-                setTimeout(scrollToToday, 100);
+                setTimeout(scrollToLatestCompleted, 100);
                 initialLoad = false;
             }
         } else if (currentView === 'round') {
@@ -946,11 +954,12 @@
         }, {});
     }
 
-    function scrollToToday() {
-        const todayCard = document.getElementById('card-today');
-        if (todayCard) {
-            const navHeight = 90;
-            const y = todayCard.getBoundingClientRect().top + window.pageYOffset - navHeight - 16;
+    function scrollToLatestCompleted() {
+        const latestCompletedCard = document.getElementById('card-latest-completed');
+        const navControls = document.querySelector('.pills-nav-container');
+        if (latestCompletedCard && navControls) {
+            const navBottom = navControls.getBoundingClientRect().bottom;
+            const y = latestCompletedCard.getBoundingClientRect().top + window.pageYOffset - navBottom - 16;
             window.scrollTo({top: y, behavior: 'smooth'});
         }
     }
