@@ -666,6 +666,8 @@
             });
             p.totalDraftDiff = totalDiff;
         });
+        players.sort((a, b) => b.totalDraftDiff - a.totalDraftDiff);
+
         let playerHtml = `
             <div class="fixture-card">
                 <div class="card-header">Draft Value Performance by Player</div>
