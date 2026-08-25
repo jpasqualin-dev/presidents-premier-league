@@ -76,8 +76,7 @@
             position: sticky;
             top: 65px;
             z-index: 40;
-            background-color: rgba(244, 246, 248, 0.95);
-            backdrop-filter: blur(8px);
+            background-color: var(--bg-color);
         }
 
         .site-menu {
@@ -334,10 +333,25 @@
             position: sticky;
             top: var(--table-header-top, 0px);
             z-index: 29;
-            background: var(--card-bg);
+            background: var(--bg-color);
             box-shadow: 0 2px 0 var(--card-bg);
             border-top-left-radius: 16px;
             border-top-right-radius: 16px;
+        }
+
+        .content-area > .fixture-card:first-child .card-header::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background: var(--card-bg);
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+        }
+
+        .content-area > .fixture-card:first-child .card-header > * {
+            position: relative;
+            z-index: 1;
         }
 
         .text-left { text-align: left !important; }
@@ -563,7 +577,7 @@
         const sorted = sortTeams(teamsArray);
         let html = `
             <div class="fixture-card">
-                <div class="card-header">${title}</div>
+                <div class="card-header"><span>${title}</span></div>
                 <div class="table-wrapper">
                     <table>
                         <thead>
