@@ -633,7 +633,7 @@
                 <tr class="title-row">
                     <th colspan="6" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
                         <div class="draft-title-row">
-                            <h2 class="plain-table-title draft-title">Draft Value Performance</h2>
+                            <h2 class="plain-table-title draft-title">Draft Value<br>Performance</h2>
                             <div class="dvp-sort-toggle" role="group" aria-label="Draft value performance sort order">
                                 <button type="button" class="dvp-sort-btn active" data-dvp-sort="rank">Rank</button>
                                 <button type="button" class="dvp-sort-btn" data-dvp-sort="diff">Diff</button>
@@ -1195,7 +1195,7 @@
                 <tr class="title-row">
                     <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
                         <div class="division-header-container">
-                            <h2>${divName}</h2>
+                            <h2>${divName === 'Red and Blue Division' ? 'Red and Blue<br>Division' : divName}</h2>
                             <div class="toggle-switch" data-toggle-group="${divName}">
                                 <button class="toggle-btn ${mode === 'PTS' ? 'active' : ''}" onclick="toggleDivisionMode('${divName}', 'PTS')">PTS</button>
                                 <button class="toggle-btn ${mode === 'PGA' ? 'active' : ''}" onclick="toggleDivisionMode('${divName}', 'PGA')">PGA</button>
