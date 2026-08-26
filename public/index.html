@@ -7,21 +7,13 @@
     <style>
         body {
             --page-pad: 20px;
-            --container-pad: 24px;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f6f8;
+            background-color: #fff;
             color: #333;
             margin: 0;
             padding: 20px;
-        }
-
-        .container {
             max-width: 1100px;
             margin: 0 auto;
-            background: #fff;
-            padding: 24px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .header-container {
@@ -77,10 +69,10 @@
             display: flex;
             align-items: center;
             gap: 2px;
-            margin-left: calc(-1 * var(--container-pad));
-            margin-right: calc(-1 * var(--container-pad));
+            margin-left: 0;
+            margin-right: 0;
             margin-bottom: 0;
-            padding: 1px calc(3px + var(--container-pad)) 10px;
+            padding: 1px 3px 10px;
             background: rgba(255,255,255,0.96);
             border-radius: 0;
         }
@@ -565,8 +557,7 @@
         .fotmob-link-btn:hover { opacity: 0.85; }
 
         @media (max-width: 768px) {
-            body { padding: 10px; --page-pad: 10px; --container-pad: 12px; }
-            .container { padding: 12px; }
+            body { padding: 10px; --page-pad: 10px; }
             h1 { font-size: 1.3rem; }
             .lion-logo { height: 45px; }
             th, td { padding: 10px 4px; font-size: 0.8rem; }
@@ -595,7 +586,6 @@
 
 <div class="menu-backdrop"></div>
 
-<div class="container">
     <div class="header-container">
         <h1>Presidents<br>Premier League</h1>
         <img src="lion-logo.png" alt="Premier League Lion Logo" class="lion-logo">
@@ -684,8 +674,6 @@
             <tbody id="draft-player-body"></tbody>
         </table>
     </div>
-</div>
-
 <script>
     const draftData = {
         "Hef": ["Arsenal", "Bournemouth", "Nottingham Forest", "Hull City"],
