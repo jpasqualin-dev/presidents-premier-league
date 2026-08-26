@@ -353,7 +353,11 @@
         }
 
         .content-area > .fixture-card:first-child .card-header {
+            position: sticky;
+            top: var(--table-header-top, 0px);
+            z-index: 31;
             background: var(--card-bg);
+            padding: 10px 16px 6px;
             box-shadow: 0 2px 0 var(--card-bg);
         }
 
