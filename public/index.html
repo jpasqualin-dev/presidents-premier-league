@@ -465,7 +465,8 @@
         tr:hover { background-color: #f8f9fa; }
 
         .expandable-row { cursor: pointer; transition: background-color 0.15s ease; }
-        .expandable-row:hover { background-color: #fafafa; }
+        .expandable-row,
+        .expandable-row:hover { background-color: #ffffff; }
         .expandable-row.expanded, .expandable-row.expanded:hover { background-color: #ffffff !important; }
 
         .table-chevron { color: #a0aec0; font-size: 0.75rem; transition: transform 0.2s ease; margin-left: 6px; display: inline-block; }
@@ -529,8 +530,11 @@
         .stat-card.collapsed .stat-player-wrapper:nth-child(n+2) { display: none; }
         
         .stat-player-row { display: flex; align-items: center; padding: 8px 0; cursor: pointer; transition: background-color 0.15s ease; border-radius: 4px; }
-        .stat-player-row:hover { background-color: #fafafa; }
         .stat-player-wrapper.expanded .stat-player-row, .stat-player-wrapper.expanded .stat-player-row:hover { background-color: #ffffff !important; }
+
+        @media (hover: hover) {
+            .stat-player-row:hover { background-color: #fafafa; }
+        }
 
         .stat-rank { width: 24px; font-size: 0.85rem; color: #718096; font-weight: 600; padding-left: 4px; }
         .stat-player-info { flex-grow: 1; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.95rem; color: #1a1a1a; }
