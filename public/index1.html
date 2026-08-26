@@ -48,6 +48,7 @@
 
         h1 {
             margin: 0;
+            margin-left: 10px;
             color: #38003c;
             font-size: 1.45rem;
             line-height: 1.05;
@@ -413,6 +414,12 @@
             border-radius: 8px;
         }
 
+        .table-card {
+            background: #ffffff;
+            border: 1px solid #dfe5eb;
+            box-shadow: 0 3px 10px rgba(56,0,60,0.08);
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -619,6 +626,7 @@
 
         .players-dropdown,
         .today-card,
+        .table-card,
         table,
         th,
         .stat-card,
@@ -633,7 +641,8 @@
         .players-dropdown a { color: #f1f1f1; }
         .players-dropdown a:hover { background: #303030; }
 
-        .today-card { box-shadow: 0 3px 10px rgba(0,0,0,0.35); }
+        .today-card,
+        .table-card { box-shadow: 0 3px 10px rgba(0,0,0,0.35); }
         .today-match-row { border-bottom-color: #3d3d3d; color: #f1f1f1; }
         .team-name-text,
         .match-score-block { color: #f1f1f1; }
@@ -733,7 +742,7 @@
 
     <div id="status-indicator">Initializing 2026/2027 season data...</div>
 
-    <div class="table-wrapper" style="margin-top: 0;">
+    <div class="table-wrapper table-card" style="margin-top: 0;">
         <table id="standings-table">
             <thead></thead>
             <tbody id="standings-body"></tbody>
@@ -1309,11 +1318,11 @@
             if (mode === 'PTS') teamsInDiv.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
             else teamsInDiv.sort((a, b) => b.ptsPga - a.ptsPga || b.PGA - a.PGA);
 
-            let html = `<div class="table-wrapper"><table><thead>
+            let html = `<div class="table-wrapper table-card"><table><thead>
                 <tr class="title-row">
                     <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
                         <div class="division-header-container">
-                            <h2>${divName === 'Red and Blue Division' ? 'Red and Blue<br>Division' : divName}</h2>
+                            <h2>${divName.replace(' Division', '<br>Division')}</h2>
                             <div class="toggle-switch" data-toggle-group="${divName}">
                                 <button class="toggle-btn ${mode === 'PTS' ? 'active' : ''}" onclick="toggleDivisionMode('${divName}', 'PTS')">PTS</button>
                                 <button class="toggle-btn ${mode === 'PGA' ? 'active' : ''}" onclick="toggleDivisionMode('${divName}', 'PGA')">PGA</button>
