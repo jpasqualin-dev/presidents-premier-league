@@ -210,6 +210,10 @@
         .pill-green { background-color: #f0fff4; color: #276749; border: 1px solid #c6f6d5; }
         .pill-purple { background-color: #faf5ff; color: #6b46c1; border: 1px solid #e9d8fd; }
         .pill-gray { background-color: #f7fafc; color: #4a5568; border: 1px solid #e2e8f0; }
+
+        .fotmob-btn-container { display: flex; gap: 10px; margin-top: 15px; }
+        .fotmob-link-btn { flex: 1 1 0; min-width: 0; padding: 10px; border-radius: 8px; background-color: #00ff87; color: #38003c; font-size: 0.95rem; font-weight: 700; text-align: center; text-decoration: none; transition: opacity 0.2s; }
+        .fotmob-link-btn:hover { opacity: 0.85; }
     </style>
 </head>
 <body>
@@ -236,7 +240,13 @@
         </details>
     </nav>
 
-    <h2>Season Awards</h2>
+    <h2>View Stats on FotMob</h2>
+    <div class="fotmob-btn-container">
+        <a href="https://www.fotmob.com/leagues/47/stats/premier-league/players" target="_blank" class="fotmob-link-btn">Player Stats</a>
+        <a href="https://www.fotmob.com/leagues/47/stats/premier-league/teams" target="_blank" class="fotmob-link-btn">Team Stats</a>
+    </div>
+
+    <h2>PPL Stats</h2>
     <div id="season-awards-container" class="stats-grid">
         <div class="loading-state">Loading season awards...</div>
     </div>
