@@ -361,13 +361,16 @@
             box-shadow: 0 2px 0 var(--card-bg);
         }
 
-        .content-area > .standings-card .table-wrapper thead {
-            top: calc(var(--table-header-top, 0px) + var(--card-header-height, 48px));
-            z-index: 32;
+        .content-area > .standings-card .table-wrapper {
+            max-height: none;
+            overflow: visible;
+            padding-bottom: 240px;
         }
 
-        .content-area > .standings-card .table-wrapper {
-            padding-bottom: 240px;
+        .content-area > .standings-card .table-wrapper thead {
+            position: sticky;
+            top: calc(var(--table-header-top, 0px) + var(--card-header-height, 48px));
+            z-index: 32;
         }
 
         .content-area > .standings-card {
