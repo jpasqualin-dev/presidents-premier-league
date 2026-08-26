@@ -582,6 +582,111 @@
             #standings-table th:nth-child(2), #standings-table td:nth-child(2),
             #divisions-container table th:nth-child(2), #divisions-container table td:nth-child(2) { width: 35%; }
         }
+
+        /* Dark mode palette for this alternate home page. */
+        body {
+            background: #121212;
+            color: #e6e6e6;
+            color-scheme: dark;
+        }
+
+        .header-container {
+            background-color: #232323;
+            background-blend-mode: soft-light;
+        }
+
+        .menu-backdrop,
+        .site-menu {
+            background: rgba(18,18,18,0.96);
+        }
+
+        h1,
+        .site-menu a,
+        .players-menu summary {
+            color: #f2f2f2;
+            text-shadow: none;
+        }
+
+        .site-menu a:hover,
+        .players-menu summary:hover,
+        .players-menu[open] summary {
+            background: #2a2a2a;
+            border-color: #4b4b4b;
+        }
+
+        .site-menu a.active::after { background: #00ff87; }
+
+        .players-dropdown,
+        .today-card,
+        table,
+        th,
+        .stat-card,
+        .toggle-btn.active,
+        .dvp-sort-btn.active {
+            background: #202020;
+            border-color: #3d3d3d;
+            color: #f1f1f1;
+        }
+
+        .players-dropdown { box-shadow: 0 4px 12px rgba(0,0,0,0.45); }
+        .players-dropdown a { color: #f1f1f1; }
+        .players-dropdown a:hover { background: #303030; }
+
+        .today-card { box-shadow: 0 3px 10px rgba(0,0,0,0.35); }
+        #status-indicator { background: #173044; color: #bce6ff; }
+
+        th,
+        td { border-bottom-color: #3d3d3d; }
+        th { color: #bdbdbd; }
+        .plain-table-title,
+        .fotmob-rank,
+        .fotmob-player,
+        .stat-card,
+        .stat-card-title,
+        .stat-player-info { color: #f1f1f1; }
+
+        td [style*="color: #1a1a1a"] { color: #f1f1f1 !important; }
+        td [style*="color: #888"] { color: #b4b4b4 !important; }
+
+        @media (hover: hover) {
+            tr:hover { background-color: #2a2a2a; }
+            .nested-table-row:hover,
+            .stat-player-row:hover { background-color: #2a2a2a; }
+        }
+
+        .expandable-row,
+        .expandable-row:hover,
+        .expandable-row.expanded,
+        .expandable-row.expanded:hover,
+        .stat-player-wrapper.expanded .stat-player-row,
+        .stat-player-wrapper.expanded .stat-player-row:hover {
+            background-color: #202020 !important;
+        }
+
+        .nested-table-row,
+        .nested-teams-container { background-color: #292929; }
+        .nested-table-row td,
+        .stat-player-wrapper { border-bottom-color: #3d3d3d; }
+        .nested-table-row td,
+        .nested-team-name { color: #c8c8c8; }
+        .highlight-col,
+        .stat-card-title:hover { color: #00ff87; }
+
+        .toggle-switch,
+        .dvp-sort-toggle { background-color: #303030; }
+        .toggle-btn,
+        .dvp-sort-btn,
+        .stat-rank,
+        .chevron,
+        .chevron-small,
+        .table-chevron { color: #a8a8a8; }
+
+        .stat-card { border-color: #3d3d3d; box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
+        .pill-blue { background-color: #16394f; color: #a9ddff; border-color: #245675; }
+        .pill-red { background-color: #4a2024; color: #ffb4b8; border-color: #7c353b; }
+        .pill-green { background-color: #173d2c; color: #a8edc7; border-color: #286647; }
+        .pill-purple { background-color: #39294c; color: #d9bcff; border-color: #5a4178; }
+        .pill-gray { background-color: #303030; color: #d0d0d0; border-color: #4a4a4a; }
     </style>
 </head>
 <body>
