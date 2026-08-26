@@ -361,6 +361,10 @@
             box-shadow: 0 2px 0 var(--card-bg);
         }
 
+        .content-area > .standings-card .table-wrapper {
+            padding-bottom: 240px;
+        }
+
         .content-area > .fixture-card:first-child .card-header::before {
             content: "";
             position: absolute;
@@ -606,7 +610,7 @@
     function renderStandingsCard(title, teamsArray) {
         const sorted = sortTeams(teamsArray);
         let html = `
-            <div class="fixture-card">
+            <div class="fixture-card standings-card">
                 <div class="card-header"><span>${title}</span></div>
                 <div class="table-wrapper">
                     <table>
