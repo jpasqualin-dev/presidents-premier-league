@@ -25,6 +25,7 @@
         }
 
         .header-container {
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -37,6 +38,18 @@
             background-size: cover;
             background-position: center;
             overflow: hidden;
+        }
+
+        /* Thin fixed strip so content stays tinted in the gap above the sticky nav */
+        .menu-backdrop {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(calc(100vw - 2 * var(--page-pad)), 1100px);
+            height: 5px;
+            background: rgba(255,255,255,0.96);
+            pointer-events: none;
         }
 
         h1 {
@@ -573,6 +586,8 @@
     </style>
 </head>
 <body>
+
+<div class="menu-backdrop"></div>
 
 <div class="container">
     <div class="header-container">
