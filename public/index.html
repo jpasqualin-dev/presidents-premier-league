@@ -8,6 +8,7 @@
         body {
             --page-pad: 20px;
             --container-pad: 24px;
+            --header-height: 60px;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #f4f6f8;
             color: #333;
@@ -25,6 +26,8 @@
         }
 
         .header-container {
+            position: relative;
+            z-index: 25;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -37,6 +40,19 @@
             background-size: cover;
             background-position: center;
             overflow: hidden;
+        }
+
+        /* Fixed backdrop that keeps scrolled content tinted above the sticky nav */
+        .menu-backdrop {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(calc(100vw - 2 * var(--page-pad)), 1100px);
+            height: var(--header-height);
+            background: rgba(255,255,255,0.96);
+            z-index: 15;
+            pointer-events: none;
         }
 
         h1 {
@@ -57,7 +73,7 @@
 
         .site-menu {
             position: sticky;
-            top: 5px;
+            top: var(--header-height);
             z-index: 20;
             display: flex;
             align-items: center;
@@ -573,6 +589,8 @@
     </style>
 </head>
 <body>
+
+<div class="menu-backdrop"></div>
 
 <div class="container">
     <div class="header-container">
