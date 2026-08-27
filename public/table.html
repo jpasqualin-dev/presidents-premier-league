@@ -30,18 +30,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        body::before {
-            content: "";
-            position: fixed;
-            top: 16px;
-            right: 0;
-            left: 0;
-            height: var(--table-header-top, 0px);
-            z-index: 39;
-            background: var(--bg-color);
-            pointer-events: none;
-        }
-
         .main-container {
             max-width: 800px;
             margin: 0 auto;
@@ -215,61 +203,12 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.06);
         }
 
-        .dvp-sort-toggle {
-            display: inline-flex;
-            gap: 2px;
-            padding: 2px;
-            margin: 0 0 0 auto;
-            background: #edf2f7;
-            border-radius: 20px;
-        }
+        .dvp-sort-toggle { display: inline-flex; gap: 2px; padding: 2px; background: #edf2f7; border-radius: 20px; }
+        .dvp-sort-btn { min-width: 52px; padding: 6px 12px; border: 1px solid transparent; border-radius: 16px; background: transparent; color: #718096; font: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+        .dvp-sort-btn.active { background: #ffffff; color: #1a1a1a; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
 
-        .dvp-sort-toggle .pill {
-            min-width: 72px;
-            padding: 6px 12px;
-            font-size: 0.8rem;
-        }
-
-        .dvp-card-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .dvp-player-table {
-            table-layout: fixed;
-        }
-
-        .dvp-player-table th:first-child,
-        .dvp-player-table td:first-child {
-            width: 14%;
-            white-space: nowrap;
-        }
-
-        .dvp-player-table th:nth-child(2),
-        .dvp-player-table td:nth-child(2) {
-            width: 62%;
-        }
-
-        .dvp-player-table th:last-child,
-        .dvp-player-table td:last-child {
-            width: 24%;
-            max-width: 24%;
-            overflow: hidden;
-            text-align: center;
-            white-space: nowrap;
-        }
-
-        .dvp-player-table .stat-value {
-            max-width: 100%;
-            padding-right: 6px;
-            padding-left: 6px;
-        }
-
-        /* Content Area & Cards */
-        .content-area {
-            padding: 0 20px;
-        }
+        /* Content Area & Tables */
+        .content-area { padding: 0 16px; }
 
         .loading-state {
             padding: 40px 20px;
@@ -277,39 +216,24 @@
             color: var(--text-muted);
             font-weight: 500;
             background: var(--card-bg);
-            border-radius: 16px;
-            margin-top: 20px;
+            border-radius: 6px;
+            margin: 35px 0 10px;
         }
 
-        .fixture-card {
-            background-color: var(--card-bg);
-            border-radius: 16px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-            overflow: visible;
-        }
-
-        .card-header {
-            font-weight: 700;
-            font-size: 1rem;
-            color: var(--text-main);
-            padding: 16px 16px 12px 16px;
-        }
-
-        /* Tables */
         .table-wrapper {
             width: 100%;
-            max-height: calc(100vh - var(--table-header-top, 0px) - var(--card-header-height, 48px) - 16px);
-            overflow-x: hidden;
-            overflow-y: auto;
+            overflow-x: auto;
             -webkit-overflow-scrolling: touch;
+            margin: 35px 0 10px;
+            border-radius: 8px;
         }
+
+        .table-card { background: #ffffff; border: 1px solid #dfe5eb; box-shadow: 0 3px 10px rgba(56,0,60,0.08); }
 
         table {
             width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            background: transparent;
+            border-collapse: collapse;
+            background: #ffffff;
             font-size: 0.9rem;
             white-space: nowrap;
         }
@@ -320,12 +244,6 @@
             border-bottom: 1px solid #eaeaea;
         }
 
-        thead {
-            position: sticky;
-            top: 0;
-            z-index: 30;
-        }
-
         th {
             background-color: #fff;
             color: #666;
@@ -333,78 +251,19 @@
             font-size: 0.8rem;
             text-transform: uppercase;
             border-bottom: 2px solid #eaeaea;
-            box-shadow: 0 2px 0 rgba(234, 234, 234, 0.9);
         }
 
-        thead th:first-child {
-            border-top-left-radius: 10px;
-        }
+        .plain-table-title { margin: 0; padding: 0 0 8px; font-size: 1.4rem; color: #1a1a1a; text-align: left; }
+        .draft-title { font-size: 1.15rem; }
+        .overall-header-container { display: flex; align-items: flex-end; padding-bottom: 8px; margin: 0 10px; text-align: left; }
+        .overall-header-container h2 { margin: 0; padding: 0; border: 0; font-size: 1.4rem; }
+        .draft-title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 10px; }
 
-        thead th:last-child {
-            border-top-right-radius: 10px;
-        }
-
-        tbody tr {
-            background: var(--card-bg);
-        }
-
-        .content-area > .fixture-card:first-child {
-            background: transparent;
-        }
-
-        .content-area > .fixture-card:first-child .card-header {
-            position: sticky;
-            top: var(--table-header-top, 0px);
-            z-index: 31;
-            background: var(--card-bg);
-            padding: 10px 16px 6px;
-            box-shadow: 0 2px 0 var(--card-bg);
-        }
-
-        .content-area > .standings-card .table-wrapper {
-            max-height: none;
-            overflow: visible;
-            padding-bottom: 240px;
-        }
-
-        .content-area > .standings-card .table-wrapper thead {
-            position: sticky;
-            top: calc(var(--table-header-top, 0px) + var(--card-header-height, 48px));
-            z-index: 32;
-        }
-
-        .content-area > .standings-card {
-            overflow: visible;
-            box-shadow: none;
-        }
-
-        .content-area > .standings-card thead th:first-child,
-        .content-area > .standings-card thead th:last-child {
-            border-radius: 0;
-        }
-
-        .content-area > .fixture-card:first-child .card-header::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            z-index: 0;
-            background: var(--card-bg);
-            border-top-left-radius: 16px;
-            border-top-right-radius: 16px;
-        }
-
-        .content-area > .fixture-card:first-child .card-header > * {
-            position: relative;
-            z-index: 1;
-        }
-
-        tbody tr:last-child td:first-child {
-            border-bottom-left-radius: 16px;
-        }
-
-        tbody tr:last-child td:last-child {
-            border-bottom-right-radius: 16px;
-        }
+        #dvp-player-table { table-layout: fixed; }
+        #dvp-rank-table tr:nth-child(2) th:first-child, #dvp-rank-table td:first-child,
+        #dvp-player-table tr:nth-child(2) th:first-child, #dvp-player-table td:first-child { width: 8%; }
+        #dvp-player-table tr:nth-child(2) th:nth-child(2), #dvp-player-table td:nth-child(2) { width: 69%; white-space: normal; }
+        #dvp-player-table tr:nth-child(2) th:nth-child(3), #dvp-player-table td:nth-child(3) { width: 25%; text-align: right; padding-right: 16px; }
 
         .text-left { text-align: left !important; }
         .fotmob-rank { width: 25px; font-weight: 600; color: #1a1a1a; }
@@ -631,11 +490,14 @@
     function renderStandingsCard(title, teamsArray) {
         const sorted = sortTeams(teamsArray);
         let html = `
-            <div class="fixture-card standings-card">
-                <div class="card-header"><span>${title}</span></div>
-                <div class="table-wrapper">
-                    <table>
+            <div class="table-wrapper table-card" style="margin-top: 0;">
+                    <table id="standings-table">
                         <thead>
+                            <tr class="title-row">
+                                <th colspan="9" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
+                                    <div class="overall-header-container"><h2>${title}</h2></div>
+                                </th>
+                            </tr>
                             <tr><th>#</th><th class="text-left">Team</th><th>PL</th><th>W</th><th>D</th><th>L</th><th>+/-</th><th>GD</th><th>PTS</th></tr>
                         </thead>
                         <tbody>
@@ -691,22 +553,23 @@
             })
             : rankedTeams;
 
-        const sortToggleHtml = `
-            <div class="dvp-sort-toggle" role="group" aria-label="DVP table sort order">
-                <button class="pill${dvpSort === 'rank' ? ' active' : ''}" onclick="setDvpSort('rank')">Rank</button>
-                <button class="pill${dvpSort === 'diff' ? ' active' : ''}" onclick="setDvpSort('diff')">Diff</button>
-            </div>
-        `;
-
         let rankHtml = `
-            <div class="fixture-card">
-                <div class="card-header dvp-card-header">
-                    <span>Draft Value Performance</span>
-                    ${sortToggleHtml}
-                </div>
-                <div class="table-wrapper">
-                    <table>
-                        <thead><tr><th>Rank</th><th class="text-left">Team</th><th>PTS</th><th>GD</th><th>Pick</th><th>Diff</th></tr></thead>
+            <div class="table-wrapper table-card">
+                    <table id="dvp-rank-table">
+                        <thead>
+                            <tr class="title-row">
+                                <th colspan="6" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
+                                    <div class="draft-title-row">
+                                        <h2 class="plain-table-title draft-title">Draft Value<br>Performance</h2>
+                                        <div class="dvp-sort-toggle" role="group" aria-label="Draft value performance sort order">
+                                            <button type="button" class="dvp-sort-btn${dvpSort === 'rank' ? ' active' : ''}" onclick="setDvpSort('rank')">Rank</button>
+                                            <button type="button" class="dvp-sort-btn${dvpSort === 'diff' ? ' active' : ''}" onclick="setDvpSort('diff')">Diff</button>
+                                        </div>
+                                    </div>
+                                </th>
+                            </tr>
+                            <tr><th>#</th><th class="text-left">Team</th><th>PTS</th><th>GD</th><th>Pick</th><th>Diff</th></tr>
+                        </thead>
                         <tbody>
         `;
 
@@ -758,11 +621,21 @@
         players.sort((a, b) => b.totalDraftDiff - a.totalDraftDiff);
 
         let playerHtml = `
-            <div class="fixture-card">
-                <div class="card-header">Draft Value Performance by Player</div>
-                <div class="table-wrapper">
-                    <table class="dvp-player-table">
-                        <thead><tr><th>Rank</th><th class="text-left">Player</th><th>Total Diff</th></tr></thead>
+            <div class="table-wrapper table-card">
+                    <table id="dvp-player-table">
+                        <colgroup>
+                            <col style="width: 8%;">
+                            <col style="width: 67%;">
+                            <col style="width: 25%;">
+                        </colgroup>
+                        <thead>
+                            <tr class="title-row">
+                                <th colspan="3" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
+                                    <h2 class="plain-table-title draft-title" style="margin-left: 10px;">Draft Value Performance<br>by Player</h2>
+                                </th>
+                            </tr>
+                            <tr><th>#</th><th class="text-left">Player</th><th style="text-align: right; padding-right: 16px;">Total Diff</th></tr>
+                        </thead>
                         <tbody>
         `;
 
@@ -849,44 +722,6 @@
         renderView();
     }
 
-    function updateTableHeaderOffset() {
-        const header = document.querySelector('.header-container');
-        const navControls = document.querySelector('.pills-nav-container');
-        if (!header || !navControls) return;
-
-        const cardHeader = document.querySelector('.content-area > .fixture-card:first-child .card-header');
-        const tableHeader = document.querySelector('.content-area > .fixture-card:first-child thead');
-        const cardHeaderHeight = cardHeader ? Math.ceil(cardHeader.getBoundingClientRect().height) : 48;
-        const tableHeaderHeight = tableHeader ? Math.ceil(tableHeader.getBoundingClientRect().height) : 48;
-
-        document.documentElement.style.setProperty(
-            '--header-height',
-            `${Math.ceil(header.getBoundingClientRect().height)}px`
-        );
-        document.documentElement.style.setProperty(
-            '--table-header-top',
-            `${Math.ceil(navControls.getBoundingClientRect().bottom)}px`
-        );
-        document.documentElement.style.setProperty(
-            '--card-header-height',
-            `${cardHeaderHeight}px`
-        );
-        document.documentElement.style.setProperty(
-            '--table-header-height',
-            `${tableHeaderHeight}px`
-        );
-    }
-
-    let cardHeaderResizeObserver = null;
-
-    function observeCardHeaderResize() {
-        const cardHeader = document.querySelector('.content-area > .fixture-card:first-child .card-header');
-        if (!cardHeader || !('ResizeObserver' in window)) return;
-        if (cardHeaderResizeObserver) cardHeaderResizeObserver.disconnect();
-        cardHeaderResizeObserver = new ResizeObserver(updateTableHeaderOffset);
-        cardHeaderResizeObserver.observe(cardHeader);
-    }
-
     function updateNavUI() {
         ['all', 'home', 'away', 'dvp'].forEach(v => {
             document.getElementById(`btn-${v}`).classList.toggle('active', v === currentView);
@@ -901,8 +736,6 @@
         else if (currentView === 'away') renderStandingsCard('Away Standings', Object.values(cachedStats.awayStats));
         else if (currentView === 'dvp') renderDvpCards(cachedStats.allStats);
 
-        updateTableHeaderOffset();
-        observeCardHeaderResize();
     }
 
     // Fetch matches from API (same caching strategy as other pages)
@@ -936,17 +769,6 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        updateTableHeaderOffset();
-        const header = document.querySelector('.header-container');
-        if (header && 'ResizeObserver' in window) {
-            new ResizeObserver(updateTableHeaderOffset).observe(header);
-        }
-        window.addEventListener('resize', updateTableHeaderOffset);
-        window.addEventListener('scroll', updateTableHeaderOffset, { passive: true });
-        const navControls = document.querySelector('.pills-nav-container');
-        if (navControls && 'ResizeObserver' in window) {
-            new ResizeObserver(updateTableHeaderOffset).observe(navControls);
-        }
         fetchTableData();
     });
 </script>
