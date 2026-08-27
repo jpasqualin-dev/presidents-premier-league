@@ -297,11 +297,13 @@
         .pill-gray { background-color: #f7fafc; color: #4a5568; border: 1px solid #e2e8f0; }
 
         /* Mobile tweaks */
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
             .header-container { top: 10px; margin-right: 10px; margin-left: 10px; }
             .sticky-nav-wrapper { top: calc(var(--header-height, 60px) + 15px); }
             .site-menu { margin-right: 10px; margin-left: 10px; }
             th, td { padding: 10px 4px; font-size: 0.8rem; }
+            .plain-table-title, .overall-header-container h2 { font-size: 1.1rem; }
+            .draft-title { font-size: 1rem; }
         }
     </style>
 </head>
@@ -554,7 +556,7 @@
             : rankedTeams;
 
         let rankHtml = `
-                <div class="table-wrapper table-card" style="margin-top: 0;">
+                <div class="table-wrapper table-card" style="margin-top: 12px;">
                     <table id="dvp-rank-table">
                         <thead>
                             <tr class="title-row">
@@ -715,6 +717,7 @@
         currentView = view;
         updateNavUI();
         renderView();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function setDvpSort(sort) {
