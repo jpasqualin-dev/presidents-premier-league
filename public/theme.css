@@ -103,11 +103,19 @@ body.dark-mode .match-score-block {
     border-color: #3d3d3d;
 }
 
+body.dark-mode .players-dropdown a {
+    border-color: transparent;
+}
+
 body.dark-mode .players-dropdown a:hover,
 body.dark-mode .nested-table-row,
 body.dark-mode .nested-teams-container,
 body.dark-mode .mw-header {
     background: #292929;
+}
+
+body.dark-mode .players-dropdown a:hover {
+    background: #303030;
 }
 
 body.dark-mode .team-owner,
