@@ -30,6 +30,18 @@
             -webkit-font-smoothing: antialiased;
         }
 
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            height: calc(var(--fixtures-header-top, 0px) + 4px);
+            z-index: 39;
+            background: var(--bg-color);
+            pointer-events: none;
+        }
+
         .main-container {
             max-width: 800px;
             margin: 0 auto;
@@ -74,9 +86,9 @@
 
         .sticky-nav-wrapper {
             position: sticky;
-            top: calc(var(--header-height, 60px) + 21px);
+            top: calc(var(--fixtures-header-height, 65px) + 21px);
             z-index: 40;
-            background-color: var(--bg-color);
+            background-color: transparent;
         }
 
         .site-menu {
@@ -170,7 +182,7 @@
 
         /* Navigation Pills */
         .pills-nav-container {
-            padding: 0 20px 8px;
+            padding: 0 20px 4px;
             display: flex;
             gap: 8px;
             margin: 0;
@@ -299,7 +311,7 @@
         /* Mobile tweaks */
         @media (max-width: 768px) {
             .header-container { top: 10px; margin-right: 10px; margin-left: 10px; }
-            .sticky-nav-wrapper { top: calc(var(--header-height, 60px) + 15px); }
+            .sticky-nav-wrapper { top: calc(var(--fixtures-header-height, 60px) + 15px); }
             .site-menu { margin-right: 10px; margin-left: 10px; }
             th, td { padding: 10px 4px; font-size: 0.8rem; }
             .plain-table-title, .overall-header-container h2 { font-size: 1.1rem; }
@@ -772,8 +784,34 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+        updateTableHeaderOffset();
+        window.addEventListener('resize', updateTableHeaderOffset);
+        window.addEventListener('scroll', updateTableHeaderOffset, { passive: true });
+
+        const header = document.querySelector('.header-container');
+        const navControls = document.querySelector('.pills-nav-container');
+        if ('ResizeObserver' in window) {
+            if (header) new ResizeObserver(updateTableHeaderOffset).observe(header);
+            if (navControls) new ResizeObserver(updateTableHeaderOffset).observe(navControls);
+        }
+
         fetchTableData();
     });
+
+    function updateTableHeaderOffset() {
+        const header = document.querySelector('.header-container');
+        const navControls = document.querySelector('.pills-nav-container');
+        if (!header || !navControls) return;
+
+        document.documentElement.style.setProperty(
+            '--fixtures-header-height',
+            `${Math.ceil(header.getBoundingClientRect().height)}px`
+        );
+        document.documentElement.style.setProperty(
+            '--fixtures-header-top',
+            `${Math.ceil(navControls.getBoundingClientRect().bottom)}px`
+        );
+    }
 </script>
 </body>
 </html>
