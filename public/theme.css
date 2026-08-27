@@ -112,6 +112,7 @@ body.dark-mode .table-chevron {
 body.dark-mode .mw-title { color: #00ff87; }
 body.dark-mode .venue-tag,
 body.dark-mode .upcoming { background: #303030; border-color: #4a4a4a; }
+body.dark-mode .upcoming { color: #f1f1f1; }
 
 body.dark-mode .pill-blue { background-color: #16394f; color: #a9ddff; border-color: #245675; }
 body.dark-mode .pill-red { background-color: #4a2024; color: #ffb4b8; border-color: #7c353b; }
