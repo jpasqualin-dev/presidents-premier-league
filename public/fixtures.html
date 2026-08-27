@@ -971,7 +971,7 @@
         const navControls = document.querySelector('.pills-nav-container');
         if (latestCompletedCard && navControls) {
             const navBottom = navControls.getBoundingClientRect().bottom;
-            const y = latestCompletedCard.getBoundingClientRect().top + window.pageYOffset - navBottom - 16;
+            const y = latestCompletedCard.getBoundingClientRect().top + window.pageYOffset - navBottom - 8;
             window.scrollTo({top: y, behavior: 'smooth'});
         }
     }
@@ -981,7 +981,7 @@
         const navControls = document.querySelector('.pills-nav-container');
         if (latestActiveRoundCard && navControls) {
             const navBottom = navControls.getBoundingClientRect().bottom;
-            const y = latestActiveRoundCard.getBoundingClientRect().top + window.pageYOffset - navBottom - 16;
+            const y = latestActiveRoundCard.getBoundingClientRect().top + window.pageYOffset - navBottom - 8;
             window.scrollTo({top: y, behavior: 'smooth'});
         }
     }
