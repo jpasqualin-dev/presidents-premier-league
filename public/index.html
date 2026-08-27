@@ -1150,7 +1150,7 @@
                 teams: draftData[player],
                 PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0,
                 goldenBoot: 0, goldenGloves: 0, ppm: 0, gpm: 0, gcpm: 0,
-                pvpWins: 0, pga: 0, ptsPga: 0
+                pvpWins: 0, pga: 0, ptsPga: 0, roundsWon: 0
             };
         }
         return stats;
@@ -1468,6 +1468,40 @@
             return card;
         }
 
+        function buildSimpleAwardCard(config) {
+            const card = document.createElement('div');
+            card.className = 'stat-card collapsed';
+
+            let html = `
+                <div class="stat-card-title" onclick="toggleCard(this)">
+                    <span>${config.title}</span>
+                    <span class="chevron">❯</span>
+                </div>
+                <div class="stat-card-body">
+            `;
+
+            config.players.forEach((player, index) => {
+                const iconsHtml = player.teams.map(team => teamLogos[team] ? `<img src="${teamLogos[team]}" class="team-icon" title="${team}" alt="${team}">` : '').join('');
+
+                html += `
+                    <div class="stat-player-wrapper">
+                        <div class="stat-player-row">
+                            <div class="stat-rank">${index + 1}</div>
+                            <div class="stat-player-info">
+                                <span>${player.player}</span>
+                                <div class="stat-player-icons">${iconsHtml}</div>
+                            </div>
+                            <div class="stat-value ${config.pillClass}">${config.playerVal(player)}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            card.innerHTML = html;
+            return card;
+        }
+
         const awardConfigs = [
             {
                 title: "Golden Boot",
@@ -1526,6 +1560,12 @@
         ];
 
         awardConfigs.forEach(config => container.appendChild(buildAwardCard(config)));
+        container.appendChild(buildSimpleAwardCard({
+            title: "Rounds Won",
+            players: [...players].sort((a, b) => b.roundsWon - a.roundsWon || b.PTS - a.PTS),
+            playerVal: player => player.roundsWon,
+            pillClass: "pill-green"
+        }));
     }
 
     let draftRankSort = 'rank';
@@ -1690,6 +1730,7 @@
     async function fetchAndUpdateStandings() {
         let playerStats = initializePlayerStats();
         let teamStats = initializeTeamStats();
+        const weeklyPlayerPoints = {};
         const statusEl = document.getElementById('status-indicator');
 
         renderPrimaryTable(playerStats, teamStats);
@@ -1737,6 +1778,13 @@
                         const awayPlayer = findPlayerByTeam(awayTeamName, playerStats);
                         const homeTeamKey = findTeamKey(homeTeamName, teamStats);
                         const awayTeamKey = findTeamKey(awayTeamName, teamStats);
+                        const matchweek = match.matchday;
+
+                        if (!weeklyPlayerPoints[matchweek]) {
+                            weeklyPlayerPoints[matchweek] = Object.fromEntries(
+                                Object.keys(playerStats).map(player => [player, 0])
+                            );
+                        }
 
                         if (homePlayer) {
                             let pStat = playerStats[homePlayer];
@@ -1747,6 +1795,8 @@
                             if (homeScore > awayScore) { pStat.W += 1; pStat.PTS += 3; }
                             else if (homeScore === awayScore) { pStat.D += 1; pStat.PTS += 1; }
                             else pStat.L += 1;
+
+                            weeklyPlayerPoints[matchweek][homePlayer] += homeScore > awayScore ? 3 : (homeScore === awayScore ? 1 : 0);
                         }
 
                         if (awayPlayer) {
@@ -1758,6 +1808,8 @@
                             if (awayScore > homeScore) { pStat.W += 1; pStat.PTS += 3; }
                             else if (awayScore === homeScore) { pStat.D += 1; pStat.PTS += 1; }
                             else pStat.L += 1;
+
+                            weeklyPlayerPoints[matchweek][awayPlayer] += awayScore > homeScore ? 3 : (awayScore === homeScore ? 1 : 0);
                         }
 
                         if (homePlayer && awayPlayer && homePlayer !== awayPlayer) {
@@ -1812,6 +1864,13 @@
                 t.GD = t.GF - t.GA;
                 t.ptsPga = t.PTS + t.PGA;
             }
+
+            Object.values(weeklyPlayerPoints).forEach(playerPoints => {
+                const highestScore = Math.max(...Object.values(playerPoints));
+                Object.entries(playerPoints).forEach(([player, points]) => {
+                    if (points === highestScore) playerStats[player].roundsWon += 1;
+                });
+            });
 
             cachedPlayerStats = playerStats;
             cachedTeamStats = teamStats;
