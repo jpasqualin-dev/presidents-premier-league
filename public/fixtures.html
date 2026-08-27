@@ -185,7 +185,7 @@
 
         /* Navigation Pills */
         .pills-nav-container {
-            padding: 0 20px 8px;
+            padding: 8px 20px;
             display: flex;
             gap: 8px;
             margin: 0;
@@ -793,8 +793,10 @@
             });
             setTimeout(scrollToLatestActiveRound, 100);
         } else if (currentView === 'team') {
-            container.appendChild(createTeamCard(selectedTeam));
-            window.scrollTo(0, 0);
+            const teamCard = createTeamCard(selectedTeam);
+            teamCard.id = 'card-selected-team';
+            container.appendChild(teamCard);
+            setTimeout(scrollToSelectedTeam, 100);
         }
     }
 
@@ -978,10 +980,19 @@
 
     function scrollToLatestActiveRound() {
         const latestActiveRoundCard = document.getElementById('card-latest-active-round');
+        scrollCardBelowNav(latestActiveRoundCard);
+    }
+
+    function scrollToSelectedTeam() {
+        const selectedTeamCard = document.getElementById('card-selected-team');
+        scrollCardBelowNav(selectedTeamCard);
+    }
+
+    function scrollCardBelowNav(card) {
         const navControls = document.querySelector('.pills-nav-container');
-        if (latestActiveRoundCard && navControls) {
+        if (card && navControls) {
             const navBottom = navControls.getBoundingClientRect().bottom;
-            const y = latestActiveRoundCard.getBoundingClientRect().top + window.pageYOffset - navBottom - 8;
+            const y = card.getBoundingClientRect().top + window.pageYOffset - navBottom - 16;
             window.scrollTo({top: y, behavior: 'smooth'});
         }
     }
