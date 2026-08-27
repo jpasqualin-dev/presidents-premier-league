@@ -1,0 +1,120 @@
+body.dark-mode {
+    --bg-color: #121212;
+    --card-bg: #202020;
+    --text-main: #f1f1f1;
+    --text-muted: #b8b8b8;
+    --pill-active: #202020;
+    --border-color: #3d3d3d;
+    color-scheme: dark;
+    background: #121212;
+    color: #e6e6e6;
+}
+
+body.dark-mode .header-container {
+    background-color: #232323;
+    background-blend-mode: soft-light;
+}
+
+body.dark-mode .site-menu,
+body.dark-mode .sticky-nav-wrapper {
+    background: #121212;
+}
+
+body.dark-mode::before { background: #121212; }
+
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode .header-container h1,
+body.dark-mode .profile-info h1,
+body.dark-mode .site-menu a,
+body.dark-mode .players-menu summary,
+body.dark-mode .back-button,
+body.dark-mode .plain-table-title,
+body.dark-mode .overall-header-container h2,
+body.dark-mode .fotmob-rank,
+body.dark-mode .fotmob-player,
+body.dark-mode .stat-card,
+body.dark-mode .stat-card-title,
+body.dark-mode .stat-player-info,
+body.dark-mode .my-team {
+    color: #f1f1f1;
+    text-shadow: none;
+}
+
+body.dark-mode .site-menu a:hover,
+body.dark-mode .players-menu summary:hover,
+body.dark-mode .players-menu[open] summary,
+body.dark-mode .back-button:hover,
+body.dark-mode .today-match-row:hover,
+body.dark-mode .fixture-row:hover,
+body.dark-mode .stat-player-row:hover,
+body.dark-mode .expandable-row:hover {
+    background: #2a2a2a;
+    border-color: #4b4b4b;
+}
+
+body.dark-mode .players-dropdown,
+body.dark-mode .loading-state,
+body.dark-mode .fixture-card,
+body.dark-mode .table-card,
+body.dark-mode table,
+body.dark-mode th,
+body.dark-mode .stat-card,
+body.dark-mode .profile-card,
+body.dark-mode .mw-card,
+body.dark-mode .back-button {
+    background: #202020;
+    border-color: #3d3d3d;
+}
+
+body.dark-mode .players-dropdown,
+body.dark-mode .players-dropdown a,
+body.dark-mode .today-match-row,
+body.dark-mode .fixture-row,
+body.dark-mode .mw-card,
+body.dark-mode .fixture-item,
+body.dark-mode td,
+body.dark-mode th,
+body.dark-mode .loading,
+body.dark-mode .loading-state,
+body.dark-mode .team-name,
+body.dark-mode .score-text,
+body.dark-mode .team-name-text,
+body.dark-mode .match-score-block {
+    color: #f1f1f1;
+    border-color: #3d3d3d;
+}
+
+body.dark-mode .players-dropdown a:hover,
+body.dark-mode .nested-table-row,
+body.dark-mode .nested-teams-container,
+body.dark-mode .mw-header {
+    background: #292929;
+}
+
+body.dark-mode .team-owner,
+body.dark-mode .ft-text,
+body.dark-mode .time-text,
+body.dark-mode .team-owner,
+body.dark-mode .profile-info p,
+body.dark-mode .manager-tag,
+body.dark-mode .opponent-line,
+body.dark-mode .venue-tag,
+body.dark-mode .mw-points,
+body.dark-mode .nested-team-name,
+body.dark-mode .nested-table-row td,
+body.dark-mode .chevron,
+body.dark-mode .chevron-small,
+body.dark-mode .table-chevron {
+    color: #b8b8b8;
+}
+
+body.dark-mode .mw-title { color: #00ff87; }
+body.dark-mode .venue-tag,
+body.dark-mode .upcoming { background: #303030; border-color: #4a4a4a; }
+
+body.dark-mode .pill-blue { background-color: #16394f; color: #a9ddff; border-color: #245675; }
+body.dark-mode .pill-red { background-color: #4a2024; color: #ffb4b8; border-color: #7c353b; }
+body.dark-mode .pill-green { background-color: #173d2c; color: #a8edc7; border-color: #286647; }
+body.dark-mode .pill-purple { background-color: #39294c; color: #d9bcff; border-color: #5a4178; }
+body.dark-mode .pill-gray { background-color: #303030; color: #d0d0d0; border-color: #4a4a4a; }
