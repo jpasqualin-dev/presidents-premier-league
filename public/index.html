@@ -113,11 +113,17 @@
             list-style: none;
         }
 
-        .site-menu a:hover,
-        .players-menu summary:hover,
         .players-menu[open] summary {
             background: #f0fff4;
             border-color: #c6f6d5;
+        }
+
+        @media (hover: hover) {
+            .site-menu a:hover,
+            .players-menu summary:hover {
+                background: #f0fff4;
+                border-color: #c6f6d5;
+            }
         }
 
         .site-menu a.active {
