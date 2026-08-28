@@ -51,7 +51,7 @@
             body.wide-page::before { display: none; }
             @media (hover: hover) { .site-menu a:hover, .players-menu summary:hover { background: #f0fff4; border-color: #c6f6d5; } }
             @media (max-width: 768px) { body { --menu-page-pad: 10px; } }
-            body.dark-mode .menu-backdrop, body.dark-mode .site-menu { background: rgba(18,18,18,0.96); }
+            body.dark-mode .menu-backdrop, body.dark-mode .site-menu { background: #121212; }
             body.dark-mode.wide-page .pills-nav-container { background: #121212; }
             body.dark-mode .site-menu a, body.dark-mode .players-menu summary { color: #f2f2f2; }
             body.dark-mode .site-menu a.active::after { background: #00ff87; }
