@@ -199,6 +199,9 @@
         .stat-player-row { display: flex; align-items: center; padding: 8px 0; cursor: pointer; transition: background-color 0.15s ease; border-radius: 4px; }
         .stat-player-wrapper.expanded .stat-player-row, .stat-player-wrapper.expanded .stat-player-row:hover { background-color: #ffffff !important; }
 
+        body.dark-mode .stat-player-wrapper.expanded .stat-player-row,
+        body.dark-mode .stat-player-wrapper.expanded .stat-player-row:hover { background-color: #202020 !important; }
+
         @media (hover: hover) {
             .stat-player-row:hover { background-color: #fafafa; }
         }
