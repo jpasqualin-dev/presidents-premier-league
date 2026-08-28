@@ -28,6 +28,20 @@ body.dark-mode {
     outline-offset: -4px;
 }
 
+.fixture-card,
+.stat-card,
+.profile-card,
+.mw-card,
+.loading-state {
+    border: 1px solid #dfe5eb;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(56,0,60,0.08);
+}
+
+.profile-card {
+    border-left: 1px solid #dfe5eb;
+}
+
 body.dark-mode .header-container {
     background-color: #232323;
     background-blend-mode: soft-light;
@@ -89,6 +103,14 @@ body.dark-mode .mw-card,
 body.dark-mode .back-button {
     background: #202020;
     border-color: #3d3d3d;
+}
+
+body.dark-mode .fixture-card,
+body.dark-mode .stat-card,
+body.dark-mode .profile-card,
+body.dark-mode .mw-card,
+body.dark-mode .loading-state {
+    box-shadow: 0 3px 10px rgba(0,0,0,0.35);
 }
 
 body.dark-mode .players-dropdown,
