@@ -9,6 +9,7 @@
         if (navigationWrapper) navigationWrapper.before(siteMenu);
 
         const pillNavigation = document.querySelector('.pills-nav-container');
+        if (navigationWrapper && pillNavigation) siteMenu.after(pillNavigation);
         const updatePrimaryMenuHeight = () => {
             document.documentElement.style.setProperty(
                 '--primary-menu-height',
