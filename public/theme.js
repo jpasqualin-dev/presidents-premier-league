@@ -47,6 +47,7 @@
             body.wide-page .header-container, body.wide-page .site-menu { margin-right: 0; margin-left: 0; }
             body.wide-page .sticky-nav-wrapper { position: static; background: transparent; }
             body.wide-page .pills-nav-container { position: sticky; top: var(--primary-menu-height, 36px); z-index: 19; background: #ffffff; }
+            body:not(.wide-page) .profile-card { top: var(--primary-menu-height, 36px); z-index: 19; }
             body.wide-page::before { display: none; }
             @media (hover: hover) { .site-menu a:hover, .players-menu summary:hover { background: #f0fff4; border-color: #c6f6d5; } }
             @media (max-width: 768px) { body { --menu-page-pad: 10px; } }
