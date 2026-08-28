@@ -31,8 +31,10 @@
 
         const navigationStyles = document.createElement('style');
         navigationStyles.textContent = `
+            html { background: #ffffff; }
             html:has(body.dark-mode) { background: #121212; }
             body { --menu-page-pad: 16px; --menu-max-width: 600px; }
+            body:not(.dark-mode) { background-color: #ffffff; }
             body.wide-page { --menu-max-width: 800px; }
             .menu-backdrop { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: min(calc(100vw - 2 * var(--menu-page-pad)), var(--menu-max-width)); height: 5px; background: rgba(255,255,255,0.96); z-index: 15; pointer-events: none; }
             .header-container { position: relative; top: auto; z-index: 25; }
