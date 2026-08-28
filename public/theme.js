@@ -23,7 +23,8 @@
             .players-menu[open] summary { background: #f0fff4; border-color: #c6f6d5; }
             .site-menu a.active::after, .players-menu summary.active::before { right: 8px; left: 8px; background: #38003c; }
             body.wide-page .header-container, body.wide-page .site-menu { margin-right: 16px; margin-left: 16px; }
-            body.wide-page .sticky-nav-wrapper { position: static; background: transparent; }
+            body.wide-page .sticky-nav-wrapper { position: sticky; top: 0; z-index: 20; background: transparent; }
+            body.wide-page .site-menu { position: static; }
             body.wide-page::before { display: none; }
             @media (hover: hover) { .site-menu a:hover, .players-menu summary:hover { background: #f0fff4; border-color: #c6f6d5; } }
             @media (max-width: 600px) { body { --menu-page-pad: 10px; } body.wide-page .header-container, body.wide-page .site-menu { margin-right: 10px; margin-left: 10px; } }
