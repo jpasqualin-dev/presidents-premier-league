@@ -41,7 +41,7 @@
             .site-menu { position: sticky; top: 0; z-index: 20; height: auto; padding: 10px 3px; margin-bottom: 0; background: #ffffff; border: 0; border-radius: 0; box-shadow: none; }
             .site-menu a, .players-menu summary { color: #38003c; }
             .players-menu[open] summary { background: #f0fff4; border-color: #c6f6d5; }
-            .site-menu a.active::after { right: 8px; left: 8px; background: #38003c; }
+            .site-menu a.active::after, .players-menu summary.active::before { right: 8px; left: 8px; background: #38003c; }
             body.wide-page .site-menu { margin: 0 16px; }
             body.wide-page .sticky-nav-wrapper { position: static; background: transparent; }
             body.wide-page .pills-nav-container { position: sticky; top: var(--primary-menu-height, 36px); z-index: 19; background: #ffffff; }
@@ -55,7 +55,7 @@
             body.dark-mode .menu-backdrop, body.dark-mode .site-menu { background: #121212; }
             body.dark-mode.wide-page .pills-nav-container { background: #121212; }
             body.dark-mode .site-menu a, body.dark-mode .players-menu summary { color: #f2f2f2; }
-            body.dark-mode .site-menu a.active::after { background: #00ff87; }
+            body.dark-mode .site-menu a.active::after, body.dark-mode .players-menu summary.active::before { background: #00ff87; }
             body.dark-mode .players-menu[open] summary { background: #2a2a2a; border-color: #4b4b4b; }
             @media (hover: hover) { body.dark-mode .site-menu a:hover, body.dark-mode .players-menu summary:hover { background: #2a2a2a; border-color: #4b4b4b; } }
         `;
