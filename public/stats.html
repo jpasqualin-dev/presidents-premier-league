@@ -288,7 +288,8 @@
                 teams: draftData[player],
                 PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0,
                 goldenBoot: 0, goldenGloves: 0, ppm: 0, gpm: 0, gcpm: 0,
-                pvpWins: 0, pga: 0, ptsPga: 0, roundsWon: 0
+                pvpWins: 0, pga: 0, ptsPga: 0, roundsWon: 0,
+                undefeatedWeeks: 0, perfectWeeks: 0
             };
         }
         return stats;
@@ -528,12 +529,26 @@
             playerVal: player => player.roundsWon,
             pillClass: "pill-green"
         }));
+        container.appendChild(buildSimpleAwardCard({
+            title: "Undefeated Weeks (No Losses)",
+            players: [...players].sort((a, b) => b.undefeatedWeeks - a.undefeatedWeeks || b.PTS - a.PTS),
+            playerVal: player => player.undefeatedWeeks,
+            pillClass: "pill-green"
+        }));
+        container.appendChild(buildSimpleAwardCard({
+            title: "Perfect Weeks (All Wins)",
+            players: [...players].sort((a, b) => b.perfectWeeks - a.perfectWeeks || b.PTS - a.PTS),
+            playerVal: player => player.perfectWeeks,
+            pillClass: "pill-purple"
+        }));
     }
 
     async function fetchAndRenderAwards() {
         let playerStats = initializePlayerStats();
         let teamStats = initializeTeamStats();
         const weeklyPlayerPoints = {};
+        const weeklyPlayerResults = {};
+        const incompletePlayerWeeks = {};
 
         const cacheKey = 'pl_match_data';
         const cacheTimeKey = 'pl_match_data_time';
@@ -574,6 +589,7 @@
                                 Object.keys(playerStats).map(player => [player, 0])
                             );
                         }
+                        if (!weeklyPlayerResults[matchweek]) weeklyPlayerResults[matchweek] = {};
 
                         if (homePlayer) {
                             let pStat = playerStats[homePlayer];
@@ -586,6 +602,7 @@
                             else pStat.L += 1;
 
                             weeklyPlayerPoints[matchweek][homePlayer] += homeScore > awayScore ? 3 : (homeScore === awayScore ? 1 : 0);
+                            (weeklyPlayerResults[matchweek][homePlayer] ||= []).push(homeScore > awayScore ? 'win' : homeScore === awayScore ? 'draw' : 'loss');
                         }
 
                         if (awayPlayer) {
@@ -599,6 +616,7 @@
                             else pStat.L += 1;
 
                             weeklyPlayerPoints[matchweek][awayPlayer] += awayScore > homeScore ? 3 : (awayScore === homeScore ? 1 : 0);
+                            (weeklyPlayerResults[matchweek][awayPlayer] ||= []).push(awayScore > homeScore ? 'win' : awayScore === homeScore ? 'draw' : 'loss');
                         }
 
                         if (homePlayer && awayPlayer && homePlayer !== awayPlayer) {
@@ -658,6 +676,21 @@
                 const highestScore = Math.max(...Object.values(playerPoints));
                 Object.entries(playerPoints).forEach(([player, points]) => {
                     if (points === highestScore) playerStats[player].roundsWon += 1;
+                });
+            });
+
+            data.matches.filter(match => match.status !== 'FINISHED').forEach(match => {
+                const matchweek = match.matchday;
+                [findPlayerByTeam(match.homeTeam.name, playerStats), findPlayerByTeam(match.awayTeam.name, playerStats)].forEach(player => {
+                    if (player) (incompletePlayerWeeks[matchweek] ||= {})[player] = true;
+                });
+            });
+
+            Object.entries(weeklyPlayerResults).forEach(([matchweek, playerResults]) => {
+                Object.entries(playerResults).forEach(([player, results]) => {
+                    if (incompletePlayerWeeks[matchweek]?.[player]) return;
+                    if (!results.includes('loss')) playerStats[player].undefeatedWeeks += 1;
+                    if (results.every(result => result === 'win')) playerStats[player].perfectWeeks += 1;
                 });
             });
 
