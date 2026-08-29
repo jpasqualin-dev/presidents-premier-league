@@ -341,6 +341,13 @@
             font-weight: 700;
         }
 
+        .live-score {
+            margin-top: 4px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
         .time-text {
             font-size: 0.85rem;
             font-weight: 500;
@@ -490,8 +497,8 @@
         </nav>
 
         <div class="pills-nav-container" id="main-nav">
-            <button class="pill active" id="btn-date" onclick="setView('date')">Date</button>
-            <button class="pill" id="btn-round" onclick="setView('round')">Round</button>
+            <button class="pill active" id="btn-round" onclick="setView('round')">Round</button>
+            <button class="pill" id="btn-date" onclick="setView('date')">Date</button>
             <button class="pill" id="btn-team" onclick="openTeamDropdown()">Team <span>&#x25BE;</span></button>
         </div>
     </div>
@@ -586,7 +593,7 @@
 
     // --- State & Schedule Variables ---
     let fixtures = [];
-    let currentView = 'date';
+    let currentView = 'round';
     let selectedTeam = null;
     let initialLoad = true;
 
@@ -875,7 +882,10 @@
                 scoreHTML = `<div class="score-text">${match.homeScore} - ${match.awayScore}</div>`;
             }
         } else if (match.isLive) {
-            scoreHTML = `<div class="score-time-block"><div class="live-badge">${match.time}</div></div>`;
+            scoreHTML = `<div>
+                <div class="live-badge">${match.time}</div>
+                <div class="live-score">${match.homeScore ?? 0} - ${match.awayScore ?? 0}</div>
+            </div>`;
         } else {
             const timeParts = match.time.split(' ');
             scoreHTML = `<div class="time-text">
