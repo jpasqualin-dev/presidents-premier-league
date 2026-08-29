@@ -741,24 +741,8 @@
             <tbody id="draft-player-body"></tbody>
         </table>
     </div>
+<script src="theme.js"></script>
 <script>
-    const themeToggle = document.querySelector('.theme-toggle');
-
-    function setTheme(theme) {
-        const isDarkMode = theme === 'dark';
-        document.body.classList.toggle('dark-mode', isDarkMode);
-        themeToggle.setAttribute('aria-pressed', String(isDarkMode));
-        themeToggle.setAttribute('aria-label', `Switch to ${isDarkMode ? 'light' : 'dark'} mode`);
-        localStorage.setItem('ppl-theme', theme);
-    }
-
-    const savedTheme = localStorage.getItem('ppl-theme');
-    if (savedTheme === 'light' || savedTheme === 'dark') setTheme(savedTheme);
-
-    themeToggle.addEventListener('click', () => {
-        setTheme(document.body.classList.contains('dark-mode') ? 'light' : 'dark');
-    });
-
     const draftData = {
         "Hef": ["Arsenal", "Bournemouth", "Nottingham Forest", "Hull City"],
         "Jordan": ["Manchester City", "Brighton", "Brentford", "Ipswich Town"],
