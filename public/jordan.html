@@ -188,14 +188,7 @@
             color: #1a1a1a;
         }
 
-        .profile-info h1::after {
-            content: ">";
-            display: inline-block;
-            margin-left: 8px;
-            color: #666;
-            font-size: 0.9rem;
-            transition: transform 0.2s;
-        }
+        .profile-info h1::after { content: "❯"; display: inline-block; margin-left: 8px; color: #718096; font-size: 0.85rem; transition: transform 0.25s ease; }
 
         .profile-card[aria-expanded="true"] .profile-info h1::after { transform: rotate(90deg); }
 
