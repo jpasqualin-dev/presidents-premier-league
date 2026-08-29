@@ -71,6 +71,11 @@ body.dark-mode {
     outline-offset: -4px;
 }
 
+.players-dropdown,
+.players-dropdown a {
+    box-sizing: content-box;
+}
+
 .fixture-card,
 .stat-card,
 .profile-card,
