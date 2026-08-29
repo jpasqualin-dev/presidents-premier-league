@@ -37,14 +37,11 @@
             body:not(.dark-mode) { background-color: #ffffff; }
             body.wide-page { --menu-max-width: 800px; }
             .menu-backdrop { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: min(calc(100vw - 2 * var(--menu-page-pad)), var(--menu-max-width)); height: 5px; background: rgba(255,255,255,0.96); z-index: 15; pointer-events: none; }
-            .header-container { position: relative; top: auto; z-index: 25; }
-            .header-container .theme-toggle { min-height: 60px; padding: 0 14px; border-radius: 4px; }
             .header-container .theme-toggle:focus-visible { outline-offset: 3px; }
             .site-menu { position: sticky; top: 0; z-index: 20; height: auto; padding: 6px 3px; margin-bottom: 0; background: #ffffff; border: 0; border-radius: 0; box-shadow: none; }
             .site-menu a, .players-menu summary { color: #38003c; }
             .players-menu[open] summary { background: #f0fff4; border-color: #c6f6d5; }
             .site-menu a.active::after { right: 8px; left: 8px; background: #38003c; }
-            body.wide-page .header-container { margin: 16px 16px 0; }
             body.wide-page .site-menu { margin: 0 16px; }
             body.wide-page .sticky-nav-wrapper { position: static; background: transparent; }
             body.wide-page .pills-nav-container { position: sticky; top: var(--primary-menu-height, 36px); z-index: 19; background: #ffffff; }
@@ -53,7 +50,6 @@
             @media (hover: hover) { .site-menu a:hover, .players-menu summary:hover { background: #f0fff4; border-color: #c6f6d5; } }
             @media (max-width: 768px) {
                 body { --menu-page-pad: 10px; }
-                body.wide-page .header-container { margin: 10px 10px 0; }
                 body.wide-page .site-menu { margin: 0 10px; }
             }
             body.dark-mode .menu-backdrop, body.dark-mode .site-menu { background: #121212; }

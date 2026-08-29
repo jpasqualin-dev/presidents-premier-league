@@ -1,3 +1,55 @@
+/* Shared page header */
+.header-container {
+    position: relative;
+    z-index: 25;
+    min-height: 60px;
+    margin: 0;
+    border-radius: 4px;
+    background-color: #f4f6f8;
+    background-image: url("header-background_new.png");
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+}
+
+.header-container .theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 60px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+}
+
+.header-container h1 {
+    margin: 0;
+    color: #38003c;
+    font-size: 1.45rem;
+    font-weight: 700;
+    line-height: 1.05;
+    text-align: left;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+}
+
+.lion-logo,
+.header-logo {
+    display: block;
+    width: 52px;
+    height: 52px;
+    object-fit: contain;
+}
+
+body.wide-page .header-container { margin: 16px 16px 0; }
+
+@media (max-width: 768px) {
+    body.wide-page .header-container { margin: 10px 10px 0; }
+}
+
 body.dark-mode {
     --bg-color: #121212;
     --card-bg: #202020;
@@ -11,16 +63,7 @@ body.dark-mode {
 }
 
 .header-container .theme-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     align-self: stretch;
-    width: 100%;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    cursor: pointer;
-    text-align: left;
 }
 
 .header-container .theme-toggle:focus-visible {
