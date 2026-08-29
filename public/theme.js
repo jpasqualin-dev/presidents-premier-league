@@ -44,7 +44,7 @@
             .site-menu a.active::after, .players-menu summary.active::before { right: 8px; left: 8px; background: #38003c; }
             body.wide-page .site-menu { margin: 0 16px; }
             body.wide-page .sticky-nav-wrapper { position: static; background: transparent; }
-            body.wide-page .pills-nav-container { position: sticky; top: var(--primary-menu-height, 36px); z-index: 19; background: #ffffff; }
+            body.wide-page .pills-nav-container { position: sticky; top: var(--primary-menu-height, 36px); z-index: 19; padding: 2px 20px 10px; background: #ffffff; }
             body:not(.wide-page) .profile-card { top: var(--primary-menu-height, 36px); z-index: 19; }
             body.wide-page::before { display: none; }
             @media (hover: hover) { .site-menu a:hover, .players-menu summary:hover { background: #f0fff4; border-color: #c6f6d5; } }
