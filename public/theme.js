@@ -44,13 +44,18 @@
             .site-menu a, .players-menu summary { color: #38003c; }
             .players-menu[open] summary { background: #f0fff4; border-color: #c6f6d5; }
             .site-menu a.active::after { right: 8px; left: 8px; background: #38003c; }
-            body.wide-page .header-container, body.wide-page .site-menu { margin-right: 0; margin-left: 0; }
+            body.wide-page .header-container { margin: 16px 16px 0; }
+            body.wide-page .site-menu { margin: 0 16px; }
             body.wide-page .sticky-nav-wrapper { position: static; background: transparent; }
             body.wide-page .pills-nav-container { position: sticky; top: var(--primary-menu-height, 36px); z-index: 19; background: #ffffff; }
             body:not(.wide-page) .profile-card { top: var(--primary-menu-height, 36px); z-index: 19; }
             body.wide-page::before { display: none; }
             @media (hover: hover) { .site-menu a:hover, .players-menu summary:hover { background: #f0fff4; border-color: #c6f6d5; } }
-            @media (max-width: 768px) { body { --menu-page-pad: 10px; } }
+            @media (max-width: 768px) {
+                body { --menu-page-pad: 10px; }
+                body.wide-page .header-container { margin: 10px 10px 0; }
+                body.wide-page .site-menu { margin: 0 10px; }
+            }
             body.dark-mode .menu-backdrop, body.dark-mode .site-menu { background: #121212; }
             body.dark-mode.wide-page .pills-nav-container { background: #121212; }
             body.dark-mode .site-menu a, body.dark-mode .players-menu summary { color: #f2f2f2; }
