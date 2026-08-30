@@ -17,21 +17,33 @@
         button:disabled { opacity: .45; cursor: not-allowed; }
         #status { margin: 12px 0; padding: 10px 12px; border-radius: 6px; background: #e8f4fd; color: #0c5460; font-size: .9rem; }
         .espn-card { overflow: hidden; border: 1px solid #dfe5eb; border-radius: 8px; box-shadow: 0 3px 10px rgba(56,0,60,.08); }
+        .matchday-header { display: grid; grid-template-columns: 30px minmax(0, 1fr) 30px; align-items: center; padding: 10px 12px; border-bottom: 2px solid #00ff85; background: #38003c; color: #fff; }
+        .matchday-header h2 { grid-column: 2; margin: 0; color: #fff; font-size: .9rem; text-align: center; }
+        .nav-btn { width: 30px; height: 30px; padding: 0; border-color: rgba(255,255,255,.24); background: rgba(255,255,255,.14); color: #fff; font-size: .9rem; }
+        .nav-btn:first-child { grid-column: 1; grid-row: 1; }
+        .nav-btn:last-child { grid-column: 3; grid-row: 1; }
+        .nav-btn:hover:not(:disabled) { background: #00ff87; border-color: #00ff87; color: #38003c; }
         .match { border-bottom: 1px solid #edf0f2; }
         .match:last-child { border-bottom: 0; }
-        .match-summary { display: grid; grid-template-columns: 92px 1fr 90px 1fr 92px; align-items: center; gap: 8px; padding: 14px 12px; }
-        .team { display: flex; align-items: center; gap: 8px; font-weight: 600; }
-        .team.home { justify-content: end; text-align: right; }
+        .match-summary { display: grid; grid-template-columns: 72px minmax(0, 1fr) 72px; align-items: center; gap: 8px; padding: 12px; }
+        .teams-pair { display: grid; grid-template-columns: minmax(0, 1fr) 72px minmax(0, 1fr); align-items: center; gap: 8px; }
+        .team { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; font-weight: 600; text-align: center; }
+        .team.home { text-align: center; }
+        .team-name { min-height: 2.2em; font-size: .86rem; line-height: 1.1; }
         .team img { width: 30px; height: 30px; object-fit: contain; }
+        .team-owner { color: #718096; font-size: .72rem; font-weight: 400; }
         .score { text-align: center; font-size: 1.1rem; font-weight: 700; white-space: nowrap; }
-        .score small, .muted { display: block; color: #718096; font-size: .75rem; font-weight: 500; }
+        .muted { display: block; color: #718096; font-size: .72rem; font-weight: 500; text-align: center; }
         .state { color: #00a667; font-size: .75rem; font-weight: 700; text-align: center; }
         .state.final { color: #718096; }
-        .details { padding: 0 12px 12px; color: #4a5568; font-size: .82rem; }
-        .details summary { color: #38003c; cursor: pointer; font-weight: 600; }
-        .event { margin-top: 5px; }
+        .details { grid-column: 2; color: #4a5568; font-size: .78rem; }
+        .details summary { width: fit-content; margin: 0 auto; color: #38003c; cursor: pointer; font-weight: 600; }
+        .goals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 6px; }
+        .goals-column { min-width: 0; }
+        .goals-column.away { text-align: right; }
+        .event { margin-top: 3px; }
         .empty { padding: 24px; text-align: center; color: #718096; }
-        @media (max-width: 600px) { body { padding: 10px; } .match-summary { grid-template-columns: 52px 1fr 58px 1fr 52px; gap: 4px; } .team { flex-direction: column; gap: 3px; font-size: .78rem; } .team.home { flex-direction: column-reverse; } .team img { width: 25px; height: 25px; } .state { font-size: .68rem; } }
+        @media (max-width: 600px) { body { padding: 10px; } .match-summary { grid-template-columns: 48px minmax(0, 1fr) 48px; gap: 4px; } .teams-pair { grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr); gap: 4px; } .team-name { font-size: .76rem; } .team img { width: 25px; height: 25px; } .team-owner { font-size: .65rem; } .state { font-size: .68rem; } .muted { font-size: .62rem; } }
         body.dark-mode { background: #121212; color: #f1f1f1; } body.dark-mode .site-menu a, body.dark-mode button, body.dark-mode .espn-card { color: #f1f1f1; background: #202020; border-color: #3d3d3d; } body.dark-mode .details summary { color: #00ff87; }
     </style>
 </head>
@@ -41,7 +53,6 @@
         <a href="index.html">Home</a><a href="index1.html" class="active" aria-current="page">ESPN Test</a><a href="table.html">Table</a><a href="fixtures.html">Fixtures</a><a href="stats.html">Stats</a>
     </nav>
     <main>
-        <div class="test-heading"><h2 id="date-heading">ESPN Matchday</h2><div class="date-controls"><button id="previous" type="button" aria-label="Previous date">Previous</button><button id="next" type="button" aria-label="Next date">Next</button></div></div>
         <div id="status" role="status">Loading ESPN scoreboard...</div>
         <section id="matches" class="espn-card" aria-live="polite"></section>
     </main>
@@ -51,6 +62,13 @@
         let events = [];
         let availableDates = [];
         let selectedDate = new Date();
+        const teamOwners = {
+            Arsenal: 'Hef', Bournemouth: 'Hef', 'Nottingham Forest': 'Hef',
+            'Manchester City': 'Jordan', Brighton: 'Jordan', Brentford: 'Jordan',
+            Liverpool: 'Wes', Newcastle: 'Wes', Sunderland: 'Wes',
+            'Manchester United': 'Nate', 'Aston Villa': 'Nate', Everton: 'Nate', Fulham: 'Nate',
+            Chelsea: 'Jamey', Tottenham: 'Jamey', 'Crystal Palace': 'Jamey', 'Leeds United': 'Jamey'
+        };
 
         const escapeHtml = value => String(value ?? '').replace(/[&<>\"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', "'": '&#39;' }[character]));
         const dateKey = date => date.toISOString().slice(0, 10);
@@ -60,15 +78,17 @@
         function eventsForDate(date) { return events.filter(event => dateKey(eventDate(event)) === dateKey(date)); }
         function competitor(event, side) { return event.competitions?.[0]?.competitors?.find(item => item.homeAway === side) || {}; }
         function statusFor(event) { return event.competitions?.[0]?.status || event.status || {}; }
+        function ownerFor(team) { return Object.entries(teamOwners).find(([name]) => team?.displayName?.includes(name) || name.includes(team?.displayName || ''))?.[1] || 'Unassigned'; }
 
         function render() {
             const dayEvents = eventsForDate(selectedDate);
-            document.getElementById('date-heading').textContent = formatDate(selectedDate);
             const selectedKey = dateKey(selectedDate);
             const selectedIndex = availableDates.indexOf(selectedKey);
-            document.getElementById('previous').disabled = selectedIndex <= 0;
-            document.getElementById('next').disabled = selectedIndex === -1 || selectedIndex >= availableDates.length - 1;
-            document.getElementById('matches').innerHTML = dayEvents.length ? dayEvents.map(renderEvent).join('') : '<div class="empty">No matches scheduled for this date.</div>';
+            const previousDisabled = selectedIndex <= 0;
+            const nextDisabled = selectedIndex === -1 || selectedIndex >= availableDates.length - 1;
+            document.getElementById('matches').innerHTML = '<div class="matchday-header"><button class="nav-btn" type="button" aria-label="Previous date" ' + (previousDisabled ? 'disabled' : '') + '>❮</button><h2>' + escapeHtml(formatDate(selectedDate)) + '</h2><button class="nav-btn" type="button" aria-label="Next date" ' + (nextDisabled ? 'disabled' : '') + '>❯</button></div>' + (dayEvents.length ? dayEvents.map(renderEvent).join('') : '<div class="empty">No matches scheduled for this date.</div>');
+            document.querySelector('.matchday-header .nav-btn:first-child').addEventListener('click', () => moveDate(-1));
+            document.querySelector('.matchday-header .nav-btn:last-child').addEventListener('click', () => moveDate(1));
         }
 
         function renderEvent(event) {
@@ -81,12 +101,16 @@
             const stateText = isLive ? (status.displayClock || 'LIVE') : (type.shortDetail || type.detail || type.description || 'Scheduled');
             const homeScore = home.score ?? '-';
             const awayScore = away.score ?? '-';
-            const details = (event.competitions?.[0]?.details || []).filter(item => item.scoringPlay).map(item => {
+            const goals = (event.competitions?.[0]?.details || []).filter(item => item.scoringPlay);
+            const renderGoal = item => {
                 const scorer = item.athletesInvolved?.[0]?.displayName || 'Unknown scorer';
                 const label = item.ownGoal ? 'own goal' : item.penaltyKick ? 'penalty' : 'goal';
                 return '<div class="event">' + escapeHtml(item.clock?.displayValue || '') + ' - ' + escapeHtml(scorer) + ' (' + label + ')</div>';
-            }).join('');
-            return '<article class="match"><div class="match-summary"><div class="state ' + (isFinal ? 'final' : '') + '">' + escapeHtml(stateText) + '</div><div class="team home">' + escapeHtml(home.team?.shortDisplayName || home.team?.displayName) + '<img src="' + escapeHtml(home.team?.logo) + '" alt=""></div><div class="score">' + escapeHtml(homeScore) + ' - ' + escapeHtml(awayScore) + '<small>' + escapeHtml(event.shortName || '') + '</small></div><div class="team"><img src="' + escapeHtml(away.team?.logo) + '" alt="">' + escapeHtml(away.team?.shortDisplayName || away.team?.displayName) + '</div><div class="muted">' + escapeHtml(event.competitions?.[0]?.venue?.fullName || '') + '</div></div>' + (details ? '<details class="details"><summary>Scorers</summary>' + details + '</details>' : '') + '</article>';
+            };
+            const homeGoals = goals.filter(item => item.team?.id === home.team?.id).map(renderGoal).join('');
+            const awayGoals = goals.filter(item => item.team?.id === away.team?.id).map(renderGoal).join('');
+            const details = goals.length ? '<details class="details"><summary>Scorers</summary><div class="goals-grid"><div class="goals-column">' + (homeGoals || '<span class="muted">No goals</span>') + '</div><div class="goals-column away">' + (awayGoals || '<span class="muted">No goals</span>') + '</div></div></details>' : '';
+            return '<article class="match"><div class="match-summary"><div class="state ' + (isFinal ? 'final' : '') + '">' + escapeHtml(stateText) + '</div><div class="teams-pair"><div class="team home"><span class="team-name">' + escapeHtml(home.team?.shortDisplayName || home.team?.displayName) + '</span><img src="' + escapeHtml(home.team?.logo) + '" alt=""><span class="team-owner">' + escapeHtml(ownerFor(home.team)) + '</span></div><div class="score">' + escapeHtml(homeScore) + ' - ' + escapeHtml(awayScore) + '</div><div class="team"><span class="team-name">' + escapeHtml(away.team?.shortDisplayName || away.team?.displayName) + '</span><img src="' + escapeHtml(away.team?.logo) + '" alt=""><span class="team-owner">' + escapeHtml(ownerFor(away.team)) + '</span></div></div><div class="muted">' + escapeHtml(event.competitions?.[0]?.venue?.fullName || '') + '</div>' + details + '</div></article>';
         }
 
         function moveDate(direction) {
@@ -114,8 +138,6 @@
             }
         }
 
-        document.getElementById('previous').addEventListener('click', () => moveDate(-1));
-        document.getElementById('next').addEventListener('click', () => moveDate(1));
         loadScoreboard();
         setInterval(loadScoreboard, 30000);
     </script>
