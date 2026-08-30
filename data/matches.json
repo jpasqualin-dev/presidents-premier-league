@@ -1,0 +1,449 @@
+{
+  "schemaVersion": 1,
+  "provider": "espn",
+  "competition": "eng.1",
+  "season": 2026,
+  "updatedAt": "2026-08-30T19:37:44.281Z",
+  "matches": [
+    {
+      "id": "espn:401879314",
+      "provider": "espn",
+      "providerEventId": "401879314",
+      "date": "2026-08-29T11:30Z",
+      "status": {
+        "state": "post",
+        "completed": true,
+        "detail": "FT",
+        "clock": "90'+6'"
+      },
+      "homeTeam": {
+        "providerId": "364",
+        "name": "Liverpool",
+        "shortName": "Liverpool",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/364.png",
+        "score": 2
+      },
+      "awayTeam": {
+        "providerId": "393",
+        "name": "Nottingham Forest",
+        "shortName": "Nottm Forest",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/393.png",
+        "score": 2
+      },
+      "venue": "Anfield",
+      "scorers": [
+        {
+          "teamProviderId": "393",
+          "athleteProviderId": "275842",
+          "athleteName": "Dan Ndoye",
+          "minute": "24'",
+          "ownGoal": false,
+          "penalty": false
+        },
+        {
+          "teamProviderId": "364",
+          "athleteProviderId": "235662",
+          "athleteName": "Alexander Isak",
+          "minute": "60'",
+          "ownGoal": false,
+          "penalty": false
+        },
+        {
+          "teamProviderId": "393",
+          "athleteProviderId": "243396",
+          "athleteName": "Morgan Gibbs-White",
+          "minute": "70'",
+          "ownGoal": false,
+          "penalty": true
+        },
+        {
+          "teamProviderId": "364",
+          "athleteProviderId": "397545",
+          "athleteName": "Víctor Muñoz",
+          "minute": "82'",
+          "ownGoal": false,
+          "penalty": false
+        }
+      ]
+    },
+    {
+      "id": "espn:401879296",
+      "provider": "espn",
+      "providerEventId": "401879296",
+      "date": "2026-08-29T14:00Z",
+      "status": {
+        "state": "post",
+        "completed": true,
+        "detail": "FT",
+        "clock": "90'+5'"
+      },
+      "homeTeam": {
+        "providerId": "349",
+        "name": "AFC Bournemouth",
+        "shortName": "Bournemouth",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/349.png",
+        "score": 1
+      },
+      "awayTeam": {
+        "providerId": "368",
+        "name": "Everton",
+        "shortName": "Everton",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/368.png",
+        "score": 1
+      },
+      "venue": "Vitality Stadium",
+      "scorers": [
+        {
+          "teamProviderId": "349",
+          "athleteProviderId": "314790",
+          "athleteName": "Alex Scott",
+          "minute": "41'",
+          "ownGoal": false,
+          "penalty": false
+        },
+        {
+          "teamProviderId": "368",
+          "athleteProviderId": "155226",
+          "athleteName": "James Tarkowski",
+          "minute": "90'+1'",
+          "ownGoal": false,
+          "penalty": false
+        }
+      ]
+    },
+    {
+      "id": "espn:401879316",
+      "provider": "espn",
+      "providerEventId": "401879316",
+      "date": "2026-08-29T14:00Z",
+      "status": {
+        "state": "post",
+        "completed": true,
+        "detail": "FT",
+        "clock": "90'+5'"
+      },
+      "homeTeam": {
+        "providerId": "388",
+        "name": "Coventry City",
+        "shortName": "Coventry",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/388.png",
+        "score": 0
+      },
+      "awayTeam": {
+        "providerId": "306",
+        "name": "Hull City",
+        "shortName": "Hull",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/306.png",
+        "score": 1
+      },
+      "venue": "Coventry Building Society Arena",
+      "scorers": [
+        {
+          "teamProviderId": "306",
+          "athleteProviderId": "271879",
+          "athleteName": "Liam Millar",
+          "minute": "82'",
+          "ownGoal": false,
+          "penalty": false
+        }
+      ]
+    },
+    {
+      "id": "espn:401879312",
+      "provider": "espn",
+      "providerEventId": "401879312",
+      "date": "2026-08-29T16:30Z",
+      "status": {
+        "state": "post",
+        "completed": true,
+        "detail": "FT",
+        "clock": "90'+4'"
+      },
+      "homeTeam": {
+        "providerId": "367",
+        "name": "Tottenham Hotspur",
+        "shortName": "Spurs",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/367.png",
+        "score": 0
+      },
+      "awayTeam": {
+        "providerId": "361",
+        "name": "Newcastle United",
+        "shortName": "Newcastle",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/361.png",
+        "score": 2
+      },
+      "venue": "Tottenham Hotspur Stadium",
+      "scorers": [
+        {
+          "teamProviderId": "361",
+          "athleteProviderId": "296622",
+          "athleteName": "Anthony Elanga",
+          "minute": "62'",
+          "ownGoal": false,
+          "penalty": false
+        },
+        {
+          "teamProviderId": "361",
+          "athleteProviderId": "224077",
+          "athleteName": "Yoane Wissa",
+          "minute": "72'",
+          "ownGoal": false,
+          "penalty": false
+        }
+      ]
+    },
+    {
+      "id": "espn:401879317",
+      "provider": "espn",
+      "providerEventId": "401879317",
+      "date": "2026-08-30T13:00Z",
+      "status": {
+        "state": "post",
+        "completed": true,
+        "detail": "FT",
+        "clock": "90'+7'"
+      },
+      "homeTeam": {
+        "providerId": "363",
+        "name": "Chelsea",
+        "shortName": "Chelsea",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/363.png",
+        "score": 4
+      },
+      "awayTeam": {
+        "providerId": "331",
+        "name": "Brighton & Hove Albion",
+        "shortName": "Brighton",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/331.png",
+        "score": 3
+      },
+      "venue": "Stamford Bridge",
+      "scorers": [
+        {
+          "teamProviderId": "363",
+          "athleteProviderId": "308217",
+          "athleteName": "Romeo Lavia",
+          "minute": "4'",
+          "ownGoal": false,
+          "penalty": false
+        },
+        {
+          "teamProviderId": "363",
+          "athleteProviderId": "256115",
+          "athleteName": "Pedro Neto",
+          "minute": "14'",
+          "ownGoal": false,
+          "penalty": false
+        },
+        {
+          "teamProviderId": "363",
+          "athleteProviderId": "284960",
+          "athleteName": "João Pedro",
+          "minute": "32'",
+          "ownGoal": false,
+          "penalty": false
+        },
+        {
+          "teamProviderId": "331",
+          "athleteProviderId": "359097",
+          "athleteName": "Malick Yalcouyé",
+          "minute": "35'",
+          "ownGoal": false,
+          "penalty": false
+        },
+        {
+          "teamProviderId": "331",
+          "athleteProviderId": "284960",
+          "athleteName": "João Pedro",
+          "minute": "63'",
+          "ownGoal": true,
+          "penalty": false
+        },
+        {
+          "teamProviderId": "363",
+          "athleteProviderId": "296395",
+          "athleteName": "Cole Palmer",
+          "minute": "74'",
+          "ownGoal": false,
+          "penalty": false
+        },
+        {
+          "teamProviderId": "331",
+          "athleteProviderId": "132659",
+          "athleteName": "Pascal Gross",
+          "minute": "90'+6'",
+          "ownGoal": false,
+          "penalty": false
+        }
+      ]
+    },
+    {
+      "id": "espn:401879315",
+      "provider": "espn",
+      "providerEventId": "401879315",
+      "date": "2026-08-30T13:00Z",
+      "status": {
+        "state": "post",
+        "completed": true,
+        "detail": "FT",
+        "clock": "90'+4'"
+      },
+      "homeTeam": {
+        "providerId": "357",
+        "name": "Leeds United",
+        "shortName": "Leeds",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/357.png",
+        "score": 1
+      },
+      "awayTeam": {
+        "providerId": "337",
+        "name": "Brentford",
+        "shortName": "Brentford",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/337.png",
+        "score": 1
+      },
+      "venue": "Elland Road",
+      "scorers": [
+        {
+          "teamProviderId": "337",
+          "athleteProviderId": "310958",
+          "athleteName": "Kevin Schade",
+          "minute": "41'",
+          "ownGoal": false,
+          "penalty": false
+        },
+        {
+          "teamProviderId": "357",
+          "athleteProviderId": "197717",
+          "athleteName": "Dominic Calvert-Lewin",
+          "minute": "79'",
+          "ownGoal": false,
+          "penalty": false
+        }
+      ]
+    },
+    {
+      "id": "espn:401879313",
+      "provider": "espn",
+      "providerEventId": "401879313",
+      "date": "2026-08-30T13:00Z",
+      "status": {
+        "state": "post",
+        "completed": true,
+        "detail": "FT",
+        "clock": "90'+5'"
+      },
+      "homeTeam": {
+        "providerId": "366",
+        "name": "Sunderland",
+        "shortName": "Sunderland",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/366.png",
+        "score": 1
+      },
+      "awayTeam": {
+        "providerId": "370",
+        "name": "Fulham",
+        "shortName": "Fulham",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/370.png",
+        "score": 0
+      },
+      "venue": "Stadium of Light",
+      "scorers": [
+        {
+          "teamProviderId": "366",
+          "athleteProviderId": "265915",
+          "athleteName": "Wilson Isidor",
+          "minute": "75'",
+          "ownGoal": false,
+          "penalty": false
+        }
+      ]
+    },
+    {
+      "id": "espn:401879293",
+      "provider": "espn",
+      "providerEventId": "401879293",
+      "date": "2026-08-30T15:30Z",
+      "status": {
+        "state": "post",
+        "completed": true,
+        "detail": "FT",
+        "clock": "90'+9'"
+      },
+      "homeTeam": {
+        "providerId": "360",
+        "name": "Manchester United",
+        "shortName": "Man United",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/360.png",
+        "score": 5
+      },
+      "awayTeam": {
+        "providerId": "373",
+        "name": "Ipswich Town",
+        "shortName": "Ipswich",
+        "logo": "https://a.espncdn.com/i/teamlogos/soccer/500/373.png",
+        "score": 2
+      },
+      "venue": "Old Trafford",
+      "scorers": [
+        {
+          "teamProviderId": "373",
+          "athleteProviderId": "283086",
+          "athleteName": "Leif Davis",
+          "minute": "29'",
+          "ownGoal": false,
+          "penalty": false
+        },
+        {
+          "teamProviderId": "360",
+          "athleteProviderId": "124091",
+          "athleteName": "Bruno Fernandes",
+          "minute": "40'",
+          "ownGoal": false,
+          "penalty": false
+        },
+        {
+          "teamProviderId": "360",
+          "athleteProviderId": "291174",
+          "athleteName": "Jacob Greaves",
+          "minute": "56'",
+          "ownGoal": true,
+          "penalty": false
+        },
+        {
+          "teamProviderId": "360",
+          "athleteProviderId": "124091",
+          "athleteName": "Bruno Fernandes",
+          "minute": "61'",
+          "ownGoal": false,
+          "penalty": true
+        },
+        {
+          "teamProviderId": "360",
+          "athleteProviderId": "124091",
+          "athleteName": "Bruno Fernandes",
+          "minute": "68'",
+          "ownGoal": false,
+          "penalty": false
+        },
+        {
+          "teamProviderId": "360",
+          "athleteProviderId": "271170",
+          "athleteName": "Bryan Mbeumo",
+          "minute": "82'",
+          "ownGoal": false,
+          "penalty": false
+        },
+        {
+          "teamProviderId": "373",
+          "athleteProviderId": "181092",
+          "athleteName": "Chuba Akpom",
+          "minute": "90'+1'",
+          "ownGoal": false,
+          "penalty": false
+        }
+      ]
+    }
+  ]
+}

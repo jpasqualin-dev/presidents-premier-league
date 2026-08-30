@@ -1,0 +1,9 @@
+ALTER TABLE teams ADD COLUMN IF NOT EXISTS provider_team_id TEXT;
+ALTER TABLE teams ADD COLUMN IF NOT EXISTS provider TEXT NOT NULL DEFAULT 'espn';
+ALTER TABLE teams ADD COLUMN IF NOT EXISTS short_name TEXT;
+ALTER TABLE teams ADD COLUMN IF NOT EXISTS logo_url TEXT;
+ALTER TABLE teams ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+ALTER TABLE matches ADD COLUMN IF NOT EXISTS status_completed BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE matches ADD COLUMN IF NOT EXISTS status_clock TEXT;
+CREATE UNIQUE INDEX IF NOT EXISTS teams_canonical_name_unique ON teams (canonical_name);
+CREATE UNIQUE INDEX IF NOT EXISTS teams_provider_team_unique ON teams (provider, provider_team_id);
