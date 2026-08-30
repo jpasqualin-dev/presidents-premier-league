@@ -89,6 +89,10 @@ body.dark-mode {
     box-shadow: 0 3px 10px rgba(56,0,60,0.08);
 }
 
+.mw-title {
+    color: #38003c;
+}
+
 .profile-card {
     border-left: 1px solid #dfe5eb;
 }
