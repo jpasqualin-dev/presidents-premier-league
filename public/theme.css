@@ -93,6 +93,10 @@ body.dark-mode {
     color: #38003c;
 }
 
+.mw-header {
+    background-color: #e0e0e0;
+}
+
 .profile-card {
     border-left: 1px solid #dfe5eb;
 }
