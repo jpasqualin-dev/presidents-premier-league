@@ -27,23 +27,23 @@
         .match:last-child { border-bottom: 0; }
         .match-summary { display: grid; grid-template-columns: 72px minmax(0, 1fr) 72px; align-items: center; gap: 8px; padding: 12px; }
         .teams-pair { display: grid; grid-template-columns: minmax(0, 1fr) 72px minmax(0, 1fr); align-items: center; gap: 8px; }
-        .team { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; font-weight: 600; text-align: center; }
+        .team { display: flex; flex-direction: column; align-items: center; gap: 0; min-width: 0; font-weight: 600; text-align: center; }
         .team.home { text-align: center; }
         .team-name { min-height: 2.2em; font-size: .86rem; line-height: 1.1; }
         .team img { width: 30px; height: 30px; object-fit: contain; }
         .team-owner { color: #718096; font-size: .72rem; font-weight: 400; }
-        .score { text-align: center; font-size: 1.1rem; font-weight: 700; white-space: nowrap; }
+        .score { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; align-self: stretch; padding-top: 2px; text-align: center; font-size: 1.1rem; font-weight: 700; white-space: nowrap; }
         .muted { display: block; color: #718096; font-size: .72rem; font-weight: 500; text-align: center; }
         .state { color: #00a667; font-size: .75rem; font-weight: 700; text-align: center; }
         .state.final { color: #718096; }
-        .details { grid-column: 2; color: #4a5568; font-size: .78rem; }
-        .details summary { width: fit-content; margin: 0 auto; color: #38003c; cursor: pointer; font-weight: 600; }
-        .goals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 6px; }
+        .details { width: 100%; margin-top: auto; color: #4a5568; font-size: .78rem; }
+        .details summary { width: fit-content; margin: 6px auto 0; color: #38003c; cursor: pointer; font-weight: 600; }
+        .goals-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; width: calc(100% + 160px); margin-top: 6px; transform: translateX(-80px); white-space: normal; }
         .goals-column { min-width: 0; }
         .goals-column.away { text-align: right; }
         .event { margin-top: 3px; }
         .empty { padding: 24px; text-align: center; color: #718096; }
-        @media (max-width: 600px) { body { padding: 10px; } .match-summary { grid-template-columns: 48px minmax(0, 1fr) 48px; gap: 4px; } .teams-pair { grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr); gap: 4px; } .team-name { font-size: .76rem; } .team img { width: 25px; height: 25px; } .team-owner { font-size: .65rem; } .state { font-size: .68rem; } .muted { font-size: .62rem; } }
+        @media (max-width: 600px) { body { padding: 10px; } .match-summary { grid-template-columns: 48px minmax(0, 1fr) 48px; gap: 4px; } .teams-pair { grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr); gap: 4px; } .team-name { font-size: .76rem; } .team img { width: 25px; height: 25px; } .team-owner { font-size: .65rem; } .state { font-size: .68rem; } .muted { font-size: .62rem; } .goals-grid { width: calc(100% + 104px); gap: 12px; transform: translateX(-52px); } }
         body.dark-mode { background: #121212; color: #f1f1f1; } body.dark-mode .site-menu a, body.dark-mode button, body.dark-mode .espn-card { color: #f1f1f1; background: #202020; border-color: #3d3d3d; } body.dark-mode .details summary { color: #00ff87; }
     </style>
 </head>
@@ -109,8 +109,8 @@
             };
             const homeGoals = goals.filter(item => item.team?.id === home.team?.id).map(renderGoal).join('');
             const awayGoals = goals.filter(item => item.team?.id === away.team?.id).map(renderGoal).join('');
-            const details = goals.length ? '<details class="details"><summary>Scorers</summary><div class="goals-grid"><div class="goals-column">' + (homeGoals || '<span class="muted">No goals</span>') + '</div><div class="goals-column away">' + (awayGoals || '<span class="muted">No goals</span>') + '</div></div></details>' : '';
-            return '<article class="match"><div class="match-summary"><div class="state ' + (isFinal ? 'final' : '') + '">' + escapeHtml(stateText) + '</div><div class="teams-pair"><div class="team home"><span class="team-name">' + escapeHtml(home.team?.shortDisplayName || home.team?.displayName) + '</span><img src="' + escapeHtml(home.team?.logo) + '" alt=""><span class="team-owner">' + escapeHtml(ownerFor(home.team)) + '</span></div><div class="score">' + escapeHtml(homeScore) + ' - ' + escapeHtml(awayScore) + '</div><div class="team"><span class="team-name">' + escapeHtml(away.team?.shortDisplayName || away.team?.displayName) + '</span><img src="' + escapeHtml(away.team?.logo) + '" alt=""><span class="team-owner">' + escapeHtml(ownerFor(away.team)) + '</span></div></div><div class="muted">' + escapeHtml(event.competitions?.[0]?.venue?.fullName || '') + '</div>' + details + '</div></article>';
+            const details = (goals.length || isFinal) ? '<details class="details"><summary>Scorers</summary><div class="goals-grid"><div class="goals-column">' + (homeGoals || '<span class="muted">No goals</span>') + '</div><div class="goals-column away">' + (awayGoals || '<span class="muted">No goals</span>') + '</div></div></details>' : '';
+            return '<article class="match"><div class="match-summary"><div class="state ' + (isFinal ? 'final' : '') + '">' + escapeHtml(stateText) + '</div><div class="teams-pair"><div class="team home"><span class="team-name">' + escapeHtml(home.team?.shortDisplayName || home.team?.displayName) + '</span><img src="' + escapeHtml(home.team?.logo) + '" alt=""><span class="team-owner">' + escapeHtml(ownerFor(home.team)) + '</span></div><div class="score">' + escapeHtml(homeScore) + ' - ' + escapeHtml(awayScore) + details + '</div><div class="team"><span class="team-name">' + escapeHtml(away.team?.shortDisplayName || away.team?.displayName) + '</span><img src="' + escapeHtml(away.team?.logo) + '" alt=""><span class="team-owner">' + escapeHtml(ownerFor(away.team)) + '</span></div></div><div class="muted">' + escapeHtml(event.competitions?.[0]?.venue?.fullName || '') + '</div></div></article>';
         }
 
         function moveDate(direction) {
