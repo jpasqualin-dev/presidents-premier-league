@@ -1469,7 +1469,7 @@
 
         awardConfigs.forEach(config => container.appendChild(buildAwardCard(config)));
         container.appendChild(buildSimpleAwardCard({
-            title: "Rounds Won",
+            title: "Weeks Won",
             players: [...players].sort((a, b) => b.roundsWon - a.roundsWon || b.PTS - a.PTS),
             playerVal: player => player.roundsWon,
             pillClass: "pill-green"
