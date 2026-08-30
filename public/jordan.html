@@ -395,6 +395,7 @@
     </div>
 
 <script src="theme.js"></script>
+<script src="match-data.js"></script>
 <script>
     // 1. Integrated data mappings directly from your main site configuration
     const draftData = {
@@ -486,10 +487,7 @@
         const myTeams = draftData["Jordan"];
 
         try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            
-            const data = await response.json();
+            const data = await getMatchData();
             const matchweeks = {};
 
             if (data.matches) {
@@ -621,6 +619,7 @@
             if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleProfileCard(); }
         });
         fetchJordanFixtures();
+        setInterval(fetchJordanFixtures, 30000);
     });
 </script>
 

@@ -245,6 +245,7 @@
     </div>
 
 <script src="theme.js"></script>
+<script src="match-data.js"></script>
 <script>
     const draftData = {
         "Hef": ["Arsenal", "Bournemouth", "Nottingham Forest", "Hull City"],
@@ -554,25 +555,8 @@
         const weeklyPlayerResults = {};
         const incompletePlayerWeeks = {};
 
-        const cacheKey = 'pl_match_data';
-        const cacheTimeKey = 'pl_match_data_time';
-        const cacheDuration = 60 * 1000;
-
         try {
-            let data;
-            const now = new Date().getTime();
-            const cachedTime = localStorage.getItem(cacheTimeKey);
-            const cachedData = localStorage.getItem(cacheKey);
-
-            if (cachedData && cachedTime && (now - cachedTime < cacheDuration)) {
-                data = JSON.parse(cachedData);
-            } else {
-                const response = await fetch('/api/standings');
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                data = await response.json();
-                localStorage.setItem(cacheKey, JSON.stringify(data));
-                localStorage.setItem(cacheTimeKey, now.toString());
-            }
+            const data = await getMatchData();
 
             if (data.matches) {
                 data.matches.forEach(match => {
@@ -706,7 +690,10 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', fetchAndRenderAwards);
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchAndRenderAwards();
+        setInterval(fetchAndRenderAwards, 30000);
+    });
 </script>
 </body>
 </html>

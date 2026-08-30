@@ -345,6 +345,7 @@
 </div>
 
 <script src="theme.js"></script>
+<script src="match-data.js"></script>
 <script>
     // --- Data Definitions (Shared with Index Page) ---
     const draftData = {
@@ -739,25 +740,8 @@
 
     // Fetch matches from API (same caching strategy as other pages)
     async function fetchTableData() {
-        const cacheKey = 'pl_match_data';
-        const cacheTimeKey = 'pl_match_data_time';
-        const cacheDuration = 60 * 1000; // 1 minute cache
-
         try {
-            let data;
-            const now = new Date().getTime();
-            const cachedTime = localStorage.getItem(cacheTimeKey);
-            const cachedData = localStorage.getItem(cacheKey);
-
-            if (cachedData && cachedTime && (now - cachedTime < cacheDuration)) {
-                data = JSON.parse(cachedData);
-            } else {
-                const response = await fetch('/api/standings');
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                data = await response.json();
-                localStorage.setItem(cacheKey, JSON.stringify(data));
-                localStorage.setItem(cacheTimeKey, now.toString());
-            }
+            const data = await getMatchData();
 
             cachedStats = computeStats(data.matches || []);
             renderView();
@@ -780,6 +764,7 @@
         }
 
         fetchTableData();
+        setInterval(fetchTableData, 30000);
     });
 
     function updateTableHeaderOffset() {

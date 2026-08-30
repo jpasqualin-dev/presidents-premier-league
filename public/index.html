@@ -745,6 +745,7 @@
         </table>
     </div>
 <script src="theme.js"></script>
+<script src="match-data.js"></script>
 <script>
     const draftData = {
         "Hef": ["Arsenal", "Bournemouth", "Nottingham Forest", "Hull City"],
@@ -1632,9 +1633,7 @@
 
     async function refreshMatchdayCard() {
         try {
-            const response = await fetch('/api/standings');
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const data = await response.json();
+            const data = await getMatchData();
             
             if (data.matches) {
                 // Update dates silently without overriding the currently selected swipe index
@@ -1661,25 +1660,8 @@
         renderPlayerDraftValueTable(playerStats, teamStats);
         renderMatchdayCard();
 
-        const cacheKey = 'pl_match_data';
-        const cacheTimeKey = 'pl_match_data_time';
-        const cacheDuration = 60 * 1000;
-
         try {
-            let data;
-            const now = new Date().getTime();
-            const cachedTime = localStorage.getItem(cacheTimeKey);
-            const cachedData = localStorage.getItem(cacheKey);
-
-            if (cachedData && cachedTime && (now - cachedTime < cacheDuration)) {
-                data = JSON.parse(cachedData);
-            } else {
-                const response = await fetch('/api/standings');
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                data = await response.json();
-                localStorage.setItem(cacheKey, JSON.stringify(data));
-                localStorage.setItem(cacheTimeKey, now.toString());
-            }
+            const data = await getMatchData();
 
             let gamesProcessed = 0;
 
