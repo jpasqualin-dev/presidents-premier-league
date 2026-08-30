@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presidents Premier League - ESPN Test</title>
+    <link rel="stylesheet" href="theme.css">
+    <style>
+        body { max-width: 1100px; margin: 0 auto; padding: 16px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #333; background: #fff; }
+        .site-menu { display: flex; gap: 2px; align-items: center; }
+        .site-menu a { flex: 1; padding: 8px 6px; color: #38003c; font-weight: 700; font-size: .85rem; text-align: center; text-decoration: none; }
+        .site-menu a.active { border-bottom: 3px solid #00ff87; }
+        .test-heading { display: flex; justify-content: space-between; align-items: end; gap: 12px; margin: 24px 0 10px; }
+        .test-heading h2 { margin: 0; border: 0; font-size: 1.4rem; }
+        .date-controls { display: flex; gap: 6px; }
+        button { border: 1px solid #dfe5eb; border-radius: 4px; background: #fff; padding: 7px 10px; cursor: pointer; }
+        button:disabled { opacity: .45; cursor: not-allowed; }
+        #status { margin: 12px 0; padding: 10px 12px; border-radius: 6px; background: #e8f4fd; color: #0c5460; font-size: .9rem; }
+        .espn-card { overflow: hidden; border: 1px solid #dfe5eb; border-radius: 8px; box-shadow: 0 3px 10px rgba(56,0,60,.08); }
+        .match { border-bottom: 1px solid #edf0f2; }
+        .match:last-child { border-bottom: 0; }
+        .match-summary { display: grid; grid-template-columns: 92px 1fr 90px 1fr 92px; align-items: center; gap: 8px; padding: 14px 12px; }
+        .team { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+        .team.home { justify-content: end; text-align: right; }
+        .team img { width: 30px; height: 30px; object-fit: contain; }
+        .score { text-align: center; font-size: 1.1rem; font-weight: 700; white-space: nowrap; }
+        .score small, .muted { display: block; color: #718096; font-size: .75rem; font-weight: 500; }
+        .state { color: #00a667; font-size: .75rem; font-weight: 700; text-align: center; }
+        .state.final { color: #718096; }
+        .details { padding: 0 12px 12px; color: #4a5568; font-size: .82rem; }
+        .details summary { color: #38003c; cursor: pointer; font-weight: 600; }
+        .event { margin-top: 5px; }
+        .empty { padding: 24px; text-align: center; color: #718096; }
+        @media (max-width: 600px) { body { padding: 10px; } .match-summary { grid-template-columns: 52px 1fr 58px 1fr 52px; gap: 4px; } .team { flex-direction: column; gap: 3px; font-size: .78rem; } .team.home { flex-direction: column-reverse; } .team img { width: 25px; height: 25px; } .state { font-size: .68rem; } }
+        body.dark-mode { background: #121212; color: #f1f1f1; } body.dark-mode .site-menu a, body.dark-mode button, body.dark-mode .espn-card { color: #f1f1f1; background: #202020; border-color: #3d3d3d; } body.dark-mode .details summary { color: #00ff87; }
+    </style>
+</head>
+<body class="dark-mode">
+    <div class="header-container"><button class="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="true"><h1>Presidents<br>Premier League</h1><img src="lion-logo.png" alt="Premier League Lion Logo" class="lion-logo"></button></div>
+    <nav class="site-menu" aria-label="Primary navigation">
+        <a href="index.html">Home</a><a href="index1.html" class="active" aria-current="page">ESPN Test</a><a href="table.html">Table</a><a href="fixtures.html">Fixtures</a><a href="stats.html">Stats</a>
+    </nav>
+    <main>
+        <div class="test-heading"><h2 id="date-heading">ESPN Matchday</h2><div class="date-controls"><button id="previous" type="button" aria-label="Previous date">Previous</button><button id="next" type="button" aria-label="Next date">Next</button></div></div>
+        <div id="status" role="status">Loading ESPN scoreboard...</div>
+        <section id="matches" class="espn-card" aria-live="polite"></section>
+    </main>
+    <script src="theme.js"></script>
+    <script>
+        const endpoint = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard';
+        let events = [];
+        let availableDates = [];
+        let selectedDate = new Date();
+
+        const escapeHtml = value => String(value ?? '').replace(/[&<>\"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', "'": '&#39;' }[character]));
+        const dateKey = date => date.toISOString().slice(0, 10);
+        const formatDate = date => date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+
+        function eventDate(event) { return new Date(event.date); }
+        function eventsForDate(date) { return events.filter(event => dateKey(eventDate(event)) === dateKey(date)); }
+        function competitor(event, side) { return event.competitions?.[0]?.competitors?.find(item => item.homeAway === side) || {}; }
+        function statusFor(event) { return event.competitions?.[0]?.status || event.status || {}; }
+
+        function render() {
+            const dayEvents = eventsForDate(selectedDate);
+            document.getElementById('date-heading').textContent = formatDate(selectedDate);
+            const selectedKey = dateKey(selectedDate);
+            const selectedIndex = availableDates.indexOf(selectedKey);
+            document.getElementById('previous').disabled = selectedIndex <= 0;
+            document.getElementById('next').disabled = selectedIndex === -1 || selectedIndex >= availableDates.length - 1;
+            document.getElementById('matches').innerHTML = dayEvents.length ? dayEvents.map(renderEvent).join('') : '<div class="empty">No matches scheduled for this date.</div>';
+        }
+
+        function renderEvent(event) {
+            const home = competitor(event, 'home');
+            const away = competitor(event, 'away');
+            const status = statusFor(event);
+            const type = status.type || {};
+            const isFinal = type.completed || type.state === 'post';
+            const isLive = type.state === 'in';
+            const stateText = isLive ? (status.displayClock || 'LIVE') : (type.shortDetail || type.detail || type.description || 'Scheduled');
+            const homeScore = home.score ?? '-';
+            const awayScore = away.score ?? '-';
+            const details = (event.competitions?.[0]?.details || []).filter(item => item.scoringPlay).map(item => {
+                const scorer = item.athletesInvolved?.[0]?.displayName || 'Unknown scorer';
+                const label = item.ownGoal ? 'own goal' : item.penaltyKick ? 'penalty' : 'goal';
+                return '<div class="event">' + escapeHtml(item.clock?.displayValue || '') + ' - ' + escapeHtml(scorer) + ' (' + label + ')</div>';
+            }).join('');
+            return '<article class="match"><div class="match-summary"><div class="state ' + (isFinal ? 'final' : '') + '">' + escapeHtml(stateText) + '</div><div class="team home">' + escapeHtml(home.team?.shortDisplayName || home.team?.displayName) + '<img src="' + escapeHtml(home.team?.logo) + '" alt=""></div><div class="score">' + escapeHtml(homeScore) + ' - ' + escapeHtml(awayScore) + '<small>' + escapeHtml(event.shortName || '') + '</small></div><div class="team"><img src="' + escapeHtml(away.team?.logo) + '" alt="">' + escapeHtml(away.team?.shortDisplayName || away.team?.displayName) + '</div><div class="muted">' + escapeHtml(event.competitions?.[0]?.venue?.fullName || '') + '</div></div>' + (details ? '<details class="details"><summary>Scorers</summary>' + details + '</details>' : '') + '</article>';
+        }
+
+        function moveDate(direction) {
+            const index = availableDates.indexOf(dateKey(selectedDate));
+            const nextIndex = index + direction;
+            if (nextIndex >= 0 && nextIndex < availableDates.length) {
+                selectedDate = new Date(availableDates[nextIndex] + 'T12:00:00');
+                loadScoreboard();
+            }
+        }
+
+        async function loadScoreboard() {
+            try {
+                const response = await fetch(endpoint + '?dates=' + dateKey(selectedDate).replaceAll('-', ''), { cache: 'no-store' });
+                if (!response.ok) throw new Error('ESPN returned HTTP ' + response.status);
+                const data = await response.json();
+                events = data.events || [];
+                const calendar = data.leagues?.[0]?.calendar || [];
+                if (calendar.length) availableDates = calendar.map(value => value.slice(0, 10)).filter((value, index, values) => values.indexOf(value) === index).sort();
+                document.getElementById('status').textContent = 'ESPN data loaded: ' + events.length + ' event(s) for ' + dateKey(selectedDate) + '. Updated ' + new Date().toLocaleTimeString() + '.';
+                render();
+            } catch (error) {
+                document.getElementById('status').textContent = 'Unable to load ESPN data: ' + error.message;
+                document.getElementById('matches').innerHTML = '<div class="empty">Check the browser console and network access.</div>';
+            }
+        }
+
+        document.getElementById('previous').addEventListener('click', () => moveDate(-1));
+        document.getElementById('next').addEventListener('click', () => moveDate(1));
+        loadScoreboard();
+        setInterval(loadScoreboard, 30000);
+    </script>
+</body>
+</html>
