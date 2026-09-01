@@ -35,8 +35,27 @@ function getCompetitor(event, side) {
     return event.competitions?.[0]?.competitors?.find(item => item.homeAway === side);
 }
 
+function dateKeysBetween(startDate, endDate) {
+    const dates = [];
+    const current = new Date(`${startDate}T12:00:00Z`);
+    const last = new Date(`${endDate}T12:00:00Z`);
+    for (; current <= last; current.setUTCDate(current.getUTCDate() + 1)) {
+        dates.push(current.toISOString().slice(0, 10).replaceAll('-', ''));
+    }
+    return dates;
+}
+
 async function fetchEvents() {
     const responses = await Promise.all(dayKeys().map(async date => {
+        const response = await fetch(`${ESPN_ENDPOINT}?dates=${date}`);
+        if (!response.ok) throw new Error(`ESPN returned HTTP ${response.status} for ${date}`);
+        return response.json();
+    }));
+    return responses.flatMap(payload => payload.events || []);
+}
+
+async function fetchEventsForDates(dates) {
+    const responses = await Promise.all(dates.map(async date => {
         const response = await fetch(`${ESPN_ENDPOINT}?dates=${date}`);
         if (!response.ok) throw new Error(`ESPN returned HTTP ${response.status} for ${date}`);
         return response.json();
@@ -119,3 +138,7 @@ module.exports = async function handler(req, res) {
         return res.status(500).json({ error: 'ESPN synchronization failed.' });
     }
 };
+
+module.exports.dateKeysBetween = dateKeysBetween;
+module.exports.fetchEventsForDates = fetchEventsForDates;
+module.exports.syncEvent = syncEvent;
