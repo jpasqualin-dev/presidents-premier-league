@@ -251,6 +251,12 @@
             letter-spacing: 0.5px;
         }
 
+        .mw-achievement-stars {
+            color: #d69e00;
+            margin-left: 6px;
+            letter-spacing: 2px;
+        }
+
         .mw-points {
             font-size: 0.8rem;
             font-weight: 700;
@@ -567,9 +573,10 @@
                 `;
             });
 
+            const matchweekStars = getMatchweekStars(mw, matches);
             card.innerHTML = `
                 <div class="mw-header">
-                    <span class="mw-title">Matchweek ${mw.matchweek}</span>
+                    <span class="mw-title">Matchweek ${mw.matchweek}${matchweekStars}</span>
                     <span class="mw-points">+${mw.weeklyPoints} PTS</span>
                 </div>
                 <div>${fixturesHTML}</div>
@@ -579,6 +586,34 @@
 
         document.getElementById('total-pts').textContent = totalPts;
         updateAchievements(data, matches);
+    }
+
+    function getMatchweekStars(matchweek, matches) {
+        if (!matchweek.fixtures.every(fixture => fixture.isComplete)) return '';
+
+        const results = matchweek.fixtures.map(fixture => fixture.result);
+        const weeklyPoints = {};
+        matches.filter(match => match.status === 'FINISHED' && match.matchday === matchweek.matchweek).forEach(match => {
+            const homeOwner = getOwnerOfTeam(match.homeTeam.name);
+            const awayOwner = getOwnerOfTeam(match.awayTeam.name);
+            const homeScore = match.score.fullTime.home;
+            const awayScore = match.score.fullTime.away;
+            if (homeScore === null || awayScore === null) return;
+            [homeOwner, awayOwner].forEach(owner => {
+                if (owner !== 'Free Agent / Unassigned') weeklyPoints[owner] ||= 0;
+            });
+            if (homeOwner !== 'Free Agent / Unassigned') weeklyPoints[homeOwner] += homeScore > awayScore ? 3 : homeScore === awayScore ? 1 : 0;
+            if (awayOwner !== 'Free Agent / Unassigned') weeklyPoints[awayOwner] += awayScore > homeScore ? 3 : awayScore === homeScore ? 1 : 0;
+        });
+
+        const weeklyScores = Object.values(weeklyPoints);
+        const isWeeklyLeader = weeklyScores.length > 0 && matchweek.weeklyPoints === Math.max(...weeklyScores);
+        const stars = [
+            isWeeklyLeader ? 'Won week' : '',
+            !results.includes('loss') ? 'Undefeated' : '',
+            results.every(result => result === 'win') ? 'Perfect week' : ''
+        ].filter(Boolean);
+        return stars.length ? `<span class="mw-achievement-stars" title="${stars.join(', ')}" aria-label="${stars.join(', ')}">${'&#9733;'.repeat(stars.length)}</span>` : '';
     }
 
     function updateAchievements(matchweeks, matches) {
