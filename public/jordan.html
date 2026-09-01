@@ -605,14 +605,15 @@
     }
 
     function positionCurrentMatchweek() {
-        const primaryMenu = document.querySelector('.site-menu');
         const profileCard = document.querySelector('.profile-card');
         const currentMatchweek = document.getElementById('current-matchweek');
-        if (!primaryMenu || !profileCard || !currentMatchweek) {
+        if (!profileCard || !currentMatchweek) {
             revealPlayerPage();
             return;
         }
-        const targetTop = profileCard.getBoundingClientRect().bottom;
+        const profileStyle = getComputedStyle(profileCard);
+        const stickyTop = parseFloat(profileStyle.top) || 0;
+        const targetTop = stickyTop + profileCard.getBoundingClientRect().height;
         const y = currentMatchweek.getBoundingClientRect().top + window.pageYOffset - targetTop;
         window.scrollTo({ top: Math.max(0, y), behavior: 'auto' });
         revealPlayerPage();
