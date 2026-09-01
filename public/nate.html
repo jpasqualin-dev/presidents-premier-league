@@ -652,7 +652,7 @@
         }
         const profileStyle = getComputedStyle(profileCard);
         const stickyTop = parseFloat(profileStyle.top) || 0;
-        const targetTop = stickyTop + profileCard.getBoundingClientRect().height;
+        const targetTop = stickyTop + profileCard.getBoundingClientRect().height + 14;
         const y = currentMatchweek.getBoundingClientRect().top + window.pageYOffset - targetTop;
         window.scrollTo({ top: Math.max(0, y), behavior: 'auto' });
         revealPlayerPage();
