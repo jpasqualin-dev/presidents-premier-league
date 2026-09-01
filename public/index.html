@@ -224,6 +224,15 @@
             cursor: pointer;
         }
 
+        .today-match-row.completed-match.expanded,
+        .today-match-row.completed-match.expanded:hover {
+            background-color: #f1f5f9;
+        }
+
+        .today-match-row.completed-match:not(.expanded):hover {
+            background-color: transparent;
+        }
+
         .today-match-row.completed-match:focus-visible {
             outline: 2px solid #00a667;
             outline-offset: -2px;
@@ -231,11 +240,12 @@
 
         .match-goals {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 20px 1fr;
             gap: 12px;
             padding: 12px 12px 12px 46px;
             color: #718096;
             font-size: 0.78rem;
+            background-color: #f1f5f9;
         }
 
         .match-goals[hidden] {
@@ -254,6 +264,14 @@
 
         .match-goals-team.away {
             text-align: right;
+        }
+
+        .match-goals-ball {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #718096;
+            font-size: 0.95rem;
         }
 
         .today-match-row:hover {
@@ -621,7 +639,12 @@
         body.dark-mode .today-card,
         body.dark-mode .table-card { box-shadow: 0 3px 10px rgba(0,0,0,0.35); }
         body.dark-mode .today-match-row { border-bottom-color: #3d3d3d; color: #f1f1f1; }
-        body.dark-mode .match-goals { color: #b8b8b8; }
+        body.dark-mode .today-match-row.completed-match.expanded,
+        body.dark-mode .today-match-row.completed-match.expanded:hover,
+        body.dark-mode .match-goals { background-color: #2a2a2a; }
+        body.dark-mode .today-match-row.completed-match:not(.expanded):hover { background-color: transparent; }
+        body.dark-mode .match-goals,
+        body.dark-mode .match-goals-ball { color: #b8b8b8; }
         body.dark-mode .team-name-text,
         body.dark-mode .match-score-block { color: #f1f1f1; }
         body.dark-mode .team-owner,
@@ -1007,8 +1030,8 @@
         const awayScorers = scorers.filter(scorer => String(scorer.teamProviderId) === String(match.awayTeam.id));
         const renderScorers = teamScorers => teamScorers.length
             ? teamScorers.map(scorer => `<span class="match-goal">${scorer.athleteName} ${scorer.minute || ''}${scorer.ownGoal ? ' (OG)' : ''}${scorer.penalty ? ' (P)' : ''}</span>`).join('')
-            : '<span class="match-goal">No goals</span>';
-        return `<div class="match-goals-team home">${renderScorers(homeScorers)}</div><div class="match-goals-team away">${renderScorers(awayScorers)}</div>`;
+            : '';
+        return `<div class="match-goals-team home">${renderScorers(homeScorers)}</div><div class="match-goals-ball" aria-hidden="true">&#9917;</div><div class="match-goals-team away">${renderScorers(awayScorers)}</div>`;
     }
 
     function toggleMatchDetails(rowId) {
@@ -1018,6 +1041,7 @@
         const expanded = !details.hidden;
         details.hidden = expanded;
         row.setAttribute('aria-expanded', String(!expanded));
+        row.classList.toggle('expanded', !expanded);
     }
 
     function handleMatchDetailsKey(event, rowId) {
