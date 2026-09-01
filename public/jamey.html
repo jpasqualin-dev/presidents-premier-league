@@ -182,10 +182,24 @@
             cursor: pointer;
         }
 
+        .profile-card::before {
+            content: "";
+            position: absolute;
+            z-index: -1;
+            top: 0;
+            right: -100vw;
+            bottom: 0;
+            left: -100vw;
+            background: #f4f6f8;
+            pointer-events: none;
+        }
+
         .profile-card:focus-visible {
             outline: 2px solid #00a667;
             outline-offset: 2px;
         }
+
+        body.dark-mode .profile-card::before { background: #121212; }
 
         .profile-info h1 {
             font-size: 1.25rem;
