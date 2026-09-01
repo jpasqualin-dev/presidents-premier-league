@@ -32,11 +32,25 @@ async function readHistoricalMatches(sql) {
             m.provider, m.provider_event_id, m.kickoff_at, m.status, m.status_completed, m.status_clock,
             m.home_score, m.away_score, m.venue, m.matchday,
             home.provider_team_id AS home_provider_id, home.canonical_name AS home_name, home.logo_url AS home_logo,
-            away.provider_team_id AS away_provider_id, away.canonical_name AS away_name, away.logo_url AS away_logo
+            away.provider_team_id AS away_provider_id, away.canonical_name AS away_name, away.logo_url AS away_logo,
+            COALESCE(
+                json_agg(json_build_object(
+                    'teamProviderId', scorer_team.provider_team_id,
+                    'athleteProviderId', ms.provider_athlete_id,
+                    'athleteName', ms.athlete_name,
+                    'minute', ms.minute,
+                    'ownGoal', ms.own_goal,
+                    'penalty', ms.penalty
+                ) ORDER BY ms.id) FILTER (WHERE ms.id IS NOT NULL),
+                '[]'::json
+            ) AS scorers
         FROM matches m
         JOIN teams home ON home.id = m.home_team_id
         JOIN teams away ON away.id = m.away_team_id
+        LEFT JOIN match_scorers ms ON ms.match_id = m.id
+        LEFT JOIN teams scorer_team ON scorer_team.id = ms.team_id
         WHERE m.season = '2026'
+        GROUP BY m.id, home.id, away.id
         ORDER BY m.kickoff_at ASC`;
 
     return rows.map(normalizeNeonMatch);

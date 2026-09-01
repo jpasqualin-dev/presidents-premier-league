@@ -220,6 +220,38 @@
             transition: background-color 0.15s;
         }
 
+        .today-match-row.completed-match {
+            cursor: pointer;
+        }
+
+        .today-match-row.completed-match:focus-visible {
+            outline: 2px solid #00a667;
+            outline-offset: -2px;
+        }
+
+        .match-goals {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 0 12px 12px 46px;
+            color: #718096;
+            font-size: 0.78rem;
+        }
+
+        .match-goals-team {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .match-goal {
+            line-height: 1.25;
+        }
+
+        .match-goals-team.away {
+            text-align: right;
+        }
+
         .today-match-row:hover {
             background-color: #f8f9fa;
         }
@@ -585,6 +617,7 @@
         body.dark-mode .today-card,
         body.dark-mode .table-card { box-shadow: 0 3px 10px rgba(0,0,0,0.35); }
         body.dark-mode .today-match-row { border-bottom-color: #3d3d3d; color: #f1f1f1; }
+        body.dark-mode .match-goals { color: #b8b8b8; }
         body.dark-mode .team-name-text,
         body.dark-mode .match-score-block { color: #f1f1f1; }
         body.dark-mode .team-owner,
@@ -914,8 +947,11 @@
                 statusHtml = ``;
             }
 
+            const isCompleted = match.status === 'FINISHED';
+            const goalDetailsHtml = isCompleted ? getGoalDetailsHtml(match) : '';
+            const rowId = `match-${match.id.replace(/[^a-zA-Z0-9_-]/g, '')}`;
             return `
-                <div class="today-match-row">
+                <div class="today-match-row${isCompleted ? ' completed-match' : ''}"${isCompleted ? ` role="button" tabindex="0" aria-expanded="false" aria-controls="${rowId}-goals" onclick="toggleMatchDetails('${rowId}')" onkeydown="handleMatchDetailsKey(event, '${rowId}')"` : ''}>
                     <div class="match-status">${statusHtml}</div>
                     <div class="match-content">
                         <div class="team-block team-home">
@@ -935,6 +971,7 @@
                         </div>
                     </div>
                 </div>
+                ${goalDetailsHtml ? `<div id="${rowId}-goals" class="match-goals" hidden>${goalDetailsHtml}</div>` : ''}
             `;
         }).join('');
 
@@ -957,6 +994,33 @@
                 ${fixturesHtml}
             </div>
         `;
+    }
+
+    function getGoalDetailsHtml(match) {
+        const scorers = Array.isArray(match.scorers) ? match.scorers : [];
+        const homeId = String(match.homeTeam.id);
+        const homeScorers = scorers.filter(scorer => String(scorer.teamProviderId) === homeId);
+        const awayScorers = scorers.filter(scorer => String(scorer.teamProviderId) === String(match.awayTeam.id));
+        const renderScorers = teamScorers => teamScorers.length
+            ? teamScorers.map(scorer => `<span class="match-goal">${scorer.athleteName} ${scorer.minute || ''}${scorer.ownGoal ? ' (OG)' : ''}${scorer.penalty ? ' (P)' : ''}</span>`).join('')
+            : '<span class="match-goal">No goals</span>';
+        return `<div class="match-goals-team home">${renderScorers(homeScorers)}</div><div class="match-goals-team away">${renderScorers(awayScorers)}</div>`;
+    }
+
+    function toggleMatchDetails(rowId) {
+        const row = document.querySelector(`[onclick="toggleMatchDetails('${rowId}')"]`);
+        const details = document.getElementById(`${rowId}-goals`);
+        if (!row || !details) return;
+        const expanded = !details.hidden;
+        details.hidden = expanded;
+        row.setAttribute('aria-expanded', String(!expanded));
+    }
+
+    function handleMatchDetailsKey(event, rowId) {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            toggleMatchDetails(rowId);
+        }
     }
 
     function renderMatchdayCard() {
