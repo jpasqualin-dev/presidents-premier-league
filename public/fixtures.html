@@ -52,6 +52,11 @@
             position: relative;
             min-height: 100vh;
             padding-bottom: 40px;
+            visibility: hidden;
+        }
+
+        body.fixtures-ready .main-container {
+            visibility: visible;
         }
 
         .sticky-nav-wrapper {
@@ -607,10 +612,12 @@
                 processMatches(data.matches);
             } else {
                 document.getElementById('content-area').innerHTML = '<div class="loading-state">No match schedule found.</div>';
+                revealFixturesPage();
             }
         } catch (error) {
             console.error("Error fetching match data:", error);
             document.getElementById('content-area').innerHTML = '<div class="loading-state" style="color:#e53e3e;">Unable to load schedule data.</div>';
+            revealFixturesPage();
         }
     }
 
@@ -723,7 +730,10 @@
         const container = document.getElementById('content-area');
         container.innerHTML = '';
 
-        if (!fixtures || fixtures.length === 0) return;
+        if (!fixtures || fixtures.length === 0) {
+            revealFixturesPage();
+            return;
+        }
 
         if (currentView === 'date') {
             const grouped = groupBy(fixtures, 'dateLabel');
@@ -739,7 +749,10 @@
                 container.appendChild(card);
             });
             if (shouldPositionInitialCard) {
-                setTimeout(scrollToLatestCompleted, 100);
+                setTimeout(() => {
+                    scrollToLatestCompleted();
+                    revealFixturesPage();
+                }, 100);
             }
         } else if (currentView === 'round') {
             const grouped = groupBy(fixtures, 'round');
@@ -754,11 +767,17 @@
                 if (index === latestActiveRoundIndex) card.id = 'card-latest-active-round';
                 container.appendChild(card);
             });
-            if (shouldPositionInitialCard) setTimeout(scrollToLatestActiveRound, 100);
+            if (shouldPositionInitialCard) {
+                setTimeout(() => {
+                    scrollToLatestActiveRound();
+                    revealFixturesPage();
+                }, 100);
+            }
         } else if (currentView === 'team') {
             const teamCard = createTeamCard(selectedTeam);
             teamCard.id = 'card-selected-team';
             container.appendChild(teamCard);
+            revealFixturesPage();
         }
 
         shouldPositionInitialCard = false;
@@ -957,6 +976,10 @@
             const y = card.getBoundingClientRect().top + window.pageYOffset - navBottom;
             window.scrollTo({top: y, behavior: 'auto'});
         }
+    }
+
+    function revealFixturesPage() {
+        document.body.classList.add('fixtures-ready');
     }
 
     function updateFixturesHeaderOffset() {
