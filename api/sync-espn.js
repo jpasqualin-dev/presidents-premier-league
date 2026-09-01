@@ -2,7 +2,8 @@ const { neon } = require('@neondatabase/serverless');
 const { getMatchday } = require('../lib/match-contract');
 
 const ESPN_ENDPOINT = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard';
-const LOOKBACK_DAYS = 3;
+const SEASON_START = '2026-08-01';
+const SEASON_END = '2027-06-01';
 const teamOwners = {
     Arsenal: ['Hef', 'Red and Blue Division'], Bournemouth: ['Hef', 'Birds and Beasts Division'], 'Nottingham Forest': ['Hef', 'Field and Forest Division'], 'Hull City': ['Hef', 'Cottage and Country Division'],
     'Manchester City': ['Jordan', 'Red and Blue Division'], Brighton: ['Jordan', 'Birds and Beasts Division'], Brentford: ['Jordan', 'Field and Forest Division'], 'Ipswich Town': ['Jordan', 'Cottage and Country Division'],
@@ -12,15 +13,7 @@ const teamOwners = {
 };
 
 function dayKeys() {
-    const dates = [];
-    const date = new Date();
-    date.setUTCHours(12, 0, 0, 0);
-    for (let offset = 0; offset <= LOOKBACK_DAYS; offset += 1) {
-        const current = new Date(date);
-        current.setUTCDate(date.getUTCDate() - offset);
-        dates.push(current.toISOString().slice(0, 10).replaceAll('-', ''));
-    }
-    return dates;
+    return [`${SEASON_START.replaceAll('-', '')}-${SEASON_END.replaceAll('-', '')}`];
 }
 
 function findTeamOwner(name) {
@@ -47,7 +40,7 @@ function dateKeysBetween(startDate, endDate) {
 
 async function fetchEvents() {
     const responses = await Promise.all(dayKeys().map(async date => {
-        const response = await fetch(`${ESPN_ENDPOINT}?dates=${date}`);
+        const response = await fetch(`${ESPN_ENDPOINT}?dates=${date}&limit=1000`);
         if (!response.ok) throw new Error(`ESPN returned HTTP ${response.status} for ${date}`);
         return response.json();
     }));
@@ -74,6 +67,10 @@ async function syncEvent(sql, event) {
     const awayOwner = findTeamOwner(away.team.displayName);
     const homeName = findCanonicalTeam(home.team.displayName);
     const awayName = findCanonicalTeam(away.team.displayName);
+    const [existingMatch] = await sql`
+        SELECT id, kickoff_at, matchday
+        FROM matches
+        WHERE provider = 'espn' AND provider_event_id = ${String(event.id)}`;
     const [homeTeam] = await sql`
         INSERT INTO teams (provider, provider_team_id, canonical_name, short_name, owner, division, logo_url)
         VALUES ('espn', ${String(home.team.id)}, ${homeName}, ${home.team.shortDisplayName || home.team.abbreviation}, ${homeOwner[0]}, ${homeOwner[1]}, ${home.team.logo || null})
@@ -87,8 +84,14 @@ async function syncEvent(sql, event) {
     const [match] = await sql`
         INSERT INTO matches (provider, provider_event_id, competition, season, kickoff_at, matchday, status, status_completed, status_detail, status_clock, home_team_id, away_team_id, home_score, away_score, venue)
         VALUES ('espn', ${String(event.id)}, 'eng.1', ${Number(event.season?.year || 2026)}, ${event.date}, ${getMatchday(event)}, ${status.state || 'scheduled'}, ${Boolean(status.completed)}, ${status.detail || null}, ${competition.status?.displayClock || null}, ${homeTeam.id}, ${awayTeam.id}, ${home.score == null ? null : Number(home.score)}, ${away.score == null ? null : Number(away.score)}, ${competition.venue?.fullName || null})
-        ON CONFLICT (provider, provider_event_id) DO UPDATE SET kickoff_at = EXCLUDED.kickoff_at, matchday = EXCLUDED.matchday, status = EXCLUDED.status, status_completed = EXCLUDED.status_completed, status_detail = EXCLUDED.status_detail, status_clock = EXCLUDED.status_clock, home_team_id = EXCLUDED.home_team_id, away_team_id = EXCLUDED.away_team_id, home_score = EXCLUDED.home_score, away_score = EXCLUDED.away_score, venue = EXCLUDED.venue, updated_at = NOW()
+        ON CONFLICT (provider, provider_event_id) DO UPDATE SET original_kickoff_at = COALESCE(matches.original_kickoff_at, matches.kickoff_at), rescheduled_at = CASE WHEN matches.kickoff_at IS DISTINCT FROM EXCLUDED.kickoff_at THEN NOW() ELSE matches.rescheduled_at END, kickoff_at = EXCLUDED.kickoff_at, matchday = COALESCE(matches.matchday, EXCLUDED.matchday), status = EXCLUDED.status, status_completed = EXCLUDED.status_completed, status_detail = EXCLUDED.status_detail, status_clock = EXCLUDED.status_clock, home_team_id = EXCLUDED.home_team_id, away_team_id = EXCLUDED.away_team_id, home_score = EXCLUDED.home_score, away_score = EXCLUDED.away_score, venue = EXCLUDED.venue, updated_at = NOW()
         RETURNING id`;
+    if (existingMatch?.kickoff_at && new Date(existingMatch.kickoff_at).getTime() !== new Date(event.date).getTime()) {
+        await sql`
+            INSERT INTO schedule_changes (match_id, old_kickoff_at, new_kickoff_at)
+            VALUES (${existingMatch.id}, ${existingMatch.kickoff_at}, ${event.date})
+            ON CONFLICT (match_id, old_kickoff_at, new_kickoff_at) DO NOTHING`;
+    }
     await sql`DELETE FROM match_scorers WHERE match_id = ${match.id}`;
     await sql`DELETE FROM match_events WHERE match_id = ${match.id}`;
     await sql`DELETE FROM match_team_stats WHERE match_id = ${match.id}`;
