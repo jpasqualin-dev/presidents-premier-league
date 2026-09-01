@@ -594,7 +594,7 @@
     let fixtures = [];
     let currentView = 'round';
     let selectedTeam = null;
-    let initialLoad = true;
+    let shouldPositionInitialCard = true;
 
     // Fetch matches from API (same caching strategy as main index)
     async function fetchMatchData() {
@@ -736,9 +736,8 @@
                 if (index === latestCompletedIndex) card.id = 'card-latest-completed';
                 container.appendChild(card);
             });
-            if (initialLoad) {
+            if (shouldPositionInitialCard) {
                 setTimeout(scrollToLatestCompleted, 100);
-                initialLoad = false;
             }
         } else if (currentView === 'round') {
             const grouped = groupBy(fixtures, 'round');
@@ -753,13 +752,14 @@
                 if (index === latestActiveRoundIndex) card.id = 'card-latest-active-round';
                 container.appendChild(card);
             });
-            setTimeout(scrollToLatestActiveRound, 100);
+            if (shouldPositionInitialCard) setTimeout(scrollToLatestActiveRound, 100);
         } else if (currentView === 'team') {
             const teamCard = createTeamCard(selectedTeam);
             teamCard.id = 'card-selected-team';
             container.appendChild(teamCard);
-            setTimeout(scrollToSelectedTeam, 100);
         }
+
+        shouldPositionInitialCard = false;
     }
 
     // --- HTML Builders ---
