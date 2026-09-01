@@ -954,7 +954,7 @@
         const navControls = document.querySelector('.pills-nav-container');
         if (card && navControls) {
             const navBottom = navControls.getBoundingClientRect().bottom;
-            const y = card.getBoundingClientRect().top + window.pageYOffset - navBottom - 20;
+            const y = card.getBoundingClientRect().top + window.pageYOffset - navBottom;
             window.scrollTo({top: y, behavior: 'auto'});
         }
     }
