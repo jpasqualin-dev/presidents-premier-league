@@ -1,5 +1,5 @@
 (() => {
-    const cacheKey = 'pl_match_data';
+    const cacheKey = 'pl_match_data_v2';
     const cacheTimeKey = 'pl_match_data_time';
     const lockKey = 'pl_match_data_lock';
     const cacheDuration = 30 * 1000;
@@ -42,7 +42,7 @@
             }
 
             try {
-                const response = await fetch('/api/standings', { cache: 'no-store' });
+                const response = await fetch('/api/matches', { cache: 'no-store' });
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 localStorage.setItem(cacheKey, JSON.stringify(data));
