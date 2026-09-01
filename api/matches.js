@@ -3,28 +3,27 @@ const { normalizeEspnEvent, normalizeNeonMatch } = require('../lib/match-contrac
 
 const ESPN_ENDPOINT = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard';
 const RECENT_DAYS = 3;
+const SEASON_END = '2027-06-01';
 
-function recentDateKeys() {
-    const dates = [];
+function espnDate(value) {
+    return value.toISOString().slice(0, 10).replaceAll('-', '');
+}
+
+function espnDateRange() {
     const today = new Date();
     today.setUTCHours(12, 0, 0, 0);
-    for (let offset = 0; offset <= RECENT_DAYS; offset += 1) {
-        const date = new Date(today);
-        date.setUTCDate(today.getUTCDate() - offset);
-        dates.push(date.toISOString().slice(0, 10).replaceAll('-', ''));
-    }
-    return dates;
+    const start = new Date(today);
+    start.setUTCDate(today.getUTCDate() - RECENT_DAYS);
+    return `${espnDate(start)}-${SEASON_END.replaceAll('-', '')}`;
 }
 
 async function fetchRecentEspnMatches() {
-    const responses = await Promise.all(recentDateKeys().map(async date => {
-        const response = await fetch(`${ESPN_ENDPOINT}?dates=${date}`);
-        if (!response.ok) throw new Error(`ESPN returned HTTP ${response.status} for ${date}`);
-        const payload = await response.json();
-        if (!Array.isArray(payload.events)) throw new Error(`Invalid ESPN response for ${date}`);
-        return payload.events;
-    }));
-    return responses.flat().map(normalizeEspnEvent).filter(Boolean);
+    const dateRange = espnDateRange();
+    const response = await fetch(`${ESPN_ENDPOINT}?dates=${dateRange}&limit=1000`);
+    if (!response.ok) throw new Error(`ESPN returned HTTP ${response.status} for ${dateRange}`);
+    const payload = await response.json();
+    if (!Array.isArray(payload.events)) throw new Error(`Invalid ESPN response for ${dateRange}`);
+    return payload.events.map(normalizeEspnEvent).filter(Boolean);
 }
 
 async function readHistoricalMatches(sql) {
