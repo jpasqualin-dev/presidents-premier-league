@@ -19,6 +19,11 @@
             padding: 16px;
             max-width: 600px; 
             margin: 0 auto;
+            visibility: hidden;
+        }
+
+        body.player-page-ready {
+            visibility: visible;
         }
 
         /* Navigation / Back Button */
@@ -403,6 +408,8 @@
 <script src="theme.js"></script>
 <script src="match-data.js"></script>
 <script>
+    let shouldPositionInitialCard = true;
+
     // 1. Integrated data mappings directly from your main site configuration
     const draftData = {
         "Hef": ["Arsenal", "Bournemouth", "Nottingham Forest", "Hull City"],
@@ -529,6 +536,7 @@
             console.error('Fetch error:', error);
             document.getElementById('fixtures-container').innerHTML = 
                 '<div class="loading">Unable to load match data. Please check your backend route connection.</div>';
+            revealPlayerPage();
         }
     }
 
@@ -539,13 +547,17 @@
 
         if (data.length === 0) {
             container.innerHTML = '<div class="loading">No matchweek fixtures found.</div>';
+            revealPlayerPage();
             return;
         }
 
-        data.forEach(mw => {
+        const currentMatchweekIndex = data.reduce((latestIndex, matchweek, index) =>
+            matchweek.fixtures.some(fixture => fixture.result !== 'upcoming') ? index : latestIndex, -1);
+        data.forEach((mw, index) => {
             totalPts += mw.weeklyPoints;
             const card = document.createElement('div');
             card.className = 'mw-card';
+            if (index === currentMatchweekIndex) card.id = 'current-matchweek';
 
             let fixturesHTML = '';
             mw.fixtures.forEach(fix => {
@@ -586,6 +598,28 @@
 
         document.getElementById('total-pts').textContent = totalPts;
         updateAchievements(data, matches);
+        if (shouldPositionInitialCard) {
+            setTimeout(positionCurrentMatchweek, 100);
+            shouldPositionInitialCard = false;
+        }
+    }
+
+    function positionCurrentMatchweek() {
+        const primaryMenu = document.querySelector('.site-menu');
+        const profileCard = document.querySelector('.profile-card');
+        const currentMatchweek = document.getElementById('current-matchweek');
+        if (!primaryMenu || !profileCard || !currentMatchweek) {
+            revealPlayerPage();
+            return;
+        }
+        const targetTop = profileCard.getBoundingClientRect().bottom;
+        const y = currentMatchweek.getBoundingClientRect().top + window.pageYOffset - targetTop;
+        window.scrollTo({ top: Math.max(0, y), behavior: 'auto' });
+        revealPlayerPage();
+    }
+
+    function revealPlayerPage() {
+        document.body.classList.add('player-page-ready');
     }
 
     function getMatchweekStars(matchweek, matches) {
