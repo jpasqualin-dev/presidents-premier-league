@@ -998,7 +998,7 @@
                         </div>
                     </div>
                 </div>
-                ${goalDetailsHtml ? `<div id="${rowId}-goals" class="match-goals" hidden>${goalDetailsHtml}</div>` : ''}
+                ${goalDetailsHtml ? `<div id="${rowId}-goals" class="match-goals" hidden onclick="toggleMatchDetails('${rowId}')">${goalDetailsHtml}</div>` : ''}
             `;
         }).join('');
 
