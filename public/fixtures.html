@@ -602,6 +602,7 @@
     let currentView = 'round';
     let selectedTeam = null;
     let shouldPositionInitialCard = true;
+    let shouldPositionViewCard = false;
 
     // Fetch matches from API (same caching strategy as main index)
     async function fetchMatchData() {
@@ -692,6 +693,7 @@
     function setView(viewMode) {
         currentView = viewMode;
         selectedTeam = null; 
+        shouldPositionViewCard = true;
         updateNavUI();
         renderView();
     }
@@ -699,6 +701,7 @@
     function selectTeam(teamName) {
         selectedTeam = teamName;
         currentView = 'team';
+        shouldPositionViewCard = true;
         closeTeamDropdown();
         updateNavUI();
         renderView();
@@ -748,7 +751,7 @@
                 if (index === latestCompletedIndex) card.id = 'card-latest-completed';
                 container.appendChild(card);
             });
-            if (shouldPositionInitialCard) {
+            if (shouldPositionInitialCard || shouldPositionViewCard) {
                 setTimeout(() => {
                     scrollToLatestCompleted();
                     revealFixturesPage();
@@ -767,7 +770,7 @@
                 if (index === latestActiveRoundIndex) card.id = 'card-latest-active-round';
                 container.appendChild(card);
             });
-            if (shouldPositionInitialCard) {
+            if (shouldPositionInitialCard || shouldPositionViewCard) {
                 setTimeout(() => {
                     scrollToLatestActiveRound();
                     revealFixturesPage();
@@ -777,10 +780,18 @@
             const teamCard = createTeamCard(selectedTeam);
             teamCard.id = 'card-selected-team';
             container.appendChild(teamCard);
-            revealFixturesPage();
+            if (shouldPositionViewCard) {
+                setTimeout(() => {
+                    scrollToSelectedTeam();
+                    revealFixturesPage();
+                }, 0);
+            } else {
+                revealFixturesPage();
+            }
         }
 
         shouldPositionInitialCard = false;
+        shouldPositionViewCard = false;
     }
 
     // --- HTML Builders ---
@@ -972,8 +983,11 @@
     function scrollCardBelowNav(card) {
         const navControls = document.querySelector('.pills-nav-container');
         if (card && navControls) {
-            const navBottom = navControls.getBoundingClientRect().bottom;
-            const y = card.getBoundingClientRect().top + window.pageYOffset - navBottom;
+            const navStyle = getComputedStyle(navControls);
+            const stickyTop = parseFloat(navStyle.top) || 0;
+            const navHeight = navControls.getBoundingClientRect().height;
+            const targetTop = stickyTop + navHeight;
+            const y = card.getBoundingClientRect().top + window.pageYOffset - targetTop;
             window.scrollTo({top: y, behavior: 'auto'});
         }
     }
