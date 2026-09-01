@@ -220,17 +220,34 @@
             transition: background-color 0.15s;
         }
 
-        .today-match-row.completed-match {
+        .today-match-row.expandable-match {
             cursor: pointer;
         }
 
-        .today-match-row.completed-match.expanded,
-        .today-match-row.completed-match.expanded:hover {
+        .today-match-row.expandable-match.expanded,
+        .today-match-row.expandable-match.expanded:hover {
             background-color: #f1f5f9;
         }
 
-        .today-match-row.completed-match:not(.expanded):hover {
+        .today-match-row.expandable-match:not(.expanded):hover {
             background-color: transparent;
+        }
+
+        .ft-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .match-expand-chevron {
+            display: inline-block;
+            font-size: 1rem;
+            line-height: 1;
+            transition: transform 0.15s ease;
+        }
+
+        .expandable-match.expanded .match-expand-chevron {
+            transform: rotate(90deg);
         }
 
         .today-match-row.completed-match:focus-visible {
@@ -639,10 +656,10 @@
         body.dark-mode .today-card,
         body.dark-mode .table-card { box-shadow: 0 3px 10px rgba(0,0,0,0.35); }
         body.dark-mode .today-match-row { border-bottom-color: #3d3d3d; color: #f1f1f1; }
-        body.dark-mode .today-match-row.completed-match.expanded,
-        body.dark-mode .today-match-row.completed-match.expanded:hover,
+        body.dark-mode .today-match-row.expandable-match.expanded,
+        body.dark-mode .today-match-row.expandable-match.expanded:hover,
         body.dark-mode .match-goals { background-color: #2a2a2a; }
-        body.dark-mode .today-match-row.completed-match:not(.expanded):hover { background-color: transparent; }
+        body.dark-mode .today-match-row.expandable-match:not(.expanded):hover { background-color: transparent; }
         body.dark-mode .match-goals,
         body.dark-mode .match-goals-ball { color: #b8b8b8; }
         body.dark-mode .team-name-text,
@@ -956,10 +973,11 @@
 
             if (['IN_PLAY', 'PAUSED'].includes(match.status)) {
                 let liveText = match.status === 'PAUSED' ? 'HT' : match.minute ? match.minute : '';
-                statusHtml = liveText ? `<div class="live-badge">${liveText}</div>` : `<div class="live-badge-text">LIVE</div>`;
+                const liveBadge = liveText ? `<span class="live-badge">${liveText}</span>` : `<span class="live-badge-text">LIVE</span>`;
+                statusHtml = `<div class="ft-status">${liveBadge}<span class="match-expand-chevron" aria-hidden="true">›</span></div>`;
                 scoreHtml = `${match.score?.fullTime?.home ?? 0} - ${match.score?.fullTime?.away ?? 0}`;
             } else if (match.status === 'FINISHED') {
-                statusHtml = `<div class="ft-text">FT</div>`;
+                statusHtml = `<div class="ft-text ft-status"><span>FT</span><span class="match-expand-chevron" aria-hidden="true">›</span></div>`;
                 scoreHtml = `${match.score?.fullTime?.home ?? 0} - ${match.score?.fullTime?.away ?? 0}`;
             } else {
                 const mTime = new Date(match.utcDate);
@@ -974,11 +992,11 @@
                 statusHtml = ``;
             }
 
-            const isCompleted = match.status === 'FINISHED';
-            const goalDetailsHtml = isCompleted ? getGoalDetailsHtml(match) : '';
+            const isExpandable = ['FINISHED', 'IN_PLAY', 'PAUSED'].includes(match.status);
+            const goalDetailsHtml = isExpandable ? getGoalDetailsHtml(match) : '';
             const rowId = `match-${match.id.replace(/[^a-zA-Z0-9_-]/g, '')}`;
             return `
-                <div class="today-match-row${isCompleted ? ' completed-match' : ''}"${isCompleted ? ` role="button" tabindex="0" aria-expanded="false" aria-controls="${rowId}-goals" onclick="toggleMatchDetails('${rowId}')" onkeydown="handleMatchDetailsKey(event, '${rowId}')"` : ''}>
+                <div class="today-match-row${isExpandable ? ' expandable-match' : ''}"${isExpandable ? ` role="button" tabindex="0" aria-expanded="false" aria-controls="${rowId}-goals" onclick="toggleMatchDetails('${rowId}')" onkeydown="handleMatchDetailsKey(event, '${rowId}')"` : ''}>
                     <div class="match-status">${statusHtml}</div>
                     <div class="match-content">
                         <div class="team-block team-home">
