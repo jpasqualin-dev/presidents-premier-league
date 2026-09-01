@@ -524,6 +524,8 @@
 <script src="theme.js"></script>
 <script src="match-data.js"></script>
 <script>
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
     // --- Data Definitions (Shared with Index Page) ---
     const draftData = {
         "Hef": ["Arsenal", "Bournemouth", "Nottingham Forest", "Hull City"],
@@ -935,12 +937,7 @@
 
     function scrollToLatestCompleted() {
         const latestCompletedCard = document.getElementById('card-latest-completed');
-        const navControls = document.querySelector('.pills-nav-container');
-        if (latestCompletedCard && navControls) {
-            const navBottom = navControls.getBoundingClientRect().bottom;
-            const y = latestCompletedCard.getBoundingClientRect().top + window.pageYOffset - navBottom - 20;
-            window.scrollTo({top: y, behavior: 'smooth'});
-        }
+        scrollCardBelowNav(latestCompletedCard);
     }
 
     function scrollToLatestActiveRound() {
@@ -958,7 +955,7 @@
         if (card && navControls) {
             const navBottom = navControls.getBoundingClientRect().bottom;
             const y = card.getBoundingClientRect().top + window.pageYOffset - navBottom - 20;
-            window.scrollTo({top: y, behavior: 'smooth'});
+            window.scrollTo({top: y, behavior: 'auto'});
         }
     }
 
