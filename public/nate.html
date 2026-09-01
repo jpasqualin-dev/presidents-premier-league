@@ -182,14 +182,13 @@
             cursor: pointer;
         }
 
-        .profile-card::before {
-            content: "";
-            position: absolute;
-            z-index: -1;
-            top: 0;
-            right: -100vw;
-            bottom: 0;
-            left: -100vw;
+        .profile-card-backdrop {
+            position: fixed;
+            top: var(--profile-card-sticky-top, 36px);
+            right: 0;
+            left: 0;
+            height: var(--profile-card-height, 0px);
+            z-index: 18;
             background: #f4f6f8;
             pointer-events: none;
         }
@@ -199,7 +198,7 @@
             outline-offset: 2px;
         }
 
-        body.dark-mode .profile-card::before { background: #121212; }
+        body.dark-mode .profile-card-backdrop { background: #121212; }
 
         .profile-info h1 {
             font-size: 1.25rem;
@@ -437,6 +436,7 @@
     </nav>
 
     <!-- Sticky User Profile Header -->
+    <div class="profile-card-backdrop" aria-hidden="true"></div>
     <div class="profile-card" role="button" tabindex="0" aria-expanded="false" aria-controls="achievement-summary">
         <div class="profile-info">
             <p>Matchweek Performance Feed</p>
@@ -676,6 +676,14 @@
         document.body.classList.add('player-page-ready');
     }
 
+    function updatePlayerCardBackdrop() {
+        const profileCard = document.querySelector('.profile-card');
+        if (!profileCard) return;
+        const profileStyle = getComputedStyle(profileCard);
+        document.documentElement.style.setProperty('--profile-card-sticky-top', profileStyle.top);
+        document.documentElement.style.setProperty('--profile-card-height', `${profileCard.getBoundingClientRect().height}px`);
+    }
+
     function getMatchweekStars(matchweek, matches) {
         if (!matchweek.fixtures.every(fixture => fixture.isComplete)) return '';
 
@@ -746,7 +754,9 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         const card = document.querySelector('.profile-card');
+        updatePlayerCardBackdrop();
         card.addEventListener('click', toggleProfileCard);
+        if ('ResizeObserver' in window) new ResizeObserver(updatePlayerCardBackdrop).observe(card);
         card.addEventListener('keydown', event => {
             if (event.key === 'Enter' || event.key === ' ') {
                 event.preventDefault();
