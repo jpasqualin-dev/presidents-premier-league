@@ -878,6 +878,7 @@
     let cachedPlayerStats = null;
     let cachedTeamStats = null;
     let overallMode = 'PTS';
+    const seasonAwardsStateKey = 'pl_season_awards_state';
 
     let divisionModes = {
         "Red and Blue Division": 'PTS',
@@ -890,6 +891,7 @@
     let allMatchesData = [];
     let matchDates = []; 
     let currentMatchDateIndex = -1;
+    let lastStandingsMatchSignature = '';
 
     function processMatchDates(matches) {
         allMatchesData = matches || [];
@@ -1416,12 +1418,18 @@
 
     function toggleCard(titleEl) {
         const card = titleEl.closest('.stat-card');
+        const title = titleEl.querySelector('span')?.textContent.trim();
         if (card.classList.contains('collapsed')) {
             card.classList.remove('collapsed');
             card.classList.add('expanded');
         } else {
             card.classList.remove('expanded');
             card.classList.add('collapsed');
+        }
+        if (title) {
+            const state = JSON.parse(localStorage.getItem(seasonAwardsStateKey) || '{}');
+            state[title] = card.classList.contains('expanded');
+            localStorage.setItem(seasonAwardsStateKey, JSON.stringify(state));
         }
     }
 
@@ -1434,10 +1442,11 @@
         const container = document.getElementById('season-awards-container');
         container.innerHTML = '';
         const players = Object.values(playerStatsObj);
+        const savedState = JSON.parse(localStorage.getItem(seasonAwardsStateKey) || '{}');
 
         function buildAwardCard(config) {
             const card = document.createElement('div');
-            card.className = 'stat-card collapsed';
+            card.className = `stat-card ${savedState[config.title] ? 'expanded' : 'collapsed'}`;
 
             let html = `
                 <div class="stat-card-title" onclick="toggleCard(this)">
@@ -1495,7 +1504,7 @@
 
         function buildSimpleAwardCard(config) {
             const card = document.createElement('div');
-            card.className = 'stat-card collapsed';
+            card.className = `stat-card ${savedState[config.title] ? 'expanded' : 'collapsed'}`;
 
             let html = `
                 <div class="stat-card-title" onclick="toggleCard(this)">
@@ -1748,6 +1757,15 @@
         });
     }
 
+    function getMatchSignature(matches) {
+        return (matches || []).map(match => [
+            match.id,
+            match.status,
+            match.score?.fullTime?.home ?? '',
+            match.score?.fullTime?.away ?? ''
+        ].join(':')).sort().join('|');
+    }
+
     async function refreshMatchdayCard() {
         try {
             const data = await getMatchData();
@@ -1756,13 +1774,18 @@
                 // Update dates silently without overriding the currently selected swipe index
                 processMatchDates(data.matches); 
                 renderMatchdayCard(); 
+
+                const matchSignature = getMatchSignature(data.matches);
+                if (matchSignature !== lastStandingsMatchSignature) {
+                    await fetchAndUpdateStandings(data);
+                }
             }
         } catch (error) {
             console.error("Error refreshing matchday card:", error);
         }
     }
 
-    async function fetchAndUpdateStandings() {
+    async function fetchAndUpdateStandings(matchData = null) {
         let playerStats = initializePlayerStats();
         let teamStats = initializeTeamStats();
         const weeklyPlayerPoints = {};
@@ -1770,15 +1793,17 @@
         const incompletePlayerWeeks = {};
         const statusEl = document.getElementById('status-indicator');
 
-        renderPrimaryTable(playerStats, teamStats);
-        renderDivisions(teamStats);
-        renderSeasonAwards(playerStats, teamStats);
-        renderDraftRankTable(teamStats);
-        renderPlayerDraftValueTable(playerStats, teamStats);
-        renderMatchdayCard();
+        if (!matchData) {
+            renderPrimaryTable(playerStats, teamStats);
+            renderDivisions(teamStats);
+            renderSeasonAwards(playerStats, teamStats);
+            renderDraftRankTable(teamStats);
+            renderPlayerDraftValueTable(playerStats, teamStats);
+            renderMatchdayCard();
+        }
 
         try {
-            const data = await getMatchData();
+            const data = matchData || await getMatchData();
 
             let gamesProcessed = 0;
 
@@ -1919,6 +1944,7 @@
             renderDraftRankTable(teamStats);
             renderPlayerDraftValueTable(playerStats, teamStats);
 
+            lastStandingsMatchSignature = getMatchSignature(data.matches);
             statusEl.textContent = `Successfully processed 2026/2027 season data (${gamesProcessed} completed matches evaluated).`;
 
         } catch (error) {
