@@ -373,6 +373,10 @@
         wrapper.classList.toggle('expanded');
     }
 
+    function collapseNestedPlayer(nestedTeamsEl) {
+        nestedTeamsEl.closest('.stat-player-wrapper').classList.remove('expanded');
+    }
+
     function renderSeasonAwards(playerStatsObj, teamStatsObj) {
         const container = document.getElementById('season-awards-container');
         container.innerHTML = '';
@@ -424,7 +428,7 @@
                             <div class="chevron-small">❯</div>
                             <div class="stat-value ${config.pillClass}">${config.playerVal(p)}</div>
                         </div>
-                        <div class="nested-teams-container">
+                        <div class="nested-teams-container" onclick="collapseNestedPlayer(this)">
                             ${teamsHtml}
                         </div>
                     </div>
@@ -456,7 +460,7 @@
                             <div class="chevron-small">❯</div>
                             <div class="stat-value ${config.pillClass}">${config.aggregateVal(teamStatsObj)}</div>
                         </div>
-                        <div class="nested-teams-container">
+                        <div class="nested-teams-container" onclick="collapseNestedPlayer(this)">
                             ${allTeamsHtml}
                         </div>
                     </div>
