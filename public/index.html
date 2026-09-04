@@ -879,6 +879,25 @@
     let cachedTeamStats = null;
     let overallMode = 'PTS';
     const seasonAwardsStateKey = 'pl_season_awards_state';
+    const indexExpansionStateKey = 'pl_index_expansion_state';
+
+    function readIndexExpansionState() {
+        try {
+            return JSON.parse(localStorage.getItem(indexExpansionStateKey) || '{}');
+        } catch (error) {
+            return {};
+        }
+    }
+
+    function setIndexExpansionState(key, expanded) {
+        const state = readIndexExpansionState();
+        state[key] = expanded;
+        localStorage.setItem(indexExpansionStateKey, JSON.stringify(state));
+    }
+
+    function isIndexExpanded(key) {
+        return readIndexExpansionState()[key] === true;
+    }
 
     let divisionModes = {
         "Red and Blue Division": 'PTS',
@@ -1003,8 +1022,9 @@
             const isExpandable = ['FINISHED', 'IN_PLAY', 'PAUSED'].includes(match.status);
             const goalDetailsHtml = isExpandable ? getGoalDetailsHtml(match) : '';
             const rowId = `match-${match.id.replace(/[^a-zA-Z0-9_-]/g, '')}`;
+            const matchExpanded = isIndexExpanded(`match:${rowId}`);
             return `
-                <div class="today-match-row${isExpandable ? ' expandable-match' : ''}"${isExpandable ? ` role="button" tabindex="0" aria-expanded="false" aria-controls="${rowId}-goals" onclick="toggleMatchDetails('${rowId}')" onkeydown="handleMatchDetailsKey(event, '${rowId}')"` : ''}>
+                <div class="today-match-row${isExpandable ? ' expandable-match' : ''}${matchExpanded ? ' expanded' : ''}"${isExpandable ? ` role="button" tabindex="0" aria-expanded="${matchExpanded}" aria-controls="${rowId}-goals" onclick="toggleMatchDetails('${rowId}')" onkeydown="handleMatchDetailsKey(event, '${rowId}')"` : ''}>
                     <div class="match-status">${statusHtml}</div>
                     <div class="match-content">
                         <div class="team-block team-home">
@@ -1024,7 +1044,7 @@
                         </div>
                     </div>
                 </div>
-                ${goalDetailsHtml ? `<div id="${rowId}-goals" class="match-goals" hidden onclick="toggleMatchDetails('${rowId}')">${goalDetailsHtml}</div>` : ''}
+                ${goalDetailsHtml ? `<div id="${rowId}-goals" class="match-goals"${matchExpanded ? '' : ' hidden'} onclick="toggleMatchDetails('${rowId}')">${goalDetailsHtml}</div>` : ''}
             `;
         }).join('');
 
@@ -1069,6 +1089,7 @@
         details.hidden = expanded;
         row.setAttribute('aria-expanded', String(!expanded));
         row.classList.toggle('expanded', !expanded);
+        setIndexExpansionState(`match:${rowId}`, !expanded);
     }
 
     function handleMatchDetailsKey(event, rowId) {
@@ -1250,10 +1271,12 @@
     }
 
     function toggleNestedTableTRs(rowEl, targetClass) {
-        rowEl.classList.toggle('expanded');
+        const expanded = !rowEl.classList.contains('expanded');
+        rowEl.classList.toggle('expanded', expanded);
         document.querySelectorAll(`.${targetClass}`).forEach(el => {
-            el.classList.toggle('expanded');
+            el.classList.toggle('expanded', expanded);
         });
+        if (rowEl.dataset.expandKey) setIndexExpansionState(rowEl.dataset.expandKey, expanded);
     }
 
     function setOverallMode(mode) {
@@ -1304,7 +1327,9 @@
         playerStatsArray.forEach((p, index) => {
             const targetClass = `nested-overall-${index}`;
             const tr = document.createElement('tr');
-            tr.className = 'expandable-row';
+            const expandKey = `overall:${p.player}`;
+            tr.className = `expandable-row${isIndexExpanded(expandKey) ? ' expanded' : ''}`;
+            tr.dataset.expandKey = expandKey;
             tr.onclick = function() { toggleNestedTableTRs(this, targetClass); };
 
             const iconsHtml = p.teams.map(t => teamLogos[t] ? `<img src="${teamLogos[t]}" class="team-icon" alt="${t} crest">` : '').join('');
@@ -1341,7 +1366,7 @@
                 `;
 
                 const nestedTr = document.createElement('tr');
-                nestedTr.className = `nested-table-row ${targetClass}`;
+                nestedTr.className = `nested-table-row ${targetClass}${isIndexExpanded(expandKey) ? ' expanded' : ''}`;
 
                 if (overallMode === 'PTS') {
                     nestedTr.innerHTML = `
@@ -1435,7 +1460,9 @@
 
     function toggleNestedPlayer(playerRowEl) {
         const wrapper = playerRowEl.closest('.stat-player-wrapper');
-        wrapper.classList.toggle('expanded');
+        const expanded = !wrapper.classList.contains('expanded');
+        wrapper.classList.toggle('expanded', expanded);
+        if (wrapper.dataset.expandKey) setIndexExpansionState(wrapper.dataset.expandKey, expanded);
     }
 
     function renderSeasonAwards(playerStatsObj, teamStatsObj) {
@@ -1480,7 +1507,7 @@
                 });
 
                 html += `
-                    <div class="stat-player-wrapper">
+                    <div class="stat-player-wrapper${isIndexExpanded(`award:${config.title}:${p.player}`) ? ' expanded' : ''}" data-expand-key="award:${config.title}:${p.player}">
                         <div class="stat-player-row" onclick="toggleNestedPlayer(this)">
                             <div class="stat-rank">${idx + 1}</div>
                             <div class="stat-player-info">
@@ -1694,7 +1721,9 @@
         players.forEach((p, idx) => {
             const targetClass = `nested-draft-${idx}`;
             const tr = document.createElement('tr');
-            tr.className = 'expandable-row';
+            const expandKey = `draft:${p.player}`;
+            tr.className = `expandable-row${isIndexExpanded(expandKey) ? ' expanded' : ''}`;
+            tr.dataset.expandKey = expandKey;
             tr.onclick = function() { toggleNestedTableTRs(this, targetClass); };
 
             const iconsHtml = p.teams.map(t => teamLogos[t] ? `<img src="${teamLogos[t]}" class="team-icon" alt="crest">` : '').join('');
@@ -1739,7 +1768,7 @@
                 let displayName = getShortTeamName(t.team);
 
                 const nestedTr = document.createElement('tr');
-                nestedTr.className = `nested-table-row ${targetClass}`;
+                nestedTr.className = `nested-table-row ${targetClass}${isIndexExpanded(expandKey) ? ' expanded' : ''}`;
 
                 nestedTr.innerHTML = `
                     <td></td>
