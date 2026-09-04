@@ -1052,8 +1052,9 @@
         const homeId = String(match.homeTeam.id);
         const homeScorers = scorers.filter(scorer => String(scorer.teamProviderId) === homeId);
         const awayScorers = scorers.filter(scorer => String(scorer.teamProviderId) === String(match.awayTeam.id));
+        const scorerMinute = scorer => Number.isFinite(Number(scorer.minute)) ? Number(scorer.minute) : Infinity;
         const renderScorers = teamScorers => teamScorers.length
-            ? teamScorers.map(scorer => `<span class="match-goal">${scorer.athleteName} ${scorer.minute || ''}${scorer.ownGoal ? ' (OG)' : ''}${scorer.penalty ? ' (P)' : ''}</span>`).join('')
+            ? [...teamScorers].sort((a, b) => scorerMinute(a) - scorerMinute(b)).map(scorer => `<span class="match-goal">${scorer.athleteName} ${scorer.minute || ''}${scorer.ownGoal ? ' (OG)' : ''}${scorer.penalty ? ' (P)' : ''}</span>`).join('')
             : '';
         return `<div class="match-goals-team home">${renderScorers(homeScorers)}</div><div class="match-goals-ball" aria-hidden="true"><img class="match-goals-ball-icon" src="ball.png" alt=""></div><div class="match-goals-team away">${renderScorers(awayScorers)}</div>`;
     }
