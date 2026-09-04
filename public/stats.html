@@ -552,7 +552,7 @@
                     const totalMatches = teams.reduce((total, team) => total + team.PL, 0);
                     return (totalMatches > 0 ? teams.reduce((total, team) => total + team.GA, 0) / totalMatches : 0).toFixed(2);
                 },
-                pillClass: "pill-red", sortDir: -1, allTeams: true, allTeamsSortDir: 1
+                pillClass: "pill-red", sortDir: -1, allTeams: true, allTeamsSortDir: -1
             },
             {
                 title: "Goal difference",
