@@ -287,8 +287,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #718096;
-            font-size: 0.95rem;
+        }
+
+        .match-goals-ball-icon {
+            width: 16px;
+            height: 16px;
+            object-fit: contain;
         }
 
         .today-match-row:hover {
@@ -1051,7 +1055,7 @@
         const renderScorers = teamScorers => teamScorers.length
             ? teamScorers.map(scorer => `<span class="match-goal">${scorer.athleteName} ${scorer.minute || ''}${scorer.ownGoal ? ' (OG)' : ''}${scorer.penalty ? ' (P)' : ''}</span>`).join('')
             : '';
-        return `<div class="match-goals-team home">${renderScorers(homeScorers)}</div><div class="match-goals-ball" aria-hidden="true">&#9917;</div><div class="match-goals-team away">${renderScorers(awayScorers)}</div>`;
+        return `<div class="match-goals-team home">${renderScorers(homeScorers)}</div><div class="match-goals-ball" aria-hidden="true"><img class="match-goals-ball-icon" src="ball.png" alt=""></div><div class="match-goals-team away">${renderScorers(awayScorers)}</div>`;
     }
 
     function toggleMatchDetails(rowId) {
