@@ -431,6 +431,38 @@
                 `;
             });
 
+            if (config.allTeams) {
+                const allTeams = Object.values(teamStatsObj).sort((a, b) =>
+                    config.teamRaw(b) - config.teamRaw(a) || a.standingsRank - b.standingsRank
+                );
+                const allTeamsHtml = allTeams.map(t => `
+                    <div class="nested-team-row">
+                        <div class="nested-team-name">
+                            ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="nested-team-icon" alt="${t.team}">` : ''}
+                            ${getShortTeamName(t.team)}
+                        </div>
+                        <div class="stat-value ${config.pillClass}" style="transform: scale(0.9); opacity: 0.9;">
+                            ${config.teamVal(t)}
+                        </div>
+                    </div>
+                `).join('');
+
+                html += `
+                    <div class="stat-player-wrapper">
+                        <div class="stat-player-row" onclick="toggleNestedPlayer(this)">
+                            <div class="stat-player-info">
+                                <span>All Teams</span>
+                            </div>
+                            <div class="chevron-small">❯</div>
+                            <div class="stat-value ${config.pillClass}">${config.aggregateVal(teamStatsObj)}</div>
+                        </div>
+                        <div class="nested-teams-container">
+                            ${allTeamsHtml}
+                        </div>
+                    </div>
+                `;
+            }
+
             html += `</div>`;
             card.innerHTML = html;
             return card;
@@ -475,7 +507,8 @@
                 title: "Golden Boot",
                 players: [...players].sort((a,b) => b.goldenBoot - a.goldenBoot || b.PTS - a.PTS),
                 playerVal: p => p.goldenBoot, teamVal: t => t.GF, teamRaw: t => t.GF,
-                pillClass: "pill-green", sortDir: 1
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.GF, 0),
+                pillClass: "pill-green", sortDir: 1, allTeams: true
             },
             {
                 title: "Golden Gloves (Clean Sheets)",
@@ -659,6 +692,10 @@
                 t.GD = t.GF - t.GA;
                 t.ptsPga = t.PTS + t.PGA;
             }
+
+            Object.values(teamStats)
+                .sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF)
+                .forEach((team, index) => { team.standingsRank = index + 1; });
 
             Object.values(weeklyPlayerPoints).forEach(playerPoints => {
                 const highestScore = Math.max(...Object.values(playerPoints));
