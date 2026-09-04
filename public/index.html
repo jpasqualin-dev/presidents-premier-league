@@ -878,25 +878,15 @@
     let cachedPlayerStats = null;
     let cachedTeamStats = null;
     let overallMode = 'PTS';
-    const seasonAwardsStateKey = 'pl_season_awards_state';
-    const indexExpansionStateKey = 'pl_index_expansion_state';
-
-    function readIndexExpansionState() {
-        try {
-            return JSON.parse(localStorage.getItem(indexExpansionStateKey) || '{}');
-        } catch (error) {
-            return {};
-        }
-    }
+    const seasonAwardsState = {};
+    const indexExpansionState = {};
 
     function setIndexExpansionState(key, expanded) {
-        const state = readIndexExpansionState();
-        state[key] = expanded;
-        localStorage.setItem(indexExpansionStateKey, JSON.stringify(state));
+        indexExpansionState[key] = expanded;
     }
 
     function isIndexExpanded(key) {
-        return readIndexExpansionState()[key] === true;
+        return indexExpansionState[key] === true;
     }
 
     let divisionModes = {
@@ -1452,9 +1442,7 @@
             card.classList.add('collapsed');
         }
         if (title) {
-            const state = JSON.parse(localStorage.getItem(seasonAwardsStateKey) || '{}');
-            state[title] = card.classList.contains('expanded');
-            localStorage.setItem(seasonAwardsStateKey, JSON.stringify(state));
+            seasonAwardsState[title] = card.classList.contains('expanded');
         }
     }
 
@@ -1469,11 +1457,10 @@
         const container = document.getElementById('season-awards-container');
         container.innerHTML = '';
         const players = Object.values(playerStatsObj);
-        const savedState = JSON.parse(localStorage.getItem(seasonAwardsStateKey) || '{}');
 
         function buildAwardCard(config) {
             const card = document.createElement('div');
-            card.className = `stat-card ${savedState[config.title] ? 'expanded' : 'collapsed'}`;
+            card.className = `stat-card ${seasonAwardsState[config.title] ? 'expanded' : 'collapsed'}`;
 
             let html = `
                 <div class="stat-card-title" onclick="toggleCard(this)">
@@ -1531,7 +1518,7 @@
 
         function buildSimpleAwardCard(config) {
             const card = document.createElement('div');
-            card.className = `stat-card ${savedState[config.title] ? 'expanded' : 'collapsed'}`;
+            card.className = `stat-card ${seasonAwardsState[config.title] ? 'expanded' : 'collapsed'}`;
 
             let html = `
                 <div class="stat-card-title" onclick="toggleCard(this)">
