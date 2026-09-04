@@ -760,14 +760,24 @@
         } else if (currentView === 'round') {
             const grouped = groupBy(fixtures, 'round');
             const roundEntries = Object.entries(grouped);
+            const today = new Date();
+            const isSameDay = (date, comparisonDate) =>
+                date.getFullYear() === comparisonDate.getFullYear() &&
+                date.getMonth() === comparisonDate.getMonth() &&
+                date.getDate() === comparisonDate.getDate();
             let latestActiveRoundIndex = -1;
+            let roundStartingTodayIndex = -1;
             roundEntries.forEach(([round, matches], index) => {
                 if (matches.some(match => match.isPast || match.isLive)) latestActiveRoundIndex = index;
+                if (matches[0] && isSameDay(matches[0].dateObj, today)) roundStartingTodayIndex = index;
             });
+            const targetRoundIndex = roundStartingTodayIndex >= 0
+                ? roundStartingTodayIndex
+                : latestActiveRoundIndex;
 
             roundEntries.forEach(([round, matches], index) => {
                 const card = createRoundCard(round, matches);
-                if (index === latestActiveRoundIndex) card.id = 'card-latest-active-round';
+                if (index === targetRoundIndex) card.id = 'card-latest-active-round';
                 container.appendChild(card);
             });
             if (shouldPositionInitialCard || shouldPositionViewCard) {
