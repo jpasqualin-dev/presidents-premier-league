@@ -518,31 +518,51 @@
                 title: "Golden Gloves (Clean Sheets)",
                 players: [...players].sort((a,b) => b.goldenGloves - a.goldenGloves || b.PTS - a.PTS),
                 playerVal: p => p.goldenGloves, teamVal: t => t.goldenGloves, teamRaw: t => t.goldenGloves,
-                pillClass: "pill-blue", sortDir: 1
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.goldenGloves, 0),
+                pillClass: "pill-blue", sortDir: 1, allTeams: true
             },
             {
                 title: "PTS per match",
                 players: [...players].sort((a,b) => b.ppm - a.ppm || b.PTS - a.PTS),
                 playerVal: p => p.ppm.toFixed(2), teamVal: t => (t.PL > 0 ? (t.PTS / t.PL) : 0).toFixed(2), teamRaw: t => (t.PL > 0 ? (t.PTS / t.PL) : 0),
-                pillClass: "pill-purple", sortDir: 1
+                aggregateVal: teamStatsObj => {
+                    const teams = Object.values(teamStatsObj);
+                    const totalMatches = teams.reduce((total, team) => total + team.PL, 0);
+                    return (totalMatches > 0 ? teams.reduce((total, team) => total + team.PTS, 0) / totalMatches : 0).toFixed(2);
+                },
+                pillClass: "pill-purple", sortDir: 1, allTeams: true
             },
             {
                 title: "Goals per match",
                 players: [...players].sort((a,b) => b.gpm - a.gpm || b.PTS - a.PTS),
                 playerVal: p => p.gpm.toFixed(2), teamVal: t => (t.PL > 0 ? (t.GF / t.PL) : 0).toFixed(2), teamRaw: t => (t.PL > 0 ? (t.GF / t.PL) : 0),
-                pillClass: "pill-blue", sortDir: 1
+                aggregateVal: teamStatsObj => {
+                    const teams = Object.values(teamStatsObj);
+                    const totalMatches = teams.reduce((total, team) => total + team.PL, 0);
+                    return (totalMatches > 0 ? teams.reduce((total, team) => total + team.GF, 0) / totalMatches : 0).toFixed(2);
+                },
+                pillClass: "pill-blue", sortDir: 1, allTeams: true
             },
             {
                 title: "Goals conceded per match",
                 players: [...players].sort((a,b) => a.gcpm - b.gcpm || b.PTS - a.PTS),
                 playerVal: p => p.gcpm.toFixed(2), teamVal: t => (t.PL > 0 ? (t.GA / t.PL) : 0).toFixed(2), teamRaw: t => (t.PL > 0 ? (t.GA / t.PL) : 0),
-                pillClass: "pill-red", sortDir: -1
+                aggregateVal: teamStatsObj => {
+                    const teams = Object.values(teamStatsObj);
+                    const totalMatches = teams.reduce((total, team) => total + team.PL, 0);
+                    return (totalMatches > 0 ? teams.reduce((total, team) => total + team.GA, 0) / totalMatches : 0).toFixed(2);
+                },
+                pillClass: "pill-red", sortDir: -1, allTeams: true
             },
             {
                 title: "Goal difference",
                 players: [...players].sort((a,b) => b.GD - a.GD || b.PTS - a.PTS),
                 playerVal: p => (p.GD > 0 ? '+' + p.GD : p.GD), teamVal: t => (t.GD > 0 ? '+' + t.GD : t.GD), teamRaw: t => t.GD,
-                pillClass: "pill-gray", sortDir: 1
+                aggregateVal: teamStatsObj => {
+                    const goalDifference = Object.values(teamStatsObj).reduce((total, team) => total + team.GD, 0);
+                    return goalDifference > 0 ? '+' + goalDifference : goalDifference;
+                },
+                pillClass: "pill-gray", sortDir: 1, allTeams: true
             },
             {
                 title: "PvP wins",
