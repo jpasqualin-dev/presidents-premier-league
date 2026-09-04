@@ -437,13 +437,13 @@
 
             if (config.allTeams) {
                 const allTeams = Object.values(teamStatsObj).sort((a, b) =>
-                    config.teamRaw(b) - config.teamRaw(a) || a.standingsRank - b.standingsRank
+                    (config.teamRaw(b) - config.teamRaw(a)) * (config.allTeamsSortDir || 1) || a.standingsRank - b.standingsRank
                 );
                 const allTeamsHtml = allTeams.map(t => `
                     <div class="nested-team-row">
                         <div class="nested-team-name">
                             ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="nested-team-icon" alt="${t.team}">` : ''}
-                            ${getShortTeamName(t.team)}
+                            ${getShortTeamName(t.team)} (${t.owner})
                         </div>
                         <div class="stat-value ${config.pillClass}" style="transform: scale(0.9); opacity: 0.9;">
                             ${config.teamVal(t)}
@@ -552,7 +552,7 @@
                     const totalMatches = teams.reduce((total, team) => total + team.PL, 0);
                     return (totalMatches > 0 ? teams.reduce((total, team) => total + team.GA, 0) / totalMatches : 0).toFixed(2);
                 },
-                pillClass: "pill-red", sortDir: -1, allTeams: true
+                pillClass: "pill-red", sortDir: -1, allTeams: true, allTeamsSortDir: 1
             },
             {
                 title: "Goal difference",
