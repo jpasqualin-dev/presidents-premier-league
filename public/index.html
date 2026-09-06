@@ -12,7 +12,7 @@
             color: #333;
             margin: 0;
             padding: 16px;
-            max-width: 1100px;
+            max-width: 600px;
             margin: 0 auto;
         }
 
@@ -111,9 +111,11 @@
             font-size: 0.8rem;
         }
 
-        .players-dropdown a:hover {
-            background: #f4f6f8;
-            border-color: transparent;
+        @media (hover: hover) {
+            .players-dropdown a:hover {
+                background: #f4f6f8;
+                border-color: transparent;
+            }
         }
 
         /* FotMob Style Matchday Card */
@@ -229,10 +231,6 @@
             background-color: #ffffff;
         }
 
-        .today-match-row.expandable-match:not(.expanded):hover {
-            background-color: transparent;
-        }
-
         .ft-status {
             display: inline-flex;
             align-items: center;
@@ -295,8 +293,11 @@
             object-fit: contain;
         }
 
-        .today-match-row:hover {
-            background-color: #f8f9fa;
+        @media (hover: hover) {
+            .today-match-row.expandable-match:not(.expanded):hover,
+            .today-match-row:hover {
+                background-color: #f8f9fa;
+            }
         }
 
         .today-match-row:last-child {
@@ -656,8 +657,6 @@
 
         body.dark-mode .players-dropdown { box-shadow: 0 4px 12px rgba(0,0,0,0.45); }
         body.dark-mode .players-dropdown a { color: #f1f1f1; }
-        body.dark-mode .players-dropdown a:hover { background: #303030; }
-
         body.dark-mode .today-card,
         body.dark-mode .table-card { box-shadow: 0 3px 10px rgba(0,0,0,0.35); }
         body.dark-mode .today-match-row { border-bottom-color: #3d3d3d; color: #f1f1f1; }
@@ -694,6 +693,7 @@
         body.dark-mode td [style*="color: #888"] { color: #b4b4b4 !important; }
 
         @media (hover: hover) {
+            body.dark-mode .players-dropdown a:hover { background: #303030; }
             body.dark-mode tr:hover { background-color: #2a2a2a; }
             body.dark-mode .nested-table-row:hover,
             body.dark-mode .stat-player-row:hover { background-color: #2a2a2a; }
@@ -1294,7 +1294,7 @@
             <tr class="title-row">
                 <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
                     <div class="overall-header-container">
-                        <h2>Overall Standings</h2>
+                        <h2>PPL Standings</h2>
                         <div class="toggle-switch" data-toggle-group="overall">
                             <button class="toggle-btn ${overallMode === 'PTS' ? 'active' : ''}" onclick="setOverallMode('PTS')">PTS</button>
                             <button class="toggle-btn ${overallMode === 'PGA' ? 'active' : ''}" onclick="setOverallMode('PGA')">PGA</button>

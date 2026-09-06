@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fixtures - La Liga de Los Presidentes</title>
+    <title>Fixtures - Presidents Premier League</title>
     <link rel="stylesheet" href="theme.css">
     <style>
         :root {
@@ -47,7 +47,7 @@
         }
 
         .main-container {
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
             position: relative;
             min-height: 100vh;
@@ -158,7 +158,9 @@
             font-size: 0.8rem;
         }
 
-        .players-dropdown a:hover { background: #f4f6f8; border-color: transparent; }
+        @media (hover: hover) {
+            .players-dropdown a:hover { background: #f4f6f8; border-color: transparent; }
+        }
 
         /* Navigation Pills */
         .pills-nav-container {
@@ -182,8 +184,8 @@
             transition: all 0.2s ease;
         }
 
-        .pill:hover {
-            background-color: #e2e8f0;
+        @media (hover: hover) {
+            .pill:hover { background-color: #e2e8f0; }
         }
 
         .pill.active {
@@ -219,8 +221,8 @@
             transition: background 0.2s;
         }
         
-        .close-icon:hover {
-            background: #a0aec0;
+        @media (hover: hover) {
+            .close-icon:hover { background: #a0aec0; }
         }
 
         /* Content Area & Cards */
@@ -276,8 +278,8 @@
             border-bottom: none;
         }
 
-        .fixture-row:hover {
-            background-color: #fafafa;
+        @media (hover: hover) {
+            .fixture-row:hover { background-color: #fafafa; }
         }
 
         .team-block {
@@ -402,7 +404,7 @@
         .dropdown-modal {
             background: var(--card-bg);
             width: 100%;
-            max-width: 800px;
+            max-width: 600px;
             height: 85vh;
             border-radius: 16px 16px 0 0;
             display: flex;
@@ -450,8 +452,8 @@
             transition: background-color 0.2s;
         }
 
-        .team-list-item:hover {
-            background-color: #f8f9fa;
+        @media (hover: hover) {
+            .team-list-item:hover { background-color: #f8f9fa; }
         }
         
         .team-list-item .team-logo {

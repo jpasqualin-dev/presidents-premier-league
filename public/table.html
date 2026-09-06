@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Table - La Liga de Los Presidentes</title>
+    <title>Table - Presidents Premier League</title>
     <link rel="stylesheet" href="theme.css">
     <style>
         :root {
@@ -44,7 +44,7 @@
         }
 
         .main-container {
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
             position: relative;
             min-height: 100vh;
@@ -150,7 +150,9 @@
             font-size: 0.8rem;
         }
 
-        .players-dropdown a:hover { background: #f4f6f8; border-color: transparent; }
+        @media (hover: hover) {
+            .players-dropdown a:hover { background: #f4f6f8; border-color: transparent; }
+        }
 
         /* Navigation Pills */
         .pills-nav-container {
@@ -176,8 +178,8 @@
             justify-content: center;
         }
 
-        .pill:hover {
-            background-color: #e2e8f0;
+        @media (hover: hover) {
+            .pill:hover { background-color: #e2e8f0; }
         }
 
         .pill.active {
@@ -260,10 +262,7 @@
         .team-inline { display: inline-flex; align-items: center; gap: 8px; }
         body.dark-mode .table-team-name { color: #f1f1f1 !important; }
 
-        tr:hover { background-color: #f8f9fa; }
-
         .expandable-row { cursor: pointer; transition: background-color 0.15s ease; }
-        .expandable-row:hover { background-color: #fafafa; }
         .expandable-row.expanded, .expandable-row.expanded:hover { background-color: #ffffff !important; }
 
         .table-chevron { color: #a0aec0; font-size: 0.75rem; transition: transform 0.2s ease; margin-left: 6px; display: inline-block; }
@@ -272,7 +271,12 @@
         .nested-table-row { display: none; background-color: #fcfcfc; }
         .nested-table-row.expanded { display: table-row; }
         .nested-table-row td { font-size: 0.85rem; color: #555; padding-top: 8px; padding-bottom: 8px; border-bottom: 1px dashed #eaeaea; }
-        .nested-table-row:hover { background-color: #f4f6f8; }
+
+        @media (hover: hover) {
+            tr:hover { background-color: #f8f9fa; }
+            .expandable-row:hover { background-color: #fafafa; }
+            .nested-table-row:hover { background-color: #f4f6f8; }
+        }
 
         body.dark-mode .expandable-row,
         body.dark-mode .expandable-row:hover,

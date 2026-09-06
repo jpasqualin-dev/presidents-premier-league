@@ -123,9 +123,11 @@
             font-size: 0.8rem;
         }
 
-        .players-dropdown a:hover {
-            background: #f4f6f8;
-            border-color: transparent;
+        @media (hover: hover) {
+            .players-dropdown a:hover {
+                background: #f4f6f8;
+                border-color: transparent;
+            }
         }
 
         @media (max-width: 768px) {
@@ -204,7 +206,9 @@
 
         .fotmob-btn-container { display: flex; gap: 10px; margin-top: 15px; }
         .fotmob-link-btn { flex: 1 1 0; min-width: 0; padding: 10px; border-radius: 8px; background-color: #00ff87; color: #38003c; font-size: 0.95rem; font-weight: 700; text-align: center; text-decoration: none; transition: opacity 0.2s; }
-        .fotmob-link-btn:hover { opacity: 0.85; }
+        @media (hover: hover) {
+            .fotmob-link-btn:hover { opacity: 0.85; }
+        }
     </style>
 </head>
 <body>

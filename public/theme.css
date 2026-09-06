@@ -132,11 +132,7 @@ body.dark-mode .my-team {
     text-shadow: none;
 }
 
-body.dark-mode .players-menu[open] summary,
-body.dark-mode .back-button:hover,
-body.dark-mode .today-match-row:hover,
-body.dark-mode .fixture-row:hover,
-body.dark-mode .expandable-row:hover {
+body.dark-mode .players-menu[open] summary {
     background: #2a2a2a;
     border-color: #4b4b4b;
 }
@@ -144,7 +140,11 @@ body.dark-mode .expandable-row:hover {
 @media (hover: hover) {
     body.dark-mode .site-menu a:hover,
     body.dark-mode .players-menu summary:hover,
-    body.dark-mode .stat-player-row:hover {
+    body.dark-mode .stat-player-row:hover,
+    body.dark-mode .back-button:hover,
+    body.dark-mode .today-match-row:hover,
+    body.dark-mode .fixture-row:hover,
+    body.dark-mode .expandable-row:hover {
         background: #2a2a2a;
         border-color: #4b4b4b;
     }
@@ -194,15 +194,14 @@ body.dark-mode .players-dropdown a {
     border-color: transparent;
 }
 
-body.dark-mode .players-dropdown a:hover,
 body.dark-mode .nested-table-row,
 body.dark-mode .nested-teams-container,
 body.dark-mode .mw-header {
     background: #292929;
 }
 
-body.dark-mode .players-dropdown a:hover {
-    background: #303030;
+@media (hover: hover) {
+    body.dark-mode .players-dropdown a:hover { background: #303030; }
 }
 
 body.dark-mode .team-owner,
