@@ -218,6 +218,32 @@
 
         .table-card { background: #ffffff; border: 1px solid #dfe5eb; border-radius: 16px; box-shadow: 0 3px 10px rgba(56,0,60,0.08); }
 
+        .overall-standings-header {
+            position: sticky;
+            top: calc(var(--primary-menu-height, 36px) + 52px);
+            z-index: 18;
+            margin-bottom: 0;
+            border-bottom-right-radius: 0;
+            border-bottom-left-radius: 0;
+            box-shadow: 0 3px 10px rgba(56,0,60,0.08);
+        }
+
+        .overall-standings-body {
+            margin-top: 0;
+            border-top: 0;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            box-shadow: 0 3px 10px rgba(56,0,60,0.08);
+        }
+
+        .overall-standings-table { table-layout: fixed; }
+        .overall-standings-table col.rank { width: 6%; }
+        .overall-standings-table col.team { width: 38%; }
+        .overall-standings-table col.stat { width: 7%; }
+        .overall-standings-table col.goals { width: 10%; }
+        .overall-standings-table col.gd { width: 8%; }
+        .overall-standings-table col.points { width: 10%; }
+
         table {
             width: 100%;
             border-collapse: collapse;
@@ -492,6 +518,59 @@
 
     function renderStandingsCard(title, teamsArray) {
         const sorted = sortTeams(teamsArray);
+
+        if (title === 'Overall Standings') {
+            let headerHtml = `
+                <div class="table-wrapper table-card overall-standings-header" style="margin-top: 0px;">
+                    <table id="standings-table-header" class="overall-standings-table">
+                        <colgroup><col class="rank"><col class="team"><col class="stat"><col class="stat"><col class="stat"><col class="stat"><col class="goals"><col class="gd"><col class="points"></colgroup>
+                        <thead>
+                            <tr class="title-row">
+                                <th colspan="9" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
+                                    <div class="overall-header-container"><h2>${title}</h2></div>
+                                </th>
+                            </tr>
+                            <tr><th>#</th><th class="text-left">Team</th><th>PL</th><th>W</th><th>D</th><th>L</th><th>+/-</th><th>GD</th><th>PTS</th></tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="table-wrapper table-card overall-standings-body" style="margin-top: 0px;">
+                    <table id="standings-table-body" class="overall-standings-table">
+                        <colgroup><col class="rank"><col class="team"><col class="stat"><col class="stat"><col class="stat"><col class="stat"><col class="goals"><col class="gd"><col class="points"></colgroup>
+                        <tbody>
+            `;
+
+            sorted.forEach((t, idx) => {
+                const displayName = getShortTeamName(t.team);
+                const logo = getLogoByName(t.team);
+                headerHtml += `
+                    <tr>
+                        <td class="fotmob-rank">${idx + 1}</td>
+                        <td class="text-left">
+                            <div class="team-inline">
+                                ${logo ? `<img src="${logo}" class="team-icon" alt="crest">` : ''}
+                                <div style="line-height: 1.2;">
+                                    <div class="table-team-name" style="font-weight: 600; color: #1a1a1a;">${displayName}</div>
+                                    <div style="font-size: 0.70rem; color: #888;">${t.owner}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${t.PL}</td>
+                        <td>${t.W}</td>
+                        <td>${t.D}</td>
+                        <td>${t.L}</td>
+                        <td>${t.GF}-${t.GA}</td>
+                        <td>${t.GD > 0 ? '+' + t.GD : t.GD}</td>
+                        <td><strong>${t.PTS}</strong></td>
+                    </tr>
+                `;
+            });
+
+            headerHtml += `</tbody></table></div>`;
+            document.getElementById('content-area').innerHTML = headerHtml;
+            return;
+        }
+
         let html = `
             <div class="table-wrapper table-card" style="margin-top: 0px;">
                     <table id="standings-table">

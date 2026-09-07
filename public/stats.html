@@ -588,25 +588,35 @@
             }
         ];
 
-        awardConfigs.forEach(config => container.appendChild(buildAwardCard(config)));
-        container.appendChild(buildSimpleAwardCard({
-            title: "Weeks Won",
-            players: [...players].sort((a, b) => b.roundsWon - a.roundsWon || b.PTS - a.PTS),
-            playerVal: player => player.roundsWon,
-            pillClass: "pill-green"
-        }));
-        container.appendChild(buildSimpleAwardCard({
-            title: "Undefeated Weeks (No Losses)",
-            players: [...players].sort((a, b) => b.undefeatedWeeks - a.undefeatedWeeks || b.PTS - a.PTS),
-            playerVal: player => player.undefeatedWeeks,
-            pillClass: "pill-green"
-        }));
-        container.appendChild(buildSimpleAwardCard({
-            title: "Perfect Weeks (All Wins)",
-            players: [...players].sort((a, b) => b.perfectWeeks - a.perfectWeeks || b.PTS - a.PTS),
-            playerVal: player => player.perfectWeeks,
-            pillClass: "pill-purple"
-        }));
+        const weeklyAwardConfigs = [
+            {
+                title: "Weeks Won",
+                players: [...players].sort((a, b) => b.roundsWon - a.roundsWon || b.PTS - a.PTS),
+                playerVal: player => player.roundsWon,
+                pillClass: "pill-green"
+            },
+            {
+                title: "Undefeated Weeks (No Losses)",
+                players: [...players].sort((a, b) => b.undefeatedWeeks - a.undefeatedWeeks || b.PTS - a.PTS),
+                playerVal: player => player.undefeatedWeeks,
+                pillClass: "pill-green"
+            },
+            {
+                title: "Perfect Weeks (All Wins)",
+                players: [...players].sort((a, b) => b.perfectWeeks - a.perfectWeeks || b.PTS - a.PTS),
+                playerVal: player => player.perfectWeeks,
+                pillClass: "pill-purple"
+            }
+        ];
+
+        awardConfigs.forEach(config => {
+            if (config.title === "PvP wins") {
+                weeklyAwardConfigs.forEach(weeklyConfig => {
+                    container.appendChild(buildSimpleAwardCard(weeklyConfig));
+                });
+            }
+            container.appendChild(buildAwardCard(config));
+        });
     }
 
     async function fetchAndRenderAwards() {
