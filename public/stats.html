@@ -307,7 +307,7 @@
                 player: player,
                 teams: draftData[player],
                 PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0,
-                goldenBoot: 0, homeGoals: 0, awayGoals: 0, assists: 0, homeAssists: 0, awayAssists: 0, goldenGloves: 0, ppm: 0, gpm: 0, gcpm: 0,
+                goldenBoot: 0, homeGoals: 0, awayGoals: 0, homeWins: 0, awayWins: 0, homeDraws: 0, awayDraws: 0, assists: 0, homeAssists: 0, awayAssists: 0, goldenGloves: 0, ppm: 0, gpm: 0, gcpm: 0,
                 pvpWins: 0, pga: 0, ptsPga: 0, roundsWon: 0,
                 undefeatedWeeks: 0, perfectWeeks: 0
             };
@@ -325,7 +325,7 @@
                     division: divName,
                     owner: owner || "Unassigned",
                     PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0, PGA: 0, pvpWins: 0, ptsPga: 0,
-                    goldenGloves: 0, assists: 0, homeGoals: 0, awayGoals: 0, homeAssists: 0, awayAssists: 0
+                    goldenGloves: 0, assists: 0, homeGoals: 0, awayGoals: 0, homeWins: 0, awayWins: 0, homeDraws: 0, awayDraws: 0, homeAssists: 0, awayAssists: 0
                 };
             });
         }
@@ -550,6 +550,34 @@
                 pillClass: "pill-green", sortDir: 1, allTeams: true
             },
             {
+                title: "Home Wins",
+                players: [...players].sort((a,b) => b.homeWins - a.homeWins || b.PTS - a.PTS),
+                playerVal: p => p.homeWins, teamVal: t => t.homeWins, teamRaw: t => t.homeWins,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.homeWins, 0),
+                pillClass: "pill-green", sortDir: 1, allTeams: true
+            },
+            {
+                title: "Away Wins",
+                players: [...players].sort((a,b) => b.awayWins - a.awayWins || b.PTS - a.PTS),
+                playerVal: p => p.awayWins, teamVal: t => t.awayWins, teamRaw: t => t.awayWins,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.awayWins, 0),
+                pillClass: "pill-green", sortDir: 1, allTeams: true
+            },
+            {
+                title: "Home Draws",
+                players: [...players].sort((a,b) => b.homeDraws - a.homeDraws || b.PTS - a.PTS),
+                playerVal: p => p.homeDraws, teamVal: t => t.homeDraws, teamRaw: t => t.homeDraws,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.homeDraws, 0),
+                pillClass: "pill-blue", sortDir: 1, allTeams: true
+            },
+            {
+                title: "Away Draws",
+                players: [...players].sort((a,b) => b.awayDraws - a.awayDraws || b.PTS - a.PTS),
+                playerVal: p => p.awayDraws, teamVal: t => t.awayDraws, teamRaw: t => t.awayDraws,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.awayDraws, 0),
+                pillClass: "pill-blue", sortDir: 1, allTeams: true
+            },
+            {
                 title: "Golden Gloves (Clean Sheets)",
                 players: [...players].sort((a,b) => b.goldenGloves - a.goldenGloves || b.PTS - a.PTS),
                 playerVal: p => p.goldenGloves, teamVal: t => t.goldenGloves, teamRaw: t => t.goldenGloves,
@@ -708,8 +736,8 @@
                             pStat.goldenBoot += homeScore; pStat.homeGoals += homeScore;
                             if (awayScore === 0) pStat.goldenGloves += 1;
 
-                            if (homeScore > awayScore) { pStat.W += 1; pStat.PTS += 3; }
-                            else if (homeScore === awayScore) { pStat.D += 1; pStat.PTS += 1; }
+                            if (homeScore > awayScore) { pStat.W += 1; pStat.homeWins += 1; pStat.PTS += 3; }
+                            else if (homeScore === awayScore) { pStat.D += 1; pStat.homeDraws += 1; pStat.PTS += 1; }
                             else pStat.L += 1;
 
                             weeklyPlayerPoints[matchweek][homePlayer] += homeScore > awayScore ? 3 : (homeScore === awayScore ? 1 : 0);
@@ -722,8 +750,8 @@
                             pStat.goldenBoot += awayScore; pStat.awayGoals += awayScore;
                             if (homeScore === 0) pStat.goldenGloves += 1;
 
-                            if (awayScore > homeScore) { pStat.W += 1; pStat.PTS += 3; }
-                            else if (awayScore === homeScore) { pStat.D += 1; pStat.PTS += 1; }
+                            if (awayScore > homeScore) { pStat.W += 1; pStat.awayWins += 1; pStat.PTS += 3; }
+                            else if (awayScore === homeScore) { pStat.D += 1; pStat.awayDraws += 1; pStat.PTS += 1; }
                             else pStat.L += 1;
 
                             weeklyPlayerPoints[matchweek][awayPlayer] += awayScore > homeScore ? 3 : (awayScore === homeScore ? 1 : 0);
@@ -762,9 +790,9 @@
                             if (awayScore === 0) t.goldenGloves += 1;
 
                             if (homeScore > awayScore) {
-                                t.W += 1; t.PTS += 3;
+                                t.W += 1; t.homeWins += 1; t.PTS += 3;
                                 if (awayPlayer && awayPlayer !== t.owner) { t.PGA += (homeScore - awayScore); t.pvpWins += 1; }
-                            } else if (homeScore === awayScore) { t.D += 1; t.PTS += 1; }
+                            } else if (homeScore === awayScore) { t.D += 1; t.homeDraws += 1; t.PTS += 1; }
                             else t.L += 1;
                         }
 
@@ -774,9 +802,9 @@
                             if (homeScore === 0) t.goldenGloves += 1;
 
                             if (awayScore > homeScore) {
-                                t.W += 1; t.PTS += 3;
+                                t.W += 1; t.awayWins += 1; t.PTS += 3;
                                 if (homePlayer && homePlayer !== t.owner) { t.PGA += (awayScore - homeScore); t.pvpWins += 1; }
-                            } else if (homeScore === awayScore) { t.D += 1; t.PTS += 1; }
+                            } else if (homeScore === awayScore) { t.D += 1; t.awayDraws += 1; t.PTS += 1; }
                             else t.L += 1;
                         }
                     }
