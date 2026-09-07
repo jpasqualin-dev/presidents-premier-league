@@ -56,8 +56,6 @@
             top: calc(var(--fixtures-header-height, 65px) + 21px);
             z-index: 40;
             background-color: var(--bg-color);
-            padding-bottom: 12px;
-            margin-bottom: -12px;
         }
 
         .site-menu {
@@ -227,10 +225,25 @@
             margin-bottom: 0;
             border-bottom-right-radius: 0;
             border-bottom-left-radius: 0;
-            box-shadow: 0 -12px 0 var(--bg-color);
         }
 
         .overall-standings-header th { border-bottom-width: 1px; }
+
+        .overall-standings-backdrop {
+            display: none;
+            position: fixed;
+            top: calc(var(--primary-menu-height, 36px) + 40px);
+            right: 0;
+            left: 0;
+            height: calc(var(--overall-standings-header-height, 0px) + 12px);
+            z-index: 17;
+            background: var(--bg-color);
+            pointer-events: none;
+        }
+
+        .overall-standings-backdrop.visible { display: block; }
+
+        body.dark-mode .overall-standings-backdrop { background: #121212; }
 
         .overall-standings-body {
             margin-top: 0;
@@ -370,6 +383,8 @@
             <button class="pill" id="btn-dvp" onclick="setView('dvp')">DVP</button>
         </div>
     </div>
+
+    <div class="overall-standings-backdrop" id="overall-standings-backdrop" aria-hidden="true"></div>
 
     <!-- Dynamic Content Rendered Here -->
     <div class="content-area" id="content-area">
@@ -823,6 +838,20 @@
         else if (currentView === 'away') renderStandingsCard('Away Standings', Object.values(cachedStats.awayStats));
         else if (currentView === 'dvp') renderDvpCards(cachedStats.allStats);
 
+        updateOverallStandingsBackdrop();
+    }
+
+    function updateOverallStandingsBackdrop() {
+        const backdrop = document.getElementById('overall-standings-backdrop');
+        const header = document.querySelector('.overall-standings-header');
+        const isOverallView = currentView === 'all' && header;
+        backdrop?.classList.toggle('visible', Boolean(isOverallView));
+        if (!isOverallView) return;
+
+        document.documentElement.style.setProperty(
+            '--overall-standings-header-height',
+            `${Math.ceil(header.getBoundingClientRect().height)}px`
+        );
     }
 
     // Fetch matches from API (same caching strategy as other pages)
@@ -840,7 +869,9 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         updateTableHeaderOffset();
+        updateOverallStandingsBackdrop();
         window.addEventListener('resize', updateTableHeaderOffset);
+        window.addEventListener('resize', updateOverallStandingsBackdrop);
         window.addEventListener('scroll', updateTableHeaderOffset, { passive: true });
 
         const header = document.querySelector('.header-container');
@@ -848,6 +879,8 @@
         if ('ResizeObserver' in window) {
             if (header) new ResizeObserver(updateTableHeaderOffset).observe(header);
             if (navControls) new ResizeObserver(updateTableHeaderOffset).observe(navControls);
+            const standingsHeader = document.querySelector('.overall-standings-header');
+            if (standingsHeader) new ResizeObserver(updateOverallStandingsBackdrop).observe(standingsHeader);
         }
 
         fetchTableData();
