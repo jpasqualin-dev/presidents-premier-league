@@ -55,7 +55,7 @@
             position: sticky;
             top: calc(var(--fixtures-header-height, 65px) + 21px);
             z-index: 40;
-            background-color: transparent;
+            background-color: var(--bg-color);
         }
 
         .site-menu {
@@ -225,7 +225,6 @@
             margin-bottom: 0;
             border-bottom-right-radius: 0;
             border-bottom-left-radius: 0;
-            box-shadow: 0 3px 10px rgba(56,0,60,0.08);
         }
 
         .overall-standings-body {
@@ -526,7 +525,7 @@
                         <colgroup><col class="rank"><col class="team"><col class="stat"><col class="stat"><col class="stat"><col class="stat"><col class="goals"><col class="gd"><col class="points"></colgroup>
                         <thead>
                             <tr class="title-row">
-                                <th colspan="9" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
+                                <th colspan="9" class="text-left" style="border-bottom: 1px solid #00ff87; padding-bottom: 4px;">
                                     <div class="overall-header-container"><h2>${title}</h2></div>
                                 </th>
                             </tr>
@@ -576,7 +575,7 @@
                     <table id="standings-table">
                         <thead>
                             <tr class="title-row">
-                                <th colspan="9" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
+                                <th colspan="9" class="text-left" style="border-bottom: 1px solid #00ff87; padding-bottom: 4px;">
                                     <div class="overall-header-container"><h2>${title}</h2></div>
                                 </th>
                             </tr>
@@ -640,7 +639,7 @@
                     <table id="dvp-rank-table">
                         <thead>
                             <tr class="title-row">
-                                <th colspan="6" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
+                                <th colspan="6" class="text-left" style="border-bottom: 1px solid #00ff87; padding-bottom: 4px;">
                                     <div class="draft-title-row">
                                         <h2 class="plain-table-title draft-title">Draft Value<br>Performance</h2>
                                         <div class="dvp-sort-toggle" role="group" aria-label="Draft value performance sort order">
@@ -712,7 +711,7 @@
                         </colgroup>
                         <thead>
                             <tr class="title-row">
-                                <th colspan="3" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
+                                <th colspan="3" class="text-left" style="border-bottom: 1px solid #00ff87; padding-bottom: 4px;">
                                     <h2 class="plain-table-title draft-title" style="margin-left: 10px;">Draft Value Performance<br>by Player</h2>
                                 </th>
                             </tr>
