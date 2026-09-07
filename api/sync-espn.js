@@ -56,6 +56,25 @@ async function fetchEventsForDates(dates) {
     return responses.flatMap(payload => payload.events || []);
 }
 
+async function fetchScoringDetails(event) {
+    const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/summary?event=${encodeURIComponent(event.id)}`);
+    if (!response.ok) return event.competitions?.[0]?.details || [];
+    const payload = await response.json();
+    const scoringDetails = (payload.keyEvents || []).filter(item => item.scoringPlay);
+    if (!scoringDetails.length) return event.competitions?.[0]?.details || [];
+    return scoringDetails.map(item => ({
+        type: item.type,
+        clock: item.clock,
+        team: item.team,
+        scoreValue: item.scoreValue,
+        scoringPlay: true,
+        penaltyKick: Boolean(item.penaltyKick),
+        ownGoal: Boolean(item.ownGoal),
+        shootout: Boolean(item.shootout),
+        athletesInvolved: (item.participants || []).map(participant => participant.athlete).filter(Boolean)
+    }));
+}
+
 async function syncEvent(sql, event) {
     const competition = event.competitions?.[0];
     const home = getCompetitor(event, 'home');
@@ -95,14 +114,15 @@ async function syncEvent(sql, event) {
     await sql`DELETE FROM match_scorers WHERE match_id = ${match.id}`;
     await sql`DELETE FROM match_events WHERE match_id = ${match.id}`;
     await sql`DELETE FROM match_team_stats WHERE match_id = ${match.id}`;
-    for (const detail of competition.details || []) {
+    const details = await fetchScoringDetails(event);
+    for (const detail of details) {
         const scorer = detail.athletesInvolved?.[0];
         const team = detail.team?.id === home.team.id ? homeTeam : detail.team?.id === away.team.id ? awayTeam : null;
         await sql`
             INSERT INTO match_events (match_id, team_id, event_type, clock_seconds, clock_display, athlete_provider_id, athlete_name, score_value, scoring_play, red_card, yellow_card, penalty, own_goal, shootout)
             VALUES (${match.id}, ${team?.id || null}, ${detail.type?.text || 'unknown'}, ${detail.clock?.value == null ? null : Math.floor(Number(detail.clock.value))}, ${detail.clock?.displayValue || null}, ${scorer?.id ? String(scorer.id) : null}, ${scorer?.displayName || null}, ${detail.scoreValue == null ? null : Number(detail.scoreValue)}, ${Boolean(detail.scoringPlay)}, ${Boolean(detail.redCard)}, ${Boolean(detail.yellowCard)}, ${Boolean(detail.penaltyKick)}, ${Boolean(detail.ownGoal)}, ${Boolean(detail.shootout)})`;
     }
-    for (const detail of (competition.details || []).filter(item => item.scoringPlay)) {
+    for (const detail of details.filter(item => item.scoringPlay)) {
         const scorer = detail.athletesInvolved?.[0];
         const scorerTeam = detail.team?.id === home.team.id ? homeTeam : awayTeam;
         if (!scorerTeam) continue;
@@ -144,4 +164,5 @@ module.exports = async function handler(req, res) {
 
 module.exports.dateKeysBetween = dateKeysBetween;
 module.exports.fetchEventsForDates = fetchEventsForDates;
+module.exports.fetchScoringDetails = fetchScoringDetails;
 module.exports.syncEvent = syncEvent;

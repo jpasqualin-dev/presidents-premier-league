@@ -1,5 +1,6 @@
 const { neon } = require('@neondatabase/serverless');
 const { normalizeEspnEvent, normalizeNeonMatch } = require('../lib/match-contract');
+const { fetchScoringDetails } = require('./sync-espn');
 
 const ESPN_ENDPOINT = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard';
 const RECENT_DAYS = 3;
@@ -23,7 +24,14 @@ async function fetchRecentEspnMatches() {
     if (!response.ok) throw new Error(`ESPN returned HTTP ${response.status} for ${dateRange}`);
     const payload = await response.json();
     if (!Array.isArray(payload.events)) throw new Error(`Invalid ESPN response for ${dateRange}`);
-    return payload.events.map(normalizeEspnEvent).filter(Boolean);
+    const events = await Promise.all((payload.events || []).map(async event => {
+        const details = await fetchScoringDetails(event);
+        return {
+            ...event,
+            competitions: event.competitions?.map(competition => ({ ...competition, details }))
+        };
+    }));
+    return events.map(normalizeEspnEvent).filter(Boolean);
 }
 
 async function readHistoricalMatches(sql) {
@@ -38,6 +46,8 @@ async function readHistoricalMatches(sql) {
                     'teamProviderId', scorer_team.provider_team_id,
                     'athleteProviderId', ms.provider_athlete_id,
                     'athleteName', ms.athlete_name,
+                    'assistProviderId', to_jsonb(ms)->>'assist_provider_id',
+                    'assistName', to_jsonb(ms)->>'assist_name',
                     'minute', ms.minute,
                     'ownGoal', ms.own_goal,
                     'penalty', ms.penalty
