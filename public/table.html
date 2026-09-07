@@ -218,7 +218,7 @@
 
         .table-card { background: #ffffff; border: 1px solid #dfe5eb; border-radius: 16px; box-shadow: 0 3px 10px rgba(56,0,60,0.08); }
 
-        .overall-standings-header {
+        .standings-header {
             position: sticky;
             top: calc(var(--primary-menu-height, 36px) + 52px);
             z-index: 18;
@@ -227,9 +227,13 @@
             border-bottom-left-radius: 0;
         }
 
-        .overall-standings-header th { border-bottom-width: 1px; }
+        .standings-header th { border-bottom-width: 1px; }
 
-        .overall-standings-backdrop {
+        .dvp-player-header {
+            top: calc(var(--primary-menu-height, 36px) + 52px + var(--overall-standings-header-height, 0px) + 12px);
+        }
+
+        .standings-backdrop {
             display: none;
             position: fixed;
             top: calc(var(--primary-menu-height, 36px) + 40px);
@@ -241,11 +245,11 @@
             pointer-events: none;
         }
 
-        .overall-standings-backdrop.visible { display: block; }
+        .standings-backdrop.visible { display: block; }
 
-        body.dark-mode .overall-standings-backdrop { background: #121212; }
+        body.dark-mode .standings-backdrop { background: #121212; }
 
-        .overall-standings-body {
+        .standings-body {
             margin-top: 0;
             border-top: 0;
             border-top-left-radius: 0;
@@ -290,7 +294,7 @@
         .overall-header-container h2 { margin: 0; border-bottom: none; padding-bottom: 0; font-size: 1.4rem; color: #1a1a1a; }
         .draft-title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 10px; }
 
-        #dvp-player-table { table-layout: fixed; }
+        #dvp-player-table, #dvp-rank-table, #dvp-rank-table-body, #dvp-player-table-body { table-layout: fixed; }
         #dvp-rank-table tr:nth-child(2) th:first-child, #dvp-rank-table td:first-child,
         #dvp-player-table tr:nth-child(2) th:first-child, #dvp-player-table td:first-child { width: 8%; }
         #dvp-player-table tr:nth-child(2) th:nth-child(2), #dvp-player-table td:nth-child(2) { width: 69%; white-space: normal; }
@@ -384,7 +388,7 @@
         </div>
     </div>
 
-    <div class="overall-standings-backdrop" id="overall-standings-backdrop" aria-hidden="true"></div>
+    <div class="standings-backdrop" id="standings-backdrop" aria-hidden="true"></div>
 
     <!-- Dynamic Content Rendered Here -->
     <div class="content-area" id="content-area">
@@ -538,9 +542,9 @@
     function renderStandingsCard(title, teamsArray) {
         const sorted = sortTeams(teamsArray);
 
-        if (title === 'Overall Standings') {
+        if (title !== 'DVP') {
             let headerHtml = `
-                <div class="table-wrapper table-card overall-standings-header" style="margin-top: 0px;">
+                <div class="table-wrapper table-card standings-header" style="margin-top: 0px;">
                     <table id="standings-table-header" class="overall-standings-table">
                         <colgroup><col class="rank"><col class="team"><col class="stat"><col class="stat"><col class="stat"><col class="stat"><col class="goals"><col class="gd"><col class="points"></colgroup>
                         <thead>
@@ -553,7 +557,7 @@
                         </thead>
                     </table>
                 </div>
-                <div class="table-wrapper table-card overall-standings-body" style="margin-top: 0px;">
+                <div class="table-wrapper table-card standings-body" style="margin-top: 0px;">
                     <table id="standings-table-body" class="overall-standings-table">
                         <colgroup><col class="rank"><col class="team"><col class="stat"><col class="stat"><col class="stat"><col class="stat"><col class="goals"><col class="gd"><col class="points"></colgroup>
                         <tbody>
@@ -655,8 +659,9 @@
             : rankedTeams;
 
         let rankHtml = `
-                <div class="table-wrapper table-card" style="margin-top: 0px;">
-                    <table id="dvp-rank-table">
+                <div class="table-wrapper table-card standings-header" style="margin-top: 0px;">
+                    <table id="dvp-rank-table" class="dvp-rank-table">
+                        <colgroup><col style="width: 8%;"><col style="width: 57%;"><col style="width: 10%;"><col style="width: 8%;"><col style="width: 8%;"><col style="width: 9%;"></colgroup>
                         <thead>
                             <tr class="title-row">
                                 <th colspan="6" class="text-left" style="border-bottom: 1px solid #00ff87; padding-bottom: 4px;">
@@ -671,6 +676,11 @@
                             </tr>
                             <tr><th>#</th><th class="text-left">Team</th><th>PTS</th><th>GD</th><th>Pick</th><th>Diff</th></tr>
                         </thead>
+                    </table>
+                </div>
+                <div class="table-wrapper table-card standings-body" style="margin-top: 0px;">
+                    <table id="dvp-rank-table-body">
+                        <colgroup><col style="width: 8%;"><col style="width: 57%;"><col style="width: 10%;"><col style="width: 8%;"><col style="width: 8%;"><col style="width: 9%;"></colgroup>
                         <tbody>
         `;
 
@@ -707,7 +717,7 @@
             `;
         });
 
-        rankHtml += `</tbody></table></div></div>`;
+        rankHtml += `</tbody></table></div>`;
 
         const players = Object.keys(draftData).map(player => ({ player, teams: draftData[player] }));
         players.forEach(p => {
@@ -722,7 +732,7 @@
         players.sort((a, b) => b.totalDraftDiff - a.totalDraftDiff);
 
         let playerHtml = `
-            <div class="table-wrapper table-card">
+            <div class="table-wrapper table-card standings-header dvp-player-header">
                     <table id="dvp-player-table">
                         <colgroup>
                             <col style="width: 8%;">
@@ -737,6 +747,15 @@
                             </tr>
                             <tr><th>#</th><th class="text-left">Player</th><th style="text-align: right; padding-right: 16px;">Total Diff</th></tr>
                         </thead>
+                    </table>
+                </div>
+                <div class="table-wrapper table-card standings-body">
+                    <table id="dvp-player-table-body">
+                        <colgroup>
+                            <col style="width: 8%;">
+                            <col style="width: 67%;">
+                            <col style="width: 25%;">
+                        </colgroup>
                         <tbody>
         `;
 
@@ -802,7 +821,7 @@
             });
         });
 
-        playerHtml += `</tbody></table></div></div>`;
+        playerHtml += `</tbody></table></div>`;
 
         document.getElementById('content-area').innerHTML = rankHtml + playerHtml;
     }
@@ -842,11 +861,11 @@
     }
 
     function updateOverallStandingsBackdrop() {
-        const backdrop = document.getElementById('overall-standings-backdrop');
-        const header = document.querySelector('.overall-standings-header');
-        const isOverallView = currentView === 'all' && header;
-        backdrop?.classList.toggle('visible', Boolean(isOverallView));
-        if (!isOverallView) return;
+        const backdrop = document.getElementById('standings-backdrop');
+        const header = document.querySelector('.standings-header');
+        const isStandingsView = Boolean(header);
+        backdrop?.classList.toggle('visible', isStandingsView);
+        if (!isStandingsView) return;
 
         document.documentElement.style.setProperty(
             '--overall-standings-header-height',
@@ -879,7 +898,7 @@
         if ('ResizeObserver' in window) {
             if (header) new ResizeObserver(updateTableHeaderOffset).observe(header);
             if (navControls) new ResizeObserver(updateTableHeaderOffset).observe(navControls);
-            const standingsHeader = document.querySelector('.overall-standings-header');
+            const standingsHeader = document.querySelector('.standings-header');
             if (standingsHeader) new ResizeObserver(updateOverallStandingsBackdrop).observe(standingsHeader);
         }
 
