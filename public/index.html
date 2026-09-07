@@ -1929,7 +1929,12 @@
                 t.ptsPga = t.PTS + t.PGA;
             }
 
-            Object.values(weeklyPlayerPoints).forEach(playerPoints => {
+            const finishedMatchesByWeek = {};
+            data.matches.filter(match => match.status === 'FINISHED').forEach(match => {
+                finishedMatchesByWeek[match.matchday] = (finishedMatchesByWeek[match.matchday] || 0) + 1;
+            });
+            Object.entries(weeklyPlayerPoints).forEach(([matchweek, playerPoints]) => {
+                if ((finishedMatchesByWeek[matchweek] || 0) < 10) return;
                 const highestScore = Math.max(...Object.values(playerPoints));
                 Object.entries(playerPoints).forEach(([player, points]) => {
                     if (points === highestScore) playerStats[player].roundsWon += 1;

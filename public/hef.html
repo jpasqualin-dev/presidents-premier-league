@@ -665,7 +665,8 @@
         });
 
         const weeklyScores = Object.values(weeklyPoints);
-        const isWeeklyLeader = weeklyScores.length > 0 && matchweek.weeklyPoints === Math.max(...weeklyScores);
+        const isFullMatchweek = matches.filter(match => match.status === 'FINISHED' && match.matchday === matchweek.matchweek).length >= 10;
+        const isWeeklyLeader = isFullMatchweek && weeklyScores.length > 0 && matchweek.weeklyPoints === Math.max(...weeklyScores);
         const stars = [
             isWeeklyLeader ? 'Won week' : '',
             !results.includes('loss') ? 'Undefeated' : '',
@@ -688,7 +689,7 @@
             if (homeOwner !== 'Free Agent / Unassigned') weeklyPoints[matchweek][homeOwner] += homeScore > awayScore ? 3 : homeScore === awayScore ? 1 : 0;
             if (awayOwner !== 'Free Agent / Unassigned') weeklyPoints[matchweek][awayOwner] += awayScore > homeScore ? 3 : awayScore === homeScore ? 1 : 0;
         });
-        const completedWeeks = matchweeks.filter(matchweek => matchweek.fixtures.length > 0 && matchweek.fixtures.every(fixture => fixture.isComplete));
+        const completedWeeks = matchweeks.filter(matchweek => matchweek.fixtures.length > 0 && matchweek.fixtures.every(fixture => fixture.isComplete) && matches.filter(match => match.status === 'FINISHED' && match.matchday === matchweek.matchweek).length >= 10);
         const achievements = completedWeeks.reduce((totals, matchweek) => {
             const results = matchweek.fixtures.map(fixture => fixture.result);
             const weeklyScores = Object.values(weeklyPoints[matchweek.matchweek] || {});
