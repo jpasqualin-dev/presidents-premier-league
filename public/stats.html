@@ -289,6 +289,17 @@
         "Cottage and Country Division": ["Leeds United", "Fulham", "Coventry City", "Ipswich Town", "Hull City"]
     };
 
+    const seasonAwardsState = {};
+    const statsExpansionState = {};
+
+    function setStatsExpansionState(key, expanded) {
+        statsExpansionState[key] = expanded;
+    }
+
+    function isStatsExpanded(key) {
+        return statsExpansionState[key] === true;
+    }
+
     function initializePlayerStats() {
         let stats = {};
         for (let player in draftData) {
@@ -363,6 +374,7 @@
 
     function toggleCard(titleEl) {
         const card = titleEl.closest('.stat-card');
+        const title = titleEl.querySelector('span')?.textContent.trim();
         if (card.classList.contains('collapsed')) {
             card.classList.remove('collapsed');
             card.classList.add('expanded');
@@ -370,15 +382,20 @@
             card.classList.remove('expanded');
             card.classList.add('collapsed');
         }
+        if (title) seasonAwardsState[title] = card.classList.contains('expanded');
     }
 
     function toggleNestedPlayer(playerRowEl) {
         const wrapper = playerRowEl.closest('.stat-player-wrapper');
-        wrapper.classList.toggle('expanded');
+        const expanded = !wrapper.classList.contains('expanded');
+        wrapper.classList.toggle('expanded', expanded);
+        if (wrapper.dataset.expandKey) setStatsExpansionState(wrapper.dataset.expandKey, expanded);
     }
 
     function collapseNestedPlayer(nestedTeamsEl) {
-        nestedTeamsEl.closest('.stat-player-wrapper').classList.remove('expanded');
+        const wrapper = nestedTeamsEl.closest('.stat-player-wrapper');
+        wrapper.classList.remove('expanded');
+        if (wrapper.dataset.expandKey) setStatsExpansionState(wrapper.dataset.expandKey, false);
     }
 
     function renderSeasonAwards(playerStatsObj, teamStatsObj) {
@@ -388,7 +405,7 @@
 
         function buildAwardCard(config) {
             const card = document.createElement('div');
-            card.className = 'stat-card collapsed';
+            card.className = `stat-card ${seasonAwardsState[config.title] ? 'expanded' : 'collapsed'}`;
 
             let html = `
                 <div class="stat-card-title" onclick="toggleCard(this)">
@@ -422,7 +439,7 @@
                 });
 
                 html += `
-                    <div class="stat-player-wrapper">
+                    <div class="stat-player-wrapper${isStatsExpanded(`award:${config.title}:${p.player}`) ? ' expanded' : ''}" data-expand-key="award:${config.title}:${p.player}">
                         <div class="stat-player-row" onclick="toggleNestedPlayer(this)">
                             <div class="stat-rank">${idx + 1}</div>
                             <div class="stat-player-info">
@@ -456,7 +473,7 @@
                 `).join('');
 
                 html += `
-                    <div class="stat-player-wrapper">
+                    <div class="stat-player-wrapper${isStatsExpanded(`award:${config.title}:all`) ? ' expanded' : ''}" data-expand-key="award:${config.title}:all">
                         <div class="stat-player-row" onclick="toggleNestedPlayer(this)">
                             <div class="stat-player-info">
                                 <span>All Teams</span>
@@ -478,7 +495,7 @@
 
         function buildSimpleAwardCard(config) {
             const card = document.createElement('div');
-            card.className = 'stat-card collapsed';
+            card.className = `stat-card ${seasonAwardsState[config.title] ? 'expanded' : 'collapsed'}`;
 
             let html = `
                 <div class="stat-card-title" onclick="toggleCard(this)">
