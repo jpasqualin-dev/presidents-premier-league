@@ -229,10 +229,6 @@
 
         .standings-header th { border-bottom-width: 1px; }
 
-        .dvp-player-header {
-            top: calc(var(--primary-menu-height, 36px) + 52px + var(--overall-standings-header-height, 0px) + 12px);
-        }
-
         .standings-backdrop {
             display: none;
             position: fixed;
@@ -257,7 +253,7 @@
             box-shadow: 0 3px 10px rgba(56,0,60,0.08);
         }
 
-        .overall-standings-table { table-layout: fixed; }
+        .overall-standings-table { table-layout: auto; min-width: 0; }
         .overall-standings-table col.rank { width: 6%; }
         .overall-standings-table col.team { width: 38%; }
         .overall-standings-table col.stat { width: 7%; }
@@ -294,7 +290,7 @@
         .overall-header-container h2 { margin: 0; border-bottom: none; padding-bottom: 0; font-size: 1.4rem; color: #1a1a1a; }
         .draft-title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 10px; }
 
-        #dvp-player-table, #dvp-rank-table, #dvp-rank-table-body, #dvp-player-table-body { table-layout: fixed; }
+        #dvp-player-table, #dvp-rank-table, #dvp-rank-table-body { table-layout: auto; min-width: 0; }
         #dvp-rank-table tr:nth-child(2) th:first-child, #dvp-rank-table td:first-child,
         #dvp-player-table tr:nth-child(2) th:first-child, #dvp-player-table td:first-child { width: 8%; }
         #dvp-player-table tr:nth-child(2) th:nth-child(2), #dvp-player-table td:nth-child(2) { width: 69%; white-space: normal; }
@@ -732,31 +728,22 @@
         players.sort((a, b) => b.totalDraftDiff - a.totalDraftDiff);
 
         let playerHtml = `
-            <div class="table-wrapper table-card standings-header dvp-player-header">
-                    <table id="dvp-player-table">
-                        <colgroup>
-                            <col style="width: 8%;">
-                            <col style="width: 67%;">
-                            <col style="width: 25%;">
-                        </colgroup>
-                        <thead>
-                            <tr class="title-row">
-                                <th colspan="3" class="text-left" style="border-bottom: 1px solid #00ff87; padding-bottom: 4px;">
-                                    <h2 class="plain-table-title draft-title" style="margin-left: 10px;">Draft Value Performance<br>by Player</h2>
-                                </th>
-                            </tr>
-                            <tr><th>#</th><th class="text-left">Player</th><th style="text-align: right; padding-right: 16px;">Total Diff</th></tr>
-                        </thead>
-                    </table>
-                </div>
-                <div class="table-wrapper table-card standings-body">
-                    <table id="dvp-player-table-body">
-                        <colgroup>
-                            <col style="width: 8%;">
-                            <col style="width: 67%;">
-                            <col style="width: 25%;">
-                        </colgroup>
-                        <tbody>
+            <div class="table-wrapper table-card">
+                <table id="dvp-player-table">
+                    <colgroup>
+                        <col style="width: 8%;">
+                        <col style="width: 67%;">
+                        <col style="width: 25%;">
+                    </colgroup>
+                    <thead>
+                        <tr class="title-row">
+                            <th colspan="3" class="text-left" style="border-bottom: 1px solid #00ff87; padding-bottom: 4px;">
+                                <h2 class="plain-table-title draft-title" style="margin-left: 10px;">Draft Value Performance<br>by Player</h2>
+                            </th>
+                        </tr>
+                        <tr><th>#</th><th class="text-left">Player</th><th style="text-align: right; padding-right: 16px;">Total Diff</th></tr>
+                    </thead>
+                    <tbody>
         `;
 
         players.forEach((p, idx) => {
