@@ -104,12 +104,18 @@
         .players-dropdown a {
             flex: none;
             display: flex;
+            align-items: center;
             justify-content: flex-start;
+            gap: 8px;
             width: 100%;
             min-height: 32px;
             padding: 6px 10px;
             font-size: 0.8rem;
         }
+
+        .player-dropdown-name { flex: 0 0 48px; }
+        .player-dropdown-icons { display: inline-flex; align-items: center; gap: 3px; }
+        .player-dropdown-icons img { width: 18px; height: 18px; object-fit: contain; }
 
         @media (hover: hover) {
             .players-dropdown a:hover {
@@ -752,11 +758,11 @@
         <details class="players-menu">
             <summary>Players</summary>
             <div class="players-dropdown">
-                <a href="hef.html">Hef</a>
-                <a href="jamey.html">Jamey</a>
-                <a href="jordan.html">Jordan</a>
-                <a href="nate.html">Nate</a>
-                <a href="wes.html">Wes</a>
+                <a href="hef.html" data-player="Hef"><span class="player-dropdown-name">Hef</span><span class="player-dropdown-icons" aria-hidden="true"></span></a>
+                <a href="jamey.html" data-player="Jamey"><span class="player-dropdown-name">Jamey</span><span class="player-dropdown-icons" aria-hidden="true"></span></a>
+                <a href="jordan.html" data-player="Jordan"><span class="player-dropdown-name">Jordan</span><span class="player-dropdown-icons" aria-hidden="true"></span></a>
+                <a href="nate.html" data-player="Nate"><span class="player-dropdown-name">Nate</span><span class="player-dropdown-icons" aria-hidden="true"></span></a>
+                <a href="wes.html" data-player="Wes"><span class="player-dropdown-name">Wes</span><span class="player-dropdown-icons" aria-hidden="true"></span></a>
             </div>
         </details>
     </nav>
@@ -815,6 +821,17 @@
         "Ipswich Town": "https://upload.wikimedia.org/wikipedia/en/4/43/Ipswich_Town.svg",
         "Hull City": "https://upload.wikimedia.org/wikipedia/en/5/54/Hull_City_A.F.C._logo.svg"
     };
+
+    function populatePlayerDropdownIcons() {
+        document.querySelectorAll('.players-dropdown a[data-player]').forEach(link => {
+            const teams = draftData[link.dataset.player] || [];
+            const icons = link.querySelector('.player-dropdown-icons');
+            if (!icons) return;
+            icons.innerHTML = teams.map(team => teamLogos[team]
+                ? `<img src="${teamLogos[team]}" alt="${team} crest">`
+                : '').join('');
+        });
+    }
 
     const divisionData = {
         "Red and Blue Division": ["Arsenal", "Manchester City", "Liverpool", "Manchester United", "Chelsea"],
@@ -1918,6 +1935,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+        populatePlayerDropdownIcons();
         setupSwipeListeners();
         setupToggleSwipeListeners();
         fetchAndUpdateStandings();
