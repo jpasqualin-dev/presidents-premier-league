@@ -307,7 +307,7 @@
                 player: player,
                 teams: draftData[player],
                 PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0,
-                goldenBoot: 0, assists: 0, goldenGloves: 0, ppm: 0, gpm: 0, gcpm: 0,
+                goldenBoot: 0, homeGoals: 0, awayGoals: 0, assists: 0, homeAssists: 0, awayAssists: 0, goldenGloves: 0, ppm: 0, gpm: 0, gcpm: 0,
                 pvpWins: 0, pga: 0, ptsPga: 0, roundsWon: 0,
                 undefeatedWeeks: 0, perfectWeeks: 0
             };
@@ -325,7 +325,7 @@
                     division: divName,
                     owner: owner || "Unassigned",
                     PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0, PGA: 0, pvpWins: 0, ptsPga: 0,
-                    goldenGloves: 0, assists: 0
+                    goldenGloves: 0, assists: 0, homeGoals: 0, awayGoals: 0, homeAssists: 0, awayAssists: 0
                 };
             });
         }
@@ -536,6 +536,20 @@
                 pillClass: "pill-green", sortDir: 1, allTeams: true
             },
             {
+                title: "Home Goals",
+                players: [...players].sort((a,b) => b.homeGoals - a.homeGoals || b.PTS - a.PTS),
+                playerVal: p => p.homeGoals, teamVal: t => t.homeGoals, teamRaw: t => t.homeGoals,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.homeGoals, 0),
+                pillClass: "pill-green", sortDir: 1, allTeams: true
+            },
+            {
+                title: "Away Goals",
+                players: [...players].sort((a,b) => b.awayGoals - a.awayGoals || b.PTS - a.PTS),
+                playerVal: p => p.awayGoals, teamVal: t => t.awayGoals, teamRaw: t => t.awayGoals,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.awayGoals, 0),
+                pillClass: "pill-green", sortDir: 1, allTeams: true
+            },
+            {
                 title: "Golden Gloves (Clean Sheets)",
                 players: [...players].sort((a,b) => b.goldenGloves - a.goldenGloves || b.PTS - a.PTS),
                 playerVal: p => p.goldenGloves, teamVal: t => t.goldenGloves, teamRaw: t => t.goldenGloves,
@@ -547,6 +561,20 @@
                 players: [...players].sort((a,b) => b.assists - a.assists || b.PTS - a.PTS),
                 playerVal: p => p.assists, teamVal: t => t.assists, teamRaw: t => t.assists,
                 aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.assists, 0),
+                pillClass: "pill-green", sortDir: 1, allTeams: true
+            },
+            {
+                title: "Home Assists",
+                players: [...players].sort((a,b) => b.homeAssists - a.homeAssists || b.PTS - a.PTS),
+                playerVal: p => p.homeAssists, teamVal: t => t.homeAssists, teamRaw: t => t.homeAssists,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.homeAssists, 0),
+                pillClass: "pill-green", sortDir: 1, allTeams: true
+            },
+            {
+                title: "Away Assists",
+                players: [...players].sort((a,b) => b.awayAssists - a.awayAssists || b.PTS - a.PTS),
+                playerVal: p => p.awayAssists, teamVal: t => t.awayAssists, teamRaw: t => t.awayAssists,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.awayAssists, 0),
                 pillClass: "pill-green", sortDir: 1, allTeams: true
             },
             {
@@ -677,7 +705,7 @@
                         if (homePlayer) {
                             let pStat = playerStats[homePlayer];
                             pStat.PL += 1; pStat.GF += homeScore; pStat.GA += awayScore;
-                            pStat.goldenBoot += homeScore;
+                            pStat.goldenBoot += homeScore; pStat.homeGoals += homeScore;
                             if (awayScore === 0) pStat.goldenGloves += 1;
 
                             if (homeScore > awayScore) { pStat.W += 1; pStat.PTS += 3; }
@@ -691,7 +719,7 @@
                         if (awayPlayer) {
                             let pStat = playerStats[awayPlayer];
                             pStat.PL += 1; pStat.GF += awayScore; pStat.GA += homeScore;
-                            pStat.goldenBoot += awayScore;
+                            pStat.goldenBoot += awayScore; pStat.awayGoals += awayScore;
                             if (homeScore === 0) pStat.goldenGloves += 1;
 
                             if (awayScore > homeScore) { pStat.W += 1; pStat.PTS += 3; }
@@ -717,13 +745,20 @@
                             if (!scorer.assistName && !scorer.assistProviderId) continue;
                             const assistingTeam = scorer.teamProviderId === match.homeTeam.id ? homeTeamKey : scorer.teamProviderId === match.awayTeam.id ? awayTeamKey : null;
                             const assistingPlayer = assistingTeam ? teamStats[assistingTeam]?.owner : null;
-                            if (assistingPlayer) playerStats[assistingPlayer].assists += 1;
-                            if (assistingTeam) teamStats[assistingTeam].assists += 1;
+                            const isHomeAssist = assistingTeam === homeTeamKey;
+                            if (assistingPlayer) {
+                                playerStats[assistingPlayer].assists += 1;
+                                playerStats[assistingPlayer][isHomeAssist ? 'homeAssists' : 'awayAssists'] += 1;
+                            }
+                            if (assistingTeam) {
+                                teamStats[assistingTeam].assists += 1;
+                                teamStats[assistingTeam][isHomeAssist ? 'homeAssists' : 'awayAssists'] += 1;
+                            }
                         }
 
                         if (homeTeamKey) {
                             let t = teamStats[homeTeamKey];
-                            t.PL += 1; t.GF += homeScore; t.GA += awayScore;
+                            t.PL += 1; t.GF += homeScore; t.GA += awayScore; t.homeGoals += homeScore;
                             if (awayScore === 0) t.goldenGloves += 1;
 
                             if (homeScore > awayScore) {
@@ -735,7 +770,7 @@
 
                         if (awayTeamKey) {
                             let t = teamStats[awayTeamKey];
-                            t.PL += 1; t.GF += awayScore; t.GA += homeScore;
+                            t.PL += 1; t.GF += awayScore; t.GA += homeScore; t.awayGoals += awayScore;
                             if (homeScore === 0) t.goldenGloves += 1;
 
                             if (awayScore > homeScore) {
