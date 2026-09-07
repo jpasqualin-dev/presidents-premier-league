@@ -38,8 +38,6 @@ async function readHistoricalMatches(sql) {
                     'teamProviderId', scorer_team.provider_team_id,
                     'athleteProviderId', ms.provider_athlete_id,
                     'athleteName', ms.athlete_name,
-                    'assistProviderId', ms.assist_provider_id,
-                    'assistName', ms.assist_name,
                     'minute', ms.minute,
                     'ownGoal', ms.own_goal,
                     'penalty', ms.penalty
