@@ -107,8 +107,8 @@ async function syncEvent(sql, event) {
         const scorerTeam = detail.team?.id === home.team.id ? homeTeam : awayTeam;
         if (!scorerTeam) continue;
         await sql`
-            INSERT INTO match_scorers (match_id, provider_athlete_id, team_id, athlete_name, minute, own_goal, penalty)
-            VALUES (${match.id}, ${scorer?.id ? String(scorer.id) : null}, ${scorerTeam.id}, ${scorer?.displayName || 'Unknown scorer'}, ${detail.clock?.value == null ? null : Math.floor(Number(detail.clock.value) / 60)}, ${Boolean(detail.ownGoal)}, ${Boolean(detail.penaltyKick)})`;
+            INSERT INTO match_scorers (match_id, provider_athlete_id, team_id, athlete_name, assist_provider_id, assist_name, minute, own_goal, penalty)
+            VALUES (${match.id}, ${scorer?.id ? String(scorer.id) : null}, ${scorerTeam.id}, ${scorer?.displayName || 'Unknown scorer'}, ${detail.athletesInvolved?.[1]?.id ? String(detail.athletesInvolved[1].id) : null}, ${detail.athletesInvolved?.[1]?.displayName || null}, ${detail.clock?.value == null ? null : Math.floor(Number(detail.clock.value) / 60)}, ${Boolean(detail.ownGoal)}, ${Boolean(detail.penaltyKick)})`;
     }
     for (const competitor of [home, away]) {
         const team = competitor.homeAway === 'home' ? homeTeam : awayTeam;

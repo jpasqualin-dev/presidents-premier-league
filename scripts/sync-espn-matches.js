@@ -52,6 +52,8 @@ function normalizeEvent(event) {
             teamProviderId: String(detail.team?.id || ''),
             athleteProviderId: detail.athletesInvolved?.[0]?.id ? String(detail.athletesInvolved[0].id) : null,
             athleteName: detail.athletesInvolved?.[0]?.displayName || 'Unknown scorer',
+            assistProviderId: detail.athletesInvolved?.[1]?.id ? String(detail.athletesInvolved[1].id) : null,
+            assistName: detail.athletesInvolved?.[1]?.displayName || null,
             minute: detail.clock?.displayValue || null,
             ownGoal: Boolean(detail.ownGoal),
             penalty: Boolean(detail.penaltyKick)

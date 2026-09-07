@@ -43,6 +43,8 @@ CREATE TABLE IF NOT EXISTS match_scorers (
     provider_athlete_id TEXT,
     team_id BIGINT NOT NULL REFERENCES teams(id),
     athlete_name TEXT NOT NULL,
+    assist_provider_id TEXT,
+    assist_name TEXT,
     minute TEXT,
     own_goal BOOLEAN NOT NULL DEFAULT FALSE,
     penalty BOOLEAN NOT NULL DEFAULT FALSE,

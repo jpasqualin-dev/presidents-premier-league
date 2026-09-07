@@ -307,7 +307,7 @@
                 player: player,
                 teams: draftData[player],
                 PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0,
-                goldenBoot: 0, goldenGloves: 0, ppm: 0, gpm: 0, gcpm: 0,
+                goldenBoot: 0, assists: 0, goldenGloves: 0, ppm: 0, gpm: 0, gcpm: 0,
                 pvpWins: 0, pga: 0, ptsPga: 0, roundsWon: 0,
                 undefeatedWeeks: 0, perfectWeeks: 0
             };
@@ -325,7 +325,7 @@
                     division: divName,
                     owner: owner || "Unassigned",
                     PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0, PGA: 0, pvpWins: 0, ptsPga: 0,
-                    goldenGloves: 0
+                    goldenGloves: 0, assists: 0
                 };
             });
         }
@@ -543,6 +543,13 @@
                 pillClass: "pill-blue", sortDir: 1, allTeams: true
             },
             {
+                title: "Assists",
+                players: [...players].sort((a,b) => b.assists - a.assists || b.PTS - a.PTS),
+                playerVal: p => p.assists, teamVal: t => t.assists, teamRaw: t => t.assists,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.assists, 0),
+                pillClass: "pill-green", sortDir: 1, allTeams: true
+            },
+            {
                 title: "PTS per match",
                 players: [...players].sort((a,b) => b.ppm - a.ppm || b.PTS - a.PTS),
                 playerVal: p => p.ppm.toFixed(2), teamVal: t => (t.PL > 0 ? (t.PTS / t.PL) : 0).toFixed(2), teamRaw: t => (t.PL > 0 ? (t.PTS / t.PL) : 0),
@@ -704,6 +711,14 @@
                                 playerStats[awayPlayer].pvpWins += 1;
                                 playerStats[awayPlayer].pga += diff;
                             }
+                        }
+
+                        for (const scorer of match.scorers || []) {
+                            if (!scorer.assistName && !scorer.assistProviderId) continue;
+                            const assistingTeam = scorer.teamProviderId === match.homeTeam.id ? homeTeamKey : scorer.teamProviderId === match.awayTeam.id ? awayTeamKey : null;
+                            const assistingPlayer = assistingTeam ? teamStats[assistingTeam]?.owner : null;
+                            if (assistingPlayer) playerStats[assistingPlayer].assists += 1;
+                            if (assistingTeam) teamStats[assistingTeam].assists += 1;
                         }
 
                         if (homeTeamKey) {
