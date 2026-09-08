@@ -317,7 +317,7 @@
                 teams: draftData[player],
                 PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0,
                 goldenBoot: 0, homeGoals: 0, awayGoals: 0, homeWins: 0, awayWins: 0, homeDraws: 0, awayDraws: 0, assists: 0, homeAssists: 0, awayAssists: 0, goldenGloves: 0, homeCleanSheets: 0, awayCleanSheets: 0, ppm: 0, gpm: 0, gcpm: 0,
-                pvpWins: 0, pga: 0, ptsPga: 0, comebackWins: 0, comebackDraws: 0, comebackWinsDraws: 0, roundsWon: 0,
+                pvpWins: 0, pga: 0, ptsPga: 0, comebackWins: 0, comebackDraws: 0, comebackWinsDraws: 0, homeComebackWins: 0, homeComebackDraws: 0, homeComebackWinsDraws: 0, awayComebackWins: 0, awayComebackDraws: 0, awayComebackWinsDraws: 0, roundsWon: 0,
                 undefeatedWeeks: 0, perfectWeeks: 0
             };
         }
@@ -334,7 +334,7 @@
                     division: divName,
                     owner: owner || "Unassigned",
                     PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0, PGA: 0, pvpWins: 0, ptsPga: 0,
-                    goldenGloves: 0, homeCleanSheets: 0, awayCleanSheets: 0, comebackWins: 0, comebackDraws: 0, comebackWinsDraws: 0, assists: 0, homeGoals: 0, awayGoals: 0, homeWins: 0, awayWins: 0, homeDraws: 0, awayDraws: 0, homeAssists: 0, awayAssists: 0
+                    goldenGloves: 0, homeCleanSheets: 0, awayCleanSheets: 0, comebackWins: 0, comebackDraws: 0, comebackWinsDraws: 0, homeComebackWins: 0, homeComebackDraws: 0, homeComebackWinsDraws: 0, awayComebackWins: 0, awayComebackDraws: 0, awayComebackWinsDraws: 0, assists: 0, homeGoals: 0, awayGoals: 0, homeWins: 0, awayWins: 0, homeDraws: 0, awayDraws: 0, homeAssists: 0, awayAssists: 0
                 };
             });
         }
@@ -420,7 +420,10 @@
         const homeAwayTitles = new Set([
             "Home Goals", "Away Goals", "Home Wins", "Away Wins",
             "Home Draws", "Away Draws", "Home Assists", "Away Assists",
-            "Home Clean Sheets", "Away Clean Sheets", "Home Wins + Draws", "Away Wins + Draws"
+            "Home Clean Sheets", "Away Clean Sheets", "Home Wins + Draws", "Away Wins + Draws",
+            "Home Comeback (Down at Half) Wins", "Away Comeback (Down at Half) Wins",
+            "Home Comeback (Down at Half) Draws", "Away Comeback (Down at Half) Draws",
+            "Home Comeback (Down at Half) Wins+Draws", "Away Comeback (Down at Half) Wins+Draws"
         ]);
         const pgaTitles = new Set(["PvP wins", "PGA", "PTS + PGA"]);
 
@@ -641,6 +644,48 @@
                 pillClass: "pill-purple", sortDir: 1, allTeams: true
             },
             {
+                title: "Home Comeback (Down at Half) Wins",
+                players: [...players].sort((a,b) => b.homeComebackWins - a.homeComebackWins || b.PTS - a.PTS),
+                playerVal: p => p.homeComebackWins, teamVal: t => t.homeComebackWins, teamRaw: t => t.homeComebackWins,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.homeComebackWins, 0),
+                pillClass: "pill-green", sortDir: 1, allTeams: true
+            },
+            {
+                title: "Away Comeback (Down at Half) Wins",
+                players: [...players].sort((a,b) => b.awayComebackWins - a.awayComebackWins || b.PTS - a.PTS),
+                playerVal: p => p.awayComebackWins, teamVal: t => t.awayComebackWins, teamRaw: t => t.awayComebackWins,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.awayComebackWins, 0),
+                pillClass: "pill-green", sortDir: 1, allTeams: true
+            },
+            {
+                title: "Home Comeback (Down at Half) Draws",
+                players: [...players].sort((a,b) => b.homeComebackDraws - a.homeComebackDraws || b.PTS - a.PTS),
+                playerVal: p => p.homeComebackDraws, teamVal: t => t.homeComebackDraws, teamRaw: t => t.homeComebackDraws,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.homeComebackDraws, 0),
+                pillClass: "pill-blue", sortDir: 1, allTeams: true
+            },
+            {
+                title: "Away Comeback (Down at Half) Draws",
+                players: [...players].sort((a,b) => b.awayComebackDraws - a.awayComebackDraws || b.PTS - a.PTS),
+                playerVal: p => p.awayComebackDraws, teamVal: t => t.awayComebackDraws, teamRaw: t => t.awayComebackDraws,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.awayComebackDraws, 0),
+                pillClass: "pill-blue", sortDir: 1, allTeams: true
+            },
+            {
+                title: "Home Comeback (Down at Half) Wins+Draws",
+                players: [...players].sort((a,b) => b.homeComebackWinsDraws - a.homeComebackWinsDraws || b.PTS - a.PTS),
+                playerVal: p => p.homeComebackWinsDraws, teamVal: t => t.homeComebackWinsDraws, teamRaw: t => t.homeComebackWinsDraws,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.homeComebackWinsDraws, 0),
+                pillClass: "pill-purple", sortDir: 1, allTeams: true
+            },
+            {
+                title: "Away Comeback (Down at Half) Wins+Draws",
+                players: [...players].sort((a,b) => b.awayComebackWinsDraws - a.awayComebackWinsDraws || b.PTS - a.PTS),
+                playerVal: p => p.awayComebackWinsDraws, teamVal: t => t.awayComebackWinsDraws, teamRaw: t => t.awayComebackWinsDraws,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.awayComebackWinsDraws, 0),
+                pillClass: "pill-purple", sortDir: 1, allTeams: true
+            },
+            {
                 title: "Golden Gloves (Clean Sheets)",
                 players: [...players].sort((a,b) => b.goldenGloves - a.goldenGloves || b.PTS - a.PTS),
                 playerVal: p => p.goldenGloves, teamVal: t => t.goldenGloves, teamRaw: t => t.goldenGloves,
@@ -815,17 +860,27 @@
 
                             if (homeWasDownAtHalf && homeComebackResult && homePlayer && homeTeamKey) {
                                 const statKey = homeComebackResult === 'win' ? 'comebackWins' : 'comebackDraws';
+                                const homeStatKey = homeComebackResult === 'win' ? 'homeComebackWins' : 'homeComebackDraws';
                                 playerStats[homePlayer][statKey] += 1;
                                 playerStats[homePlayer].comebackWinsDraws += 1;
+                                playerStats[homePlayer][homeStatKey] += 1;
+                                playerStats[homePlayer].homeComebackWinsDraws += 1;
                                 teamStats[homeTeamKey][statKey] += 1;
                                 teamStats[homeTeamKey].comebackWinsDraws += 1;
+                                teamStats[homeTeamKey][homeStatKey] += 1;
+                                teamStats[homeTeamKey].homeComebackWinsDraws += 1;
                             }
                             if (awayWasDownAtHalf && awayComebackResult && awayPlayer && awayTeamKey) {
                                 const statKey = awayComebackResult === 'win' ? 'comebackWins' : 'comebackDraws';
+                                const awayStatKey = awayComebackResult === 'win' ? 'awayComebackWins' : 'awayComebackDraws';
                                 playerStats[awayPlayer][statKey] += 1;
                                 playerStats[awayPlayer].comebackWinsDraws += 1;
+                                playerStats[awayPlayer][awayStatKey] += 1;
+                                playerStats[awayPlayer].awayComebackWinsDraws += 1;
                                 teamStats[awayTeamKey][statKey] += 1;
                                 teamStats[awayTeamKey].comebackWinsDraws += 1;
+                                teamStats[awayTeamKey][awayStatKey] += 1;
+                                teamStats[awayTeamKey].awayComebackWinsDraws += 1;
                             }
                         }
 
