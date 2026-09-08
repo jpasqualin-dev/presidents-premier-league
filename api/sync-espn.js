@@ -28,6 +28,11 @@ function getCompetitor(event, side) {
     return event.competitions?.[0]?.competitors?.find(item => item.homeAway === side);
 }
 
+function getHalfTimeScore(competitor) {
+    const score = competitor?.linescores?.[0]?.value ?? competitor?.linescores?.[0]?.displayValue;
+    return score == null ? null : Number(score);
+}
+
 function dateKeysBetween(startDate, endDate) {
     const dates = [];
     const current = new Date(`${startDate}T12:00:00Z`);
@@ -60,6 +65,11 @@ async function fetchScoringDetails(event) {
     const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/summary?event=${encodeURIComponent(event.id)}`);
     if (!response.ok) return event.competitions?.[0]?.details || [];
     const payload = await response.json();
+    const competitors = payload.header?.competitions?.[0]?.competitors || [];
+    for (const competitor of competitors) {
+        const target = event.competitions?.[0]?.competitors?.find(item => item.homeAway === competitor.homeAway);
+        if (target && competitor.linescores) target.linescores = competitor.linescores;
+    }
     const scoringDetails = (payload.keyEvents || []).filter(item => item.scoringPlay);
     if (!scoringDetails.length) return event.competitions?.[0]?.details || [];
     return scoringDetails.map(item => ({
@@ -86,6 +96,7 @@ async function syncEvent(sql, event) {
     const awayOwner = findTeamOwner(away.team.displayName);
     const homeName = findCanonicalTeam(home.team.displayName);
     const awayName = findCanonicalTeam(away.team.displayName);
+    const details = await fetchScoringDetails(event);
     const [existingMatch] = await sql`
         SELECT id, kickoff_at, matchday
         FROM matches
@@ -102,7 +113,7 @@ async function syncEvent(sql, event) {
         RETURNING id`;
     const [match] = await sql`
         INSERT INTO matches (provider, provider_event_id, competition, season, kickoff_at, matchday, status, status_completed, status_detail, status_clock, home_team_id, away_team_id, home_score, away_score, home_half_time_score, away_half_time_score, venue)
-        VALUES ('espn', ${String(event.id)}, 'eng.1', ${Number(event.season?.year || 2026)}, ${event.date}, ${getMatchday(event)}, ${status.state || 'scheduled'}, ${Boolean(status.completed)}, ${status.detail || null}, ${competition.status?.displayClock || null}, ${homeTeam.id}, ${awayTeam.id}, ${home.score == null ? null : Number(home.score)}, ${away.score == null ? null : Number(away.score)}, ${home.linescores?.[0]?.value == null ? null : Number(home.linescores[0].value)}, ${away.linescores?.[0]?.value == null ? null : Number(away.linescores[0].value)}, ${competition.venue?.fullName || null})
+        VALUES ('espn', ${String(event.id)}, 'eng.1', ${Number(event.season?.year || 2026)}, ${event.date}, ${getMatchday(event)}, ${status.state || 'scheduled'}, ${Boolean(status.completed)}, ${status.detail || null}, ${competition.status?.displayClock || null}, ${homeTeam.id}, ${awayTeam.id}, ${home.score == null ? null : Number(home.score)}, ${away.score == null ? null : Number(away.score)}, ${getHalfTimeScore(home)}, ${getHalfTimeScore(away)}, ${competition.venue?.fullName || null})
         ON CONFLICT (provider, provider_event_id) DO UPDATE SET original_kickoff_at = COALESCE(matches.original_kickoff_at, matches.kickoff_at), rescheduled_at = CASE WHEN matches.kickoff_at IS DISTINCT FROM EXCLUDED.kickoff_at THEN NOW() ELSE matches.rescheduled_at END, kickoff_at = EXCLUDED.kickoff_at, matchday = COALESCE(matches.matchday, EXCLUDED.matchday), status = EXCLUDED.status, status_completed = EXCLUDED.status_completed, status_detail = EXCLUDED.status_detail, status_clock = EXCLUDED.status_clock, home_team_id = EXCLUDED.home_team_id, away_team_id = EXCLUDED.away_team_id, home_score = EXCLUDED.home_score, away_score = EXCLUDED.away_score, home_half_time_score = EXCLUDED.home_half_time_score, away_half_time_score = EXCLUDED.away_half_time_score, venue = EXCLUDED.venue, updated_at = NOW()
         RETURNING id`;
     if (existingMatch?.kickoff_at && new Date(existingMatch.kickoff_at).getTime() !== new Date(event.date).getTime()) {
@@ -114,7 +125,6 @@ async function syncEvent(sql, event) {
     await sql`DELETE FROM match_scorers WHERE match_id = ${match.id}`;
     await sql`DELETE FROM match_events WHERE match_id = ${match.id}`;
     await sql`DELETE FROM match_team_stats WHERE match_id = ${match.id}`;
-    const details = await fetchScoringDetails(event);
     for (const detail of details) {
         const scorer = detail.athletesInvolved?.[0];
         const team = detail.team?.id === home.team.id ? homeTeam : detail.team?.id === away.team.id ? awayTeam : null;
