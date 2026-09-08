@@ -170,6 +170,7 @@
         .stat-player-wrapper { border-bottom: 1px solid #f0f0f0; }
         .stat-player-wrapper:last-child { border-bottom: none; }
         .stat-card.collapsed .stat-player-wrapper:nth-child(n+2) { display: none; }
+        .individual-goals-card.collapsed .stat-player-wrapper:nth-child(n+4) { display: none; }
 
         .stat-player-row { display: flex; align-items: center; padding: 8px 0; cursor: pointer; transition: background-color 0.15s ease; border-radius: 4px; }
         .stat-player-wrapper.expanded .stat-player-row, .stat-player-wrapper.expanded .stat-player-row:hover { background-color: #ffffff !important; }
@@ -256,6 +257,9 @@
 
     <h2>PGA</h2>
     <div id="pga-container" class="stats-grid"></div>
+
+    <h2>Invividual Stats</h2>
+    <div id="individual-stats-container" class="stats-grid"></div>
 
 <script src="theme.js"></script>
 <script src="match-data.js"></script>
@@ -407,15 +411,17 @@
         if (wrapper.dataset.expandKey) setStatsExpansionState(wrapper.dataset.expandKey, false);
     }
 
-    function renderSeasonAwards(playerStatsObj, teamStatsObj) {
+    function renderSeasonAwards(playerStatsObj, teamStatsObj, goalScorers) {
         const container = document.getElementById('season-awards-container');
         const matchweekResultsContainer = document.getElementById('matchweek-results-container');
         const homeAwayContainer = document.getElementById('home-away-container');
         const pgaContainer = document.getElementById('pga-container');
+        const individualStatsContainer = document.getElementById('individual-stats-container');
         container.innerHTML = '';
         matchweekResultsContainer.innerHTML = '';
         homeAwayContainer.innerHTML = '';
         pgaContainer.innerHTML = '';
+        individualStatsContainer.innerHTML = '';
         const players = Object.values(playerStatsObj);
         const homeAwayTitles = new Set([
             "Home Goals", "Away Goals", "Home Wins", "Away Wins",
@@ -549,6 +555,42 @@
 
             html += `</div>`;
             card.innerHTML = html;
+            return card;
+        }
+
+        function buildGoalScorerCard(goalScorers) {
+            const card = document.createElement('div');
+            card.className = `stat-card individual-goals-card ${seasonAwardsState.Goals ? 'expanded' : 'collapsed'}`;
+            const topScorers = Object.values(goalScorers)
+                .sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name))
+                .slice(0, 30);
+            let html = `
+                <div class="stat-card-title" onclick="toggleCard(this)">
+                    <span>Goals</span>
+                    <span class="chevron">❯</span>
+                </div>
+                <div class="stat-card-body">
+            `;
+
+            topScorers.forEach((scorer, index) => {
+                const icon = teamLogos[scorer.team] ? `<img src="${teamLogos[scorer.team]}" class="team-icon" title="${scorer.team}" alt="${scorer.team}">` : '';
+                const owner = getOwnerOfTeam(scorer.team) || 'Unassigned';
+                html += `
+                    <div class="stat-player-wrapper">
+                        <div class="stat-player-row">
+                            <div class="stat-rank">${index + 1}</div>
+                            <div class="stat-player-info">
+                                <span>${scorer.name}</span>
+                                <div class="stat-player-icons">${icon}</div>
+                                <span>(${owner})</span>
+                            </div>
+                            <div class="stat-value pill-green">${scorer.goals}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            card.innerHTML = `${html}</div>`;
             return card;
         }
 
@@ -846,6 +888,7 @@
                     : container;
             targetContainer.appendChild(buildAwardCard(config));
         });
+        individualStatsContainer.appendChild(buildGoalScorerCard(goalScorers));
     }
 
     async function fetchAndRenderAwards() {
@@ -854,6 +897,7 @@
         const weeklyPlayerPoints = {};
         const weeklyPlayerResults = {};
         const incompletePlayerWeeks = {};
+        const goalScorers = {};
 
         try {
             const data = await getMatchData();
@@ -873,6 +917,17 @@
                         const homeTeamKey = findTeamKey(homeTeamName, teamStats);
                         const awayTeamKey = findTeamKey(awayTeamName, teamStats);
                         const matchweek = match.matchday;
+
+                        for (const scorer of match.scorers || []) {
+                            const scorerName = scorer.athleteName || 'Unknown scorer';
+                            const scorerKey = scorer.athleteProviderId || scorerName;
+                            const scorerTeam = scorer.teamProviderId === match.homeTeam.id ? homeTeamName
+                                : scorer.teamProviderId === match.awayTeam.id ? awayTeamName
+                                    : null;
+                            if (!scorerTeam) continue;
+                            if (!goalScorers[scorerKey]) goalScorers[scorerKey] = { name: scorerName, team: scorerTeam, goals: 0 };
+                            goalScorers[scorerKey].goals += 1;
+                        }
 
                         if (Number.isFinite(halfTimeHomeScore) && Number.isFinite(halfTimeAwayScore)) {
                             const homeWasDownAtHalf = halfTimeHomeScore < halfTimeAwayScore;
@@ -1068,7 +1123,7 @@
                 });
             });
 
-            renderSeasonAwards(playerStats, teamStats);
+            renderSeasonAwards(playerStats, teamStats, goalScorers);
 
         } catch (error) {
             console.error("Error fetching match data:", error);
