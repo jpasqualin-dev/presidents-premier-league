@@ -170,7 +170,8 @@
         .stat-player-wrapper { border-bottom: 1px solid #f0f0f0; }
         .stat-player-wrapper:last-child { border-bottom: none; }
         .stat-card.collapsed .stat-player-wrapper:nth-child(n+2) { display: none; }
-        .individual-goals-card.collapsed .stat-player-wrapper:nth-child(n+4) { display: none; }
+        .individual-stat-card.collapsed .stat-player-wrapper:nth-child(n+2) { display: block; }
+        .individual-stat-card.collapsed .stat-player-wrapper:nth-child(n+4) { display: none; }
 
         .stat-player-row { display: flex; align-items: center; padding: 8px 0; cursor: pointer; transition: background-color 0.15s ease; border-radius: 4px; }
         .stat-player-wrapper.expanded .stat-player-row, .stat-player-wrapper.expanded .stat-player-row:hover { background-color: #ffffff !important; }
@@ -184,6 +185,8 @@
 
         .stat-rank { width: 24px; font-size: 0.85rem; color: #718096; font-weight: 600; padding-left: 4px; }
         .stat-player-info { flex-grow: 1; display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.95rem; color: #1a1a1a; }
+        .individual-goals-card .goal-scorer-owner { color: #718096; font-weight: 500; }
+        body.dark-mode .individual-goals-card .goal-scorer-owner { color: #b8b8b8; }
         .stat-player-icons { display: inline-flex; gap: 3px; align-items: center; }
         .stat-player-icons .team-icon { width: 16px; height: 16px; object-fit: contain; }
 
@@ -558,21 +561,23 @@
             return card;
         }
 
-        function buildGoalScorerCard(goalScorers) {
+        function buildIndividualStatCard(title, individualStats, teamStatsObj, valueFn) {
             const card = document.createElement('div');
-            card.className = `stat-card individual-goals-card ${seasonAwardsState.Goals ? 'expanded' : 'collapsed'}`;
-            const topScorers = Object.values(goalScorers)
-                .sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name))
+            card.className = `stat-card individual-stat-card ${seasonAwardsState[title] ? 'expanded' : 'collapsed'}`;
+            const topPlayers = Object.values(individualStats)
+                .sort((a, b) => valueFn(b) - valueFn(a)
+                    || (teamStatsObj[a.team]?.standingsRank ?? Number.POSITIVE_INFINITY) - (teamStatsObj[b.team]?.standingsRank ?? Number.POSITIVE_INFINITY)
+                    || a.name.localeCompare(b.name))
                 .slice(0, 30);
             let html = `
                 <div class="stat-card-title" onclick="toggleCard(this)">
-                    <span>Goals</span>
+                    <span>${title}</span>
                     <span class="chevron">❯</span>
                 </div>
                 <div class="stat-card-body">
             `;
 
-            topScorers.forEach((scorer, index) => {
+            topPlayers.forEach((scorer, index) => {
                 const icon = teamLogos[scorer.team] ? `<img src="${teamLogos[scorer.team]}" class="team-icon" title="${scorer.team}" alt="${scorer.team}">` : '';
                 const owner = getOwnerOfTeam(scorer.team) || 'Unassigned';
                 html += `
@@ -582,9 +587,9 @@
                             <div class="stat-player-info">
                                 <span>${scorer.name}</span>
                                 <div class="stat-player-icons">${icon}</div>
-                                <span>(${owner})</span>
+                                <span class="goal-scorer-owner">(${owner})</span>
                             </div>
-                            <div class="stat-value pill-green">${scorer.goals}</div>
+                            <div class="stat-value pill-green">${valueFn(scorer)}</div>
                         </div>
                     </div>
                 `;
@@ -888,7 +893,9 @@
                     : container;
             targetContainer.appendChild(buildAwardCard(config));
         });
-        individualStatsContainer.appendChild(buildGoalScorerCard(goalScorers));
+        individualStatsContainer.appendChild(buildIndividualStatCard('Goals', goalScorers, teamStatsObj, scorer => scorer.goals));
+        individualStatsContainer.appendChild(buildIndividualStatCard('Assists', goalScorers, teamStatsObj, scorer => scorer.assists));
+        individualStatsContainer.appendChild(buildIndividualStatCard('Goal Involvements', goalScorers, teamStatsObj, scorer => scorer.goals + scorer.assists));
     }
 
     async function fetchAndRenderAwards() {
@@ -925,8 +932,14 @@
                                 : scorer.teamProviderId === match.awayTeam.id ? awayTeamName
                                     : null;
                             if (!scorerTeam) continue;
-                            if (!goalScorers[scorerKey]) goalScorers[scorerKey] = { name: scorerName, team: scorerTeam, goals: 0 };
+                            if (!goalScorers[scorerKey]) goalScorers[scorerKey] = { name: scorerName, team: scorerTeam, goals: 0, assists: 0 };
                             goalScorers[scorerKey].goals += 1;
+                            if (scorer.assistName || scorer.assistProviderId) {
+                                const assistName = scorer.assistName || 'Unknown assister';
+                                const assistKey = scorer.assistProviderId || assistName;
+                                if (!goalScorers[assistKey]) goalScorers[assistKey] = { name: assistName, team: scorerTeam, goals: 0, assists: 0 };
+                                goalScorers[assistKey].assists += 1;
+                            }
                         }
 
                         if (Number.isFinite(halfTimeHomeScore) && Number.isFinite(halfTimeAwayScore)) {
