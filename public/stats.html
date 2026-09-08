@@ -895,7 +895,7 @@
         });
         individualStatsContainer.appendChild(buildIndividualStatCard('Goals', goalScorers, teamStatsObj, scorer => scorer.goals));
         individualStatsContainer.appendChild(buildIndividualStatCard('Assists', goalScorers, teamStatsObj, scorer => scorer.assists));
-        individualStatsContainer.appendChild(buildIndividualStatCard('Goal Involvements', goalScorers, teamStatsObj, scorer => scorer.goals + scorer.assists));
+        individualStatsContainer.appendChild(buildIndividualStatCard('Goal Involvements (Goals + Assists)', goalScorers, teamStatsObj, scorer => scorer.goals + scorer.assists));
     }
 
     async function fetchAndRenderAwards() {
