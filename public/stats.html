@@ -248,6 +248,9 @@
         <div class="loading-state">Loading season awards...</div>
     </div>
 
+    <h2>Matchweek Results</h2>
+    <div id="matchweek-results-container" class="stats-grid"></div>
+
     <h2>Home and Away</h2>
     <div id="home-away-container" class="stats-grid"></div>
 
@@ -313,7 +316,7 @@
                 player: player,
                 teams: draftData[player],
                 PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0,
-                goldenBoot: 0, homeGoals: 0, awayGoals: 0, homeWins: 0, awayWins: 0, homeDraws: 0, awayDraws: 0, assists: 0, homeAssists: 0, awayAssists: 0, goldenGloves: 0, ppm: 0, gpm: 0, gcpm: 0,
+                goldenBoot: 0, homeGoals: 0, awayGoals: 0, homeWins: 0, awayWins: 0, homeDraws: 0, awayDraws: 0, assists: 0, homeAssists: 0, awayAssists: 0, goldenGloves: 0, homeCleanSheets: 0, awayCleanSheets: 0, ppm: 0, gpm: 0, gcpm: 0,
                 pvpWins: 0, pga: 0, ptsPga: 0, roundsWon: 0,
                 undefeatedWeeks: 0, perfectWeeks: 0
             };
@@ -331,7 +334,7 @@
                     division: divName,
                     owner: owner || "Unassigned",
                     PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0, PGA: 0, pvpWins: 0, ptsPga: 0,
-                    goldenGloves: 0, assists: 0, homeGoals: 0, awayGoals: 0, homeWins: 0, awayWins: 0, homeDraws: 0, awayDraws: 0, homeAssists: 0, awayAssists: 0
+                    goldenGloves: 0, homeCleanSheets: 0, awayCleanSheets: 0, assists: 0, homeGoals: 0, awayGoals: 0, homeWins: 0, awayWins: 0, homeDraws: 0, awayDraws: 0, homeAssists: 0, awayAssists: 0
                 };
             });
         }
@@ -406,15 +409,18 @@
 
     function renderSeasonAwards(playerStatsObj, teamStatsObj) {
         const container = document.getElementById('season-awards-container');
+        const matchweekResultsContainer = document.getElementById('matchweek-results-container');
         const homeAwayContainer = document.getElementById('home-away-container');
         const pgaContainer = document.getElementById('pga-container');
         container.innerHTML = '';
+        matchweekResultsContainer.innerHTML = '';
         homeAwayContainer.innerHTML = '';
         pgaContainer.innerHTML = '';
         const players = Object.values(playerStatsObj);
         const homeAwayTitles = new Set([
             "Home Goals", "Away Goals", "Home Wins", "Away Wins",
-            "Home Draws", "Away Draws", "Home Assists", "Away Assists"
+            "Home Draws", "Away Draws", "Home Assists", "Away Assists",
+            "Home Clean Sheets", "Away Clean Sheets"
         ]);
         const pgaTitles = new Set(["PvP wins", "PGA", "PTS + PGA"]);
 
@@ -621,6 +627,20 @@
                 pillClass: "pill-green", sortDir: 1, allTeams: true
             },
             {
+                title: "Home Clean Sheets",
+                players: [...players].sort((a,b) => b.homeCleanSheets - a.homeCleanSheets || b.PTS - a.PTS),
+                playerVal: p => p.homeCleanSheets, teamVal: t => t.homeCleanSheets, teamRaw: t => t.homeCleanSheets,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.homeCleanSheets, 0),
+                pillClass: "pill-blue", sortDir: 1, allTeams: true
+            },
+            {
+                title: "Away Clean Sheets",
+                players: [...players].sort((a,b) => b.awayCleanSheets - a.awayCleanSheets || b.PTS - a.PTS),
+                playerVal: p => p.awayCleanSheets, teamVal: t => t.awayCleanSheets, teamRaw: t => t.awayCleanSheets,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.awayCleanSheets, 0),
+                pillClass: "pill-blue", sortDir: 1, allTeams: true
+            },
+            {
                 title: "PTS per match",
                 players: [...players].sort((a,b) => b.ppm - a.ppm || b.PTS - a.PTS),
                 playerVal: p => p.ppm.toFixed(2), teamVal: t => (t.PL > 0 ? (t.PTS / t.PL) : 0).toFixed(2), teamRaw: t => (t.PL > 0 ? (t.PTS / t.PL) : 0),
@@ -707,7 +727,7 @@
         awardConfigs.forEach(config => {
             if (config.title === "PvP wins") {
                 weeklyAwardConfigs.forEach(weeklyConfig => {
-                    container.appendChild(buildSimpleAwardCard(weeklyConfig));
+                    matchweekResultsContainer.appendChild(buildSimpleAwardCard(weeklyConfig));
                 });
             }
             const targetContainer = homeAwayTitles.has(config.title)
@@ -754,7 +774,10 @@
                             let pStat = playerStats[homePlayer];
                             pStat.PL += 1; pStat.GF += homeScore; pStat.GA += awayScore;
                             pStat.goldenBoot += homeScore; pStat.homeGoals += homeScore;
-                            if (awayScore === 0) pStat.goldenGloves += 1;
+                            if (awayScore === 0) {
+                                pStat.goldenGloves += 1;
+                                pStat.homeCleanSheets += 1;
+                            }
 
                             if (homeScore > awayScore) { pStat.W += 1; pStat.homeWins += 1; pStat.PTS += 3; }
                             else if (homeScore === awayScore) { pStat.D += 1; pStat.homeDraws += 1; pStat.PTS += 1; }
@@ -768,7 +791,10 @@
                             let pStat = playerStats[awayPlayer];
                             pStat.PL += 1; pStat.GF += awayScore; pStat.GA += homeScore;
                             pStat.goldenBoot += awayScore; pStat.awayGoals += awayScore;
-                            if (homeScore === 0) pStat.goldenGloves += 1;
+                            if (homeScore === 0) {
+                                pStat.goldenGloves += 1;
+                                pStat.awayCleanSheets += 1;
+                            }
 
                             if (awayScore > homeScore) { pStat.W += 1; pStat.awayWins += 1; pStat.PTS += 3; }
                             else if (awayScore === homeScore) { pStat.D += 1; pStat.awayDraws += 1; pStat.PTS += 1; }
@@ -807,7 +833,10 @@
                         if (homeTeamKey) {
                             let t = teamStats[homeTeamKey];
                             t.PL += 1; t.GF += homeScore; t.GA += awayScore; t.homeGoals += homeScore;
-                            if (awayScore === 0) t.goldenGloves += 1;
+                            if (awayScore === 0) {
+                                t.goldenGloves += 1;
+                                t.homeCleanSheets += 1;
+                            }
 
                             if (homeScore > awayScore) {
                                 t.W += 1; t.homeWins += 1; t.PTS += 3;
@@ -819,7 +848,10 @@
                         if (awayTeamKey) {
                             let t = teamStats[awayTeamKey];
                             t.PL += 1; t.GF += awayScore; t.GA += homeScore; t.awayGoals += awayScore;
-                            if (homeScore === 0) t.goldenGloves += 1;
+                            if (homeScore === 0) {
+                                t.goldenGloves += 1;
+                                t.awayCleanSheets += 1;
+                            }
 
                             if (awayScore > homeScore) {
                                 t.W += 1; t.awayWins += 1; t.PTS += 3;
