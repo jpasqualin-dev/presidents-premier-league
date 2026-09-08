@@ -28,6 +28,8 @@ CREATE TABLE IF NOT EXISTS matches (
     away_team_id BIGINT NOT NULL REFERENCES teams(id),
     home_score INTEGER,
     away_score INTEGER,
+    home_half_time_score INTEGER,
+    away_half_time_score INTEGER,
     venue TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),

@@ -317,7 +317,7 @@
                 teams: draftData[player],
                 PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0,
                 goldenBoot: 0, homeGoals: 0, awayGoals: 0, homeWins: 0, awayWins: 0, homeDraws: 0, awayDraws: 0, assists: 0, homeAssists: 0, awayAssists: 0, goldenGloves: 0, homeCleanSheets: 0, awayCleanSheets: 0, ppm: 0, gpm: 0, gcpm: 0,
-                pvpWins: 0, pga: 0, ptsPga: 0, roundsWon: 0,
+                pvpWins: 0, pga: 0, ptsPga: 0, comebackWins: 0, comebackDraws: 0, comebackWinsDraws: 0, roundsWon: 0,
                 undefeatedWeeks: 0, perfectWeeks: 0
             };
         }
@@ -334,7 +334,7 @@
                     division: divName,
                     owner: owner || "Unassigned",
                     PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0, PGA: 0, pvpWins: 0, ptsPga: 0,
-                    goldenGloves: 0, homeCleanSheets: 0, awayCleanSheets: 0, assists: 0, homeGoals: 0, awayGoals: 0, homeWins: 0, awayWins: 0, homeDraws: 0, awayDraws: 0, homeAssists: 0, awayAssists: 0
+                    goldenGloves: 0, homeCleanSheets: 0, awayCleanSheets: 0, comebackWins: 0, comebackDraws: 0, comebackWinsDraws: 0, assists: 0, homeGoals: 0, awayGoals: 0, homeWins: 0, awayWins: 0, homeDraws: 0, awayDraws: 0, homeAssists: 0, awayAssists: 0
                 };
             });
         }
@@ -420,7 +420,7 @@
         const homeAwayTitles = new Set([
             "Home Goals", "Away Goals", "Home Wins", "Away Wins",
             "Home Draws", "Away Draws", "Home Assists", "Away Assists",
-            "Home Clean Sheets", "Away Clean Sheets"
+            "Home Clean Sheets", "Away Clean Sheets", "Home Wins + Draws", "Away Wins + Draws"
         ]);
         const pgaTitles = new Set(["PvP wins", "PGA", "PTS + PGA"]);
 
@@ -599,6 +599,48 @@
                 pillClass: "pill-blue", sortDir: 1, allTeams: true
             },
             {
+                title: "Wins + Draws",
+                players: [...players].sort((a,b) => b.W + b.D - (a.W + a.D) || b.PTS - a.PTS),
+                playerVal: p => p.W + p.D, teamVal: t => t.W + t.D, teamRaw: t => t.W + t.D,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.W + team.D, 0),
+                pillClass: "pill-green", sortDir: 1, allTeams: true
+            },
+            {
+                title: "Home Wins + Draws",
+                players: [...players].sort((a,b) => b.homeWins + b.homeDraws - (a.homeWins + a.homeDraws) || b.PTS - a.PTS),
+                playerVal: p => p.homeWins + p.homeDraws, teamVal: t => t.homeWins + t.homeDraws, teamRaw: t => t.homeWins + t.homeDraws,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.homeWins + team.homeDraws, 0),
+                pillClass: "pill-green", sortDir: 1, allTeams: true
+            },
+            {
+                title: "Away Wins + Draws",
+                players: [...players].sort((a,b) => b.awayWins + b.awayDraws - (a.awayWins + a.awayDraws) || b.PTS - a.PTS),
+                playerVal: p => p.awayWins + p.awayDraws, teamVal: t => t.awayWins + t.awayDraws, teamRaw: t => t.awayWins + t.awayDraws,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.awayWins + team.awayDraws, 0),
+                pillClass: "pill-green", sortDir: 1, allTeams: true
+            },
+            {
+                title: "Comeback (Down at Half) Wins",
+                players: [...players].sort((a,b) => b.comebackWins - a.comebackWins || b.PTS - a.PTS),
+                playerVal: p => p.comebackWins, teamVal: t => t.comebackWins, teamRaw: t => t.comebackWins,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.comebackWins, 0),
+                pillClass: "pill-green", sortDir: 1, allTeams: true
+            },
+            {
+                title: "Comeback (Down at Half) Draws",
+                players: [...players].sort((a,b) => b.comebackDraws - a.comebackDraws || b.PTS - a.PTS),
+                playerVal: p => p.comebackDraws, teamVal: t => t.comebackDraws, teamRaw: t => t.comebackDraws,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.comebackDraws, 0),
+                pillClass: "pill-blue", sortDir: 1, allTeams: true
+            },
+            {
+                title: "Comeback (Down at Half) Wins+Draws",
+                players: [...players].sort((a,b) => b.comebackWinsDraws - a.comebackWinsDraws || b.PTS - a.PTS),
+                playerVal: p => p.comebackWinsDraws, teamVal: t => t.comebackWinsDraws, teamRaw: t => t.comebackWinsDraws,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.comebackWinsDraws, 0),
+                pillClass: "pill-purple", sortDir: 1, allTeams: true
+            },
+            {
                 title: "Golden Gloves (Clean Sheets)",
                 players: [...players].sort((a,b) => b.goldenGloves - a.goldenGloves || b.PTS - a.PTS),
                 playerVal: p => p.goldenGloves, teamVal: t => t.goldenGloves, teamRaw: t => t.goldenGloves,
@@ -756,12 +798,36 @@
                         const awayTeamName = match.awayTeam.name;
                         const homeScore = match.score.fullTime.home;
                         const awayScore = match.score.fullTime.away;
+                        const halfTimeHomeScore = match.score.halfTime?.home;
+                        const halfTimeAwayScore = match.score.halfTime?.away;
 
                         const homePlayer = findPlayerByTeam(homeTeamName, playerStats);
                         const awayPlayer = findPlayerByTeam(awayTeamName, playerStats);
                         const homeTeamKey = findTeamKey(homeTeamName, teamStats);
                         const awayTeamKey = findTeamKey(awayTeamName, teamStats);
                         const matchweek = match.matchday;
+
+                        if (Number.isFinite(halfTimeHomeScore) && Number.isFinite(halfTimeAwayScore)) {
+                            const homeWasDownAtHalf = halfTimeHomeScore < halfTimeAwayScore;
+                            const awayWasDownAtHalf = halfTimeAwayScore < halfTimeHomeScore;
+                            const homeComebackResult = homeScore > awayScore ? 'win' : homeScore === awayScore ? 'draw' : null;
+                            const awayComebackResult = awayScore > homeScore ? 'win' : awayScore === homeScore ? 'draw' : null;
+
+                            if (homeWasDownAtHalf && homeComebackResult && homePlayer && homeTeamKey) {
+                                const statKey = homeComebackResult === 'win' ? 'comebackWins' : 'comebackDraws';
+                                playerStats[homePlayer][statKey] += 1;
+                                playerStats[homePlayer].comebackWinsDraws += 1;
+                                teamStats[homeTeamKey][statKey] += 1;
+                                teamStats[homeTeamKey].comebackWinsDraws += 1;
+                            }
+                            if (awayWasDownAtHalf && awayComebackResult && awayPlayer && awayTeamKey) {
+                                const statKey = awayComebackResult === 'win' ? 'comebackWins' : 'comebackDraws';
+                                playerStats[awayPlayer][statKey] += 1;
+                                playerStats[awayPlayer].comebackWinsDraws += 1;
+                                teamStats[awayTeamKey][statKey] += 1;
+                                teamStats[awayTeamKey].comebackWinsDraws += 1;
+                            }
+                        }
 
                         if (!weeklyPlayerPoints[matchweek]) {
                             weeklyPlayerPoints[matchweek] = Object.fromEntries(

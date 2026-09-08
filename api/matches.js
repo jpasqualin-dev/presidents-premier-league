@@ -38,7 +38,7 @@ async function readHistoricalMatches(sql) {
     const rows = await sql`
         SELECT
             m.provider, m.provider_event_id, m.kickoff_at, m.status, m.status_completed, m.status_clock,
-            m.home_score, m.away_score, m.venue, m.matchday,
+            m.home_score, m.away_score, m.home_half_time_score, m.away_half_time_score, m.venue, m.matchday,
             home.provider_team_id AS home_provider_id, home.canonical_name AS home_name, home.logo_url AS home_logo,
             away.provider_team_id AS away_provider_id, away.canonical_name AS away_name, away.logo_url AS away_logo,
             COALESCE(
