@@ -248,6 +248,12 @@
         <div class="loading-state">Loading season awards...</div>
     </div>
 
+    <h2>Home and Away</h2>
+    <div id="home-away-container" class="stats-grid"></div>
+
+    <h2>PGA</h2>
+    <div id="pga-container" class="stats-grid"></div>
+
 <script src="theme.js"></script>
 <script src="match-data.js"></script>
 <script>
@@ -400,8 +406,17 @@
 
     function renderSeasonAwards(playerStatsObj, teamStatsObj) {
         const container = document.getElementById('season-awards-container');
+        const homeAwayContainer = document.getElementById('home-away-container');
+        const pgaContainer = document.getElementById('pga-container');
         container.innerHTML = '';
+        homeAwayContainer.innerHTML = '';
+        pgaContainer.innerHTML = '';
         const players = Object.values(playerStatsObj);
+        const homeAwayTitles = new Set([
+            "Home Goals", "Away Goals", "Home Wins", "Away Wins",
+            "Home Draws", "Away Draws", "Home Assists", "Away Assists"
+        ]);
+        const pgaTitles = new Set(["PvP wins", "PGA", "PTS + PGA"]);
 
         function buildAwardCard(config) {
             const card = document.createElement('div');
@@ -695,7 +710,12 @@
                     container.appendChild(buildSimpleAwardCard(weeklyConfig));
                 });
             }
-            container.appendChild(buildAwardCard(config));
+            const targetContainer = homeAwayTitles.has(config.title)
+                ? homeAwayContainer
+                : pgaTitles.has(config.title)
+                    ? pgaContainer
+                    : container;
+            targetContainer.appendChild(buildAwardCard(config));
         });
     }
 
