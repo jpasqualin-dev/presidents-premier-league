@@ -244,6 +244,15 @@
         .achievement-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; font-size: 0.825rem; font-weight: 600; }
         .achievement-stars { color: #d69e00; letter-spacing: 2px; }
         .achievement-value { min-width: 2ch; text-align: right; font-size: 0.9rem; font-weight: 800; }
+        .head-to-head-divider { border-top: 1px solid #ffffff; margin-top: 3px; }
+        .head-to-head-toggle { cursor: pointer; }
+        .head-to-head-toggle .chevron { color: #718096; font-size: 0.75rem; transition: transform 0.2s ease; }
+        .head-to-head-toggle[aria-expanded="true"] .chevron { transform: rotate(90deg); }
+        .head-to-head-details { display: none; padding: 2px 0 4px; }
+        .head-to-head-toggle[aria-expanded="true"] + .head-to-head-details { display: block; }
+        .head-to-head-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px; align-items: center; padding: 5px 0 5px 16px; font-size: 0.78rem; font-weight: 600; }
+        .head-to-head-record { min-width: 5.5ch; text-align: center; color: #4a5568; }
+        .head-to-head-points { min-width: 5ch; text-align: right; }
 
         /* Matchweek Card Container */
         .mw-card {
@@ -412,6 +421,11 @@
             <div class="achievement-row"><span><span class="achievement-stars" aria-hidden="true">&#9733;</span> Weeks Won (Most Points)</span><span class="achievement-value" id="weeks-won">--</span></div>
             <div class="achievement-row"><span><span class="achievement-stars" aria-hidden="true">&#9733;</span> Undefeated Weeks (No Loss)</span><span class="achievement-value" id="undefeated-weeks">--</span></div>
             <div class="achievement-row"><span><span class="achievement-stars" aria-hidden="true">&#9733;</span> Perfect Weeks (All Wins)</span><span class="achievement-value" id="perfect-weeks">--</span></div>
+            <div class="head-to-head-divider"></div>
+            <div class="achievement-row head-to-head-toggle" role="button" tabindex="0" aria-expanded="false" aria-controls="head-to-head-details" onclick="toggleHeadToHead(event)" onkeydown="handleHeadToHeadKeydown(event)">
+                <span>Jamey Head to Head</span><span class="chevron">❯</span>
+            </div>
+            <div class="head-to-head-details" id="head-to-head-details" onclick="event.stopPropagation()"></div>
         </div>
     </div>
 
@@ -699,6 +713,49 @@
         document.getElementById('weeks-won').textContent = achievements.weeksWon;
         document.getElementById('undefeated-weeks').textContent = achievements.undefeatedWeeks;
         document.getElementById('perfect-weeks').textContent = achievements.perfectWeeks;
+        renderHeadToHead(matches);
+    }
+
+    function renderHeadToHead(matches) {
+        const currentOwner = 'Jamey';
+        const opponents = Object.keys(draftData).filter(owner => owner !== currentOwner);
+        const records = Object.fromEntries(opponents.map(owner => [owner, { wins: 0, draws: 0, losses: 0, points: 0 }]));
+        matches.filter(match => match.status === 'FINISHED').forEach(match => {
+            const homeOwner = getOwnerOfTeam(match.homeTeam.name);
+            const awayOwner = getOwnerOfTeam(match.awayTeam.name);
+            const homeScore = match.score.fullTime.home;
+            const awayScore = match.score.fullTime.away;
+            if (homeScore === null || awayScore === null) return;
+            const opponent = homeOwner === currentOwner ? awayOwner : awayOwner === currentOwner ? homeOwner : null;
+            if (!records[opponent]) return;
+            const currentScore = homeOwner === currentOwner ? homeScore : awayScore;
+            const opponentScore = homeOwner === currentOwner ? awayScore : homeScore;
+            if (currentScore > opponentScore) { records[opponent].wins += 1; records[opponent].points += 3; }
+            else if (currentScore === opponentScore) { records[opponent].draws += 1; records[opponent].points += 1; }
+            else records[opponent].losses += 1;
+        });
+        document.getElementById('head-to-head-details').innerHTML = opponents
+            .map(owner => ({ owner, ...records[owner] }))
+            .sort((a, b) => b.points - a.points || a.owner.localeCompare(b.owner))
+            .map(record => `<div class="head-to-head-row" onclick="collapseHeadToHead(event)"><span>${currentOwner} vs. ${record.owner}</span><span class="head-to-head-record">${record.wins}-${record.draws}-${record.losses}</span><span class="head-to-head-points">${record.points} PTS</span></div>`).join('');
+    }
+
+    function toggleHeadToHead(event) {
+        event.stopPropagation();
+        const toggle = event.currentTarget;
+        toggle.setAttribute('aria-expanded', String(toggle.getAttribute('aria-expanded') !== 'true'));
+    }
+
+    function collapseHeadToHead(event) {
+        event.stopPropagation();
+        document.querySelector('.head-to-head-toggle')?.setAttribute('aria-expanded', 'false');
+    }
+
+    function handleHeadToHeadKeydown(event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            toggleHeadToHead(event);
+        }
     }
 
     function toggleProfileCard() {
