@@ -434,6 +434,7 @@
         const homeAwayTitles = new Set([
             "Home Goals", "Away Goals", "Home Wins", "Away Wins",
             "Home Draws", "Away Draws", "Home Assists", "Away Assists",
+            "Home Goals + Assists", "Away Goals + Assists",
             "Home Failed to Score", "Away Failed to Score",
             "Home Clean Sheets", "Away Clean Sheets", "Home Wins + Draws", "Away Wins + Draws",
             "Home Comeback (Down at Half) Wins", "Away Comeback (Down at Half) Wins",
@@ -442,6 +443,11 @@
         ]);
         const pgaTitles = new Set(["PvP wins", "PGA", "PTS + PGA"]);
         const perMatchTitles = new Set(["PTS per match", "Goals per match", "Goals conceded per match"]);
+        const pplTitleOrder = [
+            "Golden Boot", "Golden Gloves (Clean Sheets)", "Goal difference", "Assists", "Wins + Draws",
+            "Comeback (Down at Half) Wins", "Comeback (Down at Half) Draws", "Comeback (Down at Half) Wins+Draws",
+            "Failed to Score"
+        ];
 
         function buildAwardCard(config) {
             const card = document.createElement('div');
@@ -789,6 +795,20 @@
                 pillClass: "pill-green", sortDir: 1, allTeams: true
             },
             {
+                title: "Home Goals + Assists",
+                players: [...players].sort((a,b) => b.homeGoals + b.homeAssists - (a.homeGoals + a.homeAssists) || b.PTS - a.PTS),
+                playerVal: p => p.homeGoals + p.homeAssists, teamVal: t => t.homeGoals + t.homeAssists, teamRaw: t => t.homeGoals + t.homeAssists,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.homeGoals + team.homeAssists, 0),
+                pillClass: "pill-purple", sortDir: 1, allTeams: true
+            },
+            {
+                title: "Away Goals + Assists",
+                players: [...players].sort((a,b) => b.awayGoals + b.awayAssists - (a.awayGoals + a.awayAssists) || b.PTS - a.PTS),
+                playerVal: p => p.awayGoals + p.awayAssists, teamVal: t => t.awayGoals + t.awayAssists, teamRaw: t => t.awayGoals + t.awayAssists,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.awayGoals + team.awayAssists, 0),
+                pillClass: "pill-purple", sortDir: 1, allTeams: true
+            },
+            {
                 title: "Home Clean Sheets",
                 players: [...players].sort((a,b) => b.homeCleanSheets - a.homeCleanSheets || b.PTS - a.PTS),
                 playerVal: p => p.homeCleanSheets, teamVal: t => t.homeCleanSheets, teamRaw: t => t.homeCleanSheets,
@@ -886,7 +906,12 @@
             }
         ];
 
-        awardConfigs.forEach(config => {
+        const orderedAwardConfigs = [
+            ...pplTitleOrder.map(title => awardConfigs.find(config => config.title === title)).filter(Boolean),
+            ...awardConfigs.filter(config => !pplTitleOrder.includes(config.title))
+        ];
+
+        orderedAwardConfigs.forEach(config => {
             if (config.title === "PvP wins") {
                 weeklyAwardConfigs.forEach(weeklyConfig => {
                     matchweekResultsContainer.appendChild(buildSimpleAwardCard(weeklyConfig));
