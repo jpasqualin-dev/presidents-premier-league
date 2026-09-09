@@ -1017,11 +1017,11 @@
                             if (!goalScorers[scorerKey]) goalScorers[scorerKey] = { name: scorerName, team: scorerTeam, goals: 0, assists: 0 };
                             goalScorers[scorerKey].goals += 1;
                             if (scorer.penalty) {
-                                const scoringTeamKey = scorer.teamProviderId === match.homeTeam.id ? homeTeamKey : awayTeamKey;
-                                if (scoringTeamKey) {
-                                    const scoringOwner = teamStats[scoringTeamKey].owner;
-                                    playerStats[scoringOwner].penaltiesConceded += 1;
-                                    teamStats[scoringTeamKey].penaltiesConceded += 1;
+                                const defendingTeamKey = scorer.teamProviderId === match.homeTeam.id ? awayTeamKey : homeTeamKey;
+                                if (defendingTeamKey) {
+                                    const defendingOwner = teamStats[defendingTeamKey].owner;
+                                    playerStats[defendingOwner].penaltiesConceded += 1;
+                                    teamStats[defendingTeamKey].penaltiesConceded += 1;
                                 }
                             }
                             if (scorer.assistName || scorer.assistProviderId) {
