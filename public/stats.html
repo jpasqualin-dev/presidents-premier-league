@@ -671,7 +671,7 @@
                 pillClass: "pill-red", sortDir: -1, allTeams: true
             },
             {
-                title: "Penalties Conceded",
+                title: "Penalty Goals Conceded",
                 players: [...players].sort((a,b) => a.penaltiesConceded - b.penaltiesConceded || a.PTS - b.PTS),
                 playerVal: p => p.penaltiesConceded, teamVal: t => t.penaltiesConceded, teamRaw: t => t.penaltiesConceded,
                 aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.penaltiesConceded, 0),
@@ -727,63 +727,63 @@
                 pillClass: "pill-green", sortDir: 1, allTeams: true
             },
             {
-                title: "Comeback (Down at Half) Wins",
+                title: "Comeback Wins (Down at Half)",
                 players: [...players].sort((a,b) => b.comebackWins - a.comebackWins || b.PTS - a.PTS),
                 playerVal: p => p.comebackWins, teamVal: t => t.comebackWins, teamRaw: t => t.comebackWins,
                 aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.comebackWins, 0),
                 pillClass: "pill-green", sortDir: 1, allTeams: true
             },
             {
-                title: "Comeback (Down at Half) Draws",
+                title: "Comeback Draws (Down at Half)",
                 players: [...players].sort((a,b) => b.comebackDraws - a.comebackDraws || b.PTS - a.PTS),
                 playerVal: p => p.comebackDraws, teamVal: t => t.comebackDraws, teamRaw: t => t.comebackDraws,
                 aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.comebackDraws, 0),
                 pillClass: "pill-blue", sortDir: 1, allTeams: true
             },
             {
-                title: "Comeback (Down at Half) Wins+Draws",
+                title: "Comeback Wins+Draws (Down at Half)",
                 players: [...players].sort((a,b) => b.comebackWinsDraws - a.comebackWinsDraws || b.PTS - a.PTS),
                 playerVal: p => p.comebackWinsDraws, teamVal: t => t.comebackWinsDraws, teamRaw: t => t.comebackWinsDraws,
                 aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.comebackWinsDraws, 0),
                 pillClass: "pill-purple", sortDir: 1, allTeams: true
             },
             {
-                title: "Home Comeback (Down at Half) Wins",
+                title: "Home Comeback Wins (Down at Half)",
                 players: [...players].sort((a,b) => b.homeComebackWins - a.homeComebackWins || b.PTS - a.PTS),
                 playerVal: p => p.homeComebackWins, teamVal: t => t.homeComebackWins, teamRaw: t => t.homeComebackWins,
                 aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.homeComebackWins, 0),
                 pillClass: "pill-green", sortDir: 1, allTeams: true
             },
             {
-                title: "Away Comeback (Down at Half) Wins",
+                title: "Away Comeback Wins (Down at Half)",
                 players: [...players].sort((a,b) => b.awayComebackWins - a.awayComebackWins || b.PTS - a.PTS),
                 playerVal: p => p.awayComebackWins, teamVal: t => t.awayComebackWins, teamRaw: t => t.awayComebackWins,
                 aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.awayComebackWins, 0),
                 pillClass: "pill-green", sortDir: 1, allTeams: true
             },
             {
-                title: "Home Comeback (Down at Half) Draws",
+                title: "Home Comeback Draws (Down at Half)",
                 players: [...players].sort((a,b) => b.homeComebackDraws - a.homeComebackDraws || b.PTS - a.PTS),
                 playerVal: p => p.homeComebackDraws, teamVal: t => t.homeComebackDraws, teamRaw: t => t.homeComebackDraws,
                 aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.homeComebackDraws, 0),
                 pillClass: "pill-blue", sortDir: 1, allTeams: true
             },
             {
-                title: "Away Comeback (Down at Half) Draws",
+                title: "Away Comeback Draws (Down at Half)",
                 players: [...players].sort((a,b) => b.awayComebackDraws - a.awayComebackDraws || b.PTS - a.PTS),
                 playerVal: p => p.awayComebackDraws, teamVal: t => t.awayComebackDraws, teamRaw: t => t.awayComebackDraws,
                 aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.awayComebackDraws, 0),
                 pillClass: "pill-blue", sortDir: 1, allTeams: true
             },
             {
-                title: "Home Comeback (Down at Half) Wins+Draws",
+                title: "Home Comeback Wins+Draws (Down at Half)",
                 players: [...players].sort((a,b) => b.homeComebackWinsDraws - a.homeComebackWinsDraws || b.PTS - a.PTS),
                 playerVal: p => p.homeComebackWinsDraws, teamVal: t => t.homeComebackWinsDraws, teamRaw: t => t.homeComebackWinsDraws,
                 aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.homeComebackWinsDraws, 0),
                 pillClass: "pill-purple", sortDir: 1, allTeams: true
             },
             {
-                title: "Away Comeback (Down at Half) Wins+Draws",
+                title: "Away Comeback Wins+Draws (Down at Half)",
                 players: [...players].sort((a,b) => b.awayComebackWinsDraws - a.awayComebackWinsDraws || b.PTS - a.PTS),
                 playerVal: p => p.awayComebackWinsDraws, teamVal: t => t.awayComebackWinsDraws, teamRaw: t => t.awayComebackWinsDraws,
                 aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.awayComebackWinsDraws, 0),
