@@ -760,7 +760,7 @@
             .map(owner => ({ owner, ...records[owner] }))
             .sort((a, b) => b.points - a.points || a.owner.localeCompare(b.owner))
             .map(record => `
-                <div class="head-to-head-row">
+                <div class="head-to-head-row" onclick="collapseHeadToHead(event)">
                     <span>Jordan vs. ${record.owner}</span>
                     <span class="head-to-head-record">${record.wins}-${record.draws}-${record.losses}</span>
                     <span class="head-to-head-points">${record.points} PTS</span>
@@ -772,6 +772,11 @@
         event.stopPropagation();
         const toggle = event.currentTarget;
         toggle.setAttribute('aria-expanded', String(toggle.getAttribute('aria-expanded') !== 'true'));
+    }
+
+    function collapseHeadToHead(event) {
+        event.stopPropagation();
+        document.querySelector('.head-to-head-toggle')?.setAttribute('aria-expanded', 'false');
     }
 
     function handleHeadToHeadKeydown(event) {
