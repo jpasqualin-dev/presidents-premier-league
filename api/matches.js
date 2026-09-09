@@ -44,8 +44,8 @@ async function readHistoricalMatches(sql) {
             m.venue, m.matchday,
             home.provider_team_id AS home_provider_id, home.canonical_name AS home_name, home.logo_url AS home_logo,
             away.provider_team_id AS away_provider_id, away.canonical_name AS away_name, away.logo_url AS away_logo,
-            COALESCE(
-                json_agg(json_build_object(
+            COALESCE((
+                SELECT json_agg(json_build_object(
                     'teamProviderId', scorer_team.provider_team_id,
                     'athleteProviderId', ms.provider_athlete_id,
                     'athleteName', ms.athlete_name,
@@ -54,14 +54,27 @@ async function readHistoricalMatches(sql) {
                     'minute', ms.minute,
                     'ownGoal', ms.own_goal,
                     'penalty', ms.penalty
-                ) ORDER BY ms.id) FILTER (WHERE ms.id IS NOT NULL),
-                '[]'::json
-            ) AS scorers
+                ) ORDER BY ms.id)
+                FROM match_scorers ms
+                LEFT JOIN teams scorer_team ON scorer_team.id = ms.team_id
+                WHERE ms.match_id = m.id
+            ), '[]'::json) AS scorers,
+            COALESCE((
+                SELECT json_agg(json_build_object(
+                    'teamProviderId', event_team.provider_team_id,
+                    'athleteProviderId', me.athlete_provider_id,
+                    'athleteName', me.athlete_name,
+                    'redCard', me.red_card,
+                    'yellowCard', me.yellow_card,
+                    'penalty', me.penalty
+                ) ORDER BY me.id)
+                FROM match_events me
+                LEFT JOIN teams event_team ON event_team.id = me.team_id
+                WHERE me.match_id = m.id
+            ), '[]'::json) AS events
         FROM matches m
         JOIN teams home ON home.id = m.home_team_id
         JOIN teams away ON away.id = m.away_team_id
-        LEFT JOIN match_scorers ms ON ms.match_id = m.id
-        LEFT JOIN teams scorer_team ON scorer_team.id = ms.team_id
         WHERE m.season = '2026'
         GROUP BY m.id, home.id, away.id
         ORDER BY m.kickoff_at ASC`;

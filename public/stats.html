@@ -205,6 +205,7 @@
         .pill-blue { background-color: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
         .pill-red { background-color: #fff5f5; color: #c53030; border: 1px solid #fed7d7; }
         .pill-green { background-color: #f0fff4; color: #276749; border: 1px solid #c6f6d5; }
+        .pill-yellow { background-color: #fffff0; color: #975a16; border: 1px solid #f6e05e; }
         .pill-purple { background-color: #faf5ff; color: #6b46c1; border: 1px solid #e9d8fd; }
         .pill-gray { background-color: #f7fafc; color: #4a5568; border: 1px solid #e2e8f0; }
 
@@ -326,7 +327,7 @@
                 player: player,
                 teams: draftData[player],
                 PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0,
-                goldenBoot: 0, homeGoals: 0, awayGoals: 0, failedToScore: 0, homeFailedToScore: 0, awayFailedToScore: 0, homeWins: 0, awayWins: 0, homeDraws: 0, awayDraws: 0, assists: 0, homeAssists: 0, awayAssists: 0, goldenGloves: 0, homeCleanSheets: 0, awayCleanSheets: 0, ppm: 0, gpm: 0, gcpm: 0,
+                goldenBoot: 0, homeGoals: 0, awayGoals: 0, failedToScore: 0, homeFailedToScore: 0, awayFailedToScore: 0, yellowCards: 0, redCards: 0, penaltiesConceded: 0, homeWins: 0, awayWins: 0, homeDraws: 0, awayDraws: 0, assists: 0, homeAssists: 0, awayAssists: 0, goldenGloves: 0, homeCleanSheets: 0, awayCleanSheets: 0, ppm: 0, gpm: 0, gcpm: 0,
                 pvpWins: 0, pga: 0, ptsPga: 0, comebackWins: 0, comebackDraws: 0, comebackWinsDraws: 0, homeComebackWins: 0, homeComebackDraws: 0, homeComebackWinsDraws: 0, awayComebackWins: 0, awayComebackDraws: 0, awayComebackWinsDraws: 0, roundsWon: 0,
                 undefeatedWeeks: 0, perfectWeeks: 0
             };
@@ -344,7 +345,7 @@
                     division: divName,
                     owner: owner || "Unassigned",
                     PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0, PGA: 0, pvpWins: 0, ptsPga: 0,
-                    goldenGloves: 0, homeCleanSheets: 0, awayCleanSheets: 0, failedToScore: 0, homeFailedToScore: 0, awayFailedToScore: 0, comebackWins: 0, comebackDraws: 0, comebackWinsDraws: 0, homeComebackWins: 0, homeComebackDraws: 0, homeComebackWinsDraws: 0, awayComebackWins: 0, awayComebackDraws: 0, awayComebackWinsDraws: 0, assists: 0, homeGoals: 0, awayGoals: 0, homeWins: 0, awayWins: 0, homeDraws: 0, awayDraws: 0, homeAssists: 0, awayAssists: 0
+                    goldenGloves: 0, homeCleanSheets: 0, awayCleanSheets: 0, failedToScore: 0, homeFailedToScore: 0, awayFailedToScore: 0, yellowCards: 0, redCards: 0, penaltiesConceded: 0, comebackWins: 0, comebackDraws: 0, comebackWinsDraws: 0, homeComebackWins: 0, homeComebackDraws: 0, homeComebackWinsDraws: 0, awayComebackWins: 0, awayComebackDraws: 0, awayComebackWinsDraws: 0, assists: 0, homeGoals: 0, awayGoals: 0, homeWins: 0, awayWins: 0, homeDraws: 0, awayDraws: 0, homeAssists: 0, awayAssists: 0
                 };
             });
         }
@@ -447,6 +448,7 @@
             "Golden Boot", "Golden Gloves (Clean Sheets)", "Goal difference", "Assists", "Wins + Draws",
             "Comeback (Down at Half) Wins", "Comeback (Down at Half) Draws", "Comeback (Down at Half) Wins+Draws",
             "Failed to Score"
+            , "Yellow Cards", "Red Cards", "Penalties Conceded"
         ];
 
         function buildAwardCard(config) {
@@ -653,6 +655,27 @@
                 playerVal: p => p.awayFailedToScore, teamVal: t => t.awayFailedToScore, teamRaw: t => t.awayFailedToScore,
                 aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.awayFailedToScore, 0),
                 pillClass: "pill-red", sortDir: -1, allTeams: true
+            },
+            {
+                title: "Yellow Cards",
+                players: [...players].sort((a,b) => a.yellowCards - b.yellowCards || a.PTS - b.PTS),
+                playerVal: p => p.yellowCards, teamVal: t => t.yellowCards, teamRaw: t => t.yellowCards,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.yellowCards, 0),
+                pillClass: "pill-yellow", sortDir: -1, allTeams: true
+            },
+            {
+                title: "Red Cards",
+                players: [...players].sort((a,b) => a.redCards - b.redCards || a.PTS - b.PTS),
+                playerVal: p => p.redCards, teamVal: t => t.redCards, teamRaw: t => t.redCards,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.redCards, 0),
+                pillClass: "pill-red", sortDir: -1, allTeams: true
+            },
+            {
+                title: "Penalties Conceded",
+                players: [...players].sort((a,b) => a.penaltiesConceded - b.penaltiesConceded || a.PTS - b.PTS),
+                playerVal: p => p.penaltiesConceded, teamVal: t => t.penaltiesConceded, teamRaw: t => t.penaltiesConceded,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.penaltiesConceded, 0),
+                pillClass: "pill-blue", sortDir: -1, allTeams: true
             },
             {
                 title: "Home Wins",
@@ -958,6 +981,22 @@
                         const awayTeamKey = findTeamKey(awayTeamName, teamStats);
                         const matchweek = match.matchday;
 
+                        for (const event of match.events || []) {
+                            const teamKey = event.teamProviderId === match.homeTeam.id ? homeTeamKey
+                                : event.teamProviderId === match.awayTeam.id ? awayTeamKey
+                                    : null;
+                            if (!teamKey) continue;
+                            const owner = teamStats[teamKey].owner;
+                            if (event.yellowCard) {
+                                playerStats[owner].yellowCards += 1;
+                                teamStats[teamKey].yellowCards += 1;
+                            }
+                            if (event.redCard) {
+                                playerStats[owner].redCards += 1;
+                                teamStats[teamKey].redCards += 1;
+                            }
+                        }
+
                         for (const scorer of match.scorers || []) {
                             const scorerName = scorer.athleteName || 'Unknown scorer';
                             const scorerKey = scorer.athleteProviderId || scorerName;
@@ -967,6 +1006,14 @@
                             if (!scorerTeam) continue;
                             if (!goalScorers[scorerKey]) goalScorers[scorerKey] = { name: scorerName, team: scorerTeam, goals: 0, assists: 0 };
                             goalScorers[scorerKey].goals += 1;
+                            if (scorer.penalty) {
+                                const scoringTeamKey = scorer.teamProviderId === match.homeTeam.id ? homeTeamKey : awayTeamKey;
+                                if (scoringTeamKey) {
+                                    const scoringOwner = teamStats[scoringTeamKey].owner;
+                                    playerStats[scoringOwner].penaltiesConceded += 1;
+                                    teamStats[scoringTeamKey].penaltiesConceded += 1;
+                                }
+                            }
                             if (scorer.assistName || scorer.assistProviderId) {
                                 const assistName = scorer.assistName || 'Unknown assister';
                                 const assistKey = scorer.assistProviderId || assistName;

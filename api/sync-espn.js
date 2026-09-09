@@ -70,15 +70,17 @@ async function fetchScoringDetails(event) {
         const target = event.competitions?.[0]?.competitors?.find(item => item.homeAway === competitor.homeAway);
         if (target && competitor.linescores) target.linescores = competitor.linescores;
     }
-    const scoringDetails = (payload.keyEvents || []).filter(item => item.scoringPlay);
-    if (!scoringDetails.length) return event.competitions?.[0]?.details || [];
-    return scoringDetails.map(item => ({
+    const keyEvents = payload.keyEvents || [];
+    if (!keyEvents.length) return event.competitions?.[0]?.details || [];
+    return keyEvents.map(item => ({
         type: item.type,
         clock: item.clock,
         team: item.team,
         scoreValue: item.scoreValue,
-        scoringPlay: true,
-        penaltyKick: Boolean(item.penaltyKick),
+        scoringPlay: Boolean(item.scoringPlay),
+        redCard: Boolean(item.redCard) || item.type?.type === 'red-card',
+        yellowCard: Boolean(item.yellowCard) || item.type?.type === 'yellow-card',
+        penaltyKick: Boolean(item.penaltyKick) || item.type?.type === 'penalty---scored',
         ownGoal: Boolean(item.ownGoal),
         shootout: Boolean(item.shootout),
         athletesInvolved: (item.participants || []).map(participant => participant.athlete).filter(Boolean)
