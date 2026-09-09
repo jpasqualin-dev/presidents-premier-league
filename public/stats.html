@@ -252,6 +252,9 @@
         <div class="loading-state">Loading season awards...</div>
     </div>
 
+    <h2>Per Match Stats</h2>
+    <div id="per-match-container" class="stats-grid"></div>
+
     <h2>Matchweek Results</h2>
     <div id="matchweek-results-container" class="stats-grid"></div>
 
@@ -417,11 +420,13 @@
     function renderSeasonAwards(playerStatsObj, teamStatsObj, goalScorers) {
         const container = document.getElementById('season-awards-container');
         const matchweekResultsContainer = document.getElementById('matchweek-results-container');
+        const perMatchContainer = document.getElementById('per-match-container');
         const homeAwayContainer = document.getElementById('home-away-container');
         const pgaContainer = document.getElementById('pga-container');
         const individualStatsContainer = document.getElementById('individual-stats-container');
         container.innerHTML = '';
         matchweekResultsContainer.innerHTML = '';
+        perMatchContainer.innerHTML = '';
         homeAwayContainer.innerHTML = '';
         pgaContainer.innerHTML = '';
         individualStatsContainer.innerHTML = '';
@@ -436,6 +441,7 @@
             "Home Comeback (Down at Half) Wins+Draws", "Away Comeback (Down at Half) Wins+Draws"
         ]);
         const pgaTitles = new Set(["PvP wins", "PGA", "PTS + PGA"]);
+        const perMatchTitles = new Set(["PTS per match", "Goals per match", "Goals conceded per match"]);
 
         function buildAwardCard(config) {
             const card = document.createElement('div');
@@ -886,7 +892,9 @@
                     matchweekResultsContainer.appendChild(buildSimpleAwardCard(weeklyConfig));
                 });
             }
-            const targetContainer = homeAwayTitles.has(config.title)
+            const targetContainer = perMatchTitles.has(config.title)
+                ? perMatchContainer
+                : homeAwayTitles.has(config.title)
                 ? homeAwayContainer
                 : pgaTitles.has(config.title)
                     ? pgaContainer
