@@ -450,6 +450,15 @@
             "Failed to Score"
             , "Yellow Cards", "Red Cards", "Penalties Conceded"
         ];
+        const homeAwayTitleOrder = [
+            "Home Goals", "Away Goals", "Home Assists", "Away Assists",
+            "Home Goals + Assists", "Away Goals + Assists", "Home Clean Sheets", "Away Clean Sheets",
+            "Home Wins", "Away Wins", "Home Draws", "Away Draws", "Home Wins + Draws", "Away Wins + Draws",
+            "Home Comeback Wins (Down at Half)", "Away Comeback Wins (Down at Half)",
+            "Home Comeback Draws (Down at Half)", "Away Comeback Draws (Down at Half)",
+            "Home Comeback Wins+Draws (Down at Half)",
+            "Away Comeback Wins+Draws (Down at Half)", "Home Failed to Score", "Away Failed to Score"
+        ];
 
         function buildAwardCard(config) {
             const card = document.createElement('div');
@@ -636,7 +645,7 @@
                 pillClass: "pill-green", sortDir: 1, allTeams: true
             },
             {
-                title: "Failed to Score",
+                title: "Failed to Score (Shutout)",
                 players: [...players].sort((a,b) => a.failedToScore - b.failedToScore || a.PTS - b.PTS),
                 playerVal: p => p.failedToScore, teamVal: t => t.failedToScore, teamRaw: t => t.failedToScore,
                 aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.failedToScore, 0),
@@ -931,7 +940,8 @@
 
         const orderedAwardConfigs = [
             ...pplTitleOrder.map(title => awardConfigs.find(config => config.title === title)).filter(Boolean),
-            ...awardConfigs.filter(config => !pplTitleOrder.includes(config.title))
+            ...homeAwayTitleOrder.map(title => awardConfigs.find(config => config.title === title)).filter(Boolean),
+            ...awardConfigs.filter(config => !pplTitleOrder.includes(config.title) && !homeAwayTitleOrder.includes(config.title))
         ];
 
         orderedAwardConfigs.forEach(config => {
