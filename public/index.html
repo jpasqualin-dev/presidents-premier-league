@@ -6,6 +6,21 @@
     <title>Presidents Premier League - Fantasy EPL (2026/2027 Season)</title>
     <link rel="stylesheet" href="theme.css">
     <style>
+        :root {
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-main: #1a1a1a;
+            --text-muted: #718096;
+            --pill-inactive: transparent;
+            --pill-active: #ffffff;
+            --win-color: #00a667;
+            --loss-color: #e53e3e;
+            --draw-color: #718096;
+            --border-color: #edf2f7;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --header-purple: #38003c;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #fff;
@@ -712,6 +727,8 @@
         .event-icon.yellow, .event-icon.red { width: 12px; height: 17px; border-radius: 2px; }
         .event-icon.yellow { background: #facc15; }
         .event-icon.red { background: #ef4444; }
+        .timeline-event.goal .event-main,
+        .timeline-event.card .event-main { white-space: nowrap; }
         .event-assist { margin-top: 3px; color: var(--text-muted); font-size: 0.72rem; }
         .event-sub-on { color: #16a37a; }
         .event-sub-off { color: #d05a62; }
@@ -1243,7 +1260,8 @@
                 detail = `<span>${escapeHtml(event.athleteName || (isRed ? 'Red card' : 'Yellow card'))}</span>`;
             } else detail = `<span>${escapeHtml(event.athleteName || event.eventType || 'Match event')}</span>`;
             const main = side === 'home' ? `${icon}${detail}` : `${detail}${icon}`;
-            return `<div class="timeline-event ${side}"><span class="event-copy"><span class="event-main">${main}</span>${secondary}</span><span class="event-minute">${escapeHtml(minute ? `${minute}'` : '')}</span></div>`;
+            const eventClass = isGoal ? 'goal' : isRed || isYellow ? 'card' : isSubstitution ? 'substitution' : 'generic';
+            return `<div class="timeline-event ${side} ${eventClass}"><span class="event-copy"><span class="event-main">${main}</span>${secondary}</span><span class="event-minute">${escapeHtml(minute ? `${minute}'` : '')}</span></div>`;
         };
         const items = [period('Kick-off')];
         let halfTimeInserted = false;
@@ -1269,9 +1287,14 @@
 
     function renderMatchScorers(match) {
         const scorers = Array.isArray(match.scorers) ? match.scorers : [];
+        const scorerMinute = scorer => Number.isFinite(Number(scorer.minute)) ? Number(scorer.minute) : Infinity;
+        const formatScorerMinute = minute => {
+            const value = String(minute || '').trim();
+            return value ? `${value.replace(/'+$/, '')}'` : '';
+        };
         const renderTeam = teamId => {
-            const items = scorers.filter(scorer => String(scorer.teamProviderId) === String(teamId)).sort((a, b) => (Number(a.minute) || Infinity) - (Number(b.minute) || Infinity));
-            return items.length ? items.map(scorer => `<span class="match-scorer">${escapeHtml(scorer.athleteName)} ${escapeHtml(String(scorer.minute || '').replace(/'+$/, "'"))}${scorer.ownGoal ? ' (OG)' : ''}${scorer.penalty ? ' (P)' : ''}</span>`).join('') : '<span class="match-scorer-empty">No goals</span>';
+            const items = scorers.filter(scorer => String(scorer.teamProviderId) === String(teamId)).sort((a, b) => scorerMinute(a) - scorerMinute(b));
+            return items.length ? items.map(scorer => `<span class="match-scorer">${escapeHtml(scorer.athleteName)} ${escapeHtml(formatScorerMinute(scorer.minute))}${scorer.ownGoal ? ' (OG)' : ''}${scorer.penalty ? ' (P)' : ''}</span>`).join('') : '<span class="match-scorer-empty">No goals</span>';
         };
         return `<div class="match-scorers"><div class="match-scorer-column">${renderTeam(match.homeTeam.id || match.homeTeam.providerId)}</div><div class="match-scorer-column away">${renderTeam(match.awayTeam.id || match.awayTeam.providerId)}</div></div>`;
     }
