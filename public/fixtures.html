@@ -1207,7 +1207,7 @@
             return `<div class="timeline-event ${side} ${eventClass}"><span class="event-copy"><span class="event-main">${mainContent}</span>${secondaryContent}</span><span class="event-minute">${escapeHtml(minute)}</span></div>`;
         };
 
-        const timelineItems = [];
+        const timelineItems = [renderPeriod('Kick-off')];
         let halfTimeInserted = false;
         events.forEach(event => {
             if (hasHalfTime && !halfTimeInserted && parseInt(event.minute || event.clockDisplay || 0, 10) >= 45) {
