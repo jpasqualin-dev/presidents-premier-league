@@ -1271,6 +1271,25 @@
         const data = await getMatchData();
         const match = data?.matches?.find(item => String(item.id) === String(matchId));
         if (!match) throw new Error('Match details were not found.');
+        if (match.provider === 'espn' || String(match.id).startsWith('espn:')) {
+            try {
+                const response = await fetch(`/api/match-details?event=${encodeURIComponent(match.providerEventId || match.id)}`, { cache: 'no-store' });
+                if (response.ok) {
+                    const detailData = await response.json();
+                    const events = [...(match.events || []), ...(detailData.substitutions || [])];
+                    const seenSubstitutions = new Set();
+                    match.events = events.filter(event => {
+                        if (!event.substitution) return true;
+                        const key = [event.teamProviderId, event.minute, event.comingOn, event.goingOff].join('|');
+                        if (seenSubstitutions.has(key)) return false;
+                        seenSubstitutions.add(key);
+                        return true;
+                    });
+                }
+            } catch (error) {
+                console.warn('Optional ESPN match details unavailable:', error);
+            }
+        }
         return match;
     }
 
