@@ -521,7 +521,7 @@
         .match-scorer-column.away { text-align: right; }
         .match-scorer { display: block; }
         .match-scorer-empty { color: var(--text-muted); opacity: 0.75; }
-        .match-detail-section h3 { margin-bottom: 16px; color: var(--text-main); font-size: 0.95rem; }
+        .match-detail-section h3 { margin-bottom: 16px; color: var(--text-main); font-size: 0.95rem; text-align: center; }
         .stat-row { display: grid; grid-template-columns: 54px 1fr 54px; align-items: center; gap: 10px; margin: 13px 0; font-size: 0.78rem; }
         .stat-value { font-weight: 700; color: var(--text-main); }
         .stat-value:last-child { text-align: right; }
@@ -530,14 +530,25 @@
         .stat-bar-home, .stat-bar-away { display: block; height: 8px; }
         .stat-bar-home { background: #3b82f6; }
         .stat-bar-away { background: #ef4444; }
-        .timeline { position: relative; display: grid; gap: 12px; }
-        .timeline::before { content: ""; position: absolute; top: 4px; bottom: 4px; left: 34px; width: 2px; background: var(--border-color); }
-        .timeline-event { position: relative; display: grid; grid-template-columns: 58px 1fr; gap: 12px; align-items: center; min-height: 34px; }
-        .event-minute { color: var(--text-muted); font-size: 0.75rem; font-weight: 700; text-align: right; }
-        .event-copy { padding-left: 12px; color: var(--text-main); font-size: 0.82rem; }
-        .event-dot { position: absolute; left: 29px; width: 12px; height: 12px; border: 3px solid var(--card-bg); border-radius: 50%; background: #3b82f6; box-shadow: 0 0 0 1px var(--border-color); }
-        .event-dot.card { background: #facc15; }
-        .event-dot.red { background: #ef4444; }
+        .timeline { position: relative; display: grid; gap: 14px; padding: 4px 0; }
+        .timeline::before { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: var(--border-color); transform: translateX(-50%); }
+        .timeline-event { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr); align-items: center; min-height: 42px; }
+        .timeline-event.home .event-copy { grid-column: 1; grid-row: 1; padding-right: 14px; text-align: right; }
+        .timeline-event.away .event-copy { grid-column: 3; grid-row: 1; padding-left: 14px; text-align: left; }
+        .event-minute { z-index: 1; grid-column: 2; grid-row: 1; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; margin: auto; border: 2px solid var(--card-bg); border-radius: 50%; background: var(--border-color); color: var(--text-main); font-size: 0.7rem; font-weight: 700; box-shadow: 0 0 0 1px var(--border-color); }
+        .event-copy { color: var(--text-main); font-size: 0.82rem; line-height: 1.25; }
+        .event-main { display: flex; align-items: center; gap: 6px; justify-content: flex-end; font-weight: 600; }
+        .timeline-event.away .event-main { justify-content: flex-start; }
+        .event-icon { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; flex: 0 0 20px; border-radius: 50%; background: var(--border-color); font-size: 0.72rem; }
+        .event-icon.goal { background: transparent; }
+        .event-icon.yellow { width: 12px; height: 17px; border-radius: 2px; background: #facc15; }
+        .event-icon.red { width: 12px; height: 17px; border-radius: 2px; background: #ef4444; }
+        .event-assist { margin-top: 3px; color: var(--text-muted); font-size: 0.72rem; }
+        .event-sub-on { color: #16a37a; }
+        .event-sub-off { color: #d05a62; }
+        .timeline-period { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; min-height: 30px; color: var(--text-main); font-size: 0.78rem; font-weight: 800; text-align: center; }
+        .timeline-period::before, .timeline-period::after { content: ""; height: 1px; background: var(--border-color); }
+        .timeline-period-label { padding: 0 4px; background: var(--card-bg); }
         .lineups { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .lineup-team h4 { margin-bottom: 8px; color: var(--text-main); font-size: 0.82rem; }
         .formation { margin-bottom: 8px; color: var(--text-muted); font-size: 0.75rem; }
@@ -1126,16 +1137,60 @@
         const awayId = String(match.awayTeam.id || match.awayTeam.providerId);
         const scorers = (match.scorers || []).map(item => ({ ...item, eventType: 'Goal' }));
         const events = [...scorers, ...(match.events || [])].sort((a, b) => parseInt(a.minute || a.clockDisplay || 0, 10) - parseInt(b.minute || b.clockDisplay || 0, 10));
-        if (!events.length) return '<p class="empty-detail">No match events are available yet.</p>';
+        const halfTime = match.score?.halfTime;
+        const hasHalfTime = halfTime?.home != null && halfTime?.away != null;
+        const hasFullTime = match.status === 'FINISHED' && match.score?.fullTime?.home != null && match.score?.fullTime?.away != null;
+        let runningHome = 0;
+        let runningAway = 0;
 
-        return `<div class="timeline">${events.map(event => {
-            const isRed = event.redCard;
-            const isCard = event.yellowCard || isRed;
-            const label = event.eventType || (isRed ? 'Red card' : 'Yellow card');
-            const team = String(event.teamProviderId) === homeId ? match.homeTeam.name : String(event.teamProviderId) === awayId ? match.awayTeam.name : '';
-            const detail = event.athleteName ? `${event.athleteName} · ${label}` : label;
-            return `<div class="timeline-event"><span class="event-minute">${escapeHtml(event.minute || '?')}</span><span class="event-dot${isRed ? ' red' : isCard ? ' card' : ''}"></span><span class="event-copy">${escapeHtml(detail)}${team ? ` <span class="match-status">${escapeHtml(team)}</span>` : ''}</span></div>`;
-        }).join('')}</div>`;
+        const renderPeriod = label => `<div class="timeline-period"><span></span><span class="timeline-period-label">${escapeHtml(label)}</span><span></span></div>`;
+        const renderEvent = event => {
+            const eventTeamId = String(event.teamProviderId || '');
+            const side = eventTeamId === homeId ? 'home' : eventTeamId === awayId ? 'away' : 'away';
+            const isGoal = event.eventType === 'Goal' || event.scoringPlay;
+            const isRed = Boolean(event.redCard);
+            const isYellow = Boolean(event.yellowCard);
+            const isSubstitution = Boolean(event.substitution || event.eventType?.toLowerCase().includes('substitution'));
+            const minute = event.minute || event.clockDisplay || '?';
+            let mainContent = '';
+            let secondaryContent = '';
+
+            if (isGoal) {
+                if (event.ownGoal) {
+                    if (side === 'home') runningAway += 1;
+                    else runningHome += 1;
+                } else if (side === 'home') runningHome += 1;
+                else runningAway += 1;
+                const assist = event.assistName ? `<div class="event-assist">assist by ${escapeHtml(event.assistName)}</div>` : '';
+                mainContent = `<span class="event-icon goal" aria-hidden="true">⚽</span><span>${escapeHtml(event.athleteName || 'Goal')} (${runningHome} - ${runningAway})</span>`;
+                secondaryContent = assist;
+            } else if (isSubstitution) {
+                const comingOn = event.comingOn || event.playerOn || event.substitute || event.athleteName || 'Player coming on';
+                const goingOff = event.goingOff || event.playerOff || event.replacedPlayer || '';
+                mainContent = `<span class="event-icon" aria-hidden="true">↔</span><span><span class="event-sub-on">${escapeHtml(comingOn)}</span>${goingOff ? `<br><span class="event-sub-off">${escapeHtml(goingOff)}</span>` : ''}</span>`;
+            } else if (isRed || isYellow) {
+                mainContent = `<span class="event-icon ${isRed ? 'red' : 'yellow'}" aria-hidden="true"></span><span>${escapeHtml(event.athleteName || (isRed ? 'Red card' : 'Yellow card'))}</span>`;
+            } else {
+                mainContent = `<span>${escapeHtml(event.athleteName || event.eventType || 'Match event')}</span>`;
+            }
+
+            return `<div class="timeline-event ${side}"><span class="event-copy"><span class="event-main">${mainContent}</span>${secondaryContent}</span><span class="event-minute">${escapeHtml(minute)}</span></div>`;
+        };
+
+        const timelineItems = [renderPeriod('Kickoff')];
+        let halfTimeInserted = false;
+        events.forEach(event => {
+            if (hasHalfTime && !halfTimeInserted && parseInt(event.minute || event.clockDisplay || 0, 10) >= 45) {
+                timelineItems.push(renderPeriod(`HT ${halfTime.home} - ${halfTime.away}`));
+                halfTimeInserted = true;
+            }
+            timelineItems.push(renderEvent(event));
+        });
+        if (hasHalfTime && !events.length) timelineItems.push(renderPeriod(`HT ${halfTime.home} - ${halfTime.away}`));
+        if (hasFullTime) timelineItems.push(renderPeriod('FT'));
+        if (!events.length && !hasHalfTime && !hasFullTime) timelineItems.push('<p class="empty-detail">No match events are available yet.</p>');
+
+        return `<div class="timeline">${timelineItems.join('')}</div>`;
     }
 
     function renderLineups(match) {
@@ -1170,7 +1225,7 @@
         const away = match.awayTeam;
         const score = match.score?.fullTime?.home == null ? 'vs' : `${match.score.fullTime.home} - ${match.score.fullTime.away}`;
         const status = match.status === 'FINISHED' ? 'Full time' : match.status === 'IN_PLAY' ? `${match.minute || 'Live'}'` : match.status === 'PAUSED' ? 'Half time' : 'Upcoming';
-        return `<section class="match-hero"><div class="match-meta">${escapeHtml(formatMatchDate(match.utcDate))}</div><div class="match-scoreline"><div class="match-team"><span>${escapeHtml(home.name)}</span>${home.crest ? `<img src="${escapeHtml(home.crest)}" alt="">` : ''}<span class="match-team-owner">${escapeHtml(getOwnerOfTeam(home.name))}</span></div><div class="match-score">${escapeHtml(score)}<span class="match-status">${escapeHtml(status)}</span></div><div class="match-team"><span>${escapeHtml(away.name)}</span>${away.crest ? `<img src="${escapeHtml(away.crest)}" alt="">` : ''}<span class="match-team-owner">${escapeHtml(getOwnerOfTeam(away.name))}</span></div></div><div class="match-venue">${escapeHtml(match.venue || 'Venue unavailable')}</div>${renderMatchScorers(match)}</section><section class="match-detail-section"><h3>Top Stats</h3>${renderMatchStats(match)}</section><section class="match-detail-section"><h3>Match events</h3>${renderMatchEvents(match)}</section><section class="match-detail-section"><h3>Lineups</h3>${renderLineups(match)}</section>`;
+        return `<section class="match-hero"><div class="match-meta">${escapeHtml(formatMatchDate(match.utcDate))}</div><div class="match-scoreline"><div class="match-team"><span>${escapeHtml(home.name)}</span>${home.crest ? `<img src="${escapeHtml(home.crest)}" alt="">` : ''}<span class="match-team-owner">${escapeHtml(getOwnerOfTeam(home.name))}</span></div><div class="match-score">${escapeHtml(score)}<span class="match-status">${escapeHtml(status)}</span></div><div class="match-team"><span>${escapeHtml(away.name)}</span>${away.crest ? `<img src="${escapeHtml(away.crest)}" alt="">` : ''}<span class="match-team-owner">${escapeHtml(getOwnerOfTeam(away.name))}</span></div></div><div class="match-venue">${escapeHtml(match.venue || 'Venue unavailable')}</div>${renderMatchScorers(match)}</section><section class="match-detail-section"><h3>Top Stats</h3>${renderMatchStats(match)}</section><section class="match-detail-section"><h3>Match Events</h3>${renderMatchEvents(match)}</section><section class="match-detail-section"><h3>Lineups</h3>${renderLineups(match)}</section>`;
     }
 
     async function fetchMatchById(matchId) {
