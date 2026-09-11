@@ -1249,7 +1249,11 @@
             const starters = players.filter(player => player.starter);
             const substitutes = players.filter(player => !player.starter);
             const renderPlayers = group => group.length
-                ? `<ol>${group.map(player => `<li>${escapeHtml(player.name || player)}${player.position ? ` <span class="lineup-position">(${escapeHtml(player.position)})</span>` : ''}</li>`).join('')}</ol>`
+                ? `<ol>${group.map(player => {
+                    const playerName = typeof player === 'string' ? player : player.name || player.displayName || player.athlete?.displayName || 'Unknown player';
+                    const position = typeof player === 'object' ? player.position : null;
+                    return `<li>${escapeHtml(playerName)}${position ? ` <span class="lineup-position">(${escapeHtml(position)})</span>` : ''}</li>`;
+                }).join('')}</ol>`
                 : '<p class="empty-detail">Unavailable</p>';
             return `<div class="lineup-team"><h4>${escapeHtml(getDetailTeam(match, side).name)}</h4><div class="formation">${escapeHtml(lineup.formation || 'Formation unavailable')}</div><div class="lineup-group"><h5>Starting XI</h5>${renderPlayers(starters)}</div><div class="lineup-group"><h5>Substitutes</h5>${renderPlayers(substitutes)}</div></div>`;
         }).join('')}</div>`;
