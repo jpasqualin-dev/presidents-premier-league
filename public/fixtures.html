@@ -540,6 +540,8 @@
         .timeline-event.home .event-minute { order: 1; }
         .timeline-event.away .event-minute { order: 3; }
         .event-copy { max-width: 50%; font-size: 0.82rem; line-height: 1.25; }
+        .timeline-event.home .event-copy,
+        .timeline-event.away .event-copy { max-width: 70%; }
         .event-main { display: flex; align-items: center; gap: 6px; font-weight: 600; }
         .timeline-event.home .event-main { justify-content: flex-start; }
         .timeline-event.away .event-main { justify-content: flex-end; }
@@ -547,6 +549,8 @@
         .event-icon.goal { background: transparent; }
         .event-icon.yellow { width: 12px; height: 17px; border-radius: 2px; background: #facc15; }
         .event-icon.red { width: 12px; height: 17px; border-radius: 2px; background: #ef4444; }
+        .timeline-event.goal .event-main,
+        .timeline-event.card .event-main { white-space: nowrap; }
         .event-assist { margin-top: 3px; color: var(--text-muted); font-size: 0.72rem; }
         .event-sub-on { color: #16a37a; }
         .event-sub-off { color: #d05a62; }
@@ -563,6 +567,8 @@
         @media (max-width: 600px) {
             .match-drawer { width: 100%; }
             .match-detail-content { padding: 12px; }
+            .timeline-event.home .event-copy,
+            .timeline-event.away .event-copy { max-width: calc(100% - 48px); }
         }
 
         /* Mobile tweaks */
@@ -1163,6 +1169,7 @@
             const isYellow = Boolean(event.yellowCard);
             const isSubstitution = Boolean(event.substitution || event.eventType?.toLowerCase().includes('substitution'));
             const minute = formatEventMinute(event.minute || event.clockDisplay);
+            const eventClass = isGoal ? 'goal' : isRed || isYellow ? 'card' : isSubstitution ? 'substitution' : 'generic';
             let mainContent = '';
             let secondaryContent = '';
             let iconMarkup = '';
@@ -1191,7 +1198,7 @@
             }
 
             mainContent = side === 'home' ? `${iconMarkup}${detailMarkup}` : `${detailMarkup}${iconMarkup}`;
-            return `<div class="timeline-event ${side}"><span class="event-copy"><span class="event-main">${mainContent}</span>${secondaryContent}</span><span class="event-minute">${escapeHtml(minute)}</span></div>`;
+            return `<div class="timeline-event ${side} ${eventClass}"><span class="event-copy"><span class="event-main">${mainContent}</span>${secondaryContent}</span><span class="event-minute">${escapeHtml(minute)}</span></div>`;
         };
 
         const timelineItems = [];
