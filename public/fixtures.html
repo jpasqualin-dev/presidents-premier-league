@@ -511,16 +511,23 @@
         .match-meta { color: var(--text-muted); font-size: 0.82rem; text-align: center; }
         .match-venue { margin-top: 5px; color: var(--text-muted); font-size: 0.78rem; text-align: center; }
         .match-scoreline { display: grid; grid-template-columns: 1fr 100px 1fr; align-items: center; gap: 10px; margin: 18px 0; }
-        .match-team { display: grid; justify-items: center; gap: 8px; text-align: center; font-weight: 700; }
+        .match-team { display: grid; justify-items: center; gap: 6px; text-align: center; font-weight: 700; }
         .match-team img { width: 48px; height: 48px; object-fit: contain; }
+        .match-team-owner { color: var(--text-muted); font-size: 0.72rem; font-weight: 500; }
         .match-score { font-size: 1.8rem; font-weight: 800; text-align: center; color: var(--text-main); }
         .match-status { display: block; margin-top: 2px; color: var(--text-muted); font-size: 0.72rem; font-weight: 600; text-align: center; }
+        .match-scorers { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--border-color); }
+        .match-scorer-column { display: flex; flex-direction: column; gap: 3px; color: var(--text-muted); font-size: 0.78rem; line-height: 1.25; }
+        .match-scorer-column.away { text-align: right; }
+        .match-scorer { display: block; }
+        .match-scorer-empty { color: var(--text-muted); opacity: 0.75; }
         .match-detail-section h3 { margin-bottom: 16px; color: var(--text-main); font-size: 0.95rem; }
         .stat-row { display: grid; grid-template-columns: 54px 1fr 54px; align-items: center; gap: 10px; margin: 13px 0; font-size: 0.78rem; }
         .stat-value { font-weight: 700; color: var(--text-main); }
         .stat-value:last-child { text-align: right; }
         .stat-label { grid-column: 1 / -1; order: -1; text-align: center; color: var(--text-muted); }
         .stat-bars { display: flex; height: 8px; overflow: hidden; grid-column: 2; grid-row: 2; border-radius: 99px; background: var(--border-color); }
+        .stat-bar-home, .stat-bar-away { display: block; height: 8px; }
         .stat-bar-home { background: #3b82f6; }
         .stat-bar-away { background: #ef4444; }
         .timeline { position: relative; display: grid; gap: 12px; }
@@ -1059,11 +1066,11 @@
     }
 
     const detailStatLabels = {
-        possession: 'Ball possession',
-        ballPossession: 'Ball possession',
-        shots: 'Total shots',
-        totalShots: 'Total shots',
-        shotsOnTarget: 'Shots on target',
+        possession: 'Ball Possession',
+        ballPossession: 'Ball Possession',
+        shots: 'Total Shots',
+        totalShots: 'Total Shots',
+        shotsOnTarget: 'Shots on Target',
         expectedGoals: 'Expected goals (xG)',
         xgoals: 'Expected goals (xG)'
     };
@@ -1142,12 +1149,28 @@
         }).join('')}</div>`;
     }
 
+    function renderMatchScorers(match) {
+        const scorers = Array.isArray(match.scorers) ? match.scorers : [];
+        const homeId = String(match.homeTeam.id || match.homeTeam.providerId);
+        const awayId = String(match.awayTeam.id || match.awayTeam.providerId);
+        const scorerMinute = scorer => Number.isFinite(Number(scorer.minute)) ? Number(scorer.minute) : Infinity;
+        const renderTeamScorers = (teamId, emptyLabel) => {
+            const teamScorers = scorers
+                .filter(scorer => String(scorer.teamProviderId) === teamId)
+                .sort((a, b) => scorerMinute(a) - scorerMinute(b));
+            return teamScorers.length
+                ? teamScorers.map(scorer => `<span class="match-scorer">${escapeHtml(scorer.athleteName)} ${escapeHtml(scorer.minute || '')}${scorer.ownGoal ? ' (OG)' : ''}${scorer.penalty ? ' (P)' : ''}</span>`).join('')
+                : `<span class="match-scorer-empty">${emptyLabel}</span>`;
+        };
+        return `<div class="match-scorers"><div class="match-scorer-column home" aria-label="${escapeHtml(match.homeTeam.name)} goal scorers">${renderTeamScorers(homeId, 'No goals')}</div><div class="match-scorer-column away" aria-label="${escapeHtml(match.awayTeam.name)} goal scorers">${renderTeamScorers(awayId, 'No goals')}</div></div>`;
+    }
+
     function renderMatchDetail(match) {
         const home = match.homeTeam;
         const away = match.awayTeam;
         const score = match.score?.fullTime?.home == null ? 'vs' : `${match.score.fullTime.home} - ${match.score.fullTime.away}`;
         const status = match.status === 'FINISHED' ? 'Full time' : match.status === 'IN_PLAY' ? `${match.minute || 'Live'}'` : match.status === 'PAUSED' ? 'Half time' : 'Upcoming';
-        return `<section class="match-hero"><div class="match-meta">${escapeHtml(formatMatchDate(match.utcDate))}</div><div class="match-scoreline"><div class="match-team">${home.crest ? `<img src="${escapeHtml(home.crest)}" alt="">` : ''}<span>${escapeHtml(home.name)}</span></div><div class="match-score">${escapeHtml(score)}<span class="match-status">${escapeHtml(status)}</span></div><div class="match-team">${away.crest ? `<img src="${escapeHtml(away.crest)}" alt="">` : ''}<span>${escapeHtml(away.name)}</span></div></div><div class="match-venue">${escapeHtml(match.venue || 'Venue unavailable')}</div></section><section class="match-detail-section"><h3>Top stats</h3>${renderMatchStats(match)}</section><section class="match-detail-section"><h3>Match events</h3>${renderMatchEvents(match)}</section><section class="match-detail-section"><h3>Lineups</h3>${renderLineups(match)}</section>`;
+        return `<section class="match-hero"><div class="match-meta">${escapeHtml(formatMatchDate(match.utcDate))}</div><div class="match-scoreline"><div class="match-team"><span>${escapeHtml(home.name)}</span>${home.crest ? `<img src="${escapeHtml(home.crest)}" alt="">` : ''}<span class="match-team-owner">${escapeHtml(getOwnerOfTeam(home.name))}</span></div><div class="match-score">${escapeHtml(score)}<span class="match-status">${escapeHtml(status)}</span></div><div class="match-team"><span>${escapeHtml(away.name)}</span>${away.crest ? `<img src="${escapeHtml(away.crest)}" alt="">` : ''}<span class="match-team-owner">${escapeHtml(getOwnerOfTeam(away.name))}</span></div></div><div class="match-venue">${escapeHtml(match.venue || 'Venue unavailable')}</div>${renderMatchScorers(match)}</section><section class="match-detail-section"><h3>Top Stats</h3>${renderMatchStats(match)}</section><section class="match-detail-section"><h3>Match events</h3>${renderMatchEvents(match)}</section><section class="match-detail-section"><h3>Lineups</h3>${renderLineups(match)}</section>`;
     }
 
     async function fetchMatchById(matchId) {
