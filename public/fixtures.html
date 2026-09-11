@@ -543,8 +543,6 @@
         .event-main { display: flex; align-items: center; gap: 6px; font-weight: 600; }
         .timeline-event.home .event-main { justify-content: flex-start; }
         .timeline-event.away .event-main { justify-content: flex-end; }
-        .timeline-event.home .event-icon { order: 2; }
-        .timeline-event.away .event-icon { order: 2; }
         .event-icon { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; flex: 0 0 20px; border-radius: 50%; background: var(--border-color); font-size: 0.72rem; }
         .event-icon.goal { background: transparent; }
         .event-icon.yellow { width: 12px; height: 17px; border-radius: 2px; background: #facc15; }
@@ -1142,7 +1140,9 @@
         const homeId = String(match.homeTeam.id || match.homeTeam.providerId);
         const awayId = String(match.awayTeam.id || match.awayTeam.providerId);
         const scorers = (match.scorers || []).map(item => ({ ...item, eventType: 'Goal' }));
-        const events = [...scorers, ...(match.events || [])].sort((a, b) => parseInt(a.minute || a.clockDisplay || 0, 10) - parseInt(b.minute || b.clockDisplay || 0, 10));
+        const events = [...scorers, ...(match.events || [])]
+            .filter(event => !/kick.?off|match start/i.test(String(event.eventType || event.type || '')))
+            .sort((a, b) => parseInt(a.minute || a.clockDisplay || 0, 10) - parseInt(b.minute || b.clockDisplay || 0, 10));
         const halfTime = match.score?.halfTime;
         const hasHalfTime = halfTime?.home != null && halfTime?.away != null;
         const hasFullTime = match.status === 'FINISHED' && match.score?.fullTime?.home != null && match.score?.fullTime?.away != null;
@@ -1150,6 +1150,10 @@
         let runningAway = 0;
 
         const renderPeriod = label => `<div class="timeline-period"><span></span><span class="timeline-period-label">${escapeHtml(label)}</span><span></span></div>`;
+        const formatEventMinute = value => {
+            const minute = String(value || '').trim().replace(/'+$/, '');
+            return minute ? `${minute}'` : '';
+        };
         const renderEvent = event => {
             const eventTeamId = String(event.teamProviderId || '');
             const side = eventTeamId === homeId ? 'home' : eventTeamId === awayId ? 'away' : 'away';
@@ -1157,7 +1161,7 @@
             const isRed = Boolean(event.redCard);
             const isYellow = Boolean(event.yellowCard);
             const isSubstitution = Boolean(event.substitution || event.eventType?.toLowerCase().includes('substitution'));
-            const minute = event.minute || event.clockDisplay || '?';
+            const minute = formatEventMinute(event.minute || event.clockDisplay);
             let mainContent = '';
             let secondaryContent = '';
             let iconMarkup = '';
@@ -1189,7 +1193,7 @@
             return `<div class="timeline-event ${side}"><span class="event-copy"><span class="event-main">${mainContent}</span>${secondaryContent}</span><span class="event-minute">${escapeHtml(minute)}</span></div>`;
         };
 
-        const timelineItems = [renderPeriod('Kickoff')];
+        const timelineItems = [renderPeriod('Kick-off')];
         let halfTimeInserted = false;
         events.forEach(event => {
             if (hasHalfTime && !halfTimeInserted && parseInt(event.minute || event.clockDisplay || 0, 10) >= 45) {
@@ -1199,7 +1203,7 @@
             timelineItems.push(renderEvent(event));
         });
         if (hasHalfTime && !events.length) timelineItems.push(renderPeriod(`HT ${halfTime.home} - ${halfTime.away}`));
-        if (hasFullTime) timelineItems.push(renderPeriod('FT'));
+        if (hasFullTime) timelineItems.push(renderPeriod(`FT ${match.score.fullTime.home} - ${match.score.fullTime.away}`));
         if (!events.length && !hasHalfTime && !hasFullTime) timelineItems.push('<p class="empty-detail">No match events are available yet.</p>');
 
         return `<div class="timeline">${timelineItems.join('')}</div>`;
