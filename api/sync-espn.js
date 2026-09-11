@@ -99,7 +99,27 @@ async function fetchMatchStatistics(eventId) {
         value: Number.isNaN(Number.parseFloat(stat.displayValue)) ? null : Number.parseFloat(stat.displayValue)
     })));
 }
-
+async function fetchMatchLineups(eventId) {
+    const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/summary?event=${encodeURIComponent(eventId)}`);
+    if (!response.ok) return null;
+    const payload = await response.json();
+    const lineups = {};
+    for (const roster of payload.rosters || []) {
+        const side = roster.homeAway === 'home' || roster.homeAway === 'away' ? roster.homeAway : null;
+        if (!side) continue;
+        lineups[side] = {
+            formation: roster.formation || null,
+            players: (roster.roster || []).map(item => ({
+                name: item.athlete?.displayName || item.athlete?.shortName || 'Unknown player',
+                starter: Boolean(item.starter),
+                position: item.position || null,
+                subbedIn: Boolean(item.subbedIn),
+                subbedOut: Boolean(item.subbedOut)
+            }))
+        };
+    }
+    return Object.keys(lineups).length ? lineups : null;
+}
 async function syncEvent(sql, event) {
     const competition = event.competitions?.[0];
     const home = getCompetitor(event, 'home');
@@ -191,5 +211,6 @@ module.exports = async function handler(req, res) {
 module.exports.dateKeysBetween = dateKeysBetween;
 module.exports.fetchEventsForDates = fetchEventsForDates;
 module.exports.fetchMatchStatistics = fetchMatchStatistics;
+module.exports.fetchMatchLineups = fetchMatchLineups;
 module.exports.fetchScoringDetails = fetchScoringDetails;
 module.exports.syncEvent = syncEvent;

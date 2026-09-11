@@ -559,8 +559,11 @@
         .timeline-period-label { padding: 0 4px; background: var(--card-bg); }
         .lineups { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .lineup-team h4 { margin-bottom: 8px; color: var(--text-main); font-size: 0.82rem; }
-        .formation { margin-bottom: 8px; color: var(--text-muted); font-size: 0.75rem; }
-        .lineup-team ol { padding-left: 20px; color: var(--text-muted); font-size: 0.78rem; line-height: 1.8; }
+        .formation { margin-bottom: 12px; color: var(--text-muted); font-size: 0.75rem; }
+        .lineup-group + .lineup-group { margin-top: 14px; }
+        .lineup-group h5 { margin: 0 0 5px; color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; }
+        .lineup-team ol { margin: 0; padding-left: 20px; color: var(--text-muted); font-size: 0.78rem; line-height: 1.8; }
+        .lineup-position { color: var(--text-main); font-size: 0.68rem; }
         .empty-detail { color: var(--text-muted); font-size: 0.82rem; }
         body.drawer-open { overflow: hidden; }
 
@@ -1242,7 +1245,13 @@
         }
         return `<div class="lineups">${['home', 'away'].map(side => {
             const lineup = lineups[side] || {};
-            return `<div class="lineup-team"><h4>${escapeHtml(getDetailTeam(match, side).name)}</h4><div class="formation">${escapeHtml(lineup.formation || 'Formation unavailable')}</div><ol>${(lineup.players || []).map(player => `<li>${escapeHtml(player.name || player)}</li>`).join('')}</ol></div>`;
+            const players = Array.isArray(lineup.players) ? lineup.players : [];
+            const starters = players.filter(player => player.starter);
+            const substitutes = players.filter(player => !player.starter);
+            const renderPlayers = group => group.length
+                ? `<ol>${group.map(player => `<li>${escapeHtml(player.name || player)}${player.position ? ` <span class="lineup-position">(${escapeHtml(player.position)})</span>` : ''}</li>`).join('')}</ol>`
+                : '<p class="empty-detail">Unavailable</p>';
+            return `<div class="lineup-team"><h4>${escapeHtml(getDetailTeam(match, side).name)}</h4><div class="formation">${escapeHtml(lineup.formation || 'Formation unavailable')}</div><div class="lineup-group"><h5>Starting XI</h5>${renderPlayers(starters)}</div><div class="lineup-group"><h5>Substitutes</h5>${renderPlayers(substitutes)}</div></div>`;
         }).join('')}</div>`;
     }
 
@@ -1284,6 +1293,7 @@
                 if (response.ok) {
                     const detailData = await response.json();
                     if (detailData.teamStats?.length) match.teamStats = detailData.teamStats;
+                    if (detailData.lineups) match.lineups = detailData.lineups;
                     const events = [...(match.events || []), ...(detailData.substitutions || [])];
                     const seenSubstitutions = new Set();
                     match.events = events.filter(event => {
