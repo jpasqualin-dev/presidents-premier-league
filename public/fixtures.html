@@ -1250,8 +1250,10 @@
             const substitutes = players.filter(player => !player.starter);
             const renderPlayers = group => group.length
                 ? `<ol>${group.map(player => {
-                    const playerName = typeof player === 'string' ? player : player.name || player.displayName || player.athlete?.displayName || 'Unknown player';
-                    const position = typeof player === 'object' ? player.position : null;
+                    const nameValue = typeof player === 'string' ? player : player.name || player.displayName || player.athlete?.displayName || player.athlete?.shortName;
+                    const playerName = typeof nameValue === 'string' ? nameValue : nameValue?.displayName || nameValue?.shortName || nameValue?.name || 'Unknown player';
+                    const positionValue = typeof player === 'object' ? player.position : null;
+                    const position = typeof positionValue === 'string' ? positionValue : positionValue?.abbreviation || positionValue?.displayName || positionValue?.name || '';
                     return `<li>${escapeHtml(playerName)}${position ? ` <span class="lineup-position">(${escapeHtml(position)})</span>` : ''}</li>`;
                 }).join('')}</ol>`
                 : '<p class="empty-detail">Unavailable</p>';

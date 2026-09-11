@@ -110,9 +110,11 @@ async function fetchMatchLineups(eventId) {
         lineups[side] = {
             formation: roster.formation || null,
             players: (roster.roster || []).map(item => ({
-                name: item.athlete?.displayName || item.athlete?.shortName || 'Unknown player',
+                name: item.athlete?.displayName || item.athlete?.shortName || item.name || 'Unknown player',
                 starter: Boolean(item.starter),
-                position: item.position || null,
+                position: typeof item.position === 'string'
+                    ? item.position
+                    : item.position?.abbreviation || item.position?.displayName || item.position?.name || null,
                 subbedIn: Boolean(item.subbedIn),
                 subbedOut: Boolean(item.subbedOut)
             }))
