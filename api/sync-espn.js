@@ -87,6 +87,19 @@ async function fetchScoringDetails(event) {
     }));
 }
 
+async function fetchMatchStatistics(eventId) {
+    const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/summary?event=${encodeURIComponent(eventId)}`);
+    if (!response.ok) return [];
+    const payload = await response.json();
+    const competitors = payload.header?.competitions?.[0]?.competitors || [];
+    return competitors.flatMap(competitor => (competitor.statistics || []).map(stat => ({
+        teamProviderId: competitor.team?.id ? String(competitor.team.id) : null,
+        name: stat.name,
+        displayValue: stat.displayValue || null,
+        value: Number.isNaN(Number.parseFloat(stat.displayValue)) ? null : Number.parseFloat(stat.displayValue)
+    })));
+}
+
 async function syncEvent(sql, event) {
     const competition = event.competitions?.[0];
     const home = getCompetitor(event, 'home');
@@ -177,5 +190,6 @@ module.exports = async function handler(req, res) {
 
 module.exports.dateKeysBetween = dateKeysBetween;
 module.exports.fetchEventsForDates = fetchEventsForDates;
+module.exports.fetchMatchStatistics = fetchMatchStatistics;
 module.exports.fetchScoringDetails = fetchScoringDetails;
 module.exports.syncEvent = syncEvent;

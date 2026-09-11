@@ -1088,10 +1088,19 @@
 
     const detailStatLabels = {
         possession: 'Ball Possession',
+        possessionpct: 'Ball Possession',
         ballpossession: 'Ball Possession',
         shots: 'Total Shots',
         totalshots: 'Total Shots',
         shotsontarget: 'Shots on Target',
+        cornerkicks: 'Corners',
+        corners: 'Corners',
+        fouls: 'Fouls',
+        foulscommitted: 'Fouls',
+        offsides: 'Offsides',
+        yellowcards: 'Yellow Cards',
+        redcards: 'Red Cards',
+        saves: 'Saves',
         expectedGoals: 'Expected goals (xG)',
         xgoals: 'Expected goals (xG)'
     };
@@ -1119,27 +1128,37 @@
 
     function renderMatchStats(match) {
         const stats = match.teamStats || [];
-        const names = [...new Set(stats.map(stat => stat.name))].filter(Boolean);
-        const preferred = ['possession', 'ballPossession', 'expectedGoals', 'xgoals', 'shots', 'totalShots', 'shotsOnTarget'];
-        const selectedNames = preferred.filter(name => names.some(item => item.toLowerCase() === name.toLowerCase()));
-        const statNames = selectedNames.length ? selectedNames.slice(0, 5) : names.slice(0, 5);
-        if (!statNames.length) return '<p class="empty-detail">Match statistics are not available yet.</p>';
+        const statDefinitions = [
+            ['Ball Possession', ['possessionpct', 'possession', 'ballpossession']],
+            ['Total Shots', ['totalshots', 'shots']],
+            ['Shots on Target', ['shotsontarget']],
+            ['Corners', ['cornerkicks', 'corners']],
+            ['Fouls', ['foulscommitted', 'fouls']],
+            ['Offsides', ['offsides']],
+            ['Yellow Cards', ['yellowcards']],
+            ['Red Cards', ['redcards']],
+            ['Saves', ['saves']]
+        ];
 
-        return statNames.map(name => {
+        return statDefinitions.map(([label, aliases]) => {
             const values = ['home', 'away'].map(side => {
                 const teamId = getDetailTeam(match, side).id || getDetailTeam(match, side).providerId;
-                const stat = stats.find(item => item.name === name && String(item.teamProviderId) === String(teamId));
+                const stat = stats.find(item => aliases.includes(normalizeStatNameKey(item.name)) && String(item.teamProviderId) === String(teamId));
                 return stat?.displayValue ?? stat?.value ?? '-';
             });
             const numeric = values.map(value => Number.parseFloat(String(value).replace('%', '')) || 0);
             const total = numeric[0] + numeric[1] || 1;
             return `<div class="stat-row">
                 <span class="stat-value">${escapeHtml(values[0])}</span>
-                <span class="stat-label">${escapeHtml(normalizeStatName(name))}</span>
+                <span class="stat-label">${escapeHtml(label)}</span>
                 <span class="stat-value">${escapeHtml(values[1])}</span>
                 <span class="stat-bars"><span class="stat-bar-home" style="width:${numeric[0] / total * 100}%"></span><span class="stat-bar-away" style="width:${numeric[1] / total * 100}%"></span></span>
             </div>`;
         }).join('');
+    }
+
+    function normalizeStatNameKey(name) {
+        return String(name || '').replace(/[^a-zA-Z]/g, '').toLowerCase();
     }
 
     function renderMatchEvents(match) {
@@ -1188,7 +1207,7 @@
                 } else if (side === 'home') runningHome += 1;
                 else runningAway += 1;
                 const goalDetails = [
-                    event.assistName ? `assist by ${escapeHtml(event.assistName)}` : '',
+                    event.assistName ? `Assist by ${escapeHtml(event.assistName)}` : '',
                     event.penalty ? 'Penalty' : '',
                     event.ownGoal ? 'Own goal' : ''
                 ].filter(Boolean);
@@ -1276,6 +1295,7 @@
                 const response = await fetch(`/api/match-details?event=${encodeURIComponent(match.providerEventId || match.id)}`, { cache: 'no-store' });
                 if (response.ok) {
                     const detailData = await response.json();
+                    if (detailData.teamStats?.length) match.teamStats = detailData.teamStats;
                     const events = [...(match.events || []), ...(detailData.substitutions || [])];
                     const seenSubstitutions = new Set();
                     match.events = events.filter(event => {

@@ -1,4 +1,4 @@
-const { fetchScoringDetails } = require('./sync-espn');
+const { fetchScoringDetails, fetchMatchStatistics } = require('./sync-espn');
 
 module.exports = async function handler(req, res) {
     if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed.' });
@@ -7,7 +7,10 @@ module.exports = async function handler(req, res) {
     if (!/^\d+$/.test(eventId)) return res.status(400).json({ error: 'A valid ESPN event ID is required.' });
 
     try {
-        const details = await fetchScoringDetails({ id: eventId, competitions: [] });
+        const [details, teamStats] = await Promise.all([
+            fetchScoringDetails({ id: eventId, competitions: [] }),
+            fetchMatchStatistics(eventId)
+        ]);
         const substitutions = details
             .filter(detail => detail.substitution || detail.type?.type?.includes('substitution') || detail.type?.text?.toLowerCase().includes('substitution'))
             .map(detail => ({
@@ -20,7 +23,7 @@ module.exports = async function handler(req, res) {
             }));
 
         res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=900');
-        return res.status(200).json({ substitutions });
+        return res.status(200).json({ substitutions, teamStats });
     } catch (error) {
         console.error('Match detail read failed:', error);
         return res.status(502).json({ error: 'Unable to read ESPN match details.' });
