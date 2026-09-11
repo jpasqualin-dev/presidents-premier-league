@@ -64,6 +64,8 @@ async function readHistoricalMatches(sql) {
                     'teamProviderId', event_team.provider_team_id,
                     'athleteProviderId', me.athlete_provider_id,
                     'athleteName', me.athlete_name,
+                    'eventType', me.event_type,
+                    'minute', me.clock_display,
                     'redCard', me.red_card,
                     'yellowCard', me.yellow_card,
                     'penalty', me.penalty
@@ -72,6 +74,17 @@ async function readHistoricalMatches(sql) {
                 LEFT JOIN teams event_team ON event_team.id = me.team_id
                 WHERE me.match_id = m.id
             ), '[]'::json) AS events
+            , COALESCE((
+                SELECT json_agg(json_build_object(
+                    'teamProviderId', stats_team.provider_team_id,
+                    'name', mts.stat_name,
+                    'value', mts.stat_value,
+                    'displayValue', mts.display_value
+                ) ORDER BY mts.stat_name)
+                FROM match_team_stats mts
+                JOIN teams stats_team ON stats_team.id = mts.team_id
+                WHERE mts.match_id = m.id
+            ), '[]'::json) AS team_stats
         FROM matches m
         JOIN teams home ON home.id = m.home_team_id
         JOIN teams away ON away.id = m.away_team_id
