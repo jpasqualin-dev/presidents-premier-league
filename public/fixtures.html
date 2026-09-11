@@ -530,15 +530,21 @@
         .stat-bar-home, .stat-bar-away { display: block; height: 8px; }
         .stat-bar-home { background: #3b82f6; }
         .stat-bar-away { background: #ef4444; }
-        .timeline { position: relative; display: grid; gap: 14px; padding: 4px 0; }
-        .timeline::before { content: ""; position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: var(--border-color); transform: translateX(-50%); }
-        .timeline-event { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr); align-items: center; min-height: 42px; }
-        .timeline-event.home .event-copy { grid-column: 1; grid-row: 1; padding-right: 14px; text-align: right; }
-        .timeline-event.away .event-copy { grid-column: 3; grid-row: 1; padding-left: 14px; text-align: left; }
-        .event-minute { z-index: 1; grid-column: 2; grid-row: 1; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px; margin: auto; border: 2px solid var(--card-bg); border-radius: 50%; background: var(--border-color); color: var(--text-main); font-size: 0.7rem; font-weight: 700; box-shadow: 0 0 0 1px var(--border-color); }
-        .event-copy { color: var(--text-main); font-size: 0.82rem; line-height: 1.25; }
-        .event-main { display: flex; align-items: center; gap: 6px; justify-content: flex-end; font-weight: 600; }
-        .timeline-event.away .event-main { justify-content: flex-start; }
+        .timeline { display: grid; gap: 14px; padding: 4px 0; }
+        .timeline-event { display: flex; align-items: center; min-height: 42px; width: 100%; color: var(--text-main); }
+        .timeline-event.home { justify-content: flex-start; }
+        .timeline-event.away { justify-content: flex-end; }
+        .timeline-event.home .event-copy { order: 3; padding-left: 10px; text-align: left; }
+        .timeline-event.away .event-copy { order: 1; padding-right: 10px; text-align: right; }
+        .event-minute { display: flex; align-items: center; justify-content: center; min-width: 34px; height: 34px; border-radius: 50%; background: var(--border-color); color: var(--text-main); font-size: 0.7rem; font-weight: 700; }
+        .timeline-event.home .event-minute { order: 1; }
+        .timeline-event.away .event-minute { order: 3; }
+        .event-copy { max-width: calc(100% - 92px); font-size: 0.82rem; line-height: 1.25; }
+        .event-main { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+        .timeline-event.home .event-main { justify-content: flex-start; }
+        .timeline-event.away .event-main { justify-content: flex-end; }
+        .timeline-event.home .event-icon { order: 2; }
+        .timeline-event.away .event-icon { order: 2; }
         .event-icon { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; flex: 0 0 20px; border-radius: 50%; background: var(--border-color); font-size: 0.72rem; }
         .event-icon.goal { background: transparent; }
         .event-icon.yellow { width: 12px; height: 17px; border-radius: 2px; background: #facc15; }
@@ -546,7 +552,7 @@
         .event-assist { margin-top: 3px; color: var(--text-muted); font-size: 0.72rem; }
         .event-sub-on { color: #16a37a; }
         .event-sub-off { color: #d05a62; }
-        .timeline-period { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; min-height: 30px; color: var(--text-main); font-size: 0.78rem; font-weight: 800; text-align: center; }
+        .timeline-period { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; min-height: 30px; color: var(--text-main); font-size: 0.78rem; font-weight: 800; text-align: center; }
         .timeline-period::before, .timeline-period::after { content: ""; height: 1px; background: var(--border-color); }
         .timeline-period-label { padding: 0 4px; background: var(--card-bg); }
         .lineups { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -1154,6 +1160,8 @@
             const minute = event.minute || event.clockDisplay || '?';
             let mainContent = '';
             let secondaryContent = '';
+            let iconMarkup = '';
+            let detailMarkup = '';
 
             if (isGoal) {
                 if (event.ownGoal) {
@@ -1162,18 +1170,22 @@
                 } else if (side === 'home') runningHome += 1;
                 else runningAway += 1;
                 const assist = event.assistName ? `<div class="event-assist">assist by ${escapeHtml(event.assistName)}</div>` : '';
-                mainContent = `<span class="event-icon goal" aria-hidden="true">⚽</span><span>${escapeHtml(event.athleteName || 'Goal')} (${runningHome} - ${runningAway})</span>`;
+                iconMarkup = '<span class="event-icon goal" aria-hidden="true">⚽</span>';
+                detailMarkup = `<span>${escapeHtml(event.athleteName || 'Goal')} (${runningHome} - ${runningAway})</span>`;
                 secondaryContent = assist;
             } else if (isSubstitution) {
                 const comingOn = event.comingOn || event.playerOn || event.substitute || event.athleteName || 'Player coming on';
                 const goingOff = event.goingOff || event.playerOff || event.replacedPlayer || '';
-                mainContent = `<span class="event-icon" aria-hidden="true">↔</span><span><span class="event-sub-on">${escapeHtml(comingOn)}</span>${goingOff ? `<br><span class="event-sub-off">${escapeHtml(goingOff)}</span>` : ''}</span>`;
+                iconMarkup = '<span class="event-icon" aria-hidden="true">↔</span>';
+                detailMarkup = `<span><span class="event-sub-on">${escapeHtml(comingOn)}</span>${goingOff ? `<br><span class="event-sub-off">${escapeHtml(goingOff)}</span>` : ''}</span>`;
             } else if (isRed || isYellow) {
-                mainContent = `<span class="event-icon ${isRed ? 'red' : 'yellow'}" aria-hidden="true"></span><span>${escapeHtml(event.athleteName || (isRed ? 'Red card' : 'Yellow card'))}</span>`;
+                iconMarkup = `<span class="event-icon ${isRed ? 'red' : 'yellow'}" aria-hidden="true"></span>`;
+                detailMarkup = `<span>${escapeHtml(event.athleteName || (isRed ? 'Red card' : 'Yellow card'))}</span>`;
             } else {
-                mainContent = `<span>${escapeHtml(event.athleteName || event.eventType || 'Match event')}</span>`;
+                detailMarkup = `<span>${escapeHtml(event.athleteName || event.eventType || 'Match event')}</span>`;
             }
 
+            mainContent = side === 'home' ? `${iconMarkup}${detailMarkup}` : `${detailMarkup}${iconMarkup}`;
             return `<div class="timeline-event ${side}"><span class="event-copy"><span class="event-main">${mainContent}</span>${secondaryContent}</span><span class="event-minute">${escapeHtml(minute)}</span></div>`;
         };
 
@@ -1209,12 +1221,16 @@
         const homeId = String(match.homeTeam.id || match.homeTeam.providerId);
         const awayId = String(match.awayTeam.id || match.awayTeam.providerId);
         const scorerMinute = scorer => Number.isFinite(Number(scorer.minute)) ? Number(scorer.minute) : Infinity;
+        const formatScorerMinute = minute => {
+            const value = String(minute || '').trim();
+            return value ? `${value.replace(/'+$/, '')}'` : '';
+        };
         const renderTeamScorers = (teamId, emptyLabel) => {
             const teamScorers = scorers
                 .filter(scorer => String(scorer.teamProviderId) === teamId)
                 .sort((a, b) => scorerMinute(a) - scorerMinute(b));
             return teamScorers.length
-                ? teamScorers.map(scorer => `<span class="match-scorer">${escapeHtml(scorer.athleteName)} ${escapeHtml(scorer.minute || '')}${scorer.ownGoal ? ' (OG)' : ''}${scorer.penalty ? ' (P)' : ''}</span>`).join('')
+                ? teamScorers.map(scorer => `<span class="match-scorer">${escapeHtml(scorer.athleteName)} ${escapeHtml(formatScorerMinute(scorer.minute))}${scorer.ownGoal ? ' (OG)' : ''}${scorer.penalty ? ' (P)' : ''}</span>`).join('')
                 : `<span class="match-scorer-empty">${emptyLabel}</span>`;
         };
         return `<div class="match-scorers"><div class="match-scorer-column home" aria-label="${escapeHtml(match.homeTeam.name)} goal scorers">${renderTeamScorers(homeId, 'No goals')}</div><div class="match-scorer-column away" aria-label="${escapeHtml(match.awayTeam.name)} goal scorers">${renderTeamScorers(awayId, 'No goals')}</div></div>`;
