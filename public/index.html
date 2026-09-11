@@ -222,30 +222,10 @@
             transition: background-color 0.15s;
         }
 
-        .today-match-row.expandable-match {
-            cursor: pointer;
-        }
-
-        .today-match-row.expandable-match.expanded,
-        .today-match-row.expandable-match.expanded:hover {
-            background-color: #ffffff;
-        }
-
         .ft-status {
             display: inline-flex;
             align-items: center;
             gap: 3px;
-        }
-
-        .match-expand-chevron {
-            display: inline-block;
-            font-size: 1rem;
-            line-height: 1;
-            transition: transform 0.15s ease;
-        }
-
-        .expandable-match.expanded .match-expand-chevron {
-            transform: rotate(90deg);
         }
 
         .today-match-row.completed-match:focus-visible {
@@ -253,48 +233,7 @@
             outline-offset: -2px;
         }
 
-        .match-goals {
-            display: grid;
-            grid-template-columns: 1fr 20px 1fr;
-            gap: 12px;
-            padding: 12px 12px 12px 46px;
-            color: #718096;
-            font-size: 0.78rem;
-            background-color: #f1f5f9;
-        }
-
-        .match-goals[hidden] {
-            display: none;
-        }
-
-        .match-goals-team {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-
-        .match-goal {
-            line-height: 1.25;
-        }
-
-        .match-goals-team.away {
-            text-align: right;
-        }
-
-        .match-goals-ball {
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-        }
-
-        .match-goals-ball-icon {
-            width: 16px;
-            height: 16px;
-            object-fit: contain;
-        }
-
         @media (hover: hover) {
-            .today-match-row.expandable-match:not(.expanded):hover,
             .today-match-row:hover {
                 background-color: #f8f9fa;
             }
@@ -660,13 +599,6 @@
         body.dark-mode .today-card,
         body.dark-mode .table-card { box-shadow: 0 3px 10px rgba(0,0,0,0.35); }
         body.dark-mode .today-match-row { border-bottom-color: #3d3d3d; color: #f1f1f1; }
-        body.dark-mode .today-match-row.expandable-match.expanded,
-        body.dark-mode .today-match-row.expandable-match.expanded:hover,
-        body.dark-mode .match-goals { background-color: #2a2a2a; }
-        body.dark-mode .match-goals { border-top: 1px dashed #5a5a5a; }
-        body.dark-mode .today-match-row.expandable-match:not(.expanded):hover { background-color: transparent; }
-        body.dark-mode .match-goals,
-        body.dark-mode .match-goals-ball { color: #b8b8b8; }
         body.dark-mode .team-name-text,
         body.dark-mode .match-score-block { color: #f1f1f1; }
         body.dark-mode .team-owner,
@@ -733,6 +665,68 @@
         body.dark-mode .pill-green { background-color: #173d2c; color: #a8edc7; border-color: #286647; }
         body.dark-mode .pill-purple { background-color: #39294c; color: #d9bcff; border-color: #5a4178; }
         body.dark-mode .pill-gray { background-color: #303030; color: #d0d0d0; border-color: #4a4a4a; }
+        .match-drawer-overlay { position: fixed; inset: 0; z-index: 200; display: flex; justify-content: flex-end; background: rgba(15, 23, 42, 0.48); opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+        .match-drawer-overlay.is-open { opacity: 1; pointer-events: auto; }
+        .match-drawer { width: min(100%, 560px); height: 100%; overflow-y: auto; background: var(--bg-color); box-shadow: -10px 0 35px rgba(0, 0, 0, 0.2); transform: translateX(100%); transition: transform 0.3s ease; }
+        .match-drawer-overlay.is-open .match-drawer { transform: translateX(0); }
+        .match-drawer-header { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; background: var(--card-bg); border-bottom: 1px solid var(--border-color); }
+        .match-drawer-title { font-size: 0.9rem; font-weight: 700; color: var(--text-muted); }
+        .match-drawer-close { width: 34px; height: 34px; border: 0; border-radius: 50%; background: var(--border-color); color: var(--text-main); font-size: 1.3rem; line-height: 1; cursor: pointer; }
+        .match-detail-content { padding: 18px; }
+        .match-hero, .match-detail-section { margin-bottom: 14px; padding: 18px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; }
+        .match-meta { color: var(--text-muted); font-size: 0.82rem; text-align: center; }
+        .match-venue { margin-top: 5px; color: var(--text-muted); font-size: 0.78rem; text-align: center; }
+        .match-scoreline { display: grid; grid-template-columns: 1fr 100px 1fr; align-items: center; gap: 10px; margin: 18px 0; }
+        .match-team { display: grid; justify-items: center; gap: 6px; text-align: center; font-weight: 700; }
+        .match-team img { width: 48px; height: 48px; object-fit: contain; }
+        .match-team-owner { color: var(--text-muted); font-size: 0.72rem; font-weight: 500; }
+        .match-score { font-size: 1.8rem; font-weight: 800; text-align: center; color: var(--text-main); }
+        .match-drawer .match-status { width: auto; display: block; margin-top: 2px; color: var(--text-muted); font-size: 0.72rem; font-weight: 600; text-align: center; }
+        .match-scorers { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--border-color); }
+        .match-scorer-column { display: flex; flex-direction: column; gap: 3px; color: var(--text-muted); font-size: 0.78rem; line-height: 1.25; }
+        .match-scorer-column.away { text-align: right; }
+        .match-scorer { display: block; }
+        .match-scorer-empty, .empty-detail { color: var(--text-muted); opacity: 0.75; }
+        .match-detail-section h3 { margin-bottom: 16px; color: var(--text-main); font-size: 0.95rem; text-align: center; }
+        .stat-row { display: grid; grid-template-columns: 54px 1fr 54px; align-items: center; gap: 10px; margin: 13px 0; font-size: 0.78rem; }
+        .stat-value { font-weight: 700; color: var(--text-main); }
+        .stat-value:last-child { text-align: right; }
+        .stat-label { grid-column: 1 / -1; order: -1; text-align: center; color: var(--text-muted); }
+        .stat-bars { display: flex; height: 8px; overflow: hidden; grid-column: 2; grid-row: 2; border-radius: 99px; background: var(--border-color); }
+        .stat-bar-home, .stat-bar-away { display: block; height: 8px; }
+        .stat-bar-home { background: #3b82f6; }
+        .stat-bar-away { background: #ef4444; }
+        .timeline { display: grid; gap: 14px; padding: 4px 0; }
+        .timeline-event { display: flex; align-items: center; min-height: 42px; width: 100%; color: var(--text-main); }
+        .timeline-event.home { justify-content: flex-start; }
+        .timeline-event.away { justify-content: flex-end; }
+        .timeline-event.home .event-copy { order: 2; padding-left: 10px; text-align: left; }
+        .timeline-event.away .event-copy { order: 1; padding-right: 10px; text-align: right; }
+        .event-minute { display: flex; align-items: center; justify-content: center; min-width: 34px; height: 34px; border-radius: 50%; background: var(--border-color); color: var(--text-main); font-size: 0.7rem; font-weight: 700; }
+        .timeline-event.home .event-minute { order: 1; }
+        .timeline-event.away .event-minute { order: 3; }
+        .event-copy { max-width: 70%; font-size: 0.82rem; line-height: 1.25; }
+        .event-main { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+        .event-icon { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; flex: 0 0 20px; border-radius: 50%; background: var(--border-color); font-size: 0.72rem; }
+        .event-icon.goal { background: transparent; }
+        .event-icon.yellow, .event-icon.red { width: 12px; height: 17px; border-radius: 2px; }
+        .event-icon.yellow { background: #facc15; }
+        .event-icon.red { background: #ef4444; }
+        .event-assist { margin-top: 3px; color: var(--text-muted); font-size: 0.72rem; }
+        .event-sub-on { color: #16a37a; }
+        .event-sub-off { color: #d05a62; }
+        .timeline-period { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; min-height: 30px; color: var(--text-main); font-size: 0.78rem; font-weight: 800; text-align: center; }
+        .timeline-period > span:first-child, .timeline-period > span:last-child { height: 1px; background: var(--border-color); }
+        .timeline-period-label { padding: 0 4px; background: var(--card-bg); }
+        .lineups { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .lineup-team h4 { margin-bottom: 8px; color: var(--text-main); font-size: 0.82rem; }
+        .formation { margin-bottom: 12px; color: var(--text-muted); font-size: 0.75rem; }
+        .lineup-group + .lineup-group { margin-top: 14px; }
+        .lineup-group h5 { margin: 0 0 5px; color: var(--text-muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; }
+        .lineup-team ol { margin: 0; padding-left: 20px; color: var(--text-muted); font-size: 0.78rem; line-height: 1.8; }
+        .lineup-position { color: var(--text-main); font-size: 0.68rem; }
+        body.drawer-open { overflow: hidden; }
+        @media (max-width: 600px) { .match-drawer { width: 100%; } .match-detail-content { padding: 12px; } }
     </style>
 </head>
 <body class="dark-mode">
@@ -763,6 +757,16 @@
 
     <!-- Matchday Card Container -->
     <div id="today-matches-container"></div>
+
+    <div class="match-drawer-overlay" id="match-drawer-overlay" aria-hidden="true" onclick="closeMatchDrawer(event)">
+        <aside class="match-drawer" role="dialog" aria-modal="true" aria-labelledby="match-drawer-title" onclick="event.stopPropagation()">
+            <div class="match-drawer-header">
+                <span class="match-drawer-title" id="match-drawer-title">Match details</span>
+                <button class="match-drawer-close" type="button" aria-label="Close match details" onclick="closeMatchDrawer()">&times;</button>
+            </div>
+            <div class="match-detail-content" id="match-detail-content"></div>
+        </aside>
+    </div>
 
     <div id="status-indicator">Initializing 2026/2027 season data...</div>
 
@@ -939,10 +943,10 @@
             if (['IN_PLAY', 'PAUSED'].includes(match.status)) {
                 let liveText = match.status === 'PAUSED' ? 'HT' : match.minute ? match.minute : '';
                 const liveBadge = liveText ? `<span class="live-badge">${liveText}</span>` : `<span class="live-badge-text">LIVE</span>`;
-                statusHtml = `<div class="ft-status">${liveBadge}<span class="match-expand-chevron" aria-hidden="true">›</span></div>`;
+                statusHtml = `<div class="ft-status">${liveBadge}</div>`;
                 scoreHtml = `${match.score?.fullTime?.home ?? 0} - ${match.score?.fullTime?.away ?? 0}`;
             } else if (match.status === 'FINISHED') {
-                statusHtml = `<div class="ft-text ft-status"><span>FT</span><span class="match-expand-chevron" aria-hidden="true">›</span></div>`;
+                statusHtml = '<div class="ft-text ft-status"><span>FT</span></div>';
                 scoreHtml = `${match.score?.fullTime?.home ?? 0} - ${match.score?.fullTime?.away ?? 0}`;
             } else {
                 const mTime = new Date(match.utcDate);
@@ -957,12 +961,8 @@
                 statusHtml = ``;
             }
 
-            const isExpandable = ['FINISHED', 'IN_PLAY', 'PAUSED'].includes(match.status);
-            const goalDetailsHtml = isExpandable ? getGoalDetailsHtml(match) : '';
-            const rowId = `match-${match.id.replace(/[^a-zA-Z0-9_-]/g, '')}`;
-            const matchExpanded = isIndexExpanded(`match:${rowId}`);
             return `
-                <div class="today-match-row${isExpandable ? ' expandable-match' : ''}${matchExpanded ? ' expanded' : ''}"${isExpandable ? ` role="button" tabindex="0" aria-expanded="${matchExpanded}" aria-controls="${rowId}-goals" onclick="toggleMatchDetails('${rowId}')" onkeydown="handleMatchDetailsKey(event, '${rowId}')"` : ''}>
+                <div class="today-match-row" role="button" tabindex="0" aria-label="View details for ${homeName} versus ${awayName}" onclick="openMatchDrawer('${match.id}')" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMatchDrawer('${match.id}'); }">
                     <div class="match-status">${statusHtml}</div>
                     <div class="match-content">
                         <div class="team-block team-home">
@@ -982,7 +982,6 @@
                         </div>
                     </div>
                 </div>
-                ${goalDetailsHtml ? `<div id="${rowId}-goals" class="match-goals"${matchExpanded ? '' : ' hidden'} onclick="toggleMatchDetails('${rowId}')">${goalDetailsHtml}</div>` : ''}
             `;
         }).join('');
 
@@ -1005,36 +1004,6 @@
                 ${fixturesHtml}
             </div>
         `;
-    }
-
-    function getGoalDetailsHtml(match) {
-        const scorers = Array.isArray(match.scorers) ? match.scorers : [];
-        const homeId = String(match.homeTeam.id);
-        const homeScorers = scorers.filter(scorer => String(scorer.teamProviderId) === homeId);
-        const awayScorers = scorers.filter(scorer => String(scorer.teamProviderId) === String(match.awayTeam.id));
-        const scorerMinute = scorer => Number.isFinite(Number(scorer.minute)) ? Number(scorer.minute) : Infinity;
-        const renderScorers = teamScorers => teamScorers.length
-            ? [...teamScorers].sort((a, b) => scorerMinute(a) - scorerMinute(b)).map(scorer => `<span class="match-goal">${scorer.athleteName} ${scorer.minute || ''}${scorer.ownGoal ? ' (OG)' : ''}${scorer.penalty ? ' (P)' : ''}</span>`).join('')
-            : '';
-        return `<div class="match-goals-team home">${renderScorers(homeScorers)}</div><div class="match-goals-ball" aria-hidden="true"><img class="match-goals-ball-icon" src="ball.png" alt=""></div><div class="match-goals-team away">${renderScorers(awayScorers)}</div>`;
-    }
-
-    function toggleMatchDetails(rowId) {
-        const row = document.querySelector(`[onclick="toggleMatchDetails('${rowId}')"]`);
-        const details = document.getElementById(`${rowId}-goals`);
-        if (!row || !details) return;
-        const expanded = !details.hidden;
-        details.hidden = expanded;
-        row.setAttribute('aria-expanded', String(!expanded));
-        row.classList.toggle('expanded', !expanded);
-        setIndexExpansionState(`match:${rowId}`, !expanded);
-    }
-
-    function handleMatchDetailsKey(event, rowId) {
-        if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            toggleMatchDetails(rowId);
-        }
     }
 
     function renderMatchdayCard() {
@@ -1207,6 +1176,157 @@
         if (n.includes("Sunderland")) return "Sunderland"; 
         return n.replace(" FC", "").replace(" & Hove Albion", "").replace("A.F.C. ", "").trim();
     }
+
+    const detailStatLabels = { possession: 'Ball Possession', possessionpct: 'Ball Possession', ballpossession: 'Ball Possession', shots: 'Total Shots', totalshots: 'Total Shots', shotsontarget: 'Shots on Target' };
+
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
+    }
+
+    function getDetailTeam(match, side) { return side === 'home' ? match.homeTeam : match.awayTeam; }
+
+    function formatMatchDate(value) {
+        return new Date(value).toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    }
+
+    function normalizeStatNameKey(name) { return String(name || '').replace(/[^a-zA-Z]/g, '').toLowerCase(); }
+
+    function renderMatchStats(match) {
+        const stats = match.teamStats || [];
+        const statDefinitions = [['Possession', ['possessionpct', 'possession', 'ballpossession']], ['Total Shots', ['totalshots', 'shots']], ['Shots on Target', ['shotsontarget']], ['Fouls', ['foulscommitted', 'fouls']]];
+        return statDefinitions.map(([label, aliases]) => {
+            const values = ['home', 'away'].map(side => {
+                const team = getDetailTeam(match, side);
+                const stat = stats.find(item => aliases.includes(normalizeStatNameKey(item.name)) && String(item.teamProviderId) === String(team.id || team.providerId));
+                const value = stat?.displayValue ?? stat?.value ?? '-';
+                return label === 'Possession' && value !== '-' && !String(value).includes('%') ? `${value}%` : value;
+            });
+            const numeric = values.map(value => Number.parseFloat(String(value).replace('%', '')) || 0);
+            const total = numeric[0] + numeric[1] || 1;
+            return `<div class="stat-row"><span class="stat-value">${escapeHtml(values[0])}</span><span class="stat-label">${escapeHtml(label)}</span><span class="stat-value">${escapeHtml(values[1])}</span><span class="stat-bars"><span class="stat-bar-home" style="width:${numeric[0] / total * 100}%"></span><span class="stat-bar-away" style="width:${numeric[1] / total * 100}%"></span></span></div>`;
+        }).join('');
+    }
+
+    function renderMatchEvents(match) {
+        const homeId = String(match.homeTeam.id || match.homeTeam.providerId);
+        const awayId = String(match.awayTeam.id || match.awayTeam.providerId);
+        const scorers = (match.scorers || []).map(item => ({ ...item, eventType: 'Goal' }));
+        const events = [...scorers, ...(match.events || []).filter(event => !event.scoringPlay && !/^goal|score/i.test(String(event.eventType || event.type || '')))]
+            .filter(event => !/kick.?off|match start|half.?time|halftime|second half|delay|delayed|end regular time|full time/i.test(String(event.eventType || event.type || event.event_type || '')))
+            .sort((a, b) => (parseInt(a.minute || a.clockDisplay || '', 10) || Infinity) - (parseInt(b.minute || b.clockDisplay || '', 10) || Infinity));
+        const halfTime = match.score?.halfTime;
+        const hasHalfTime = halfTime?.home != null && halfTime?.away != null;
+        const hasFullTime = match.status === 'FINISHED' && match.score?.fullTime?.home != null && match.score?.fullTime?.away != null;
+        let runningHome = 0, runningAway = 0;
+        const period = label => `<div class="timeline-period"><span></span><span class="timeline-period-label">${escapeHtml(label)}</span><span></span></div>`;
+        const eventMarkup = event => {
+            const eventTeamId = String(event.teamProviderId || '');
+            const side = eventTeamId === homeId ? 'home' : eventTeamId === awayId ? 'away' : 'away';
+            const isGoal = event.eventType === 'Goal' || event.scoringPlay;
+            const isRed = Boolean(event.redCard), isYellow = Boolean(event.yellowCard);
+            const isSubstitution = Boolean(event.substitution || event.eventType?.toLowerCase().includes('substitution'));
+            const minute = String(event.minute || event.clockDisplay || '').trim().replace(/'+$/, '');
+            let icon = '', detail = '', secondary = '';
+            if (isGoal) {
+                if (event.ownGoal) side === 'home' ? runningAway++ : runningHome++;
+                else side === 'home' ? runningHome++ : runningAway++;
+                icon = '<span class="event-icon goal" aria-hidden="true">⚽</span>';
+                detail = `<span>${escapeHtml(event.athleteName || 'Goal')} (${runningHome} - ${runningAway})</span>`;
+                secondary = [event.assistName ? `Assist by ${escapeHtml(event.assistName)}` : '', event.penalty ? 'Penalty' : '', event.ownGoal ? 'Own goal' : ''].filter(Boolean).map(item => `<div class="event-assist">${item}</div>`).join('');
+            } else if (isSubstitution) {
+                const comingOn = event.comingOn || event.playerOn || event.substitute || event.athleteName || 'Player coming on';
+                const goingOff = event.goingOff || event.playerOff || event.replacedPlayer || '';
+                icon = '<span class="event-icon" aria-hidden="true">↔</span>';
+                detail = `<span><span class="event-sub-on">${escapeHtml(comingOn)}</span>${goingOff ? `<br><span class="event-sub-off">${escapeHtml(goingOff)}</span>` : ''}</span>`;
+            } else if (isRed || isYellow) {
+                icon = `<span class="event-icon ${isRed ? 'red' : 'yellow'}" aria-hidden="true"></span>`;
+                detail = `<span>${escapeHtml(event.athleteName || (isRed ? 'Red card' : 'Yellow card'))}</span>`;
+            } else detail = `<span>${escapeHtml(event.athleteName || event.eventType || 'Match event')}</span>`;
+            const main = side === 'home' ? `${icon}${detail}` : `${detail}${icon}`;
+            return `<div class="timeline-event ${side}"><span class="event-copy"><span class="event-main">${main}</span>${secondary}</span><span class="event-minute">${escapeHtml(minute ? `${minute}'` : '')}</span></div>`;
+        };
+        const items = [period('Kick-off')];
+        let halfTimeInserted = false;
+        events.forEach(event => {
+            if (hasHalfTime && !halfTimeInserted && parseInt(event.minute || event.clockDisplay || 0, 10) >= 45) { items.push(period(`HT ${halfTime.home} - ${halfTime.away}`)); halfTimeInserted = true; }
+            items.push(eventMarkup(event));
+        });
+        if (hasHalfTime && !events.length) items.push(period(`HT ${halfTime.home} - ${halfTime.away}`));
+        if (hasFullTime) items.push(period(`FT ${match.score.fullTime.home} - ${match.score.fullTime.away}`));
+        if (!events.length && !hasHalfTime && !hasFullTime) items.push('<p class="empty-detail">No match events are available yet.</p>');
+        return `<div class="timeline">${items.join('')}</div>`;
+    }
+
+    function renderLineups(match) {
+        const lineups = match.lineups;
+        if (!lineups?.home?.players?.length && !lineups?.away?.players?.length) return '<p class="empty-detail">Lineups are not available in the current match feed.</p>';
+        return `<div class="lineups">${['home', 'away'].map(side => {
+            const lineup = lineups[side] || {}, players = Array.isArray(lineup.players) ? lineup.players : [];
+            const renderPlayers = group => group.length ? `<ol>${group.map(player => `<li>${escapeHtml(typeof player === 'string' ? player : player.name || player.displayName || player.athlete?.displayName || 'Unknown player')}${player.position ? ` <span class="lineup-position">(${escapeHtml(player.position)})</span>` : ''}</li>`).join('')}</ol>` : '<p class="empty-detail">Unavailable</p>';
+            return `<div class="lineup-team"><h4>${escapeHtml(getDetailTeam(match, side).name)}</h4><div class="formation">${escapeHtml(lineup.formation || 'Formation unavailable')}</div><div class="lineup-group"><h5>Starting XI</h5>${renderPlayers(players.filter(player => player.starter))}</div><div class="lineup-group"><h5>Substitutes</h5>${renderPlayers(players.filter(player => !player.starter))}</div></div>`;
+        }).join('')}</div>`;
+    }
+
+    function renderMatchScorers(match) {
+        const scorers = Array.isArray(match.scorers) ? match.scorers : [];
+        const renderTeam = teamId => {
+            const items = scorers.filter(scorer => String(scorer.teamProviderId) === String(teamId)).sort((a, b) => (Number(a.minute) || Infinity) - (Number(b.minute) || Infinity));
+            return items.length ? items.map(scorer => `<span class="match-scorer">${escapeHtml(scorer.athleteName)} ${escapeHtml(String(scorer.minute || '').replace(/'+$/, "'"))}${scorer.ownGoal ? ' (OG)' : ''}${scorer.penalty ? ' (P)' : ''}</span>`).join('') : '<span class="match-scorer-empty">No goals</span>';
+        };
+        return `<div class="match-scorers"><div class="match-scorer-column">${renderTeam(match.homeTeam.id || match.homeTeam.providerId)}</div><div class="match-scorer-column away">${renderTeam(match.awayTeam.id || match.awayTeam.providerId)}</div></div>`;
+    }
+
+    function renderMatchDetail(match) {
+        const home = match.homeTeam, away = match.awayTeam;
+        const score = match.score?.fullTime?.home == null ? 'vs' : `${match.score.fullTime.home} - ${match.score.fullTime.away}`;
+        const status = match.status === 'FINISHED' ? 'Full time' : match.status === 'IN_PLAY' ? `${match.minute || 'Live'}'` : match.status === 'PAUSED' ? 'Half time' : 'Upcoming';
+        return `<section class="match-hero"><div class="match-meta">${escapeHtml(formatMatchDate(match.utcDate))}</div><div class="match-scoreline"><div class="match-team"><span>${escapeHtml(home.name)}</span>${home.crest ? `<img src="${escapeHtml(home.crest)}" alt="">` : ''}<span class="match-team-owner">${escapeHtml(getOwnerOfTeam(home.name) || '')}</span></div><div class="match-score">${escapeHtml(score)}<span class="match-status">${escapeHtml(status)}</span></div><div class="match-team"><span>${escapeHtml(away.name)}</span>${away.crest ? `<img src="${escapeHtml(away.crest)}" alt="">` : ''}<span class="match-team-owner">${escapeHtml(getOwnerOfTeam(away.name) || '')}</span></div></div><div class="match-venue">${escapeHtml(match.venue || 'Venue unavailable')}</div>${renderMatchScorers(match)}</section><section class="match-detail-section"><h3>Match Stats</h3>${renderMatchStats(match)}</section><section class="match-detail-section"><h3>Match Events</h3>${renderMatchEvents(match)}</section><section class="match-detail-section"><h3>Lineups</h3>${renderLineups(match)}</section>`;
+    }
+
+    async function fetchMatchById(matchId) {
+        const data = await getMatchData();
+        const match = data?.matches?.find(item => String(item.id) === String(matchId));
+        if (!match) throw new Error('Match details were not found.');
+        if (match.provider === 'espn' || String(match.id).startsWith('espn:')) {
+            const response = await fetch(`/api/match-details?event=${encodeURIComponent(match.providerEventId || match.id)}`, { cache: 'no-store' });
+            if (response.ok) {
+                const detailData = await response.json();
+                if (detailData.teamStats?.length) match.teamStats = detailData.teamStats;
+                if (detailData.lineups) match.lineups = detailData.lineups;
+                const events = [...(match.events || []), ...(detailData.substitutions || [])];
+                const seenSubstitutions = new Set();
+                match.events = events.filter(event => {
+                    if (!event.substitution) return true;
+                    const key = [event.teamProviderId, event.minute, event.comingOn, event.goingOff].join('|');
+                    if (seenSubstitutions.has(key)) return false;
+                    seenSubstitutions.add(key);
+                    return true;
+                });
+            }
+        }
+        return match;
+    }
+
+    async function openMatchDrawer(matchId) {
+        const overlay = document.getElementById('match-drawer-overlay'), drawer = overlay.querySelector('.match-drawer'), content = document.getElementById('match-detail-content');
+        drawer.scrollTop = 0;
+        overlay.classList.add('is-open');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('drawer-open');
+        content.innerHTML = '<p class="empty-detail">Loading match details...</p>';
+        try { content.innerHTML = renderMatchDetail(await fetchMatchById(matchId)); }
+        catch (error) { console.error('Error fetching match details:', error); content.innerHTML = '<p class="empty-detail">Unable to load match details.</p>'; }
+    }
+
+    function closeMatchDrawer(event) {
+        if (event && event.target.id !== 'match-drawer-overlay') return;
+        const overlay = document.getElementById('match-drawer-overlay');
+        overlay.classList.remove('is-open');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('drawer-open');
+    }
+
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMatchDrawer(); });
 
     function toggleNestedTableTRs(rowEl, targetClass) {
         const expanded = !rowEl.classList.contains('expanded');
