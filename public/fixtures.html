@@ -655,6 +655,7 @@
 
 <script src="theme.js"></script>
 <script src="match-data.js"></script>
+<script src="match-drawer-shared.js"></script>
 <script>
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
@@ -1155,17 +1156,7 @@
     function renderMatchEvents(match) {
         const homeId = String(match.homeTeam.id || match.homeTeam.providerId);
         const awayId = String(match.awayTeam.id || match.awayTeam.providerId);
-        const scorers = (match.scorers || []).map(item => ({ ...item, eventType: 'Goal' }));
-        const nonScoringEvents = (match.events || []).filter(event => !event.scoringPlay && !/^goal|score/i.test(String(event.eventType || event.type || '')));
-        const events = [...scorers, ...nonScoringEvents]
-            .filter(event => !/kick.?off|match start|half.?time|halftime|start (of )?(the )?(second|2nd) half|second half|delay|delayed|end regular time|end of regular time|full time/i.test(String(event.eventType || event.type || event.event_type || '')))
-            .sort((a, b) => {
-                const minute = event => {
-                    const value = parseInt(event.minute || event.clockDisplay || '', 10);
-                    return Number.isFinite(value) ? value : Infinity;
-                };
-                return minute(a) - minute(b);
-            });
+        const events = getDrawerMatchEvents(match);
         const halfTime = match.score?.halfTime;
         const hasHalfTime = halfTime?.home != null && halfTime?.away != null;
         const hasFullTime = match.status === 'FINISHED' && match.score?.fullTime?.home != null && match.score?.fullTime?.away != null;
