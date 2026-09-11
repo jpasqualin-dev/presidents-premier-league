@@ -1265,7 +1265,9 @@
 
     async function openMatchDrawer(matchId) {
         const overlay = document.getElementById('match-drawer-overlay');
+        const drawer = overlay.querySelector('.match-drawer');
         const content = document.getElementById('match-detail-content');
+        drawer.scrollTop = 0;
         overlay.classList.add('is-open');
         overlay.setAttribute('aria-hidden', 'false');
         document.body.classList.add('drawer-open');
