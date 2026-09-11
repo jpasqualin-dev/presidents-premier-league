@@ -1140,7 +1140,8 @@
         const homeId = String(match.homeTeam.id || match.homeTeam.providerId);
         const awayId = String(match.awayTeam.id || match.awayTeam.providerId);
         const scorers = (match.scorers || []).map(item => ({ ...item, eventType: 'Goal' }));
-        const events = [...scorers, ...(match.events || [])]
+        const nonScoringEvents = (match.events || []).filter(event => !event.scoringPlay && !/^goal|score/i.test(String(event.eventType || event.type || '')));
+        const events = [...scorers, ...nonScoringEvents]
             .filter(event => !/kick.?off|match start|delay|delayed/i.test(String(event.eventType || event.type || event.event_type || '')))
             .sort((a, b) => parseInt(a.minute || a.clockDisplay || 0, 10) - parseInt(b.minute || b.clockDisplay || 0, 10));
         const halfTime = match.score?.halfTime;

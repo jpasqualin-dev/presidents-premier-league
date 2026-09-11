@@ -72,7 +72,8 @@ async function readHistoricalMatches(sql) {
                 ) ORDER BY me.id)
                 FROM match_events me
                 LEFT JOIN teams event_team ON event_team.id = me.team_id
-                WHERE me.match_id = m.id
+                                WHERE me.match_id = m.id
+                                    AND NOT COALESCE(me.scoring_play, FALSE)
             ), '[]'::json) AS events
             , COALESCE((
                 SELECT json_agg(json_build_object(
