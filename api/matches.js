@@ -64,6 +64,8 @@ async function readHistoricalMatches(sql) {
                     'teamProviderId', event_team.provider_team_id,
                     'athleteProviderId', me.athlete_provider_id,
                     'athleteName', me.athlete_name,
+                    'comingOn', to_jsonb(me)->>'substitution_player_on',
+                    'goingOff', to_jsonb(me)->>'substitution_player_off',
                     'eventType', me.event_type,
                     'minute', me.clock_display,
                     'redCard', me.red_card,

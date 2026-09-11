@@ -130,9 +130,10 @@ async function syncEvent(sql, event) {
     for (const detail of details) {
         const scorer = detail.athletesInvolved?.[0];
         const team = detail.team?.id === home.team.id ? homeTeam : detail.team?.id === away.team.id ? awayTeam : null;
+        const isSubstitution = Boolean(detail.substitution || detail.type?.type?.includes('substitution') || detail.type?.text?.toLowerCase().includes('substitution'));
         await sql`
-            INSERT INTO match_events (match_id, team_id, event_type, clock_seconds, clock_display, athlete_provider_id, athlete_name, score_value, scoring_play, red_card, yellow_card, penalty, own_goal, shootout)
-            VALUES (${match.id}, ${team?.id || null}, ${detail.type?.text || 'unknown'}, ${detail.clock?.value == null ? null : Math.floor(Number(detail.clock.value))}, ${detail.clock?.displayValue || null}, ${scorer?.id ? String(scorer.id) : null}, ${scorer?.displayName || null}, ${detail.scoreValue == null ? null : Number(detail.scoreValue)}, ${Boolean(detail.scoringPlay)}, ${Boolean(detail.redCard)}, ${Boolean(detail.yellowCard)}, ${Boolean(detail.penaltyKick)}, ${Boolean(detail.ownGoal)}, ${Boolean(detail.shootout)})`;
+            INSERT INTO match_events (match_id, team_id, event_type, clock_seconds, clock_display, athlete_provider_id, athlete_name, substitution_player_on, substitution_player_off, score_value, scoring_play, red_card, yellow_card, penalty, own_goal, shootout)
+            VALUES (${match.id}, ${team?.id || null}, ${detail.type?.text || 'unknown'}, ${detail.clock?.value == null ? null : Math.floor(Number(detail.clock.value))}, ${detail.clock?.displayValue || null}, ${scorer?.id ? String(scorer.id) : null}, ${scorer?.displayName || null}, ${isSubstitution ? detail.athletesInvolved?.[0]?.displayName || null : null}, ${isSubstitution ? detail.athletesInvolved?.[1]?.displayName || null : null}, ${detail.scoreValue == null ? null : Number(detail.scoreValue)}, ${Boolean(detail.scoringPlay)}, ${Boolean(detail.redCard)}, ${Boolean(detail.yellowCard)}, ${Boolean(detail.penaltyKick)}, ${Boolean(detail.ownGoal)}, ${Boolean(detail.shootout)})`;
     }
     for (const detail of details.filter(item => item.scoringPlay)) {
         const scorer = detail.athletesInvolved?.[0];

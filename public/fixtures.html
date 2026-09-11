@@ -1148,7 +1148,7 @@
         const scorers = (match.scorers || []).map(item => ({ ...item, eventType: 'Goal' }));
         const nonScoringEvents = (match.events || []).filter(event => !event.scoringPlay && !/^goal|score/i.test(String(event.eventType || event.type || '')));
         const events = [...scorers, ...nonScoringEvents]
-            .filter(event => !/kick.?off|match start|delay|delayed|end regular time|end of regular time|full time/i.test(String(event.eventType || event.type || event.event_type || '')))
+            .filter(event => !/kick.?off|match start|half.?time|halftime|start (of )?(the )?(second|2nd) half|second half|delay|delayed|end regular time|end of regular time|full time/i.test(String(event.eventType || event.type || event.event_type || '')))
             .sort((a, b) => {
                 const minute = event => {
                     const value = parseInt(event.minute || event.clockDisplay || '', 10);
