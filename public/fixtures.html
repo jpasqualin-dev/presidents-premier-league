@@ -555,7 +555,7 @@
         .event-sub-on { color: #16a37a; }
         .event-sub-off { color: #d05a62; }
         .timeline-period { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; min-height: 30px; color: var(--text-main); font-size: 0.78rem; font-weight: 800; text-align: center; }
-        .timeline-period::before, .timeline-period::after { content: ""; height: 1px; background: var(--border-color); }
+        .timeline-period > span:first-child, .timeline-period > span:last-child { height: 1px; background: var(--border-color); }
         .timeline-period-label { padding: 0 4px; background: var(--card-bg); }
         .lineups { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
         .lineup-team h4 { margin-bottom: 8px; color: var(--text-main); font-size: 0.82rem; }
@@ -1148,8 +1148,14 @@
         const scorers = (match.scorers || []).map(item => ({ ...item, eventType: 'Goal' }));
         const nonScoringEvents = (match.events || []).filter(event => !event.scoringPlay && !/^goal|score/i.test(String(event.eventType || event.type || '')));
         const events = [...scorers, ...nonScoringEvents]
-            .filter(event => !/kick.?off|match start|delay|delayed/i.test(String(event.eventType || event.type || event.event_type || '')))
-            .sort((a, b) => parseInt(a.minute || a.clockDisplay || 0, 10) - parseInt(b.minute || b.clockDisplay || 0, 10));
+            .filter(event => !/kick.?off|match start|delay|delayed|end regular time|end of regular time|full time/i.test(String(event.eventType || event.type || event.event_type || '')))
+            .sort((a, b) => {
+                const minute = event => {
+                    const value = parseInt(event.minute || event.clockDisplay || '', 10);
+                    return Number.isFinite(value) ? value : Infinity;
+                };
+                return minute(a) - minute(b);
+            });
         const halfTime = match.score?.halfTime;
         const hasHalfTime = halfTime?.home != null && halfTime?.away != null;
         const hasFullTime = match.status === 'FINISHED' && match.score?.fullTime?.home != null && match.score?.fullTime?.away != null;
