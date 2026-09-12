@@ -704,8 +704,10 @@
         .match-scorer-empty, .empty-detail { color: var(--text-muted); opacity: 0.75; }
         .match-detail-section h3 { margin-bottom: 16px; color: var(--text-main); font-size: 0.95rem; text-align: center; }
         .stat-row { display: grid; grid-template-columns: 54px 1fr 54px; align-items: center; gap: 10px; margin: 13px 0; font-size: 0.78rem; }
-        .stat-value { font-weight: 700; color: var(--text-main); }
-        .stat-value:last-child { text-align: right; }
+        .stat-value { font-weight: 700; color: var(--text-main); text-align: center; }
+        .stat-value.stat-leader { justify-self: center; padding: 3px 8px; border-radius: 999px; color: #ffffff; }
+        .stat-value.stat-leader-home { background: #3b82f6; }
+        .stat-value.stat-leader-away { background: #ef4444; }
         .stat-label { grid-column: 1 / -1; order: -1; text-align: center; color: var(--text-muted); }
         .stat-bars { display: flex; height: 8px; overflow: hidden; grid-column: 2; grid-row: 2; border-radius: 99px; background: var(--border-color); }
         .stat-bar-home, .stat-bar-away { display: block; height: 8px; }
@@ -1217,11 +1219,23 @@
                 const team = getDetailTeam(match, side);
                 const stat = stats.find(item => aliases.includes(normalizeStatNameKey(item.name)) && String(item.teamProviderId) === String(team.id || team.providerId));
                 const value = stat?.displayValue ?? stat?.value ?? '-';
-                return label === 'Possession' && value !== '-' && !String(value).includes('%') ? `${value}%` : value;
+                if (label !== 'Possession' || value === '-') return value;
+                const percentage = Number.parseFloat(String(value).replace('%', ''));
+                return Number.isFinite(percentage) ? `${Math.round(percentage)}%` : value;
             });
-            const numeric = values.map(value => Number.parseFloat(String(value).replace('%', '')) || 0);
+            const parsedValues = values.map(value => Number.parseFloat(String(value).replace('%', '')));
+            const numeric = parsedValues.map(value => Number.isFinite(value) ? value : 0);
             const total = numeric[0] + numeric[1] || 1;
-            return `<div class="stat-row"><span class="stat-value">${escapeHtml(values[0])}</span><span class="stat-label">${escapeHtml(label)}</span><span class="stat-value">${escapeHtml(values[1])}</span><span class="stat-bars"><span class="stat-bar-home" style="width:${numeric[0] / total * 100}%"></span><span class="stat-bar-away" style="width:${numeric[1] / total * 100}%"></span></span></div>`;
+            const comparable = parsedValues.every(value => Number.isFinite(value));
+            const winnerIndex = comparable && parsedValues[0] !== parsedValues[1]
+                ? (label === 'Fouls'
+                    ? (parsedValues[0] < parsedValues[1] ? 0 : 1)
+                    : (parsedValues[0] > parsedValues[1] ? 0 : 1))
+                : -1;
+            const valueClass = index => winnerIndex === index
+                ? ` stat-leader stat-leader-${index === 0 ? 'home' : 'away'}`
+                : '';
+            return `<div class="stat-row"><span class="stat-value${valueClass(0)}">${escapeHtml(values[0])}</span><span class="stat-label">${escapeHtml(label)}</span><span class="stat-value${valueClass(1)}">${escapeHtml(values[1])}</span><span class="stat-bars"><span class="stat-bar-home" style="width:${numeric[0] / total * 100}%"></span><span class="stat-bar-away" style="width:${numeric[1] / total * 100}%"></span></span></div>`;
         }).join('');
     }
 

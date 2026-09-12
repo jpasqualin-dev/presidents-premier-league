@@ -523,9 +523,8 @@
         .match-scorer-empty { color: var(--text-muted); opacity: 0.75; }
         .match-detail-section h3 { margin-bottom: 16px; color: var(--text-main); font-size: 0.95rem; text-align: center; }
         .stat-row { display: grid; grid-template-columns: 54px 1fr 54px; align-items: center; gap: 10px; margin: 13px 0; font-size: 0.78rem; }
-        .stat-value { font-weight: 700; color: var(--text-main); }
-        .stat-value:last-child { text-align: right; }
-        .stat-value.stat-leader { padding: 3px 8px; border-radius: 999px; color: #ffffff; }
+        .stat-value { font-weight: 700; color: var(--text-main); text-align: center; }
+        .stat-value.stat-leader { justify-self: center; padding: 3px 8px; border-radius: 999px; color: #ffffff; }
         .stat-value.stat-leader-home { background: #3b82f6; }
         .stat-value.stat-leader-away { background: #ef4444; }
         .stat-label { grid-column: 1 / -1; order: -1; text-align: center; color: var(--text-muted); }
