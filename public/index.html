@@ -163,9 +163,10 @@
         }
 
         .weekly-detail-leader { text-align: center; }
+        .weekly-detail-name-row { display: flex; align-items: center; justify-content: center; gap: 10px; }
         .weekly-detail-name { color: var(--text-main); font-size: 1.2rem; font-weight: 800; }
-        .weekly-detail-stats { display: flex; justify-content: center; gap: 18px; margin-top: 10px; color: var(--text-muted); font-size: 0.82rem; }
-        .weekly-detail-record { margin-top: 12px; color: var(--text-muted); font-size: 0.78rem; }
+        .weekly-detail-points { display: inline-block; margin-left: 8px; padding: 4px 8px; border-radius: 4px; background: #c6f6d5; color: #276749; font-size: 0.78rem; font-weight: 800; white-space: nowrap; }
+        .weekly-detail-record { margin-top: 12px; color: var(--text-main); font-size: 0.95rem; font-weight: 600; }
         .weekly-detail-achievements { margin-top: 8px; color: var(--text-muted); font-size: 0.78rem; }
 
         .today-header {
@@ -931,9 +932,8 @@
 
             const ownerEntries = Object.entries(owners).filter(([, owner]) => owner.results.length > 0);
             const highestPoints = ownerEntries.length ? Math.max(...ownerEntries.map(([, owner]) => owner.points)) : null;
-            const leaderEntries = ownerEntries.filter(([, owner]) => owner.points === highestPoints);
-            const leaderDetails = leaderEntries.map(([owner, details]) => {
-                const achievements = ['Weekly points leader'];
+            const ownerDetails = ownerEntries.map(([owner, details]) => {
+                const achievements = details.points === highestPoints ? ['Weekly points leader'] : [];
                 if (!details.results.includes('loss')) achievements.push('Undefeated week');
                 if (details.results.every(result => result === 'win')) achievements.push('Perfect week');
                 return {
@@ -945,10 +945,10 @@
                     stars: achievements.length,
                     achievements
                 };
-            });
+            }).sort((ownerA, ownerB) => ownerB.points - ownerA.points || ownerA.owner.localeCompare(ownerB.owner));
             const firstMatch = matches[0];
             const date = firstMatch?.utcDate ? new Date(firstMatch.utcDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
-            return { week, date, leaderDetails, matches };
+            return { week, date, ownerDetails, leaderDetails: ownerDetails.filter(owner => owner.points === highestPoints), matches };
         });
     }
 
@@ -1448,8 +1448,8 @@
     }
 
     function renderWeeklyDetail(week) {
-        if (!week?.leaderDetails?.length) return '<section class="match-detail-section"><p class="empty-detail">No completed matches yet.</p></section>';
-        return week.leaderDetails.map(leader => `<section class="match-hero weekly-detail-leader"><div class="weekly-detail-name">${escapeHtml(leader.owner)}</div><div class="weekly-detail-stats"><span><span class="weekly-stars" aria-hidden="true">${'★'.repeat(leader.stars)}</span> ${leader.stars} gold star${leader.stars === 1 ? '' : 's'}</span><span>${leader.points} weekly point${leader.points === 1 ? '' : 's'}</span></div><div class="weekly-detail-record">Record: ${leader.wins}-${leader.draws}-${leader.losses}</div><div class="weekly-detail-achievements">${leader.achievements.map(achievement => escapeHtml(achievement)).join(' · ')}</div></section>`).join('');
+        if (!week?.ownerDetails?.length) return '<section class="match-detail-section"><p class="empty-detail">No completed matches yet.</p></section>';
+        return week.ownerDetails.map(owner => `<section class="match-hero weekly-detail-leader"><div class="weekly-detail-name-row"><span class="weekly-detail-name">${escapeHtml(owner.owner)}</span><span class="weekly-stars" aria-label="${owner.stars} gold star${owner.stars === 1 ? '' : 's'}">${'★'.repeat(owner.stars)}</span><span class="weekly-detail-points">${owner.points} PTS</span></div><div class="weekly-detail-achievements">${owner.achievements.length ? owner.achievements.map(achievement => escapeHtml(achievement)).join(' · ') : 'No achievements'}</div><div class="weekly-detail-record">Record: ${owner.wins}-${owner.draws}-${owner.losses}</div></section>`).join('');
     }
 
     async function fetchMatchById(matchId) {
