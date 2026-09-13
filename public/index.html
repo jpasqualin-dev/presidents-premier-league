@@ -144,56 +144,6 @@
             touch-action: pan-y; /* Allows vertical scrolling, captures horizontal swipes */
         }
 
-        .weekly-card {
-            background: #ffffff;
-            border: 1px solid #dfe5eb;
-            border-radius: 16px;
-            margin-bottom: 18px;
-            box-shadow: 0 3px 10px rgba(56,0,60,0.08);
-            overflow: hidden;
-        }
-
-        .weekly-header {
-            display: grid;
-            grid-template-columns: 34px minmax(0, 1fr) 34px;
-            align-items: center;
-            padding: 10px 12px;
-            background: #38003c;
-            color: #ffffff;
-        }
-
-        .weekly-title {
-            margin: 0;
-            color: #ffffff;
-            font-size: 0.95rem;
-            text-align: center;
-        }
-
-        .weekly-back {
-            grid-column: 1;
-            width: 30px;
-            height: 30px;
-            padding: 0;
-            border: 1px solid rgba(255,255,255,0.24);
-            border-radius: 4px;
-            background: rgba(255,255,255,0.14);
-            color: #ffffff;
-            font-size: 1.1rem;
-            cursor: pointer;
-        }
-
-        .weekly-back:disabled {
-            cursor: not-allowed;
-            opacity: 0.45;
-        }
-
-        .weekly-week {
-            padding: 8px 12px 4px;
-            color: #718096;
-            font-size: 0.75rem;
-            text-align: center;
-        }
-
         .weekly-leader-row {
             display: flex;
             align-items: center;
@@ -201,7 +151,7 @@
             gap: 7px;
             min-height: 42px;
             padding: 4px 12px 12px;
-            color: #38003c;
+            color: inherit;
             font-size: 0.95rem;
             font-weight: 700;
         }
@@ -680,7 +630,6 @@
 
         body.dark-mode .players-dropdown { box-shadow: 0 4px 12px rgba(0,0,0,0.45); }
         body.dark-mode .players-dropdown a { color: #f1f1f1; }
-        body.dark-mode .weekly-card { box-shadow: 0 3px 10px rgba(0,0,0,0.35); }
         body.dark-mode .today-card,
         body.dark-mode .table-card { box-shadow: 0 3px 10px rgba(0,0,0,0.35); }
         body.dark-mode .today-match-row { border-bottom-color: #3d3d3d; color: #f1f1f1; }
@@ -983,28 +932,42 @@
             });
             const firstMatch = matches[0];
             const date = firstMatch?.utcDate ? new Date(firstMatch.utcDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
-            return { week, date, leaders, stars };
+            return { week, date, leaders, stars, matches };
         });
+    }
+
+    function getCurrentWeeklyCardIndex(weeks) {
+        const now = Date.now();
+        let currentIndex = -1;
+        weeks.forEach((week, index) => {
+            if (week.matches.some(match => {
+                const matchTime = match.utcDate ? new Date(match.utcDate).getTime() : 0;
+                return ['FINISHED', 'IN_PLAY', 'PAUSED'].includes(match.status) || matchTime <= now;
+            })) currentIndex = index;
+        });
+        return currentIndex === -1 ? 0 : currentIndex;
     }
 
     function renderWeeklyCard() {
         const container = document.getElementById('weekly-card-container');
         if (!container) return;
         if (!matchdayDataLoaded) {
-            container.innerHTML = '<div class="weekly-card"><div class="weekly-header"><h2 class="weekly-title">PPL Weekly</h2></div><div class="weekly-leader-row">Loading Matches</div></div>';
+            container.innerHTML = '<div class="today-card"><div class="today-header"><div class="today-header-left"><span class="today-header-text">PPL Weekly</span></div></div><div class="weekly-leader-row">Loading Matches</div></div>';
             return;
         }
 
         weeklyCardWeeks = getWeeklyCardSummary();
-        if (weeklyCardWeekIndex === -1 || weeklyCardWeekIndex >= weeklyCardWeeks.length) weeklyCardWeekIndex = weeklyCardWeeks.length - 1;
+        if (weeklyCardWeekIndex === -1) weeklyCardWeekIndex = getCurrentWeeklyCardIndex(weeklyCardWeeks);
+        if (weeklyCardWeekIndex >= weeklyCardWeeks.length) weeklyCardWeekIndex = weeklyCardWeeks.length - 1;
         const week = weeklyCardWeeks[weeklyCardWeekIndex];
         if (!week) {
-            container.innerHTML = '<div class="weekly-card"><div class="weekly-header"><h2 class="weekly-title">PPL Weekly</h2></div><div class="weekly-leader-row">No weekly results yet</div></div>';
+            container.innerHTML = '<div class="today-card"><div class="today-header"><div class="today-header-left"><span class="today-header-text">PPL Weekly</span></div></div><div class="weekly-leader-row">No weekly results yet</div></div>';
             return;
         }
 
         const leaderText = week.leaders.length ? week.leaders.map((owner, index) => `${escapeHtml(owner)} <span class="weekly-stars" aria-label="${week.stars[index]} gold star${week.stars[index] === 1 ? '' : 's'}">${'★'.repeat(week.stars[index])}</span>`).join(' <span aria-hidden="true">·</span> ') : 'No completed matches yet';
-        container.innerHTML = `<div class="weekly-card"><div class="weekly-header"><button class="weekly-back" type="button" aria-label="View previous week" onclick="changeWeeklyCardWeek(-1)" ${weeklyCardWeekIndex <= 0 ? 'disabled' : ''}>❮</button><h2 class="weekly-title">PPL Weekly</h2></div><div class="weekly-week">Week ${escapeHtml(String(week.week))}${week.date ? ` · ${escapeHtml(week.date)}` : ''}</div><div class="weekly-leader-row">${leaderText}</div></div>`;
+        const isCurrentWeek = weeklyCardWeekIndex === getCurrentWeeklyCardIndex(weeklyCardWeeks);
+        container.innerHTML = `<div class="today-card"><div class="today-header"><div class="today-header-left"><span class="today-header-text">PPL Weekly - Round ${escapeHtml(String(week.week))}</span></div><div class="matchday-nav"><button class="nav-btn ${weeklyCardWeekIndex <= 0 ? 'disabled' : ''}" type="button" aria-label="View previous week" onclick="changeWeeklyCardWeek(-1)" ${weeklyCardWeekIndex <= 0 ? 'disabled' : ''}>❮</button><button class="nav-btn ${isCurrentWeek ? 'disabled' : ''}" type="button" aria-label="View next week" onclick="changeWeeklyCardWeek(1)" ${isCurrentWeek ? 'disabled' : ''}>❯</button></div></div><div class="weekly-leader-row">${leaderText}</div></div>`;
     }
 
     window.changeWeeklyCardWeek = function(direction) {
@@ -1040,8 +1003,8 @@
                 const nextIdx = matchDates.findIndex(t => t > todayMidnight);
                 currentMatchDateIndex = nextIdx !== -1 ? nextIdx : matchDates.length - 1;
             }
-            renderWeeklyCard();
         }
+        renderWeeklyCard();
     }
 
     function renderMatchdayCardContent(container, dateIndex) {
