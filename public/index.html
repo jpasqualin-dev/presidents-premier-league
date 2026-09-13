@@ -144,6 +144,74 @@
             touch-action: pan-y; /* Allows vertical scrolling, captures horizontal swipes */
         }
 
+        .weekly-card {
+            background: #ffffff;
+            border: 1px solid #dfe5eb;
+            border-radius: 16px;
+            margin-bottom: 18px;
+            box-shadow: 0 3px 10px rgba(56,0,60,0.08);
+            overflow: hidden;
+        }
+
+        .weekly-header {
+            display: grid;
+            grid-template-columns: 34px minmax(0, 1fr) 34px;
+            align-items: center;
+            padding: 10px 12px;
+            background: #38003c;
+            color: #ffffff;
+        }
+
+        .weekly-title {
+            margin: 0;
+            color: #ffffff;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+
+        .weekly-back {
+            grid-column: 1;
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            border: 1px solid rgba(255,255,255,0.24);
+            border-radius: 4px;
+            background: rgba(255,255,255,0.14);
+            color: #ffffff;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        .weekly-back:disabled {
+            cursor: not-allowed;
+            opacity: 0.45;
+        }
+
+        .weekly-week {
+            padding: 8px 12px 4px;
+            color: #718096;
+            font-size: 0.75rem;
+            text-align: center;
+        }
+
+        .weekly-leader-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            min-height: 42px;
+            padding: 4px 12px 12px;
+            color: #38003c;
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .weekly-stars {
+            color: #d69e2e;
+            letter-spacing: 2px;
+            white-space: nowrap;
+        }
+
         .today-header {
             display: grid;
             grid-template-columns: 30px minmax(0, 1fr) 30px;
@@ -597,6 +665,7 @@
         }
 
         body.dark-mode .players-dropdown,
+        body.dark-mode .weekly-card,
         body.dark-mode .today-card,
         body.dark-mode .table-card,
         body.dark-mode table,
@@ -611,6 +680,7 @@
 
         body.dark-mode .players-dropdown { box-shadow: 0 4px 12px rgba(0,0,0,0.45); }
         body.dark-mode .players-dropdown a { color: #f1f1f1; }
+        body.dark-mode .weekly-card { box-shadow: 0 3px 10px rgba(0,0,0,0.35); }
         body.dark-mode .today-card,
         body.dark-mode .table-card { box-shadow: 0 3px 10px rgba(0,0,0,0.35); }
         body.dark-mode .today-match-row { border-bottom-color: #3d3d3d; color: #f1f1f1; }
@@ -775,6 +845,7 @@
     </nav>
 
     <!-- Matchday Card Container -->
+    <div id="weekly-card-container"></div>
     <div id="today-matches-container"></div>
 
     <div class="match-drawer-overlay" id="match-drawer-overlay" aria-hidden="true" onclick="closeMatchDrawer(event)">
@@ -872,10 +943,80 @@
     let allMatchesData = [];
     let matchDates = []; 
     let currentMatchDateIndex = -1;
+    let matchdayDataLoaded = false;
+    let weeklyCardWeeks = [];
+    let weeklyCardWeekIndex = -1;
     let lastStandingsMatchSignature = '';
+
+    function getWeeklyCardSummary() {
+        const weeks = new Map();
+        allMatchesData.forEach(match => {
+            if (match.matchday == null) return;
+            if (!weeks.has(match.matchday)) weeks.set(match.matchday, []);
+            weeks.get(match.matchday).push(match);
+        });
+
+        return Array.from(weeks.entries()).sort(([weekA], [weekB]) => Number(weekA) - Number(weekB)).map(([week, matches]) => {
+            const owners = {};
+            matches.forEach(match => {
+                if (match.status !== 'FINISHED') return;
+                const homeOwner = getOwnerOfTeam(match.homeTeam.name);
+                const awayOwner = getOwnerOfTeam(match.awayTeam.name);
+                const homeScore = match.score?.fullTime?.home ?? 0;
+                const awayScore = match.score?.fullTime?.away ?? 0;
+                [[homeOwner, homeScore > awayScore ? 3 : homeScore === awayScore ? 1 : 0, homeScore > awayScore ? 'win' : homeScore === awayScore ? 'draw' : 'loss'],
+                    [awayOwner, awayScore > homeScore ? 3 : awayScore === homeScore ? 1 : 0, awayScore > homeScore ? 'win' : awayScore === homeScore ? 'draw' : 'loss']]
+                    .forEach(([owner, points, result]) => {
+                        if (!owner) return;
+                        owners[owner] ||= { points: 0, results: [] };
+                        owners[owner].points += points;
+                        owners[owner].results.push(result);
+                    });
+            });
+
+            const ownerEntries = Object.entries(owners).filter(([, owner]) => owner.results.length > 0);
+            const highestPoints = ownerEntries.length ? Math.max(...ownerEntries.map(([, owner]) => owner.points)) : null;
+            const leaders = ownerEntries.filter(([, owner]) => owner.points === highestPoints).map(([owner]) => owner);
+            const stars = leaders.map(owner => {
+                const results = owners[owner].results;
+                return 1 + (!results.includes('loss') ? 1 : 0) + (results.every(result => result === 'win') ? 1 : 0);
+            });
+            const firstMatch = matches[0];
+            const date = firstMatch?.utcDate ? new Date(firstMatch.utcDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+            return { week, date, leaders, stars };
+        });
+    }
+
+    function renderWeeklyCard() {
+        const container = document.getElementById('weekly-card-container');
+        if (!container) return;
+        if (!matchdayDataLoaded) {
+            container.innerHTML = '<div class="weekly-card"><div class="weekly-header"><h2 class="weekly-title">PPL Weekly</h2></div><div class="weekly-leader-row">Loading Matches</div></div>';
+            return;
+        }
+
+        weeklyCardWeeks = getWeeklyCardSummary();
+        if (weeklyCardWeekIndex === -1 || weeklyCardWeekIndex >= weeklyCardWeeks.length) weeklyCardWeekIndex = weeklyCardWeeks.length - 1;
+        const week = weeklyCardWeeks[weeklyCardWeekIndex];
+        if (!week) {
+            container.innerHTML = '<div class="weekly-card"><div class="weekly-header"><h2 class="weekly-title">PPL Weekly</h2></div><div class="weekly-leader-row">No weekly results yet</div></div>';
+            return;
+        }
+
+        const leaderText = week.leaders.length ? week.leaders.map((owner, index) => `${escapeHtml(owner)} <span class="weekly-stars" aria-label="${week.stars[index]} gold star${week.stars[index] === 1 ? '' : 's'}">${'★'.repeat(week.stars[index])}</span>`).join(' <span aria-hidden="true">·</span> ') : 'No completed matches yet';
+        container.innerHTML = `<div class="weekly-card"><div class="weekly-header"><button class="weekly-back" type="button" aria-label="View previous week" onclick="changeWeeklyCardWeek(-1)" ${weeklyCardWeekIndex <= 0 ? 'disabled' : ''}>❮</button><h2 class="weekly-title">PPL Weekly</h2></div><div class="weekly-week">Week ${escapeHtml(String(week.week))}${week.date ? ` · ${escapeHtml(week.date)}` : ''}</div><div class="weekly-leader-row">${leaderText}</div></div>`;
+    }
+
+    window.changeWeeklyCardWeek = function(direction) {
+        const nextIndex = weeklyCardWeekIndex + direction;
+        if (nextIndex < 0 || nextIndex >= weeklyCardWeeks.length) return;
+        weeklyCardWeekIndex = nextIndex;
+        renderWeeklyCard();
+    };
 
     function processMatchDates(matches) {
         allMatchesData = matches || [];
+        matchdayDataLoaded = true;
         const datesMap = new Map();
 
         allMatchesData.forEach(match => {
@@ -899,11 +1040,20 @@
                 const nextIdx = matchDates.findIndex(t => t > todayMidnight);
                 currentMatchDateIndex = nextIdx !== -1 ? nextIdx : matchDates.length - 1;
             }
+            renderWeeklyCard();
         }
     }
 
     function renderMatchdayCardContent(container, dateIndex) {
         if (!container) return;
+
+        if (!matchdayDataLoaded) {
+            container.innerHTML = `
+                <div class="today-card">
+                    <div class="no-matches-today">Loading Matches</div>
+                </div>`;
+            return;
+        }
 
         if (matchDates.length === 0) {
             const today = new Date();
@@ -1289,7 +1439,7 @@
 
     function renderLineups(match) {
         const lineups = match.lineups;
-        if (!lineups?.home?.players?.length && !lineups?.away?.players?.length) return '<p class="empty-detail">Lineups are not available in the current match feed.</p>';
+        if (!lineups?.home?.players?.length && !lineups?.away?.players?.length) return '<p class="empty-detail">Lineups are not available yet</p>';
         return `<div class="lineups">${['home', 'away'].map(side => {
             const lineup = lineups[side] || {}, players = Array.isArray(lineup.players) ? lineup.players : [];
             const renderPlayers = group => group.length ? `<ol>${group.map(player => `<li>${escapeHtml(typeof player === 'string' ? player : player.name || player.displayName || player.athlete?.displayName || 'Unknown player')}${player.position ? ` <span class="lineup-position">(${escapeHtml(player.position)})</span>` : ''}</li>`).join('')}</ol>` : '<p class="empty-detail">Unavailable</p>';
@@ -1915,6 +2065,7 @@
         if (!matchData) {
             renderPrimaryTable(playerStats, teamStats);
             renderDivisions(teamStats);
+            renderWeeklyCard();
             renderMatchdayCard();
         }
 

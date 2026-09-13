@@ -1246,7 +1246,7 @@
     function renderLineups(match) {
         const lineups = match.lineups;
         if (!lineups?.home?.players?.length && !lineups?.away?.players?.length) {
-            return '<p class="empty-detail">Lineups are not available in the current match feed.</p>';
+            return '<p class="empty-detail">Lineups are not available yet</p>';
         }
         return `<div class="lineups">${['home', 'away'].map(side => {
             const lineup = lineups[side] || {};
