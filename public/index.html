@@ -162,6 +162,12 @@
             white-space: nowrap;
         }
 
+        .weekly-detail-leader { text-align: center; }
+        .weekly-detail-name { color: var(--text-main); font-size: 1.2rem; font-weight: 800; }
+        .weekly-detail-stats { display: flex; justify-content: center; gap: 18px; margin-top: 10px; color: var(--text-muted); font-size: 0.82rem; }
+        .weekly-detail-record { margin-top: 12px; color: var(--text-muted); font-size: 0.78rem; }
+        .weekly-detail-achievements { margin-top: 8px; color: var(--text-muted); font-size: 0.78rem; }
+
         .today-header {
             display: grid;
             grid-template-columns: 30px minmax(0, 1fr) 30px;
@@ -925,14 +931,24 @@
 
             const ownerEntries = Object.entries(owners).filter(([, owner]) => owner.results.length > 0);
             const highestPoints = ownerEntries.length ? Math.max(...ownerEntries.map(([, owner]) => owner.points)) : null;
-            const leaders = ownerEntries.filter(([, owner]) => owner.points === highestPoints).map(([owner]) => owner);
-            const stars = leaders.map(owner => {
-                const results = owners[owner].results;
-                return 1 + (!results.includes('loss') ? 1 : 0) + (results.every(result => result === 'win') ? 1 : 0);
+            const leaderEntries = ownerEntries.filter(([, owner]) => owner.points === highestPoints);
+            const leaderDetails = leaderEntries.map(([owner, details]) => {
+                const achievements = ['Weekly points leader'];
+                if (!details.results.includes('loss')) achievements.push('Undefeated week');
+                if (details.results.every(result => result === 'win')) achievements.push('Perfect week');
+                return {
+                    owner,
+                    points: details.points,
+                    wins: details.results.filter(result => result === 'win').length,
+                    draws: details.results.filter(result => result === 'draw').length,
+                    losses: details.results.filter(result => result === 'loss').length,
+                    stars: achievements.length,
+                    achievements
+                };
             });
             const firstMatch = matches[0];
             const date = firstMatch?.utcDate ? new Date(firstMatch.utcDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
-            return { week, date, leaders, stars, matches };
+            return { week, date, leaderDetails, matches };
         });
     }
 
@@ -965,9 +981,9 @@
             return;
         }
 
-        const leaderText = week.leaders.length ? week.leaders.map((owner, index) => `${escapeHtml(owner)} <span class="weekly-stars" aria-label="${week.stars[index]} gold star${week.stars[index] === 1 ? '' : 's'}">${'★'.repeat(week.stars[index])}</span>`).join(' <span aria-hidden="true">·</span> ') : 'No completed matches yet';
+        const leaderText = week.leaderDetails.length ? week.leaderDetails.map(leader => `${escapeHtml(leader.owner)} <span class="weekly-stars" aria-label="${leader.stars} gold star${leader.stars === 1 ? '' : 's'}">${'★'.repeat(leader.stars)}</span>`).join(' <span aria-hidden="true">·</span> ') : 'No completed matches yet';
         const isCurrentWeek = weeklyCardWeekIndex === getCurrentWeeklyCardIndex(weeklyCardWeeks);
-        container.innerHTML = `<div class="today-card"><div class="today-header"><div class="today-header-left"><span class="today-header-text">PPL Weekly - Round ${escapeHtml(String(week.week))}</span></div><div class="matchday-nav"><button class="nav-btn ${weeklyCardWeekIndex <= 0 ? 'disabled' : ''}" type="button" aria-label="View previous week" onclick="changeWeeklyCardWeek(-1)" ${weeklyCardWeekIndex <= 0 ? 'disabled' : ''}>❮</button><button class="nav-btn ${isCurrentWeek ? 'disabled' : ''}" type="button" aria-label="View next week" onclick="changeWeeklyCardWeek(1)" ${isCurrentWeek ? 'disabled' : ''}>❯</button></div></div><div class="weekly-leader-row">${leaderText}</div></div>`;
+        container.innerHTML = `<div class="today-card" role="button" tabindex="0" aria-label="View PPL Weekly details for Round ${escapeHtml(String(week.week))}" onclick="openWeeklyDrawer()" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openWeeklyDrawer(); }"><div class="today-header"><div class="today-header-left"><span class="today-header-text">PPL Weekly - Round ${escapeHtml(String(week.week))}</span></div><div class="matchday-nav"><button class="nav-btn ${weeklyCardWeekIndex <= 0 ? 'disabled' : ''}" type="button" aria-label="View previous week" onclick="event.stopPropagation(); changeWeeklyCardWeek(-1)" ${weeklyCardWeekIndex <= 0 ? 'disabled' : ''}>❮</button><button class="nav-btn ${isCurrentWeek ? 'disabled' : ''}" type="button" aria-label="View next week" onclick="event.stopPropagation(); changeWeeklyCardWeek(1)" ${isCurrentWeek ? 'disabled' : ''}>❯</button></div></div><div class="weekly-leader-row">${leaderText}</div></div>`;
     }
 
     window.changeWeeklyCardWeek = function(direction) {
@@ -1431,6 +1447,11 @@
         return `<section class="match-hero"><div class="match-meta">${escapeHtml(formatMatchDate(match.utcDate))}</div><div class="match-scoreline"><div class="match-team"><span>${escapeHtml(home.name)}</span>${home.crest ? `<img src="${escapeHtml(home.crest)}" alt="">` : ''}<span class="match-team-owner">${escapeHtml(getOwnerOfTeam(home.name) || '')}</span></div><div class="match-score">${escapeHtml(score)}<span class="match-status">${escapeHtml(status)}</span></div><div class="match-team"><span>${escapeHtml(away.name)}</span>${away.crest ? `<img src="${escapeHtml(away.crest)}" alt="">` : ''}<span class="match-team-owner">${escapeHtml(getOwnerOfTeam(away.name) || '')}</span></div></div><div class="match-venue">${escapeHtml(match.venue || 'Venue unavailable')}</div>${renderMatchScorers(match)}</section><section class="match-detail-section"><h3>Match Stats</h3>${renderMatchStats(match)}</section><section class="match-detail-section"><h3>Match Events</h3>${renderMatchEvents(match)}</section><section class="match-detail-section"><h3>Lineups</h3>${renderLineups(match)}</section>`;
     }
 
+    function renderWeeklyDetail(week) {
+        if (!week?.leaderDetails?.length) return '<section class="match-detail-section"><p class="empty-detail">No completed matches yet.</p></section>';
+        return week.leaderDetails.map(leader => `<section class="match-hero weekly-detail-leader"><div class="weekly-detail-name">${escapeHtml(leader.owner)}</div><div class="weekly-detail-stats"><span><span class="weekly-stars" aria-hidden="true">${'★'.repeat(leader.stars)}</span> ${leader.stars} gold star${leader.stars === 1 ? '' : 's'}</span><span>${leader.points} weekly point${leader.points === 1 ? '' : 's'}</span></div><div class="weekly-detail-record">Record: ${leader.wins}-${leader.draws}-${leader.losses}</div><div class="weekly-detail-achievements">${leader.achievements.map(achievement => escapeHtml(achievement)).join(' · ')}</div></section>`).join('');
+    }
+
     async function fetchMatchById(matchId) {
         const data = await getMatchData();
         const match = data?.matches?.find(item => String(item.id) === String(matchId));
@@ -1457,6 +1478,7 @@
 
     async function openMatchDrawer(matchId) {
         const overlay = document.getElementById('match-drawer-overlay'), drawer = overlay.querySelector('.match-drawer'), content = document.getElementById('match-detail-content');
+        document.getElementById('match-drawer-title').textContent = 'Match details';
         drawer.scrollTop = 0;
         overlay.classList.add('is-open');
         overlay.setAttribute('aria-hidden', 'false');
@@ -1466,12 +1488,26 @@
         catch (error) { console.error('Error fetching match details:', error); content.innerHTML = '<p class="empty-detail">Unable to load match details.</p>'; }
     }
 
+    window.openWeeklyDrawer = function() {
+        const overlay = document.getElementById('match-drawer-overlay');
+        const drawer = overlay.querySelector('.match-drawer');
+        const content = document.getElementById('match-detail-content');
+        const week = weeklyCardWeeks[weeklyCardWeekIndex];
+        document.getElementById('match-drawer-title').textContent = `PPL Weekly - Round ${week ? week.week : ''}`;
+        drawer.scrollTop = 0;
+        overlay.classList.add('is-open');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('drawer-open');
+        content.innerHTML = renderWeeklyDetail(week);
+    };
+
     function closeMatchDrawer(event) {
         if (event && event.target.id !== 'match-drawer-overlay') return;
         const overlay = document.getElementById('match-drawer-overlay');
         overlay.classList.remove('is-open');
         overlay.setAttribute('aria-hidden', 'true');
         document.body.classList.remove('drawer-open');
+        document.getElementById('match-drawer-title').textContent = 'Match details';
     }
 
     document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMatchDrawer(); });
