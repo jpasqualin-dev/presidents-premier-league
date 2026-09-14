@@ -48,20 +48,20 @@
 
         const navigationStyles = document.createElement('style');
         navigationStyles.textContent = `
-            html { background: #ffffff; }
+            html { background: #f4f6f8; }
             html:has(body.dark-mode) { background: #121212; }
             body { --menu-page-pad: 16px; --menu-max-width: 600px; }
-            body:not(.dark-mode) { background-color: #ffffff; }
+            body:not(.dark-mode) { background-color: #f4f6f8; }
             body.wide-page { --menu-max-width: 800px; }
-            .menu-backdrop { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: min(calc(100vw - 2 * var(--menu-page-pad)), var(--menu-max-width)); height: 5px; background: rgba(255,255,255,0.96); z-index: 15; pointer-events: none; }
+            .menu-backdrop { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: min(calc(100vw - 2 * var(--menu-page-pad)), var(--menu-max-width)); height: 5px; background: #f4f6f8; z-index: 15; pointer-events: none; }
             .header-container .theme-toggle:focus-visible { outline-offset: 3px; }
-            .site-menu { position: sticky; top: 0; z-index: 20; height: auto; padding: 10px 3px 12px; margin-bottom: 0; background: #ffffff; border: 0; border-radius: 0; box-shadow: none; }
+            .site-menu { position: sticky; top: 0; z-index: 20; height: auto; padding: 10px 3px 12px; margin-bottom: 0; background: #f4f6f8; border: 0; border-radius: 0; box-shadow: none; }
             .site-menu a, .players-menu summary { color: #38003c; }
             .players-menu[open] summary { background: #f0fff4; border-color: #c6f6d5; }
             .site-menu a.active::after, .players-menu summary.active::before { right: 8px; left: 8px; background: #38003c; }
             body.wide-page .site-menu { margin: 0 16px; }
             body.wide-page .sticky-nav-wrapper { position: static; background: transparent; }
-            body.wide-page .pills-nav-container { position: sticky; top: var(--primary-menu-height, 36px); z-index: 19; padding: 2px 20px 10px; background: #ffffff; }
+            body.wide-page .pills-nav-container { position: sticky; top: var(--primary-menu-height, 36px); z-index: 19; padding: 2px 20px 10px; background: #f4f6f8; }
             body:not(.wide-page) .profile-card { top: var(--primary-menu-height, 36px); z-index: 19; }
             body.wide-page::before { display: none; }
             @media (hover: hover) { .site-menu a:hover, .players-menu summary:hover { background: #f0fff4; border-color: #c6f6d5; } }
