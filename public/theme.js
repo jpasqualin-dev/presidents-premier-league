@@ -48,12 +48,12 @@
 
         const navigationStyles = document.createElement('style');
         navigationStyles.textContent = `
-            html { background: #f4f6f8; }
+            html { background: #ffffff; }
             html:has(body.dark-mode) { background: #121212; }
             body { --menu-page-pad: 16px; --menu-max-width: 600px; }
-            body:not(.dark-mode) { background-color: #f4f6f8; }
+            body:not(.dark-mode) { background-color: #ffffff; }
             body.wide-page { --menu-max-width: 800px; }
-            .menu-backdrop { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: min(calc(100vw - 2 * var(--menu-page-pad)), var(--menu-max-width)); height: 5px; background: #ffffff; z-index: 15; pointer-events: none; }
+            .menu-backdrop { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: min(calc(100vw - 2 * var(--menu-page-pad)), var(--menu-max-width)); height: 5px; background: rgba(255,255,255,0.96); z-index: 15; pointer-events: none; }
             .header-container .theme-toggle:focus-visible { outline-offset: 3px; }
             .site-menu { position: sticky; top: 0; z-index: 20; height: auto; padding: 10px 3px 12px; margin-bottom: 0; background: #ffffff; border: 0; border-radius: 0; box-shadow: none; }
             .site-menu a, .players-menu summary { color: #38003c; }
