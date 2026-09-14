@@ -6,16 +6,21 @@
     };
 
     const updateBrowserTheme = theme => {
-        const themeColor = document.querySelector('meta[name="theme-color"]') || document.createElement('meta');
+        const existingThemeColor = document.querySelector('meta[name="theme-color"]');
+        const themeColor = document.createElement('meta');
         themeColor.name = 'theme-color';
         const pageBackground = getComputedStyle(document.body).backgroundColor;
         themeColor.content = pageBackground === 'rgba(0, 0, 0, 0)' ? themeColors[theme] : pageBackground;
-        document.head.append(themeColor);
+        document.documentElement.style.backgroundColor = themeColor.content;
+        if (existingThemeColor) existingThemeColor.replaceWith(themeColor);
+        else document.head.append(themeColor);
 
-        const statusBarStyle = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]') || document.createElement('meta');
+        const existingStatusBarStyle = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+        const statusBarStyle = document.createElement('meta');
         statusBarStyle.name = 'apple-mobile-web-app-status-bar-style';
         statusBarStyle.content = theme === 'dark' ? 'black' : 'default';
-        document.head.append(statusBarStyle);
+        if (existingStatusBarStyle) existingStatusBarStyle.replaceWith(statusBarStyle);
+        else document.head.append(statusBarStyle);
     };
 
     const applyNavigationTemplate = () => {
