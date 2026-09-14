@@ -710,9 +710,17 @@
         .match-drawer-overlay.is-open { opacity: 1; visibility: visible; pointer-events: auto; transition-delay: 0s; }
         .match-drawer { width: min(100%, 560px); height: 100%; overflow-y: auto; background: var(--bg-color); box-shadow: -10px 0 35px rgba(0, 0, 0, 0.2); transform: translateX(100%); transition: transform 0.3s ease; }
         .match-drawer-overlay.is-open .match-drawer { transform: translateX(0); }
-        .match-drawer-header { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; background: var(--card-bg); border-bottom: 1px solid var(--border-color); }
-        .match-drawer-title { font-size: 0.9rem; font-weight: 700; color: var(--text-muted); }
+        .match-drawer-header { position: sticky; top: 0; z-index: 1; display: flex; justify-content: center; align-items: center; min-height: 63px; padding: 14px 58px; background: var(--card-bg); border-bottom: 1px solid var(--border-color); }
+        .match-drawer-title { font-size: 0.9rem; font-weight: 700; color: var(--text-muted); text-align: center; }
+        .weekly-drawer-nav { display: none; align-items: center; justify-content: center; gap: 12px; width: 100%; }
+        .match-drawer-header.weekly-mode > .match-drawer-title { display: none; }
+        .match-drawer-header.weekly-mode .weekly-drawer-nav { display: flex; }
+        .weekly-drawer-nav .drawer-week-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; padding: 0; border: 1px solid var(--border-color); border-radius: 50%; background: var(--card-bg); color: var(--text-main); font-size: 1.2rem; line-height: 1; cursor: pointer; }
+        .weekly-drawer-nav .drawer-week-btn:hover:not(:disabled) { background: var(--border-color); }
+        .weekly-drawer-nav .drawer-week-btn:disabled { opacity: 0.35; cursor: default; }
+        .weekly-drawer-nav .match-drawer-title { min-width: 72px; }
         .match-drawer-close { width: 34px; height: 34px; border: 0; border-radius: 50%; background: var(--border-color); color: var(--text-main); font-size: 1.3rem; line-height: 1; cursor: pointer; }
+        .match-drawer-header > .match-drawer-close { position: absolute; right: 18px; }
         .match-detail-content { padding: 18px; }
         .match-hero, .match-detail-section { margin-bottom: 14px; padding: 18px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; }
         .match-meta { color: var(--text-muted); font-size: 0.82rem; text-align: center; }
@@ -807,6 +815,11 @@
     <div class="match-drawer-overlay" id="match-drawer-overlay" aria-hidden="true" onclick="closeMatchDrawer(event)">
         <aside class="match-drawer" role="dialog" aria-modal="true" aria-labelledby="match-drawer-title" onclick="event.stopPropagation()">
             <div class="match-drawer-header">
+                <div class="weekly-drawer-nav" id="weekly-drawer-nav">
+                    <button class="drawer-week-btn" id="weekly-drawer-prev" type="button" aria-label="View previous week" onclick="changeWeeklyDrawerWeek(-1)">‹</button>
+                    <span class="match-drawer-title" id="weekly-drawer-title">Week</span>
+                    <button class="drawer-week-btn" id="weekly-drawer-next" type="button" aria-label="View next week" onclick="changeWeeklyDrawerWeek(1)">›</button>
+                </div>
                 <span class="match-drawer-title" id="match-drawer-title">Match details</span>
                 <button class="match-drawer-close" type="button" aria-label="Close match details" onclick="closeMatchDrawer()">&times;</button>
             </div>
@@ -924,8 +937,9 @@
                     [awayOwner, awayScore > homeScore ? 3 : awayScore === homeScore ? 1 : 0, awayScore > homeScore ? 'win' : awayScore === homeScore ? 'draw' : 'loss']]
                     .forEach(([owner, points, result]) => {
                         if (!owner) return;
-                        owners[owner] ||= { points: 0, results: [] };
+                        owners[owner] ||= { points: 0, results: [], goalDifference: 0 };
                         owners[owner].points += points;
+                        owners[owner].goalDifference += owner === homeOwner ? homeScore - awayScore : awayScore - homeScore;
                         owners[owner].results.push(result);
                     });
             });
@@ -939,6 +953,7 @@
                 return {
                     owner,
                     points: details.points,
+                    goalDifference: details.goalDifference,
                     wins: details.results.filter(result => result === 'win').length,
                     draws: details.results.filter(result => result === 'draw').length,
                     losses: details.results.filter(result => result === 'loss').length,
@@ -1449,7 +1464,7 @@
 
     function renderWeeklyDetail(week) {
         if (!week?.ownerDetails?.length) return '<section class="match-detail-section"><p class="empty-detail">No completed matches yet.</p></section>';
-        return week.ownerDetails.map(owner => `<section class="match-hero weekly-detail-leader"><div class="weekly-detail-name-row"><span class="weekly-detail-name">${escapeHtml(owner.owner)}</span><span class="weekly-stars" aria-label="${owner.stars} gold star${owner.stars === 1 ? '' : 's'}">${'★'.repeat(owner.stars)}</span><span class="weekly-detail-points">${owner.points} PTS</span></div><div class="weekly-detail-achievements">${owner.achievements.length ? owner.achievements.map(achievement => escapeHtml(achievement)).join(' · ') : 'No achievements'}</div><div class="weekly-detail-record">Record: ${owner.wins}-${owner.draws}-${owner.losses}</div></section>`).join('');
+        return week.ownerDetails.map(owner => `<section class="match-hero weekly-detail-leader"><div class="weekly-detail-name-row"><span class="weekly-detail-name">${escapeHtml(owner.owner)}</span><span class="weekly-stars" aria-label="${owner.stars} gold star${owner.stars === 1 ? '' : 's'}">${'★'.repeat(owner.stars)}</span><span class="weekly-detail-points">${owner.points} PTS</span></div><div class="weekly-detail-achievements">${owner.achievements.length ? owner.achievements.map(achievement => escapeHtml(achievement)).join(' · ') : ''}</div><div class="weekly-detail-record">Record: ${owner.wins}-${owner.draws}-${owner.losses}</div><div class="weekly-detail-goal-difference">GD: ${owner.goalDifference > 0 ? '+' : ''}${owner.goalDifference}</div></section>`).join('');
     }
 
     async function fetchMatchById(matchId) {
@@ -1478,6 +1493,7 @@
 
     async function openMatchDrawer(matchId) {
         const overlay = document.getElementById('match-drawer-overlay'), drawer = overlay.querySelector('.match-drawer'), content = document.getElementById('match-detail-content');
+        overlay.querySelector('.match-drawer-header').classList.remove('weekly-mode');
         document.getElementById('match-drawer-title').textContent = 'Match details';
         drawer.scrollTop = 0;
         overlay.classList.add('is-open');
@@ -1493,12 +1509,30 @@
         const drawer = overlay.querySelector('.match-drawer');
         const content = document.getElementById('match-detail-content');
         const week = weeklyCardWeeks[weeklyCardWeekIndex];
-        document.getElementById('match-drawer-title').textContent = `PPL Weekly - Round ${week ? week.week : ''}`;
+        updateWeeklyDrawerHeader();
         drawer.scrollTop = 0;
         overlay.classList.add('is-open');
         overlay.setAttribute('aria-hidden', 'false');
         document.body.classList.add('drawer-open');
         content.innerHTML = renderWeeklyDetail(week);
+    };
+
+    function updateWeeklyDrawerHeader() {
+        const header = document.querySelector('.match-drawer-header');
+        const week = weeklyCardWeeks[weeklyCardWeekIndex];
+        header.classList.add('weekly-mode');
+        document.getElementById('weekly-drawer-title').textContent = `Week ${week ? week.week : ''}`;
+        document.getElementById('weekly-drawer-prev').disabled = weeklyCardWeekIndex <= 0;
+        document.getElementById('weekly-drawer-next').disabled = weeklyCardWeekIndex >= weeklyCardWeeks.length - 1;
+    }
+
+    window.changeWeeklyDrawerWeek = function(direction) {
+        const nextIndex = weeklyCardWeekIndex + direction;
+        if (nextIndex < 0 || nextIndex >= weeklyCardWeeks.length) return;
+        weeklyCardWeekIndex = nextIndex;
+        renderWeeklyCard();
+        updateWeeklyDrawerHeader();
+        document.getElementById('match-detail-content').innerHTML = renderWeeklyDetail(weeklyCardWeeks[weeklyCardWeekIndex]);
     };
 
     function closeMatchDrawer(event) {
@@ -1507,6 +1541,7 @@
         overlay.classList.remove('is-open');
         overlay.setAttribute('aria-hidden', 'true');
         document.body.classList.remove('drawer-open');
+        overlay.querySelector('.match-drawer-header').classList.remove('weekly-mode');
         document.getElementById('match-drawer-title').textContent = 'Match details';
     }
 
