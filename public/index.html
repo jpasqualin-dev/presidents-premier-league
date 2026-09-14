@@ -166,7 +166,9 @@
         .weekly-detail-name-row { display: flex; align-items: center; justify-content: center; gap: 10px; }
         .weekly-detail-name { color: var(--text-main); font-size: 1.2rem; font-weight: 800; }
         .weekly-detail-points { display: inline-block; margin-left: 8px; padding: 4px 8px; border-radius: 4px; background: #c6f6d5; color: #276749; font-size: 0.78rem; font-weight: 800; white-space: nowrap; }
-        .weekly-detail-record { margin-top: 12px; color: var(--text-main); font-size: 0.95rem; font-weight: 600; }
+        .weekly-detail-record-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 12px; }
+        .weekly-detail-record { color: var(--text-main); font-size: 0.95rem; font-weight: 600; }
+        .weekly-detail-goal-difference { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.95rem; font-weight: 400; white-space: nowrap; }
         .weekly-detail-achievements { margin-top: 8px; color: var(--text-muted); font-size: 0.78rem; }
 
         .today-header {
@@ -1464,7 +1466,11 @@
 
     function renderWeeklyDetail(week) {
         if (!week?.ownerDetails?.length) return '<section class="match-detail-section"><p class="empty-detail">No completed matches yet.</p></section>';
-        return week.ownerDetails.map(owner => `<section class="match-hero weekly-detail-leader"><div class="weekly-detail-name-row"><span class="weekly-detail-name">${escapeHtml(owner.owner)}</span><span class="weekly-stars" aria-label="${owner.stars} gold star${owner.stars === 1 ? '' : 's'}">${'★'.repeat(owner.stars)}</span><span class="weekly-detail-points">${owner.points} PTS</span></div><div class="weekly-detail-achievements">${owner.achievements.length ? owner.achievements.map(achievement => escapeHtml(achievement)).join(' · ') : ''}</div><div class="weekly-detail-record">Record: ${owner.wins}-${owner.draws}-${owner.losses}</div><div class="weekly-detail-goal-difference">GD: ${owner.goalDifference > 0 ? '+' : ''}${owner.goalDifference}</div></section>`).join('');
+        return week.ownerDetails.map(owner => {
+            const goalDifferenceClass = owner.goalDifference > 0 ? 'pill-green' : owner.goalDifference < 0 ? 'pill-red' : 'pill-gray';
+            const goalDifference = `${owner.goalDifference > 0 ? '+' : ''}${owner.goalDifference}`;
+            return `<section class="match-hero weekly-detail-leader"><div class="weekly-detail-name-row"><span class="weekly-detail-name">${escapeHtml(owner.owner)}</span><span class="weekly-stars" aria-label="${owner.stars} gold star${owner.stars === 1 ? '' : 's'}">${'★'.repeat(owner.stars)}</span><span class="weekly-detail-points">${owner.points} PTS</span></div><div class="weekly-detail-achievements">${owner.achievements.length ? owner.achievements.map(achievement => escapeHtml(achievement)).join(' · ') : ''}</div><div class="weekly-detail-record-row"><div class="weekly-detail-record">Record: ${owner.wins}-${owner.draws}-${owner.losses}</div><div class="weekly-detail-goal-difference ${goalDifferenceClass}">GD: ${goalDifference}</div></div></section>`;
+        }).join('');
     }
 
     async function fetchMatchById(matchId) {
@@ -1520,15 +1526,17 @@
     function updateWeeklyDrawerHeader() {
         const header = document.querySelector('.match-drawer-header');
         const week = weeklyCardWeeks[weeklyCardWeekIndex];
+        const currentWeekIndex = getCurrentWeeklyCardIndex(weeklyCardWeeks);
         header.classList.add('weekly-mode');
         document.getElementById('weekly-drawer-title').textContent = `Week ${week ? week.week : ''}`;
         document.getElementById('weekly-drawer-prev').disabled = weeklyCardWeekIndex <= 0;
-        document.getElementById('weekly-drawer-next').disabled = weeklyCardWeekIndex >= weeklyCardWeeks.length - 1;
+        document.getElementById('weekly-drawer-next').disabled = weeklyCardWeekIndex >= currentWeekIndex;
     }
 
     window.changeWeeklyDrawerWeek = function(direction) {
         const nextIndex = weeklyCardWeekIndex + direction;
-        if (nextIndex < 0 || nextIndex >= weeklyCardWeeks.length) return;
+        const maxWeekIndex = direction > 0 ? getCurrentWeeklyCardIndex(weeklyCardWeeks) : weeklyCardWeeks.length - 1;
+        if (nextIndex < 0 || nextIndex > maxWeekIndex) return;
         weeklyCardWeekIndex = nextIndex;
         renderWeeklyCard();
         updateWeeklyDrawerHeader();
