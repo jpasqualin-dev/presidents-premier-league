@@ -3,6 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ffffff">
+    <script>
+        (() => {
+            const isDarkMode = localStorage.getItem('ppl-theme') === 'dark';
+            const themeColor = isDarkMode ? '#121212' : '#ffffff';
+            document.querySelector('meta[name="theme-color"]').content = themeColor;
+            document.documentElement.style.backgroundColor = themeColor;
+            document.documentElement.style.colorScheme = isDarkMode ? 'dark' : 'light';
+        })();
+    </script>
     <title>Presidents Premier League - Fantasy EPL (2026/2027 Season)</title>
     <link rel="stylesheet" href="theme.css">
     <style>
