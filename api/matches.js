@@ -25,11 +25,16 @@ async function fetchRecentEspnMatches() {
     const payload = await response.json();
     if (!Array.isArray(payload.events)) throw new Error(`Invalid ESPN response for ${dateRange}`);
     const events = await Promise.all((payload.events || []).map(async event => {
-        const details = await fetchScoringDetails(event);
-        return {
-            ...event,
-            competitions: event.competitions?.map(competition => ({ ...competition, details }))
-        };
+        try {
+            const details = await fetchScoringDetails(event);
+            return {
+                ...event,
+                competitions: event.competitions?.map(competition => ({ ...competition, details }))
+            };
+        } catch (error) {
+            console.warn(`ESPN details unavailable for event ${event.id}; using scoreboard data:`, error.message);
+            return event;
+        }
     }));
     return events.map(normalizeEspnEvent).filter(Boolean);
 }
