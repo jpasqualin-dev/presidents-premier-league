@@ -727,8 +727,9 @@
         .weekly-drawer-nav { display: none; align-items: center; justify-content: center; gap: 12px; width: 100%; }
         .match-drawer-header.weekly-mode > .match-drawer-title { display: none; }
         .match-drawer-header.weekly-mode .weekly-drawer-nav { display: flex; }
-        .weekly-drawer-nav .drawer-week-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; padding: 0; border: 1px solid var(--border-color); border-radius: 50%; background: var(--card-bg); color: var(--text-main); font-size: 1.2rem; line-height: 1; cursor: pointer; }
+        .weekly-drawer-nav .drawer-week-btn { display: inline-flex; align-items: center; justify-content: center; width: 51px; height: 51px; padding: 0; border: 1px solid var(--border-color); border-radius: 50%; background: var(--card-bg); color: var(--text-main); font-size: 1.6rem; line-height: 1; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         .weekly-drawer-nav .drawer-week-btn:hover:not(:disabled) { background: var(--border-color); }
+        .weekly-drawer-nav .drawer-week-btn:focus:not(:focus-visible) { outline: none; background: var(--card-bg); }
         .weekly-drawer-nav .drawer-week-btn:disabled { opacity: 0.35; cursor: default; }
         .weekly-drawer-nav .match-drawer-title { min-width: 72px; }
         .match-drawer-close { width: 34px; height: 34px; border: 0; border-radius: 50%; background: var(--border-color); color: var(--text-main); font-size: 1.3rem; line-height: 1; cursor: pointer; }
