@@ -1,5 +1,22 @@
 (() => {
     const themeToggle = document.querySelector('.theme-toggle');
+    const themeColors = {
+        light: '#f4f6f8',
+        dark: '#121212'
+    };
+
+    const updateBrowserTheme = theme => {
+        const themeColor = document.querySelector('meta[name="theme-color"]') || document.createElement('meta');
+        themeColor.name = 'theme-color';
+        const pageBackground = getComputedStyle(document.body).backgroundColor;
+        themeColor.content = pageBackground === 'rgba(0, 0, 0, 0)' ? themeColors[theme] : pageBackground;
+        document.head.append(themeColor);
+
+        const statusBarStyle = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]') || document.createElement('meta');
+        statusBarStyle.name = 'apple-mobile-web-app-status-bar-style';
+        statusBarStyle.content = theme === 'dark' ? 'black' : 'default';
+        document.head.append(statusBarStyle);
+    };
 
     const applyNavigationTemplate = () => {
         const siteMenu = document.querySelector('.site-menu');
@@ -65,6 +82,8 @@
     const setTheme = theme => {
         const isDarkMode = theme === 'dark';
         document.body.classList.toggle('dark-mode', isDarkMode);
+        document.documentElement.style.colorScheme = isDarkMode ? 'dark' : 'light';
+        updateBrowserTheme(theme);
         localStorage.setItem('ppl-theme', theme);
 
         if (themeToggle) {
