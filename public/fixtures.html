@@ -740,9 +740,9 @@
     let shouldPositionViewCard = false;
 
     // Fetch matches from API (same caching strategy as main index)
-    async function fetchMatchData() {
+    async function fetchMatchData(matchData = null) {
         try {
-            const data = await getMatchData();
+            const data = matchData || await getMatchData();
 
             if (data && data.matches) {
                 processMatches(data.matches);
@@ -1437,8 +1437,8 @@
             if (navControls) new ResizeObserver(updateFixturesHeaderOffset).observe(navControls);
         }
 
-        fetchMatchData();
-        setInterval(fetchMatchData, 30000);
+        DataManager.subscribe(data => fetchMatchData(data));
+        DataManager.start();
     });
 </script>
 </body>

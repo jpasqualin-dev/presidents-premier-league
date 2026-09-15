@@ -2099,9 +2099,9 @@
         ].join(':')).sort().join('|');
     }
 
-    async function refreshMatchdayCard() {
+    async function refreshMatchdayCard(matchData = null) {
         try {
-            const data = await getMatchData();
+            const data = matchData || await getMatchData();
             
             if (data.matches) {
                 // Update dates silently without overriding the currently selected swipe index
@@ -2291,11 +2291,9 @@
     document.addEventListener('DOMContentLoaded', () => {
         setupSwipeListeners();
         setupToggleSwipeListeners();
-        fetchAndUpdateStandings();
+        DataManager.subscribe(data => fetchAndUpdateStandings(data));
+        DataManager.start();
     });
-
-    // Auto-update ONLY the matchday card every 30 seconds
-    setInterval(refreshMatchdayCard, 30000);
 </script>
 
 </body>

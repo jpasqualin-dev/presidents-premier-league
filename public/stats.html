@@ -964,7 +964,7 @@
         individualStatsContainer.appendChild(buildIndividualStatCard('Goal Involvements (Goals + Assists)', goalScorers, teamStatsObj, scorer => scorer.goals + scorer.assists));
     }
 
-    async function fetchAndRenderAwards() {
+    async function fetchAndRenderAwards(matchData = null) {
         let playerStats = initializePlayerStats();
         let teamStats = initializeTeamStats();
         const weeklyPlayerPoints = {};
@@ -973,7 +973,7 @@
         const goalScorers = {};
 
         try {
-            const data = await getMatchData();
+            const data = matchData || await getMatchData();
 
             if (data.matches) {
                 data.matches.forEach(match => {
@@ -1235,8 +1235,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        fetchAndRenderAwards();
-        setInterval(fetchAndRenderAwards, 30000);
+        DataManager.subscribe(data => fetchAndRenderAwards(data));
+        DataManager.start();
     });
 </script>
 </body>

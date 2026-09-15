@@ -564,12 +564,12 @@
     }
 
     // Fetch fixtures through your secure Vercel endpoint route
-    async function fetchNateFixtures() {
+    async function fetchNateFixtures(matchData = null) {
         const url = '/api/standings'; 
         const myTeams = draftData["Nate"];
 
         try {
-            const data = await getMatchData();
+            const data = matchData || await getMatchData();
             const matchweeks = {};
 
             if (data.matches) {
@@ -823,8 +823,8 @@
                 toggleProfileCard();
             }
         });
-        fetchNateFixtures();
-        setInterval(fetchNateFixtures, 30000);
+        DataManager.subscribe(data => fetchNateFixtures(data));
+        DataManager.start();
     });
 </script>
 

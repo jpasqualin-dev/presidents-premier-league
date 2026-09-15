@@ -524,12 +524,12 @@
     }
 
     // Fetch fixtures through your secure Vercel endpoint route
-    async function fetchWesFixtures() {
+    async function fetchWesFixtures(matchData = null) {
         const url = '/api/standings'; 
         const myTeams = draftData["Wes"];
 
         try {
-            const data = await getMatchData();
+            const data = matchData || await getMatchData();
             const matchweeks = {};
 
             if (data.matches) {
@@ -771,8 +771,8 @@
         card.addEventListener('keydown', event => {
             if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleProfileCard(); }
         });
-        fetchWesFixtures();
-        setInterval(fetchWesFixtures, 30000);
+        DataManager.subscribe(data => fetchWesFixtures(data));
+        DataManager.start();
     });
 </script>
 

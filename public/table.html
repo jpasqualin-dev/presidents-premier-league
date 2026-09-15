@@ -862,9 +862,9 @@
     }
 
     // Fetch matches from API (same caching strategy as other pages)
-    async function fetchTableData() {
+    async function fetchTableData(matchData = null) {
         try {
-            const data = await getMatchData();
+            const data = matchData || await getMatchData();
 
             cachedStats = computeStats(data.matches || []);
             renderView();
@@ -890,8 +890,8 @@
             if (standingsHeader) new ResizeObserver(updateOverallStandingsBackdrop).observe(standingsHeader);
         }
 
-        fetchTableData();
-        setInterval(fetchTableData, 30000);
+        DataManager.subscribe(data => fetchTableData(data));
+        DataManager.start();
     });
 
     function updateTableHeaderOffset() {
