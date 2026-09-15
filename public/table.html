@@ -331,6 +331,15 @@
 
         body.dark-mode .nested-table-row { background-color: #292929; }
 
+        @media (hover: hover) {
+            body.dark-mode table tr:hover:not(.expandable-row):not(.nested-table-row) {
+                background-color: inherit;
+            }
+            body.dark-mode table .nested-table-row:hover {
+                background-color: #292929;
+            }
+        }
+
         .highlight-col { font-weight: bold; color: #38003c; }
 
         .stat-value { padding: 4px 10px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; display: inline-block; min-width: 32px; text-align: center; }
