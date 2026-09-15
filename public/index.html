@@ -622,7 +622,7 @@
             color-scheme: dark;
         }
 
-        body.dark-mode .header-container {
+        bdy.dark-mode .header-container {
             background-color: #232323;
             background-blend-mode: soft-light;
         }
@@ -930,7 +930,15 @@
     let weeklyCardWeekIndex = -1;
     let lastStandingsMatchSignature = '';
 
+    function getPplStandingsRankMap() {
+        const rankedPlayers = Object.values(cachedPlayerStats || {}).sort((playerA, playerB) =>
+            playerB.PTS - playerA.PTS || playerB.GD - playerA.GD || playerB.GF - playerA.GF
+        );
+        return new Map(rankedPlayers.map((player, index) => [player.player, index + 1]));
+    }
+
     function getWeeklyCardSummary() {
+        const standingsRankMap = getPplStandingsRankMap();
         const weeks = new Map();
         allMatchesData.forEach(match => {
             if (match.matchday == null) return;
@@ -973,7 +981,10 @@
                     stars: achievements.length,
                     achievements
                 };
-            }).sort((ownerA, ownerB) => ownerB.points - ownerA.points || ownerA.owner.localeCompare(ownerB.owner));
+            }).sort((ownerA, ownerB) => ownerB.points - ownerA.points
+                || ownerB.goalDifference - ownerA.goalDifference
+                || (standingsRankMap.get(ownerA.owner) || Infinity) - (standingsRankMap.get(ownerB.owner) || Infinity)
+                || ownerA.owner.localeCompare(ownerB.owner));
             const firstMatch = matches[0];
             const date = firstMatch?.utcDate ? new Date(firstMatch.utcDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
             return { week, date, ownerDetails, leaderDetails: ownerDetails.filter(owner => owner.points === highestPoints), matches };
@@ -2265,6 +2276,7 @@
 
             renderPrimaryTable(playerStats, teamStats);
             renderDivisions(teamStats);
+            renderWeeklyCard();
 
             lastStandingsMatchSignature = getMatchSignature(data.matches);
             statusEl.textContent = `Successfully processed 2026/2027 season data (${gamesProcessed} completed matches evaluated).`;
