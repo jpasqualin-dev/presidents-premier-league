@@ -662,6 +662,8 @@
                 const diffB = (draftPicks[b.team] || 20) - teamRankMap[b.team];
                 return diffB - diffA;
             })
+            : dvpSort === 'pick'
+                ? [...rankedTeams].sort((a, b) => (draftPicks[a.team] || 20) - (draftPicks[b.team] || 20))
             : rankedTeams;
 
         let rankHtml = `
@@ -675,6 +677,7 @@
                                         <h2 class="plain-table-title draft-title">Draft Value<br>Performance</h2>
                                         <div class="dvp-sort-toggle" role="group" aria-label="Draft value performance sort order">
                                             <button type="button" class="dvp-sort-btn${dvpSort === 'rank' ? ' active' : ''}" onclick="setDvpSort('rank')">Rank</button>
+                                            <button type="button" class="dvp-sort-btn${dvpSort === 'pick' ? ' active' : ''}" onclick="setDvpSort('pick')">Pick</button>
                                             <button type="button" class="dvp-sort-btn${dvpSort === 'diff' ? ' active' : ''}" onclick="setDvpSort('diff')">Diff</button>
                                         </div>
                                     </div>
