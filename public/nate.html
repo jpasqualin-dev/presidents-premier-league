@@ -797,14 +797,16 @@
     function toggleHeadToHead(event) {
         event.stopPropagation();
         const toggle = event.currentTarget;
+        const previousHeight = document.querySelector('.profile-card').getBoundingClientRect().height;
         toggle.setAttribute('aria-expanded', String(toggle.getAttribute('aria-expanded') !== 'true'));
-        requestAnimationFrame(updatePlayerCardBackdrop);
+        preserveProfileContentPosition(previousHeight);
     }
 
     function collapseHeadToHead(event) {
         event.stopPropagation();
+        const previousHeight = document.querySelector('.profile-card').getBoundingClientRect().height;
         document.querySelector('.head-to-head-toggle')?.setAttribute('aria-expanded', 'false');
-        requestAnimationFrame(updatePlayerCardBackdrop);
+        preserveProfileContentPosition(previousHeight);
     }
 
     function handleHeadToHeadKeydown(event) {
@@ -816,8 +818,18 @@
 
     function toggleProfileCard() {
         const card = document.querySelector('.profile-card');
+        const previousHeight = card.getBoundingClientRect().height;
         card.setAttribute('aria-expanded', String(card.getAttribute('aria-expanded') !== 'true'));
-        requestAnimationFrame(updatePlayerCardBackdrop);
+        preserveProfileContentPosition(previousHeight);
+    }
+
+    function preserveProfileContentPosition(previousHeight) {
+        requestAnimationFrame(() => {
+            updatePlayerCardBackdrop();
+            const card = document.querySelector('.profile-card');
+            const heightDelta = card.getBoundingClientRect().height - previousHeight;
+            if (heightDelta) window.scrollBy(0, heightDelta);
+        });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
