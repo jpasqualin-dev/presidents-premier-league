@@ -1,5 +1,6 @@
 const { neon } = require('@neondatabase/serverless');
 const { getMatchday } = require('../lib/match-contract');
+const { dedupeByKey } = require('../lib/match-aggregation');
 
 const ESPN_ENDPOINT = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard';
 const SEASON_START = '2026-08-01';
@@ -57,8 +58,7 @@ async function fetchEvents() {
         if (!response.ok) throw new Error(`ESPN returned HTTP ${response.status} for ${date}`);
         return response.json();
     }));
-    const events = responses.flatMap(payload => payload.events || []);
-    return [...new Map(events.map(event => [String(event.id), event])).values()];
+    return dedupeByKey(responses.flatMap(payload => payload.events || []), event => event.id);
 }
 
 async function fetchEventsForDates(dates) {
@@ -67,7 +67,7 @@ async function fetchEventsForDates(dates) {
         if (!response.ok) throw new Error(`ESPN returned HTTP ${response.status} for ${date}`);
         return response.json();
     }));
-    return responses.flatMap(payload => payload.events || []);
+    return dedupeByKey(responses.flatMap(payload => payload.events || []), event => event.id);
 }
 
 async function fetchMatchSummary(eventId) {
@@ -108,12 +108,13 @@ async function fetchScoringDetails(event, summary = null) {
 async function fetchMatchStatistics(eventId, summary = null) {
     const payload = summary || await fetchMatchSummary(eventId);
     if (!payload) return [];
-    return (payload.boxscore?.teams || []).flatMap(team => (team.statistics || []).map(stat => ({
+    const stats = (payload.boxscore?.teams || []).flatMap(team => (team.statistics || []).map(stat => ({
         teamProviderId: team.team?.id ? String(team.team.id) : null,
         name: stat.name,
         displayValue: stat.displayValue || null,
         value: Number.isNaN(Number.parseFloat(stat.displayValue)) ? null : Number.parseFloat(stat.displayValue)
     })));
+    return dedupeByKey(stats, stat => `${stat.teamProviderId}:${stat.name}`);
 }
 async function fetchMatchLineups(eventId, summary = null) {
     const payload = summary || await fetchMatchSummary(eventId);
@@ -178,34 +179,43 @@ async function syncEvent(sql, event) {
             VALUES (${existingMatch.id}, ${existingMatch.kickoff_at}, ${event.date})
             ON CONFLICT (match_id, old_kickoff_at, new_kickoff_at) DO NOTHING`;
     }
-    await sql`DELETE FROM match_scorers WHERE match_id = ${match.id}`;
-    await sql`DELETE FROM match_events WHERE match_id = ${match.id}`;
-    await sql`DELETE FROM match_team_stats WHERE match_id = ${match.id}`;
-    for (const detail of details) {
-        const scorer = detail.athletesInvolved?.[0];
-        const team = detail.team?.id === home.team.id ? homeTeam : detail.team?.id === away.team.id ? awayTeam : null;
-        const isSubstitution = Boolean(detail.substitution || detail.type?.type?.includes('substitution') || detail.type?.text?.toLowerCase().includes('substitution'));
-        await sql`
+    const hasEventPayload = Boolean(summary && (
+        summary.keyEvents?.length || summary.plays?.length || event.competitions?.[0]?.details?.length
+    ));
+    const hasStatsPayload = Boolean(summary?.boxscore?.teams?.length);
+
+    if (hasEventPayload) {
+        await sql`DELETE FROM match_scorers WHERE match_id = ${match.id}`;
+        await sql`DELETE FROM match_events WHERE match_id = ${match.id}`;
+        for (const detail of details) {
+            const scorer = detail.athletesInvolved?.[0];
+            const team = detail.team?.id === home.team.id ? homeTeam : detail.team?.id === away.team.id ? awayTeam : null;
+            const isSubstitution = Boolean(detail.substitution || detail.type?.type?.includes('substitution') || detail.type?.text?.toLowerCase().includes('substitution'));
+            await sql`
             INSERT INTO match_events (match_id, team_id, event_type, clock_seconds, clock_display, athlete_provider_id, athlete_name, substitution_player_on, substitution_player_off, score_value, scoring_play, red_card, yellow_card, penalty, own_goal, shootout)
             VALUES (${match.id}, ${team?.id || null}, ${detail.type?.text || 'unknown'}, ${detail.clock?.value == null ? null : Math.floor(Number(detail.clock.value))}, ${detail.clock?.displayValue || null}, ${scorer?.id ? String(scorer.id) : null}, ${scorer?.displayName || null}, ${isSubstitution ? detail.athletesInvolved?.[0]?.displayName || null : null}, ${isSubstitution ? detail.athletesInvolved?.[1]?.displayName || null : null}, ${detail.scoreValue == null ? null : Number(detail.scoreValue)}, ${Boolean(detail.scoringPlay)}, ${Boolean(detail.redCard)}, ${Boolean(detail.yellowCard)}, ${Boolean(detail.penaltyKick)}, ${Boolean(detail.ownGoal)}, ${Boolean(detail.shootout)})`;
-    }
-    for (const detail of details.filter(item => item.scoringPlay)) {
-        const scorer = detail.athletesInvolved?.[0];
-        const scorerTeam = detail.team?.id === home.team.id ? homeTeam : awayTeam;
-        if (!scorerTeam) continue;
-        await sql`
+        }
+        for (const detail of details.filter(item => item.scoringPlay)) {
+            const scorer = detail.athletesInvolved?.[0];
+            const scorerTeam = detail.team?.id === home.team.id ? homeTeam : detail.team?.id === away.team.id ? awayTeam : null;
+            if (!scorerTeam) continue;
+            await sql`
             INSERT INTO match_scorers (match_id, provider_athlete_id, team_id, athlete_name, assist_provider_id, assist_name, minute, own_goal, penalty)
             VALUES (${match.id}, ${scorer?.id ? String(scorer.id) : null}, ${scorerTeam.id}, ${scorer?.displayName || 'Unknown scorer'}, ${detail.athletesInvolved?.[1]?.id ? String(detail.athletesInvolved[1].id) : null}, ${detail.athletesInvolved?.[1]?.displayName || null}, ${detail.clock?.value == null ? null : Math.floor(Number(detail.clock.value) / 60)}, ${Boolean(detail.ownGoal)}, ${Boolean(detail.penaltyKick)})`;
+        }
     }
-    for (const stat of matchStatistics) {
-        const team = stat.teamProviderId === String(home.team.id) ? homeTeam
-            : stat.teamProviderId === String(away.team.id) ? awayTeam
-                : null;
-        if (!team) continue;
-        await sql`
+    if (hasStatsPayload) {
+        await sql`DELETE FROM match_team_stats WHERE match_id = ${match.id}`;
+        for (const stat of matchStatistics) {
+            const team = stat.teamProviderId === String(home.team.id) ? homeTeam
+                : stat.teamProviderId === String(away.team.id) ? awayTeam
+                    : null;
+            if (!team) continue;
+            await sql`
                 INSERT INTO match_team_stats (match_id, team_id, stat_name, stat_value, display_value)
                 VALUES (${match.id}, ${team.id}, ${stat.name}, ${stat.value}, ${stat.displayValue})
                 ON CONFLICT (match_id, team_id, stat_name) DO UPDATE SET stat_value = EXCLUDED.stat_value, display_value = EXCLUDED.display_value`;
+        }
     }
     return true;
 }

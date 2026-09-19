@@ -1,10 +1,12 @@
 const { neon } = require('@neondatabase/serverless');
 const { normalizeEspnEvent, normalizeNeonMatch } = require('../lib/match-contract');
+const { mergeMatches } = require('../lib/match-aggregation');
 const { fetchScoringDetails } = require('./sync-espn');
 
 const ESPN_ENDPOINT = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard';
 const DATE_LOOKBACK = 1;
 const DATE_LOOKAHEAD = 1;
+const RECENT_FINAL_WINDOW_MS = 2 * 60 * 60 * 1000;
 
 function espnDateKeys() {
     const today = new Date();
@@ -18,6 +20,13 @@ function espnDateKeys() {
     return dates;
 }
 
+function shouldFetchDetails(event) {
+    const status = event.competitions?.[0]?.status?.type || {};
+    if (status.state !== 'post' && !status.completed) return true;
+    const eventTime = new Date(event.date).getTime();
+    return Number.isFinite(eventTime) && Date.now() - eventTime <= RECENT_FINAL_WINDOW_MS;
+}
+
 async function fetchRecentEspnMatches() {
     const payloads = await Promise.all(espnDateKeys().map(async date => {
         const response = await fetch(`${ESPN_ENDPOINT}?dates=${date}&limit=1000`);
@@ -28,6 +37,7 @@ async function fetchRecentEspnMatches() {
         payloads.flatMap(payload => payload.events || []).map(event => [String(event.id), event])
     ).values()];
     const events = await Promise.all(sourceEvents.map(async event => {
+        if (!shouldFetchDetails(event)) return event;
         try {
             const details = await fetchScoringDetails(event);
             return {
@@ -106,12 +116,6 @@ async function readHistoricalMatches(sql) {
     return rows.map(normalizeNeonMatch);
 }
 
-function mergeMatches(historicalMatches, liveMatches) {
-    const merged = new Map(historicalMatches.map(match => [match.id, match]));
-    for (const match of liveMatches) merged.set(match.id, { ...merged.get(match.id), ...match });
-    return [...merged.values()].sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate));
-}
-
 module.exports = async function handler(req, res) {
     if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed.' });
     if (!process.env.DATABASE_URL) return res.status(500).json({ error: 'DATABASE_URL is not configured.' });
@@ -132,7 +136,7 @@ module.exports = async function handler(req, res) {
         // Match scores can change immediately after the upstream final whistle.
         res.setHeader('Cache-Control', 'no-store, max-age=0');
         return res.status(200).json({
-            matches: mergeMatches(historicalMatches, liveMatches),
+            matches: mergeMatches([...historicalMatches, ...liveMatches]),
             sources: { historical: 'neon', live: liveAvailable ? 'espn' : null },
             liveAvailable,
             generatedAt: new Date().toISOString()

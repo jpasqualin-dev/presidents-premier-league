@@ -1310,11 +1310,11 @@
                     const detailData = await response.json();
                     if (detailData.teamStats?.length) match.teamStats = detailData.teamStats;
                     if (detailData.lineups) match.lineups = detailData.lineups;
-                    const events = [...(match.events || []), ...(detailData.substitutions || [])];
+                    if (detailData.scorers?.length) match.scorers = detailData.scorers;
+                    const events = [...(match.events || []), ...(detailData.events || []), ...(detailData.substitutions || [])];
                     const seenSubstitutions = new Set();
                     match.events = events.filter(event => {
-                        if (!event.substitution) return true;
-                        const key = [event.teamProviderId, event.minute, event.comingOn, event.goingOff].join('|');
+                        const key = [event.teamProviderId, event.minute, event.eventType, event.athleteProviderId, event.comingOn, event.goingOff].join('|');
                         if (seenSubstitutions.has(key)) return false;
                         seenSubstitutions.add(key);
                         return true;

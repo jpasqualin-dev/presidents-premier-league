@@ -1,5 +1,40 @@
 const { fetchMatchSummary, fetchScoringDetails, fetchMatchStatistics, fetchMatchLineups } = require('./sync-espn');
 
+function toClientEvent(detail) {
+    const athlete = detail.athletesInvolved?.[0];
+    const substitute = detail.athletesInvolved?.[1];
+    return {
+        teamProviderId: detail.team?.id ? String(detail.team.id) : null,
+        athleteProviderId: athlete?.id ? String(athlete.id) : null,
+        athleteName: athlete?.displayName || null,
+        comingOn: detail.substitution ? athlete?.displayName || null : null,
+        goingOff: detail.substitution ? substitute?.displayName || null : null,
+        eventType: detail.type?.text || detail.type?.type || null,
+        minute: detail.clock?.displayValue || null,
+        scoringPlay: Boolean(detail.scoringPlay),
+        substitution: Boolean(detail.substitution),
+        redCard: Boolean(detail.redCard),
+        yellowCard: Boolean(detail.yellowCard),
+        penalty: Boolean(detail.penaltyKick),
+        ownGoal: Boolean(detail.ownGoal)
+    };
+}
+
+function toClientScorer(detail) {
+    const scorer = detail.athletesInvolved?.[0];
+    const assist = detail.athletesInvolved?.[1];
+    return {
+        teamProviderId: detail.team?.id ? String(detail.team.id) : null,
+        athleteProviderId: scorer?.id ? String(scorer.id) : null,
+        athleteName: scorer?.displayName || 'Unknown scorer',
+        assistProviderId: assist?.id ? String(assist.id) : null,
+        assistName: assist?.displayName || null,
+        minute: detail.clock?.displayValue || null,
+        ownGoal: Boolean(detail.ownGoal),
+        penalty: Boolean(detail.penaltyKick)
+    };
+}
+
 module.exports = async function handler(req, res) {
     if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed.' });
 
@@ -24,9 +59,11 @@ module.exports = async function handler(req, res) {
                 comingOn: detail.athletesInvolved?.[0]?.displayName || null,
                 goingOff: detail.athletesInvolved?.[1]?.displayName || null
             }));
+        const events = details.map(toClientEvent);
+        const scorers = details.filter(detail => detail.scoringPlay).map(toClientScorer);
 
         res.setHeader('Cache-Control', 'no-store, max-age=0');
-        return res.status(200).json({ substitutions, teamStats, lineups });
+        return res.status(200).json({ events, scorers, substitutions, teamStats, lineups });
     } catch (error) {
         console.error('Match detail read failed:', error);
         return res.status(502).json({ error: 'Unable to read ESPN match details.' });
