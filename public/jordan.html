@@ -775,16 +775,16 @@
     function toggleHeadToHead(event) {
         event.stopPropagation();
         const toggle = event.currentTarget;
-        const previousHeight = document.querySelector('.profile-card').getBoundingClientRect().height;
+        const previousPosition = captureProfileContentPosition();
         toggle.setAttribute('aria-expanded', String(toggle.getAttribute('aria-expanded') !== 'true'));
-        preserveProfileContentPosition(previousHeight);
+        preserveProfileContentPosition(previousPosition);
     }
 
     function collapseHeadToHead(event) {
         event.stopPropagation();
-        const previousHeight = document.querySelector('.profile-card').getBoundingClientRect().height;
+        const previousPosition = captureProfileContentPosition();
         document.querySelector('.head-to-head-toggle')?.setAttribute('aria-expanded', 'false');
-        preserveProfileContentPosition(previousHeight);
+        preserveProfileContentPosition(previousPosition);
     }
 
     function handleHeadToHeadKeydown(event) {
@@ -796,17 +796,27 @@
 
     function toggleProfileCard() {
         const card = document.querySelector('.profile-card');
-        const previousHeight = card.getBoundingClientRect().height;
+        const previousPosition = captureProfileContentPosition();
         card.setAttribute('aria-expanded', String(card.getAttribute('aria-expanded') !== 'true'));
-        preserveProfileContentPosition(previousHeight);
+        preserveProfileContentPosition(previousPosition);
     }
 
-    function preserveProfileContentPosition(previousHeight) {
+    function captureProfileContentPosition() {
+        const card = document.querySelector('.profile-card');
+        const cardBottom = card.getBoundingClientRect().bottom;
+        const visibleCard = [...document.querySelectorAll('.mw-card')].find(matchweek => {
+            const rect = matchweek.getBoundingClientRect();
+            return rect.bottom > cardBottom && rect.top < window.innerHeight;
+        });
+        return visibleCard ? { element: visibleCard, top: visibleCard.getBoundingClientRect().top } : null;
+    }
+
+    function preserveProfileContentPosition(previousPosition) {
         requestAnimationFrame(() => {
             updatePlayerCardBackdrop();
-            const card = document.querySelector('.profile-card');
-            const heightDelta = card.getBoundingClientRect().height - previousHeight;
-            if (heightDelta) window.scrollBy(0, heightDelta);
+            if (!previousPosition) return;
+            const positionDelta = previousPosition.element.getBoundingClientRect().top - previousPosition.top;
+            if (positionDelta) window.scrollBy(0, positionDelta);
         });
     }
 
