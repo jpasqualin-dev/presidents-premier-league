@@ -118,26 +118,28 @@ async function readHistoricalMatches(sql) {
 
 module.exports = async function handler(req, res) {
     if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed.' });
-    if (!process.env.DATABASE_URL) return res.status(500).json({ error: 'DATABASE_URL is not configured.' });
 
     try {
-        const sql = neon(process.env.DATABASE_URL);
-        const historicalMatches = await readHistoricalMatches(sql);
-        let liveMatches = [];
-        let liveAvailable = true;
+        const historyPromise = process.env.DATABASE_URL
+            ? readHistoricalMatches(neon(process.env.DATABASE_URL))
+            : Promise.reject(new Error('DATABASE_URL is not configured.'));
+        const livePromise = fetchRecentEspnMatches();
+        const [historyResult, liveResult] = await Promise.allSettled([historyPromise, livePromise]);
+        const historicalMatches = historyResult.status === 'fulfilled' ? historyResult.value : [];
+        const liveMatches = liveResult.status === 'fulfilled' ? liveResult.value : [];
+        const liveAvailable = liveResult.status === 'fulfilled';
 
-        try {
-            liveMatches = await fetchRecentEspnMatches();
-        } catch (error) {
-            liveAvailable = false;
-            console.error('ESPN live feed unavailable; serving Neon history:', error);
+        if (historyResult.status === 'rejected') console.error('Neon history unavailable; serving live ESPN data:', historyResult.reason);
+        if (liveResult.status === 'rejected') console.error('ESPN live feed unavailable; serving Neon history:', liveResult.reason);
+        if (historyResult.status === 'rejected' && liveResult.status === 'rejected') {
+            throw new Error('Both Neon history and ESPN live data are unavailable.');
         }
 
         // Match scores can change immediately after the upstream final whistle.
         res.setHeader('Cache-Control', 'no-store, max-age=0');
         return res.status(200).json({
             matches: mergeMatches([...historicalMatches, ...liveMatches]),
-            sources: { historical: 'neon', live: liveAvailable ? 'espn' : null },
+            sources: { historical: historyResult.status === 'fulfilled' ? 'neon' : null, live: liveAvailable ? 'espn' : null },
             liveAvailable,
             generatedAt: new Date().toISOString()
         });
