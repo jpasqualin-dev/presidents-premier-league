@@ -1060,6 +1060,7 @@
         const nextIndex = weeklyCardWeekIndex + direction;
         if (nextIndex < 0 || nextIndex >= weeklyCardWeeks.length) return;
         weeklyCardWeekIndex = nextIndex;
+        weeklyFormExpanded.clear();
         renderWeeklyCard();
     };
 
@@ -1628,6 +1629,7 @@
         const maxWeekIndex = direction > 0 ? getCurrentWeeklyCardIndex(weeklyCardWeeks) : weeklyCardWeeks.length - 1;
         if (nextIndex < 0 || nextIndex > maxWeekIndex) return;
         weeklyCardWeekIndex = nextIndex;
+        weeklyFormExpanded.clear();
         renderWeeklyCard();
         updateWeeklyDrawerHeader();
         document.getElementById('match-detail-content').innerHTML = renderWeeklyDetail(weeklyCardWeeks[weeklyCardWeekIndex]);
