@@ -434,6 +434,8 @@
 <script src="theme.js"></script>
 <script src="match-data.js"></script>
 <script src="match-drawer-shared.js"></script>
+<script src="team-drawer-shared.js"></script>
+<script src="player-team-drawer.js"></script>
 <script>
     let shouldPositionInitialCard = true;
 
@@ -479,6 +481,7 @@
         return "Free Agent / Unassigned";
     }
     window.matchDrawerOwnerResolver = getOwnerOfTeam;
+    window.playerTeamLogos = teamLogos;
 
     // Shorten names for cleaner mobile display
     function cleanName(name) {
@@ -529,7 +532,7 @@
         const myTeams = draftData["Wes"];
 
         try {
-            const data = matchData || await getMatchData();
+            const data = await getMatchData({ includeDetails: true });
             const matchweeks = {};
 
             if (data.matches) {
@@ -559,7 +562,8 @@
             }
 
             const processedData = Object.values(matchweeks).sort((a, b) => a.matchweek - b.matchweek);
-            renderPage(processedData, data.matches || []);
+            window.playerMatches = data.matches || [];
+            renderPage(processedData, window.playerMatches);
 
         } catch (error) {
             console.error('Fetch error:', error);
