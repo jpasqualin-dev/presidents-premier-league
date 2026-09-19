@@ -6,27 +6,28 @@ const ESPN_ENDPOINT = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.
 const DATE_LOOKBACK = 1;
 const DATE_LOOKAHEAD = 1;
 
-function espnDate(value) {
-    return value.toISOString().slice(0, 10).replaceAll('-', '');
-}
-
-function espnDateRange() {
+function espnDateKeys() {
     const today = new Date();
     today.setUTCHours(12, 0, 0, 0);
-    const start = new Date(today);
-    const end = new Date(today);
-    start.setUTCDate(start.getUTCDate() - DATE_LOOKBACK);
-    end.setUTCDate(end.getUTCDate() + DATE_LOOKAHEAD);
-    return `${espnDate(start)}-${espnDate(end)}`;
+    const dates = [];
+    for (let offset = -DATE_LOOKBACK; offset <= DATE_LOOKAHEAD; offset += 1) {
+        const date = new Date(today);
+        date.setUTCDate(today.getUTCDate() + offset);
+        dates.push(date.toISOString().slice(0, 10).replaceAll('-', ''));
+    }
+    return dates;
 }
 
 async function fetchRecentEspnMatches() {
-    const dateRange = espnDateRange();
-    const response = await fetch(`${ESPN_ENDPOINT}?dates=${dateRange}&limit=1000`);
-    if (!response.ok) throw new Error(`ESPN returned HTTP ${response.status} for ${dateRange}`);
-    const payload = await response.json();
-    if (!Array.isArray(payload.events)) throw new Error(`Invalid ESPN response for ${dateRange}`);
-    const events = await Promise.all((payload.events || []).map(async event => {
+    const payloads = await Promise.all(espnDateKeys().map(async date => {
+        const response = await fetch(`${ESPN_ENDPOINT}?dates=${date}&limit=1000`);
+        if (!response.ok) throw new Error(`ESPN returned HTTP ${response.status} for ${date}`);
+        return response.json();
+    }));
+    const sourceEvents = [...new Map(
+        payloads.flatMap(payload => payload.events || []).map(event => [String(event.id), event])
+    ).values()];
+    const events = await Promise.all(sourceEvents.map(async event => {
         try {
             const details = await fetchScoringDetails(event);
             return {
