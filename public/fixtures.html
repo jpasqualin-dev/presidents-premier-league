@@ -663,6 +663,7 @@
 <script src="theme.js"></script>
 <script src="match-data.js"></script>
 <script src="match-drawer-shared.js"></script>
+<script src="team-drawer-shared.js"></script>
 <script>
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
@@ -735,6 +736,10 @@
 
     // --- State & Schedule Variables ---
     let fixtures = [];
+    let fixtureMatches = [];
+    let fixtureTeamStats = null;
+    let matchDrawerTeamReturn = false;
+    let matchDrawerMatchId = null;
     let currentView = 'round';
     let selectedTeam = null;
     let shouldPositionInitialCard = true;
@@ -759,6 +764,8 @@
     }
 
     function processMatches(matchesArray) {
+        fixtureMatches = matchesArray || [];
+        fixtureTeamStats = computeTeamStats(fixtureMatches);
         fixtures = matchesArray.map(match => {
             const matchDate = new Date(match.utcDate);
             const homeShort = getShortTeamName(match.homeTeam.name);
@@ -805,6 +812,84 @@
         populateTeamDropdown();
         renderView();
     }
+
+    function findTeamKey(teamName, statsObj) {
+        return Object.keys(statsObj).find(key => teamName.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(teamName.toLowerCase())) || null;
+    }
+
+    function createTeamStat(team) {
+        return { team, owner: getOwnerOfTeam(team), PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 };
+    }
+
+    function applyTeamResult(stat, goalsFor, goalsAgainst) {
+        stat.PL += 1;
+        stat.GF += goalsFor;
+        stat.GA += goalsAgainst;
+        if (goalsFor > goalsAgainst) { stat.W += 1; stat.PTS += 3; }
+        else if (goalsFor === goalsAgainst) { stat.D += 1; stat.PTS += 1; }
+        else stat.L += 1;
+    }
+
+    function computeTeamStats(matches) {
+        const allStats = {}, homeStats = {}, awayStats = {};
+        Object.values(draftData).flat().forEach(team => {
+            allStats[team] = createTeamStat(team);
+            homeStats[team] = createTeamStat(team);
+            awayStats[team] = createTeamStat(team);
+        });
+        matches.forEach(match => {
+            if (match.status !== 'FINISHED' || match.score?.fullTime?.home == null || match.score?.fullTime?.away == null) return;
+            const homeKey = findTeamKey(match.homeTeam.name, allStats);
+            const awayKey = findTeamKey(match.awayTeam.name, allStats);
+            const homeScore = match.score.fullTime.home;
+            const awayScore = match.score.fullTime.away;
+            if (homeKey) {
+                applyTeamResult(allStats[homeKey], homeScore, awayScore);
+                applyTeamResult(homeStats[homeKey], homeScore, awayScore);
+                if (awayScore === 0) allStats[homeKey].cleanSheets += 1;
+            }
+            if (awayKey) {
+                applyTeamResult(allStats[awayKey], awayScore, homeScore);
+                applyTeamResult(awayStats[awayKey], awayScore, homeScore);
+                if (homeScore === 0) allStats[awayKey].cleanSheets += 1;
+            }
+            (match.events || []).forEach(event => {
+                const eventTeamId = String(event.teamProviderId || '');
+                const teamKey = eventTeamId === String(match.homeTeam.id || match.homeTeam.providerId) ? homeKey : eventTeamId === String(match.awayTeam.id || match.awayTeam.providerId) ? awayKey : null;
+                if (!teamKey) return;
+                if (event.yellowCard) allStats[teamKey].yellowCards += 1;
+                if (event.redCard) allStats[teamKey].redCards += 1;
+            });
+        });
+        Object.values(allStats).forEach(team => { team.GD = team.GF - team.GA; });
+        Object.values(homeStats).forEach(team => { team.GD = team.GF - team.GA; });
+        Object.values(awayStats).forEach(team => { team.GD = team.GF - team.GA; });
+        return { allStats, homeStats, awayStats };
+    }
+
+    window.openTeamDrawerFromMatch = function(teamName) {
+        matchDrawerTeamReturn = true;
+        const header = document.querySelector('.match-drawer-header');
+        const title = document.getElementById('match-drawer-title');
+        const content = document.getElementById('match-detail-content');
+        header?.querySelector('.match-drawer-back')?.remove();
+        header?.insertAdjacentHTML('afterbegin', '<button class="match-drawer-back" type="button" aria-label="Back to match details" onclick="returnToMatchFromTeamDrawer()">‹</button>');
+        title.textContent = `${getShortTeamName(teamName)} details`;
+        content.innerHTML = TeamDrawerShared.render(teamName, {
+            stats: fixtureTeamStats,
+            matches: fixtureMatches,
+            getLogoByName,
+            getShortTeamName,
+            getOwnerOfTeam,
+            openMatch: true
+        });
+    };
+
+    window.returnToMatchFromTeamDrawer = function() {
+        matchDrawerTeamReturn = false;
+        document.querySelector('.match-drawer-back')?.remove();
+        if (matchDrawerMatchId != null) openMatchDrawer(matchDrawerMatchId);
+    };
 
     function formatGroupDate(d) {
         const today = new Date();
@@ -1324,6 +1409,7 @@
     }
 
     async function openMatchDrawer(matchId) {
+        matchDrawerMatchId = matchId;
         return window.openSharedMatchDrawer(matchId);
     }
 
