@@ -973,7 +973,7 @@
         const goalScorers = {};
 
         try {
-            const data = matchData || await getMatchData();
+            const data = matchData || await getMatchData({ includeDetails: true });
 
             if (data.matches) {
                 data.matches.forEach(match => {
@@ -1235,7 +1235,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        DataManager.subscribe(data => fetchAndRenderAwards(data));
+        DataManager.subscribe(() => fetchAndRenderAwards());
         DataManager.start();
     });
 </script>

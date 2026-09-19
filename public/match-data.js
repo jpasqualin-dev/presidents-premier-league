@@ -13,8 +13,14 @@
     const channel = 'BroadcastChannel' in window ? new BroadcastChannel(config.channelName) : null;
     let memoryData = null;
     let memoryTime = 0;
+    let memoryIncludesDetails = false;
     let pendingRequest = null;
     let pollTimer = null;
+
+    const cacheKeys = includeDetails => ({
+        data: includeDetails ? `${config.cacheKey}_details` : config.cacheKey,
+        time: includeDetails ? `${config.cacheTimeKey}_details` : config.cacheTimeKey
+    });
 
     const pollIntervalFor = data => data?.matches?.some(match => ['IN_PLAY', 'PAUSED'].includes(match.status))
         ? config.livePollInterval
@@ -28,10 +34,11 @@
         }, pollIntervalFor(data));
     };
 
-    const readCache = () => {
+    const readCache = (includeDetails = false) => {
         try {
-            const cachedData = localStorage.getItem(config.cacheKey);
-            const cachedTime = Number(localStorage.getItem(config.cacheTimeKey));
+            const keys = cacheKeys(includeDetails);
+            const cachedData = localStorage.getItem(keys.data);
+            const cachedTime = Number(localStorage.getItem(keys.time));
             if (!cachedData || !cachedTime || Date.now() - cachedTime >= config.ttl) return null;
             return { data: JSON.parse(cachedData), time: cachedTime };
         } catch (error) {
@@ -49,33 +56,36 @@
         });
     };
 
-    const publish = (data, time) => {
+    const publish = (data, time, includeDetails = false) => {
         memoryData = data;
         memoryTime = time;
+        memoryIncludesDetails = includeDetails;
         notifySubscribers(data);
-        channel?.postMessage({ data, time });
+        channel?.postMessage({ data, time, includeDetails });
     };
 
-    const getFreshCache = () => {
-        if (memoryData && Date.now() - memoryTime < config.ttl) return { data: memoryData, time: memoryTime };
-        return readCache();
+    const getFreshCache = (includeDetails = false) => {
+        if (memoryData && memoryIncludesDetails === includeDetails && Date.now() - memoryTime < config.ttl) return { data: memoryData, time: memoryTime };
+        return readCache(includeDetails);
     };
 
-    async function getMatchData({ force = false } = {}) {
-        const cached = force ? null : getFreshCache();
+    async function getMatchData({ force = false, includeDetails = false } = {}) {
+        const cached = force ? null : getFreshCache(includeDetails);
         if (cached) {
             memoryData = cached.data;
             memoryTime = cached.time;
+            memoryIncludesDetails = includeDetails;
             return cached.data;
         }
-        if (pendingRequest) return pendingRequest;
+        if (pendingRequest?.includeDetails === includeDetails) return pendingRequest.promise;
 
-        pendingRequest = (async () => {
+        const promise = (async () => {
             const requestStarted = Date.now();
-            const refreshedCache = force ? null : getFreshCache();
+            const refreshedCache = force ? null : getFreshCache(includeDetails);
             if (refreshedCache) {
                 memoryData = refreshedCache.data;
                 memoryTime = refreshedCache.time;
+                memoryIncludesDetails = includeDetails;
                 return refreshedCache.data;
             }
 
@@ -90,10 +100,11 @@
                     ownsLock = JSON.parse(localStorage.getItem(config.lockKey) || 'null')?.owner === owner;
                 }
                 if (ownsLock) break;
-                const availableCache = readCache();
+                const availableCache = readCache(includeDetails);
                 if (availableCache && availableCache.time > requestStarted) {
                     memoryData = availableCache.data;
                     memoryTime = availableCache.time;
+                    memoryIncludesDetails = includeDetails;
                     return availableCache.data;
                 }
                 if (Date.now() - lockStarted >= config.lockDuration) throw new Error('Timed out waiting for match data refresh.');
@@ -101,13 +112,14 @@
             }
 
             try {
-                const response = await fetch('/api/matches', { cache: 'no-store' });
+                const response = await fetch(`/api/matches${includeDetails ? '?details=1' : ''}`, { cache: 'no-store' });
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
                 const time = Date.now();
-                localStorage.setItem(config.cacheKey, JSON.stringify(data));
-                localStorage.setItem(config.cacheTimeKey, time.toString());
-                publish(data, time);
+                const keys = cacheKeys(includeDetails);
+                localStorage.setItem(keys.data, JSON.stringify(data));
+                localStorage.setItem(keys.time, time.toString());
+                publish(data, time, includeDetails);
                 return data;
             } finally {
                 const currentLock = JSON.parse(localStorage.getItem(config.lockKey) || 'null');
@@ -115,10 +127,11 @@
             }
         })();
 
+        pendingRequest = { includeDetails, promise };
         try {
-            return await pendingRequest;
+            return await promise;
         } finally {
-            pendingRequest = null;
+            if (pendingRequest?.promise === promise) pendingRequest = null;
         }
     }
 
@@ -138,6 +151,7 @@
         if (cached) {
             memoryData = cached.data;
             memoryTime = cached.time;
+            memoryIncludesDetails = false;
             notifySubscribers(cached.data);
         } else {
             getMatchData()
@@ -155,14 +169,17 @@
         if (!update?.data || !update.time || update.time <= memoryTime) return;
         memoryData = update.data;
         memoryTime = update.time;
+        memoryIncludesDetails = Boolean(update.includeDetails);
         notifySubscribers(update.data);
     }
 
     channel?.addEventListener('message', handleExternalUpdate);
     window.addEventListener('storage', event => {
-        if (event.key !== config.cacheTimeKey || !event.newValue) return;
-        const cached = readCache();
-        if (cached) handleExternalUpdate({ newValue: JSON.stringify(cached) });
+        if (!event.newValue) return;
+        const includeDetails = event.key === cacheKeys(true).time;
+        if (event.key !== cacheKeys(false).time && !includeDetails) return;
+        const cached = readCache(includeDetails);
+        if (cached) handleExternalUpdate({ newValue: JSON.stringify({ ...cached, includeDetails }) });
     });
 
     window.DataManager = { config, getMatchData, refresh, subscribe, start };
