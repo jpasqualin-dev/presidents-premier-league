@@ -761,6 +761,8 @@
         .match-venue { margin-top: 5px; color: var(--text-muted); font-size: 0.78rem; text-align: center; }
         .match-scoreline { display: grid; grid-template-columns: 1fr 100px 1fr; align-items: center; gap: 10px; margin: 18px 0; }
         .match-team { display: grid; justify-items: center; gap: 6px; text-align: center; font-weight: 700; }
+        .match-team-link { cursor: pointer; }
+        .match-team-link:focus-visible { outline: 2px solid var(--text-main); outline-offset: 4px; border-radius: 6px; }
         .match-team img { width: 48px; height: 48px; object-fit: contain; }
         .match-team-owner { color: var(--text-muted); font-size: 0.72rem; font-weight: 500; }
         .match-score { font-size: 1.8rem; font-weight: 800; text-align: center; color: var(--text-main); }
@@ -771,6 +773,15 @@
         .match-scorer { display: block; }
         .match-scorer-empty, .empty-detail { color: var(--text-muted); opacity: 0.75; }
         .match-detail-section h3 { margin-bottom: 16px; color: var(--text-main); font-size: 0.95rem; text-align: center; }
+        .match-team-detail-identity { display: grid; justify-items: center; gap: 8px; text-align: center; }
+        .match-team-detail-identity img { width: 96px; height: 96px; object-fit: contain; }
+        .match-team-detail-identity h2 { color: var(--text-main); font-size: 1.1rem; }
+        .match-team-detail-identity p { color: var(--text-muted); font-size: 0.8rem; }
+        .team-detail-records { display: grid; gap: 10px; margin-top: 18px; color: var(--text-muted); font-size: 0.8rem; }
+        .team-detail-records div { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
+        .team-detail-records strong { color: var(--text-main); }
+        .team-form-inline { display: grid; grid-template-columns: repeat(5, minmax(78px, 1fr)); gap: 8px; overflow-x: auto; }
+        .team-form-inline .weekly-form-match { cursor: pointer; }
         .stat-row { display: grid; grid-template-columns: 54px 1fr 54px; align-items: center; gap: 10px; margin: 13px 0; font-size: 0.78rem; }
         .stat-value { font-weight: 700; color: var(--text-main); text-align: center; }
         .stat-value.stat-leader { justify-self: center; padding: 3px 8px; border-radius: 999px; color: #ffffff; }
@@ -951,6 +962,8 @@
     let weeklyCardWeekIndex = -1;
     const weeklyFormExpanded = new Set();
     let weeklyMatchReturn = false;
+    let matchDrawerMatchId = null;
+    let matchDrawerTeamReturn = false;
     let lastStandingsMatchSignature = '';
 
     function isCompletedMatch(match) {
@@ -1530,6 +1543,48 @@
         return `<section class="match-hero"><div class="match-meta">${escapeHtml(formatMatchDate(match.utcDate))}</div><div class="match-scoreline"><div class="match-team"><span>${escapeHtml(home.name)}</span>${home.crest ? `<img src="${escapeHtml(home.crest)}" alt="">` : ''}<span class="match-team-owner">${escapeHtml(getOwnerOfTeam(home.name) || '')}</span></div><div class="match-score">${escapeHtml(score)}<span class="match-status">${escapeHtml(status)}</span></div><div class="match-team"><span>${escapeHtml(away.name)}</span>${away.crest ? `<img src="${escapeHtml(away.crest)}" alt="">` : ''}<span class="match-team-owner">${escapeHtml(getOwnerOfTeam(away.name) || '')}</span></div></div><div class="match-venue">${escapeHtml(match.venue || 'Venue unavailable')}</div>${renderMatchScorers(match)}</section><section class="match-detail-section"><h3>Match Stats</h3>${renderMatchStats(match)}</section><section class="match-detail-section"><h3>Match Events</h3>${renderMatchEvents(match)}</section><section class="match-detail-section"><h3>Lineups</h3>${renderLineups(match)}</section>`;
     }
 
+    function renderMatchTeamDetail(teamName) {
+        const team = cachedTeamStats?.[findTeamKey(teamName, cachedTeamStats)];
+        if (!team) return '<section class="match-detail-section"><p class="empty-detail">Team details are unavailable.</p></section>';
+        const teams = Object.values(cachedTeamStats).sort((teamA, teamB) => teamB.PTS - teamA.PTS || teamB.GD - teamA.GD || teamB.GF - teamA.GF);
+        const rank = teams.findIndex(item => item.team === team.team) + 1;
+        const record = `${team.W}-${team.D}-${team.L}`;
+        const logo = getLogoByName(team.team);
+        const teamMatches = allMatchesData.filter(match => {
+            const home = match.homeTeam.name.toLowerCase(), away = match.awayTeam.name.toLowerCase(), name = team.team.toLowerCase();
+            return home.includes(name) || name.includes(home) || away.includes(name) || name.includes(away);
+        }).sort((matchA, matchB) => new Date(matchB.utcDate) - new Date(matchA.utcDate)).slice(0, 5).reverse();
+        const form = teamMatches.map(match => {
+            const isHome = match.homeTeam.name.toLowerCase().includes(team.team.toLowerCase()) || team.team.toLowerCase().includes(match.homeTeam.name.toLowerCase());
+            const matchTeam = isHome ? match.homeTeam : match.awayTeam, opponent = isHome ? match.awayTeam : match.homeTeam;
+            const teamScore = isHome ? match.score?.fullTime?.home : match.score?.fullTime?.away, opponentScore = isHome ? match.score?.fullTime?.away : match.score?.fullTime?.home;
+            const hasScore = isCompletedMatch(match) && teamScore != null && opponentScore != null;
+            const scoreClass = hasScore ? teamScore > opponentScore ? ' weekly-form-score-win' : teamScore < opponentScore ? ' weekly-form-score-loss' : ' weekly-form-score-draw' : '';
+            const matchLogo = getLogoByName(matchTeam.name) || matchTeam.crest || '', opponentLogo = getLogoByName(opponent.name) || opponent.crest || '';
+            const date = match.utcDate ? new Date(match.utcDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+            return `<div class="weekly-form-match" role="button" tabindex="0" aria-label="View details for ${escapeHtml(matchTeam.name)} versus ${escapeHtml(opponent.name)}" onclick="event.stopPropagation(); openMatchDrawer('${escapeHtml(String(match.id))}')" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); openMatchDrawer('${escapeHtml(String(match.id))}'); }"><div class="weekly-form-date">${escapeHtml(date)}</div><div class="weekly-form-team">${escapeHtml(getShortTeamName(matchTeam.name))}</div><div class="weekly-form-venue">${isHome ? 'HOME' : 'AWAY'}</div>${matchLogo ? `<img class="weekly-form-crest" src="${escapeHtml(matchLogo)}" alt="${escapeHtml(matchTeam.name)} crest">` : '<span class="weekly-form-crest empty"></span>'}<div class="weekly-form-score${scoreClass}">${hasScore ? `${teamScore} - ${opponentScore}` : ' - '}</div><div class="weekly-form-team">${escapeHtml(getShortTeamName(opponent.name))}</div>${opponentLogo ? `<img class="weekly-form-crest" src="${escapeHtml(opponentLogo)}" alt="${escapeHtml(opponent.name)} crest">` : '<span class="weekly-form-crest empty"></span>'}<div class="weekly-form-opponent-owner">${escapeHtml(getOwnerOfTeam(opponent.name) || '')}</div></div>`;
+        }).join('');
+        return `<section class="match-detail-section"><div class="match-team-detail-identity">${logo ? `<img src="${escapeHtml(logo)}" alt="${escapeHtml(team.team)} crest">` : ''}<h2>${escapeHtml(getShortTeamName(team.team))}</h2><p>${escapeHtml(team.owner || 'Unassigned')}</p></div><div class="team-detail-records"><div><span>Overall rank</span><strong>${rank}</strong></div><div><span>Record</span><strong>${record}</strong></div><div><span>Goals</span><strong>${team.GF}-${team.GA}</strong></div><div><span>Goal difference</span><strong>${team.GD > 0 ? '+' : ''}${team.GD}</strong></div><div><span>Points</span><strong>${team.PTS}</strong></div></div></section><section class="match-detail-section"><h3>Team Form</h3>${form ? `<div class="team-form-inline">${form}</div>` : '<p class="empty-detail">No matches available.</p>'}</section>`;
+    }
+
+    window.openTeamDrawerFromMatch = function(teamName) {
+        matchDrawerTeamReturn = true;
+        const header = document.querySelector('.match-drawer-header');
+        const title = document.getElementById('match-drawer-title');
+        const content = document.getElementById('match-detail-content');
+        header?.classList.remove('weekly-mode');
+        header?.querySelector('.match-drawer-back')?.remove();
+        header?.insertAdjacentHTML('afterbegin', '<button class="match-drawer-back" type="button" aria-label="Back to match details" onclick="returnToMatchFromTeamDrawer()">‹</button>');
+        title.textContent = `${getShortTeamName(teamName)} details`;
+        content.innerHTML = renderMatchTeamDetail(teamName);
+    };
+
+    window.returnToMatchFromTeamDrawer = function() {
+        matchDrawerTeamReturn = false;
+        document.querySelector('.match-drawer-back')?.remove();
+        openMatchDrawer(matchDrawerMatchId);
+    };
+
     function renderWeeklyDetail(week) {
         if (!week) return '<section class="match-detail-section"><p class="empty-detail">No weekly results yet.</p></section>';
         const ownerSections = week.ownerDetails.map((owner, ownerIndex) => {
@@ -1593,6 +1648,8 @@
     }
 
     async function openMatchDrawer(matchId) {
+        matchDrawerMatchId = matchId;
+        matchDrawerTeamReturn = false;
         return window.openSharedMatchDrawer(matchId, { backButtonMarkup: weeklyMatchReturn ? '<button class="match-drawer-back" type="button" aria-label="Back to PPL Weekly" onclick="returnToWeeklyDrawer()">‹</button>' : '' });
     }
 
@@ -1641,6 +1698,7 @@
     function closeMatchDrawer(event) {
         window.closeSharedMatchDrawer(event);
         weeklyMatchReturn = false;
+        matchDrawerTeamReturn = false;
     }
 
     document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMatchDrawer(); });
