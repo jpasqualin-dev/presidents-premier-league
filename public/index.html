@@ -977,7 +977,9 @@
         });
 
         return Array.from(weeks.entries()).sort(([weekA], [weekB]) => Number(weekA) - Number(weekB)).map(([week, matches]) => {
-            const owners = {};
+            const owners = Object.fromEntries(
+                Object.keys(draftData).map(owner => [owner, { points: 0, results: [], goalDifference: 0 }])
+            );
             matches.forEach(match => {
                 if (!isCompletedMatch(match)) return;
                 const homeOwner = getOwnerOfTeam(match.homeTeam.name);
@@ -995,12 +997,12 @@
                     });
             });
 
-            const ownerEntries = Object.entries(owners).filter(([, owner]) => owner.results.length > 0);
+            const ownerEntries = Object.entries(owners);
             const highestPoints = ownerEntries.length ? Math.max(...ownerEntries.map(([, owner]) => owner.points)) : null;
             const ownerDetails = ownerEntries.map(([owner, details]) => {
-                const achievements = details.points === highestPoints ? ['Weekly points leader'] : [];
-                if (!details.results.includes('loss')) achievements.push('Undefeated week');
-                if (details.results.every(result => result === 'win')) achievements.push('Perfect week');
+                const achievements = details.results.length && details.points === highestPoints ? ['Weekly points leader'] : [];
+                if (details.results.length && !details.results.includes('loss')) achievements.push('Undefeated week');
+                if (details.results.length && details.results.every(result => result === 'win')) achievements.push('Perfect week');
                 return {
                     owner,
                     points: details.points,
@@ -1051,7 +1053,8 @@
             return;
         }
 
-        const leaderText = week.leaderDetails.length ? week.leaderDetails.map(leader => `${escapeHtml(leader.owner)} <span class="weekly-stars" aria-label="${leader.stars} gold star${leader.stars === 1 ? '' : 's'}">${'★'.repeat(leader.stars)}</span>`).join(' <span aria-hidden="true">·</span> ') : 'No completed matches yet';
+        const achievementDetails = week.ownerDetails.filter(owner => owner.achievements.length);
+        const leaderText = achievementDetails.length ? achievementDetails.map(owner => `${escapeHtml(owner.owner)} <span class="weekly-stars" aria-label="${owner.stars} gold star${owner.stars === 1 ? '' : 's'}">${'★'.repeat(owner.stars)}</span>`).join(' <span aria-hidden="true">·</span> ') : 'No completed matches yet';
         const isCurrentWeek = weeklyCardWeekIndex === getCurrentWeeklyCardIndex(weeklyCardWeeks);
         container.innerHTML = `<div class="today-card" role="button" tabindex="0" aria-label="View PPL Weekly details for Round ${escapeHtml(String(week.week))}" onclick="openWeeklyDrawer()" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openWeeklyDrawer(); }"><div class="today-header"><div class="today-header-left"><span class="today-header-text">PPL Weekly - Round ${escapeHtml(String(week.week))}</span></div><div class="matchday-nav"><button class="nav-btn ${weeklyCardWeekIndex <= 0 ? 'disabled' : ''}" type="button" aria-label="View previous week" onclick="event.stopPropagation(); changeWeeklyCardWeek(-1)" ${weeklyCardWeekIndex <= 0 ? 'disabled' : ''}>❮</button><button class="nav-btn ${isCurrentWeek ? 'disabled' : ''}" type="button" aria-label="View next week" onclick="event.stopPropagation(); changeWeeklyCardWeek(1)" ${isCurrentWeek ? 'disabled' : ''}>❯</button></div></div><div class="weekly-leader-row">${leaderText}</div></div>`;
     }
