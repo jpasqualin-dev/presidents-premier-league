@@ -70,18 +70,14 @@ async function fetchEventsForDates(dates) {
     return responses.flatMap(payload => payload.events || []);
 }
 
-async function fetchScoringDetails(event) {
-    const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/summary?event=${encodeURIComponent(event.id)}`);
-    if (!response.ok) return event.competitions?.[0]?.details || [];
-    const payload = await response.json();
-    const competitors = payload.header?.competitions?.[0]?.competitors || [];
-    for (const competitor of competitors) {
-        const target = event.competitions?.[0]?.competitors?.find(item => item.homeAway === competitor.homeAway);
-        if (target && competitor.linescores) target.linescores = competitor.linescores;
-    }
-    const keyEvents = payload.keyEvents || [];
-    if (!keyEvents.length) return event.competitions?.[0]?.details || [];
-    return keyEvents.map(item => ({
+async function fetchMatchSummary(eventId) {
+    const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/summary?event=${encodeURIComponent(eventId)}`);
+    if (!response.ok) return null;
+    return response.json();
+}
+
+function normalizeSummaryEvent(item) {
+    return {
         type: item.type,
         clock: item.clock,
         team: item.team,
@@ -92,26 +88,36 @@ async function fetchScoringDetails(event) {
         penaltyKick: Boolean(item.penaltyKick) || item.type?.type === 'penalty---scored',
         ownGoal: Boolean(item.ownGoal),
         shootout: Boolean(item.shootout),
+        substitution: Boolean(item.substitution || item.type?.type?.includes('substitution')),
         athletesInvolved: (item.participants || []).map(participant => participant.athlete).filter(Boolean)
-    }));
+    };
 }
 
-async function fetchMatchStatistics(eventId) {
-    const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/summary?event=${encodeURIComponent(eventId)}`);
-    if (!response.ok) return [];
-    const payload = await response.json();
+async function fetchScoringDetails(event, summary = null) {
+    const payload = summary || await fetchMatchSummary(event.id);
+    if (!payload) return event.competitions?.[0]?.details || [];
     const competitors = payload.header?.competitions?.[0]?.competitors || [];
-    return competitors.flatMap(competitor => (competitor.statistics || []).map(stat => ({
-        teamProviderId: competitor.team?.id ? String(competitor.team.id) : null,
+    for (const competitor of competitors) {
+        const target = event.competitions?.[0]?.competitors?.find(item => item.homeAway === competitor.homeAway);
+        if (target && competitor.linescores) target.linescores = competitor.linescores;
+    }
+    const summaryEvents = payload.keyEvents?.length ? payload.keyEvents : payload.plays || [];
+    return summaryEvents.length ? summaryEvents.map(normalizeSummaryEvent) : event.competitions?.[0]?.details || [];
+}
+
+async function fetchMatchStatistics(eventId, summary = null) {
+    const payload = summary || await fetchMatchSummary(eventId);
+    if (!payload) return [];
+    return (payload.boxscore?.teams || []).flatMap(team => (team.statistics || []).map(stat => ({
+        teamProviderId: team.team?.id ? String(team.team.id) : null,
         name: stat.name,
         displayValue: stat.displayValue || null,
         value: Number.isNaN(Number.parseFloat(stat.displayValue)) ? null : Number.parseFloat(stat.displayValue)
     })));
 }
-async function fetchMatchLineups(eventId) {
-    const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/summary?event=${encodeURIComponent(eventId)}`);
-    if (!response.ok) return null;
-    const payload = await response.json();
+async function fetchMatchLineups(eventId, summary = null) {
+    const payload = summary || await fetchMatchSummary(eventId);
+    if (!payload) return null;
     const lineups = {};
     for (const roster of payload.rosters || []) {
         const side = roster.homeAway === 'home' || roster.homeAway === 'away' ? roster.homeAway : null;
@@ -142,9 +148,10 @@ async function syncEvent(sql, event) {
     const awayOwner = findTeamOwner(away.team.displayName);
     const homeName = findCanonicalTeam(home.team.displayName);
     const awayName = findCanonicalTeam(away.team.displayName);
+    const summary = await fetchMatchSummary(event.id);
     const [details, matchStatistics] = await Promise.all([
-        fetchScoringDetails(event),
-        fetchMatchStatistics(event.id)
+        fetchScoringDetails(event, summary),
+        fetchMatchStatistics(event.id, summary)
     ]);
     const [existingMatch] = await sql`
         SELECT id, kickoff_at, matchday
@@ -227,4 +234,5 @@ module.exports.fetchEventsForDates = fetchEventsForDates;
 module.exports.fetchMatchStatistics = fetchMatchStatistics;
 module.exports.fetchMatchLineups = fetchMatchLineups;
 module.exports.fetchScoringDetails = fetchScoringDetails;
+module.exports.fetchMatchSummary = fetchMatchSummary;
 module.exports.syncEvent = syncEvent;

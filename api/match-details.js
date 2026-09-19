@@ -1,4 +1,4 @@
-const { fetchScoringDetails, fetchMatchStatistics, fetchMatchLineups } = require('./sync-espn');
+const { fetchMatchSummary, fetchScoringDetails, fetchMatchStatistics, fetchMatchLineups } = require('./sync-espn');
 
 module.exports = async function handler(req, res) {
     if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed.' });
@@ -7,10 +7,12 @@ module.exports = async function handler(req, res) {
     if (!/^\d+$/.test(eventId)) return res.status(400).json({ error: 'A valid ESPN event ID is required.' });
 
     try {
+        const summary = await fetchMatchSummary(eventId);
+        if (!summary) return res.status(502).json({ error: 'Unable to read ESPN match summary.' });
         const [details, teamStats, lineups] = await Promise.all([
-            fetchScoringDetails({ id: eventId, competitions: [] }),
-            fetchMatchStatistics(eventId),
-            fetchMatchLineups(eventId)
+            fetchScoringDetails({ id: eventId, competitions: [] }, summary),
+            fetchMatchStatistics(eventId, summary),
+            fetchMatchLineups(eventId, summary)
         ]);
         const substitutions = details
             .filter(detail => detail.substitution || detail.type?.type?.includes('substitution') || detail.type?.text?.toLowerCase().includes('substitution'))
