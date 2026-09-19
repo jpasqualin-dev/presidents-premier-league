@@ -349,6 +349,35 @@
         .pill-purple { background-color: #faf5ff; color: #6b46c1; border: 1px solid #e9d8fd; }
         .pill-gray { background-color: #f7fafc; color: #4a5568; border: 1px solid #e2e8f0; }
 
+        .team-drawer-overlay { position: fixed; inset: 0; z-index: 200; display: flex; justify-content: flex-end; background: rgba(15,23,42,.48); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .25s ease, visibility 0s linear .25s; }
+        .team-drawer-overlay.is-open { opacity: 1; visibility: visible; pointer-events: auto; transition-delay: 0s; }
+        .team-drawer { width: min(100%, 560px); height: 100%; overflow-y: auto; background: var(--bg-color, #f4f6f8); box-shadow: -10px 0 35px rgba(0,0,0,.2); transform: translateX(100%); transition: transform .3s ease; }
+        .team-drawer-overlay.is-open .team-drawer { transform: translateX(0); }
+        .team-drawer-header { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: center; min-height: 50px; padding: 8px 58px; background: var(--card-bg, #fff); border-bottom: 1px solid var(--border-color, #dfe5eb); }
+        .team-drawer-title { color: var(--text-main, #1a1a1a); font-size: .95rem; font-weight: 700; text-align: center; }
+        .team-drawer-close { position: absolute; right: 18px; width: 34px; height: 34px; border: 0; border-radius: 50%; background: var(--border-color, #dfe5eb); color: var(--text-main, #1a1a1a); font-size: 1.3rem; line-height: 1; cursor: pointer; }
+        .team-drawer-content { padding: 18px; }
+        .team-drawer-card { margin-bottom: 14px; padding: 18px; background: var(--card-bg, #fff); border: 1px solid var(--border-color, #dfe5eb); border-radius: 12px; }
+        .team-drawer-summary { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 18px; }
+        .team-drawer-identity { display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .team-drawer-crest { width: 150px; height: 150px; object-fit: contain; align-self: flex-start; }
+        .team-drawer-owner { margin-top: 8px; color: var(--text-muted, #718096); font-size: .85rem; font-weight: 600; }
+        .team-drawer-records { display: grid; gap: 10px; color: var(--text-muted, #718096); font-size: .78rem; }
+        .team-drawer-record { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color, #dfe5eb); }
+        .team-drawer-record strong { color: var(--text-main, #1a1a1a); font-size: .9rem; }
+        .team-drawer-card-title { margin-bottom: 16px; color: var(--text-main, #1a1a1a); font-size: .95rem; text-align: center; }
+        .team-drawer-stat { display: grid; grid-template-columns: 52px 1fr 42px; align-items: center; gap: 10px; color: var(--text-muted, #718096); font-size: .82rem; }
+        .team-drawer-stat strong { color: var(--text-main, #1a1a1a); text-align: right; }
+        .team-drawer-bar { height: 10px; overflow: hidden; border-radius: 99px; background: var(--border-color, #dfe5eb); }
+        .team-drawer-bar-fill { height: 100%; border-radius: inherit; background: #00a667; }
+        body.dark-mode .team-drawer-bar-fill { background: #00ff87; }
+
+        @media (max-width: 600px) {
+            .team-drawer { width: 100%; }
+            .team-drawer-content { padding: 12px; }
+            .team-drawer-crest { width: 120px; height: 120px; }
+        }
+
         /* Mobile tweaks */
         @media (max-width: 768px) {
             th, td { padding: 10px 4px; font-size: 0.8rem; }
@@ -401,6 +430,16 @@
         <div class="loading-state">Loading standings data...</div>
     </div>
 
+</div>
+
+<div class="team-drawer-overlay" id="team-drawer-overlay" aria-hidden="true" onclick="closeTeamDrawer(event)">
+    <aside class="team-drawer" role="dialog" aria-modal="true" aria-labelledby="team-drawer-title" onclick="event.stopPropagation()">
+        <div class="team-drawer-header">
+            <span class="team-drawer-title" id="team-drawer-title">Team details</span>
+            <button class="team-drawer-close" type="button" aria-label="Close team details" onclick="closeTeamDrawer()">&times;</button>
+        </div>
+        <div class="team-drawer-content" id="team-drawer-content"></div>
+    </aside>
 </div>
 
 <script src="theme.js"></script>
@@ -549,6 +588,7 @@
         const sorted = sortTeams(teamsArray);
 
         if (title !== 'DVP') {
+            const isOverall = title === 'Overall Standings';
             let headerHtml = `
                 <div class="table-wrapper table-card standings-header" style="margin-top: 0px;">
                     <table id="standings-table-header" class="overall-standings-table">
@@ -573,7 +613,7 @@
                 const displayName = getShortTeamName(t.team);
                 const logo = getLogoByName(t.team);
                 headerHtml += `
-                    <tr>
+                    <tr${isOverall ? ` class="team-standings-row" role="button" tabindex="0" onclick="openTeamDrawer('${t.team}')" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openTeamDrawer('${t.team}'); }"` : ''}>
                         <td class="fotmob-rank">${idx + 1}</td>
                         <td class="text-left">
                             <div class="team-inline">
