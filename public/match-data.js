@@ -5,7 +5,8 @@
         lockKey: 'pl_match_data_lock',
         channelName: 'ppl-match-data',
         ttl: 15 * 1000,
-        pollInterval: 15 * 1000,
+        pollInterval: 2 * 60 * 1000,
+        livePollInterval: 15 * 1000,
         lockDuration: 10 * 1000
     };
     const subscribers = new Set();
@@ -14,6 +15,18 @@
     let memoryTime = 0;
     let pendingRequest = null;
     let pollTimer = null;
+
+    const pollIntervalFor = data => data?.matches?.some(match => ['IN_PLAY', 'PAUSED'].includes(match.status))
+        ? config.livePollInterval
+        : config.pollInterval;
+
+    const schedulePoll = data => {
+        if (pollTimer) clearTimeout(pollTimer);
+        pollTimer = setTimeout(async () => {
+            const nextData = await refresh();
+            schedulePoll(nextData);
+        }, pollIntervalFor(data));
+    };
 
     const readCache = () => {
         try {
@@ -127,9 +140,14 @@
             memoryTime = cached.time;
             notifySubscribers(cached.data);
         } else {
-            getMatchData().catch(error => console.error('Unable to load match data:', error));
+            getMatchData()
+                .then(data => schedulePoll(data))
+                .catch(error => {
+                    console.error('Unable to load match data:', error);
+                    schedulePoll(null);
+                });
         }
-        pollTimer = setInterval(refresh, config.pollInterval);
+        if (cached) schedulePoll(cached.data);
     }
 
     function handleExternalUpdate(event) {

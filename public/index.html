@@ -2125,25 +2125,6 @@
         ].join(':')).sort().join('|');
     }
 
-    async function refreshMatchdayCard(matchData = null) {
-        try {
-            const data = matchData || await getMatchData();
-            
-            if (data.matches) {
-                // Update dates silently without overriding the currently selected swipe index
-                processMatchDates(data.matches); 
-                renderMatchdayCard(); 
-
-                const matchSignature = getMatchSignature(data.matches);
-                if (matchSignature !== lastStandingsMatchSignature) {
-                    await fetchAndUpdateStandings(data);
-                }
-            }
-        } catch (error) {
-            console.error("Error refreshing matchday card:", error);
-        }
-    }
-
     async function fetchAndUpdateStandings(matchData = null) {
         let playerStats = initializePlayerStats();
         let teamStats = initializeTeamStats();

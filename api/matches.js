@@ -22,7 +22,8 @@ function espnDateKeys() {
 
 function shouldFetchDetails(event) {
     const status = event.competitions?.[0]?.status?.type || {};
-    if (status.state !== 'post' && !status.completed) return true;
+    if (status.state === 'in') return true;
+    if (status.state !== 'post' && !status.completed) return false;
     const eventTime = new Date(event.date).getTime();
     return Number.isFinite(eventTime) && Date.now() - eventTime <= RECENT_FINAL_WINDOW_MS;
 }
@@ -52,7 +53,7 @@ async function fetchRecentEspnMatches() {
     return events.map(normalizeEspnEvent).filter(Boolean);
 }
 
-async function readHistoricalMatches(sql) {
+async function readHistoricalMatches(sql, includeDetails = false) {
     const rows = await sql`
         SELECT
             m.provider, m.provider_event_id, m.kickoff_at, m.status_state, m.status_completed, m.status_clock,
@@ -62,7 +63,7 @@ async function readHistoricalMatches(sql) {
             m.venue, m.matchday,
             home.provider_team_id AS home_provider_id, home.canonical_name AS home_name, home.logo_url AS home_logo,
             away.provider_team_id AS away_provider_id, away.canonical_name AS away_name, away.logo_url AS away_logo,
-            COALESCE((
+            CASE WHEN ${includeDetails} THEN COALESCE((
                 SELECT json_agg(json_build_object(
                     'teamProviderId', scorer_team.provider_team_id,
                     'athleteProviderId', ms.provider_athlete_id,
@@ -76,8 +77,8 @@ async function readHistoricalMatches(sql) {
                 FROM match_scorers ms
                 LEFT JOIN teams scorer_team ON scorer_team.id = ms.team_id
                 WHERE ms.match_id = m.id
-            ), '[]'::json) AS scorers,
-            COALESCE((
+            ), '[]'::json) ELSE '[]'::json END AS scorers,
+            CASE WHEN ${includeDetails} THEN COALESCE((
                 SELECT json_agg(json_build_object(
                     'teamProviderId', event_team.provider_team_id,
                     'athleteProviderId', me.athlete_provider_id,
@@ -94,8 +95,8 @@ async function readHistoricalMatches(sql) {
                 LEFT JOIN teams event_team ON event_team.id = me.team_id
                                 WHERE me.match_id = m.id
                                     AND NOT COALESCE(me.scoring_play, FALSE)
-            ), '[]'::json) AS events
-            , COALESCE((
+            ), '[]'::json) ELSE '[]'::json END AS events
+            , CASE WHEN ${includeDetails} THEN COALESCE((
                 SELECT json_agg(json_build_object(
                     'teamProviderId', stats_team.provider_team_id,
                     'name', mts.stat_name,
@@ -105,7 +106,7 @@ async function readHistoricalMatches(sql) {
                 FROM match_team_stats mts
                 JOIN teams stats_team ON stats_team.id = mts.team_id
                 WHERE mts.match_id = m.id
-            ), '[]'::json) AS team_stats
+            ), '[]'::json) ELSE '[]'::json END AS team_stats
         FROM matches m
         JOIN teams home ON home.id = m.home_team_id
         JOIN teams away ON away.id = m.away_team_id
@@ -120,8 +121,9 @@ module.exports = async function handler(req, res) {
     if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed.' });
 
     try {
+        const includeDetails = req.query?.details === '1' || req.query?.details === 'true';
         const historyPromise = process.env.DATABASE_URL
-            ? readHistoricalMatches(neon(process.env.DATABASE_URL))
+            ? readHistoricalMatches(neon(process.env.DATABASE_URL), includeDetails)
             : Promise.reject(new Error('DATABASE_URL is not configured.'));
         const livePromise = fetchRecentEspnMatches();
         const [historyResult, liveResult] = await Promise.allSettled([historyPromise, livePromise]);
@@ -135,8 +137,7 @@ module.exports = async function handler(req, res) {
             throw new Error('Both Neon history and ESPN live data are unavailable.');
         }
 
-        // Match scores can change immediately after the upstream final whistle.
-        res.setHeader('Cache-Control', 'no-store, max-age=0');
+        res.setHeader('Cache-Control', 'public, s-maxage=15, stale-while-revalidate=45');
         return res.status(200).json({
             matches: mergeMatches([...historicalMatches, ...liveMatches]),
             sources: { historical: historyResult.status === 'fulfilled' ? 'neon' : null, live: liveAvailable ? 'espn' : null },
