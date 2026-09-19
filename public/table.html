@@ -370,7 +370,11 @@
         .team-drawer-stat strong { color: var(--text-main, #1a1a1a); text-align: right; }
         .team-drawer-bar { height: 10px; overflow: hidden; border-radius: 99px; background: var(--border-color, #dfe5eb); }
         .team-drawer-bar-fill { height: 100%; border-radius: inherit; background: #00a667; }
+        .team-drawer-bar-fill.yellow { background: #facc15; }
+        .team-drawer-bar-fill.red { background: #ef4444; }
         body.dark-mode .team-drawer-bar-fill { background: #00ff87; }
+        body.dark-mode .team-drawer-bar-fill.yellow { background: #facc15; }
+        body.dark-mode .team-drawer-bar-fill.red { background: #ef4444; }
         body.team-drawer-open { overflow: hidden; }
 
         @media (max-width: 600px) {
@@ -529,7 +533,7 @@
         return {
             team: team,
             owner: getOwnerOfTeam(team),
-            PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0
+            PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0, cleanSheets: 0, yellowCards: 0, redCards: 0
         };
     }
 
@@ -571,6 +575,16 @@
                 applyResult(allStats[awayKey], awayScore, homeScore);
                 applyResult(awayStats[awayKey], awayScore, homeScore);
             }
+
+            if (homeKey && awayScore === 0) allStats[homeKey].cleanSheets += 1;
+            if (awayKey && homeScore === 0) allStats[awayKey].cleanSheets += 1;
+            (match.events || []).forEach(event => {
+                const eventTeamId = String(event.teamProviderId || '');
+                const teamKey = eventTeamId === String(match.homeTeam.id) ? homeKey : eventTeamId === String(match.awayTeam.id) ? awayKey : null;
+                if (!teamKey) return;
+                if (event.yellowCard) allStats[teamKey].yellowCards += 1;
+                if (event.redCard) allStats[teamKey].redCards += 1;
+            });
         });
 
         [allStats, homeStats, awayStats].forEach(statsObj => {
@@ -693,9 +707,15 @@
         return `${team.W}-${team.D}-${team.L}`;
     }
 
-    function getTeamGoalRank(team) {
-        const rankedTeams = [...Object.values(cachedStats.allStats)].sort((a, b) => b.GF - a.GF || b.GD - a.GD || b.PTS - a.PTS);
+    function getTeamStatRank(team, field) {
+        const rankedTeams = [...Object.values(cachedStats.allStats)].sort((a, b) => b[field] - a[field] || b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
         return rankedTeams.findIndex(item => item.team === team.team) + 1;
+    }
+
+    function renderTeamStatRow(team, label, field, barClass = '') {
+        const rank = getTeamStatRank(team, field);
+        const percentage = Math.max(5, 100 - (rank - 1) * 5);
+        return `<div class="team-drawer-stat"><span>${label}</span><div class="team-drawer-bar" aria-label="${label} rank ${rank} of 20"><div class="team-drawer-bar-fill${barClass ? ` ${barClass}` : ''}" style="width: ${percentage}%"></div></div><strong>${team[field]}</strong></div>`;
     }
 
     window.openTeamDrawer = function(teamName) {
@@ -703,8 +723,6 @@
         if (!team) return;
 
         const overallRank = sortTeams(Object.values(cachedStats.allStats)).findIndex(item => item.team === team.team) + 1;
-        const goalRank = getTeamGoalRank(team);
-        const goalBarPercentage = Math.max(5, 100 - (goalRank - 1) * 5);
         const logo = getLogoByName(team.team);
         const overlay = document.getElementById('team-drawer-overlay');
         document.getElementById('team-drawer-title').textContent = getShortTeamName(team.team);
@@ -725,7 +743,11 @@
             </section>
             <section class="team-drawer-card">
                 <h2 class="team-drawer-card-title">Team stats</h2>
-                <div class="team-drawer-stat"><span>Goals</span><div class="team-drawer-bar" aria-label="Goals rank ${goalRank} of 20"><div class="team-drawer-bar-fill" style="width: ${goalBarPercentage}%"></div></div><strong>${team.GF}</strong></div>
+                ${renderTeamStatRow(team, 'Goals', 'GF')}
+                ${renderTeamStatRow(team, 'Goal differential', 'GD')}
+                ${renderTeamStatRow(team, 'Clean sheets', 'cleanSheets')}
+                ${renderTeamStatRow(team, 'Yellow cards', 'yellowCards', 'yellow')}
+                ${renderTeamStatRow(team, 'Red cards', 'redCards', 'red')}
             </section>`;
         overlay.classList.add('is-open');
         overlay.setAttribute('aria-hidden', 'false');
