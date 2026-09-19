@@ -35,6 +35,19 @@ function toClientScorer(detail) {
     };
 }
 
+function getHalfTimeScores(summary) {
+    const competitors = summary?.header?.competitions?.[0]?.competitors || [];
+    const scores = {};
+    competitors.forEach(competitor => {
+        const value = competitor.linescores?.[0]?.value ?? competitor.linescores?.[0]?.displayValue;
+        if (value == null) return;
+        scores[competitor.homeAway] = Number(value);
+    });
+    return scores.home == null || scores.away == null
+        ? null
+        : { home: scores.home, away: scores.away };
+}
+
 module.exports = async function handler(req, res) {
     if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed.' });
 
@@ -64,9 +77,10 @@ module.exports = async function handler(req, res) {
             }));
         const events = details.map(toClientEvent);
         const scorers = details.filter(detail => detail.scoringPlay).map(toClientScorer);
+        const halfTime = getHalfTimeScores(summary);
 
         res.setHeader('Cache-Control', 'no-store, max-age=0');
-        return res.status(200).json({ events, scorers, substitutions, teamStats, lineups });
+        return res.status(200).json({ events, scorers, substitutions, teamStats, lineups, halfTime });
     } catch (error) {
         console.error('Match detail read failed:', error);
         return res.status(502).json({ error: 'Unable to read ESPN match details.' });

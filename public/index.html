@@ -1526,6 +1526,7 @@
                 if (detailData.teamStats?.length) match.teamStats = detailData.teamStats;
                 if (detailData.lineups) match.lineups = detailData.lineups;
                 if (detailData.scorers?.length) match.scorers = detailData.scorers;
+                if (detailData.halfTime) match.score = { ...(match.score || {}), halfTime: detailData.halfTime };
                 const events = [...(match.events || []), ...(detailData.events || []), ...(detailData.substitutions || [])];
                 match.events = dedupeDrawerEvents(events);
             }
