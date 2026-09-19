@@ -185,7 +185,14 @@
         }
 
         .profile-card-backdrop {
-            display: none;
+            position: fixed;
+            top: var(--profile-card-sticky-top, 36px);
+            right: 0;
+            left: 0;
+            height: calc(var(--profile-card-height, 0px) - 14px);
+            z-index: 9;
+            background: #f4f6f8;
+            pointer-events: none;
         }
 
         .profile-card:focus-visible {
