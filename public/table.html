@@ -715,8 +715,10 @@
     }
 
     function getTeamStatRank(team, field) {
-        const rankedTeams = [...Object.values(cachedStats.allStats)].sort((a, b) => b[field] - a[field] || b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
-        return rankedTeams.findIndex(item => item.team === team.team) + 1;
+        const lowerIsBetter = field === 'yellowCards' || field === 'redCards';
+        const teams = Object.values(cachedStats.allStats);
+        const betterTeamCount = teams.filter(item => lowerIsBetter ? item[field] < team[field] : item[field] > team[field]).length;
+        return betterTeamCount + 1;
     }
 
     function renderTeamStatRow(team, label, field, barClass = '') {
