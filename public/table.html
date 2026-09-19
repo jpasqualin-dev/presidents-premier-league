@@ -469,6 +469,7 @@
 
 <script src="theme.js"></script>
 <script src="match-data.js"></script>
+<script src="team-drawer-shared.js"></script>
 <script>
     // --- Data Definitions (Shared with Index Page) ---
     const draftData = {
@@ -719,106 +720,19 @@
         document.getElementById('content-area').innerHTML = html;
     }
 
-    function escapeTeamDrawerText(value) {
-        return String(value ?? '').replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
-    }
-
-    function formatTeamRecord(team) {
-        return `${team.W}-${team.D}-${team.L}`;
-    }
-
-    function getTeamStatRank(team, field) {
-        const lowerIsBetter = field === 'yellowCards' || field === 'redCards';
-        const teams = Object.values(cachedStats.allStats);
-        const betterTeamCount = teams.filter(item => lowerIsBetter ? item[field] < team[field] : item[field] > team[field]).length;
-        return betterTeamCount + 1;
-    }
-
-    function renderTeamStatRow(team, label, field, barClass = '') {
-        const rank = getTeamStatRank(team, field);
-        const percentage = Math.max(5, 100 - (rank - 1) * 5);
-        const value = field === 'GD' && team[field] > 0 ? `+${team[field]}` : team[field];
-        return `<div class="team-drawer-stat"><span>${label}</span><strong>${value}</strong><div class="team-drawer-bar" aria-label="${label} rank ${rank} of 20"><div class="team-drawer-bar-fill${barClass ? ` ${barClass}` : ''}" style="width: ${percentage}%"></div></div><span class="team-drawer-bar-rank">Rank: ${rank}</span></div>`;
-    }
-
-    function isPlayedMatch(match) {
-        return match?.status === 'FINISHED' || match?.status === 'FT' || match?.status === 'post' || match?.status_completed === true;
-    }
-
-    function isTeamMatch(match, teamName) {
-        return match.homeTeam.name.toLowerCase().includes(teamName.toLowerCase())
-            || teamName.toLowerCase().includes(match.homeTeam.name.toLowerCase())
-            || match.awayTeam.name.toLowerCase().includes(teamName.toLowerCase())
-            || teamName.toLowerCase().includes(match.awayTeam.name.toLowerCase());
-    }
-
-    function renderTeamForm(teamName) {
-        const teamMatches = (cachedMatches || [])
-            .filter(match => isTeamMatch(match, teamName))
-            .sort((matchA, matchB) => new Date(matchB.utcDate) - new Date(matchA.utcDate));
-        if (!teamMatches.length) return '<p class="empty-detail">No matches available</p>';
-
-        const playedMatchdays = teamMatches.filter(isPlayedMatch).map(match => Number(match.matchday)).filter(Number.isFinite);
-        const latestPlayedMatchday = playedMatchdays.length ? Math.max(...playedMatchdays) : -Infinity;
-        const upcomingMatchdays = teamMatches
-            .filter(match => !isPlayedMatch(match) && new Date(match.utcDate).getTime() >= Date.now())
-            .map(match => Number(match.matchday))
-            .filter(matchday => Number.isFinite(matchday) && matchday >= latestPlayedMatchday);
-        const currentMatchday = upcomingMatchdays.length
-            ? Math.min(...upcomingMatchdays)
-            : Number.isFinite(latestPlayedMatchday) ? latestPlayedMatchday : Number(teamMatches[teamMatches.length - 1].matchday);
-        const visibleMatches = teamMatches.filter(match => Number(match.matchday) <= currentMatchday).slice(0, 5).reverse();
-        const form = visibleMatches.map(match => {
-            const isHome = match.homeTeam.name.toLowerCase().includes(teamName.toLowerCase()) || teamName.toLowerCase().includes(match.homeTeam.name.toLowerCase());
-            const team = isHome ? match.homeTeam : match.awayTeam;
-            const opponent = isHome ? match.awayTeam : match.homeTeam;
-            const teamScore = isHome ? match.score?.fullTime?.home : match.score?.fullTime?.away;
-            const opponentScore = isHome ? match.score?.fullTime?.away : match.score?.fullTime?.home;
-            const hasScore = isPlayedMatch(match) && teamScore != null && opponentScore != null;
-            const scoreClass = hasScore ? teamScore > opponentScore ? ' weekly-form-score-win' : teamScore < opponentScore ? ' weekly-form-score-loss' : ' weekly-form-score-draw' : '';
-            const date = match.utcDate ? new Date(match.utcDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
-            const teamLogo = getLogoByName(team.name) || team.crest || '';
-            const opponentLogo = getLogoByName(opponent.name) || opponent.crest || '';
-            return `<div class="weekly-form-match"><div class="weekly-form-date">${escapeTeamDrawerText(date)}</div><div class="weekly-form-team">${escapeTeamDrawerText(getShortTeamName(team.name))}</div><div class="weekly-form-venue">${isHome ? 'HOME' : 'AWAY'}</div>${teamLogo ? `<img class="weekly-form-crest" src="${escapeTeamDrawerText(teamLogo)}" alt="${escapeTeamDrawerText(team.name)} crest">` : '<span class="weekly-form-crest empty"></span>'}<div class="weekly-form-score${scoreClass}">${hasScore ? `${teamScore} - ${opponentScore}` : ' - '}</div><div class="weekly-form-team">${escapeTeamDrawerText(getShortTeamName(opponent.name))}</div>${opponentLogo ? `<img class="weekly-form-crest" src="${escapeTeamDrawerText(opponentLogo)}" alt="${escapeTeamDrawerText(opponent.name)} crest">` : '<span class="weekly-form-crest empty"></span>'}<div class="weekly-form-opponent-owner">${escapeTeamDrawerText(getOwnerOfTeam(opponent.name))}</div></div>`;
-        }).join('');
-        return `<div class="team-form-grid">${form}</div>`;
-    }
-
     window.openTeamDrawer = function(teamName) {
         const team = cachedStats?.allStats?.[teamName];
         if (!team) return;
 
-        const overallRank = sortTeams(Object.values(cachedStats.allStats)).findIndex(item => item.team === team.team) + 1;
-        const logo = getLogoByName(team.team);
         const overlay = document.getElementById('team-drawer-overlay');
         document.getElementById('team-drawer-title').textContent = getShortTeamName(team.team);
-        document.getElementById('team-drawer-content').innerHTML = `
-            <section class="team-drawer-card">
-                <div class="team-drawer-summary">
-                    <div class="team-drawer-identity">
-                        ${logo ? `<img class="team-drawer-crest" src="${escapeTeamDrawerText(logo)}" alt="${escapeTeamDrawerText(team.team)} crest">` : ''}
-                        <div class="team-drawer-owner">${escapeTeamDrawerText(team.owner)}</div>
-                    </div>
-                    <div class="team-drawer-records">
-                        <div class="team-drawer-record"><span>Overall rank</span><strong>${overallRank}</strong></div>
-                        <div class="team-drawer-record"><span>Overall record</span><strong>${formatTeamRecord(team)}</strong></div>
-                        <div class="team-drawer-record"><span>Home record</span><strong>${formatTeamRecord(cachedStats.homeStats[team.team])}</strong></div>
-                        <div class="team-drawer-record"><span>Away record</span><strong>${formatTeamRecord(cachedStats.awayStats[team.team])}</strong></div>
-                    </div>
-                </div>
-            </section>
-            <section class="team-drawer-card">
-                <h2 class="team-drawer-card-title">Team Form</h2>
-                ${renderTeamForm(team.team)}
-            </section>
-            <section class="team-drawer-card">
-                <h2 class="team-drawer-card-title">Team stats</h2>
-                ${renderTeamStatRow(team, 'Goals', 'GF')}
-                ${renderTeamStatRow(team, 'Goal differential', 'GD')}
-                ${renderTeamStatRow(team, 'Clean sheets', 'cleanSheets')}
-                ${renderTeamStatRow(team, 'Yellow cards', 'yellowCards', 'yellow')}
-                ${renderTeamStatRow(team, 'Red cards', 'redCards', 'red')}
-            </section>`;
+        document.getElementById('team-drawer-content').innerHTML = TeamDrawerShared.render(team.team, {
+            stats: cachedStats,
+            matches: cachedMatches,
+            getLogoByName,
+            getShortTeamName,
+            getOwnerOfTeam
+        });
         overlay.classList.add('is-open');
         overlay.setAttribute('aria-hidden', 'false');
         document.body.classList.add('team-drawer-open');

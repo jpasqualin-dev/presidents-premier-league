@@ -886,6 +886,7 @@
 <script src="theme.js"></script>
 <script src="match-data.js"></script>
 <script src="match-drawer-shared.js"></script>
+<script src="team-drawer-shared.js"></script>
 <script>
     const draftData = {
         "Hef": ["Arsenal", "Bournemouth", "Nottingham Forest", "Hull City"],
@@ -1544,27 +1545,14 @@
     }
 
     function renderMatchTeamDetail(teamName) {
-        const team = cachedTeamStats?.[findTeamKey(teamName, cachedTeamStats)];
-        if (!team) return '<section class="match-detail-section"><p class="empty-detail">Team details are unavailable.</p></section>';
-        const teams = Object.values(cachedTeamStats).sort((teamA, teamB) => teamB.PTS - teamA.PTS || teamB.GD - teamA.GD || teamB.GF - teamA.GF);
-        const rank = teams.findIndex(item => item.team === team.team) + 1;
-        const record = `${team.W}-${team.D}-${team.L}`;
-        const logo = getLogoByName(team.team);
-        const teamMatches = allMatchesData.filter(match => {
-            const home = match.homeTeam.name.toLowerCase(), away = match.awayTeam.name.toLowerCase(), name = team.team.toLowerCase();
-            return home.includes(name) || name.includes(home) || away.includes(name) || name.includes(away);
-        }).sort((matchA, matchB) => new Date(matchB.utcDate) - new Date(matchA.utcDate)).slice(0, 5).reverse();
-        const form = teamMatches.map(match => {
-            const isHome = match.homeTeam.name.toLowerCase().includes(team.team.toLowerCase()) || team.team.toLowerCase().includes(match.homeTeam.name.toLowerCase());
-            const matchTeam = isHome ? match.homeTeam : match.awayTeam, opponent = isHome ? match.awayTeam : match.homeTeam;
-            const teamScore = isHome ? match.score?.fullTime?.home : match.score?.fullTime?.away, opponentScore = isHome ? match.score?.fullTime?.away : match.score?.fullTime?.home;
-            const hasScore = isCompletedMatch(match) && teamScore != null && opponentScore != null;
-            const scoreClass = hasScore ? teamScore > opponentScore ? ' weekly-form-score-win' : teamScore < opponentScore ? ' weekly-form-score-loss' : ' weekly-form-score-draw' : '';
-            const matchLogo = getLogoByName(matchTeam.name) || matchTeam.crest || '', opponentLogo = getLogoByName(opponent.name) || opponent.crest || '';
-            const date = match.utcDate ? new Date(match.utcDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
-            return `<div class="weekly-form-match" role="button" tabindex="0" aria-label="View details for ${escapeHtml(matchTeam.name)} versus ${escapeHtml(opponent.name)}" onclick="event.stopPropagation(); openMatchDrawer('${escapeHtml(String(match.id))}')" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); openMatchDrawer('${escapeHtml(String(match.id))}'); }"><div class="weekly-form-date">${escapeHtml(date)}</div><div class="weekly-form-team">${escapeHtml(getShortTeamName(matchTeam.name))}</div><div class="weekly-form-venue">${isHome ? 'HOME' : 'AWAY'}</div>${matchLogo ? `<img class="weekly-form-crest" src="${escapeHtml(matchLogo)}" alt="${escapeHtml(matchTeam.name)} crest">` : '<span class="weekly-form-crest empty"></span>'}<div class="weekly-form-score${scoreClass}">${hasScore ? `${teamScore} - ${opponentScore}` : ' - '}</div><div class="weekly-form-team">${escapeHtml(getShortTeamName(opponent.name))}</div>${opponentLogo ? `<img class="weekly-form-crest" src="${escapeHtml(opponentLogo)}" alt="${escapeHtml(opponent.name)} crest">` : '<span class="weekly-form-crest empty"></span>'}<div class="weekly-form-opponent-owner">${escapeHtml(getOwnerOfTeam(opponent.name) || '')}</div></div>`;
-        }).join('');
-        return `<section class="match-detail-section"><div class="match-team-detail-identity">${logo ? `<img src="${escapeHtml(logo)}" alt="${escapeHtml(team.team)} crest">` : ''}<h2>${escapeHtml(getShortTeamName(team.team))}</h2><p>${escapeHtml(team.owner || 'Unassigned')}</p></div><div class="team-detail-records"><div><span>Overall rank</span><strong>${rank}</strong></div><div><span>Record</span><strong>${record}</strong></div><div><span>Goals</span><strong>${team.GF}-${team.GA}</strong></div><div><span>Goal difference</span><strong>${team.GD > 0 ? '+' : ''}${team.GD}</strong></div><div><span>Points</span><strong>${team.PTS}</strong></div></div></section><section class="match-detail-section"><h3>Team Form</h3>${form ? `<div class="team-form-inline">${form}</div>` : '<p class="empty-detail">No matches available.</p>'}</section>`;
+        return TeamDrawerShared.render(teamName, {
+            stats: { allStats: cachedTeamStats },
+            matches: allMatchesData,
+            getLogoByName,
+            getShortTeamName,
+            getOwnerOfTeam,
+            openMatch: true
+        });
     }
 
     window.openTeamDrawerFromMatch = function(teamName) {
