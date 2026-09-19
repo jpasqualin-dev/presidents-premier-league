@@ -357,41 +357,6 @@
         .team-drawer-title { color: var(--text-main, #1a1a1a); font-size: .95rem; font-weight: 700; text-align: center; }
         .team-drawer-close { position: absolute; right: 18px; width: 34px; height: 34px; border: 0; border-radius: 50%; background: var(--border-color, #dfe5eb); color: var(--text-main, #1a1a1a); font-size: 1.3rem; line-height: 1; cursor: pointer; }
         .team-drawer-content { padding: 18px; }
-        .team-drawer-card { margin-bottom: 14px; padding: 18px; background: var(--card-bg, #fff); border: 1px solid var(--border-color, #dfe5eb); border-radius: 12px; }
-        .team-drawer-summary { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 18px; }
-        .team-drawer-identity { display: flex; width: 150px; flex-direction: column; align-items: center; justify-self: start; }
-        .team-drawer-crest { width: 150px; height: 150px; object-fit: contain; }
-        .team-drawer-owner { width: 100%; margin-top: 8px; color: var(--text-main, #1a1a1a); font-size: .85rem; font-weight: 600; text-align: center; }
-        body.dark-mode .team-drawer-owner { color: #f1f1f1; }
-        .team-drawer-records { display: grid; gap: 10px; color: var(--text-muted, #718096); font-size: .78rem; }
-        .team-drawer-record { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color, #dfe5eb); }
-        .team-drawer-record strong { color: var(--text-main, #1a1a1a); font-size: .9rem; }
-        .team-drawer-card-title { margin-bottom: 16px; color: var(--text-main, #1a1a1a); font-size: .95rem; text-align: center; }
-        .team-drawer-stat { display: grid; grid-template-columns: 120px 42px minmax(0, 1fr) 62px; align-items: center; gap: 10px; color: var(--text-muted, #718096); font-size: .82rem; }
-        .team-drawer-stat + .team-drawer-stat { margin-top: 10px; }
-        .team-drawer-stat > span { white-space: nowrap; }
-        .team-drawer-stat strong { color: var(--text-main, #1a1a1a); text-align: right; }
-        .team-drawer-bar { position: relative; height: 10px; border-radius: 99px; background: var(--border-color, #dfe5eb); }
-        .team-drawer-bar-fill { position: absolute; inset: 0 auto 0 0; height: 100%; border-radius: inherit; background: #00a667; }
-        .team-drawer-bar-rank { color: var(--text-main, #1a1a1a); font-size: .82rem; font-weight: 600; line-height: 1; text-align: left; white-space: nowrap; }
-        .team-drawer-bar-fill.yellow { background: #facc15; }
-        .team-drawer-bar-fill.red { background: #ef4444; }
-        .team-form-grid { display: grid; grid-template-columns: repeat(5, minmax(78px, 1fr)); gap: 8px; overflow-x: auto; }
-        .team-form-grid .weekly-form-match { display: flex; min-width: 78px; flex-direction: column; align-items: center; gap: 5px; padding: 4px 2px; background: transparent; color: var(--text-main, #1a1a1a); text-align: center; }
-        .team-form-grid .weekly-form-date { margin: 0; color: var(--text-muted, #718096); font-size: .64rem; line-height: 1; }
-        .team-form-grid .weekly-form-venue { padding: 1px 6px; border-radius: 4px; background: #f1f5f9; color: var(--text-muted, #718096); font-size: .58rem; font-weight: 600; line-height: 1.1; }
-        .team-form-grid .weekly-form-team { min-height: 0; font-size: .66rem; font-weight: 700; line-height: 1.05; }
-        .team-form-grid .weekly-form-crest { display: block; width: 26px; height: 26px; margin: 0 auto; object-fit: contain; }
-        .team-form-grid .weekly-form-crest.empty { visibility: hidden; }
-        .team-form-grid .weekly-form-score { display: table; min-width: 38px; margin: 0 auto; padding: 3px 6px; border-radius: 4px; color: var(--text-main, #1a1a1a); font-size: .82rem; font-weight: 800; line-height: 1.1; }
-        .team-form-grid .weekly-form-score-win { background: var(--win-color, #16a37a); color: #fff; }
-        .team-form-grid .weekly-form-score-draw { background: var(--draw-color, #d99a00); color: #fff; }
-        .team-form-grid .weekly-form-score-loss { background: var(--loss-color, #d05a62); color: #fff; }
-        .team-form-grid .weekly-form-opponent-owner { min-height: 0; color: var(--text-muted, #718096); font-size: .62rem; line-height: 1.05; }
-        body.dark-mode .team-form-grid .weekly-form-venue { background: #303030; color: #b8b8b8; }
-        body.dark-mode .team-drawer-bar-fill { background: #00ff87; }
-        body.dark-mode .team-drawer-bar-fill.yellow { background: #facc15; }
-        body.dark-mode .team-drawer-bar-fill.red { background: #ef4444; }
         body.team-drawer-open { overflow: hidden; }
 
         @media (max-width: 600px) {
