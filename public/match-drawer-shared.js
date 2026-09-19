@@ -164,6 +164,8 @@
         const title = document.getElementById('match-drawer-title'); if (title) title.textContent = 'Match details';
     };
 
+    window.closeMatchDrawer = window.closeSharedMatchDrawer;
+
     window.bindSharedMatchRows = function (container) {
         container.querySelectorAll('[data-match-id]').forEach(row => {
             row.addEventListener('click', () => window.openSharedMatchDrawer(row.dataset.matchId));
