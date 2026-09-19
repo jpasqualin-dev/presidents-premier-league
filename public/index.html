@@ -1468,7 +1468,7 @@
             if (hasHalfTime && !halfTimeInserted && parseInt(event.minute || event.clockDisplay || 0, 10) >= 45) { items.push(period(`HT ${halfTime.home} - ${halfTime.away}`)); halfTimeInserted = true; }
             items.push(eventMarkup(event));
         });
-        if (hasHalfTime && !events.length) items.push(period(`HT ${halfTime.home} - ${halfTime.away}`));
+        if (hasHalfTime && !halfTimeInserted) items.push(period(`HT ${halfTime.home} - ${halfTime.away}`));
         if (hasFullTime) items.push(period(`FT ${match.score.fullTime.home} - ${match.score.fullTime.away}`));
         if (!events.length && !hasHalfTime && !hasFullTime) items.push('<p class="empty-detail">No match events are available yet.</p>');
         return `<div class="timeline">${items.join('')}</div>`;

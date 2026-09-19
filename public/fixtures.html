@@ -1241,7 +1241,7 @@
             }
             timelineItems.push(renderEvent(event));
         });
-        if (hasHalfTime && !events.length) timelineItems.push(renderPeriod(`HT ${halfTime.home} - ${halfTime.away}`));
+        if (hasHalfTime && !halfTimeInserted) timelineItems.push(renderPeriod(`HT ${halfTime.home} - ${halfTime.away}`));
         if (hasFullTime) timelineItems.push(renderPeriod(`FT ${match.score.fullTime.home} - ${match.score.fullTime.away}`));
         if (!events.length && !hasHalfTime && !hasFullTime) timelineItems.push('<p class="empty-detail">No match events are available yet.</p>');
 
