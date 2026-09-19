@@ -241,14 +241,14 @@
 
         .achievement-summary { display: none; width: 100%; border-top: 1px solid #e2e8f0; margin-top: 12px; padding-top: 10px; }
         .profile-card[aria-expanded="true"] { flex-wrap: wrap; }
-        .profile-card[aria-expanded="true"] .achievement-summary { display: block; }
-        .achievement-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; padding: 0; font-size: 0.825rem; font-weight: 600; }
+        .profile-card[aria-expanded="true"] .achievement-summary { display: grid; gap: 10px; }
+        .achievement-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0; padding: 0; font-size: 0.825rem; font-weight: 600; line-height: 1.2; }
         .achievement-stars { color: #d69e00; letter-spacing: 2px; }
-        .achievement-value { min-width: 2ch; text-align: right; font-size: 0.9rem; font-weight: 800; }
-        .head-to-head-divider { border-top: 1px solid #ffffff; margin: 0 0 10px; }
-        .head-to-head-details { display: none; padding: 0 0 10px; }
-        .profile-card[aria-expanded="true"] .head-to-head-details { display: block; }
-        .head-to-head-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px; align-items: center; padding: 5px 0 5px 16px; font-size: 0.78rem; font-weight: 600; }
+        .achievement-value { min-width: 2ch; text-align: right; font-size: inherit; font-weight: 800; }
+        .head-to-head-divider { border-top: 1px solid #ffffff; margin: 0; }
+        .head-to-head-details { display: none; gap: 10px; padding: 0; }
+        .profile-card[aria-expanded="true"] .head-to-head-details { display: grid; }
+        .head-to-head-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px; align-items: center; padding: 0; font-size: inherit; font-weight: 600; line-height: 1.2; }
         .head-to-head-record { min-width: 5.5ch; text-align: center; color: #4a5568; }
         .head-to-head-points { min-width: 5ch; text-align: right; }
 
