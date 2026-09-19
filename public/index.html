@@ -1585,14 +1585,14 @@
 
     window.openTeamDrawerFromMatch = function(teamName) {
         matchDrawerTeamReturn = true;
-        const header = document.querySelector('.match-drawer-header');
-        const title = document.getElementById('match-drawer-title');
-        const content = document.getElementById('match-detail-content');
-        header?.classList.remove('weekly-mode');
-        header?.querySelector('.match-drawer-back')?.remove();
-        header?.insertAdjacentHTML('afterbegin', '<button class="match-drawer-back" type="button" aria-label="Back to match details" onclick="returnToMatchFromTeamDrawer()">‹</button>');
-        title.textContent = getShortTeamName(teamName);
-        content.innerHTML = renderMatchTeamDetail(teamName);
+        TeamDrawerShared.openFromMatch(teamName, {
+            stats: { allStats: cachedTeamStats, ...getMatchDrawerVenueStats() },
+            matches: allMatchesData,
+            getLogoByName,
+            getShortTeamName,
+            getOwnerOfTeam,
+            openMatch: true
+        });
     };
 
     window.returnToMatchFromTeamDrawer = function() {

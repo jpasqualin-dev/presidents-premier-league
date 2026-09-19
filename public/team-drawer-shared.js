@@ -64,5 +64,20 @@
         return `<section class="team-drawer-card"><div class="team-drawer-summary"><div class="team-drawer-identity">${logo ? `<img class="team-drawer-crest" src="${escape(logo)}" alt="${escape(team.team)} crest">` : ''}<div class="team-drawer-owner">${escape(team.owner || 'Unassigned')}</div></div><div class="team-drawer-records"><div class="team-drawer-record"><span>Overall rank</span><strong>${rank}</strong></div><div class="team-drawer-record"><span>Overall record</span><strong>${formatRecord(team)}</strong></div><div class="team-drawer-record"><span>Home record</span><strong>${formatRecord(options.stats.homeStats?.[team.team] || team)}</strong></div><div class="team-drawer-record"><span>Away record</span><strong>${formatRecord(options.stats.awayStats?.[team.team] || team)}</strong></div></div></div></section><section class="team-drawer-card"><h2 class="team-drawer-card-title">Team Form</h2>${form ? `<div class="team-form-grid">${form}</div>` : '<p class="empty-detail">No matches available</p>'}</section><section class="team-drawer-card"><h2 class="team-drawer-card-title">Team stats</h2>${statRow('Goals', 'GF')}${statRow('Goal differential', 'GD')}${statRow('Clean sheets', 'cleanSheets')}${statRow('Yellow cards', 'yellowCards', 'yellow')}${statRow('Red cards', 'redCards', 'red')}</section>`;
     }
 
-    window.TeamDrawerShared = { render };
+    function openFromMatch(teamName, options) {
+        const header = document.querySelector('.match-drawer-header');
+        const title = document.getElementById('match-drawer-title');
+        const content = document.getElementById('match-detail-content');
+        header?.classList.remove('weekly-mode');
+        header?.querySelector('.match-drawer-back')?.remove();
+        header?.insertAdjacentHTML('afterbegin', '<button class="match-drawer-back" type="button" aria-label="Back to match details" onclick="returnToMatchFromTeamDrawer()">‹</button>');
+        if (title) title.textContent = getShortTeamNameForDrawer(teamName, options);
+        if (content) content.innerHTML = render(teamName, options);
+    }
+
+    function getShortTeamNameForDrawer(teamName, options) {
+        return options.getShortTeamName(teamName);
+    }
+
+    window.TeamDrawerShared = { render, openFromMatch };
 })();
