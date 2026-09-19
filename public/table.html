@@ -1004,9 +1004,9 @@
     }
 
     // Fetch matches from API (same caching strategy as other pages)
-    async function fetchTableData(matchData = null) {
+    async function fetchTableData() {
         try {
-            const data = matchData || await getMatchData();
+            const data = await getMatchData({ includeDetails: true });
 
             cachedStats = computeStats(data.matches || []);
             renderView();
