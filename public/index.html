@@ -749,9 +749,8 @@
         .weekly-drawer-nav .match-drawer-title { min-width: 72px; }
         .match-drawer-close { width: 34px; height: 34px; border: 0; border-radius: 50%; background: var(--border-color); color: var(--text-main); font-size: 1.3rem; line-height: 1; cursor: pointer; }
         .match-drawer-header > .match-drawer-close { position: absolute; right: 18px; }
+        .match-drawer-back { position: absolute; left: 18px; width: 34px; height: 34px; border: 0; border-radius: 50%; background: var(--border-color); color: var(--text-main); font-size: 1.3rem; line-height: 1; cursor: pointer; }
         .match-detail-content { padding: 18px; }
-        .weekly-match-back { display: inline-flex; align-items: center; gap: 5px; margin-bottom: 12px; padding: 0; border: 0; background: transparent; color: var(--text-muted); font-size: 0.8rem; font-weight: 700; cursor: pointer; }
-        .weekly-match-back:hover { color: var(--text-main); }
         .match-hero, .match-detail-section { margin-bottom: 14px; padding: 18px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; }
         .match-meta { color: var(--text-muted); font-size: 0.82rem; text-align: center; }
         .match-venue { margin-top: 5px; color: var(--text-muted); font-size: 0.78rem; text-align: center; }
@@ -1585,11 +1584,12 @@
     }
 
     async function openMatchDrawer(matchId) {
-        return window.openSharedMatchDrawer(matchId, { backMarkup: weeklyMatchReturn ? '<button class="weekly-match-back" type="button" onclick="returnToWeeklyDrawer()">‹ Back to PPL Weekly</button>' : '' });
+        return window.openSharedMatchDrawer(matchId, { backButtonMarkup: weeklyMatchReturn ? '<button class="match-drawer-back" type="button" aria-label="Back to PPL Weekly" onclick="returnToWeeklyDrawer()">‹</button>' : '' });
     }
 
     window.returnToWeeklyDrawer = function() {
         weeklyMatchReturn = false;
+        document.querySelector('.match-drawer-back')?.remove();
         updateWeeklyDrawerHeader();
         document.getElementById('match-detail-content').innerHTML = renderWeeklyDetail(weeklyCardWeeks[weeklyCardWeekIndex]);
     };

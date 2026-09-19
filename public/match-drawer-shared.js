@@ -132,16 +132,20 @@
 
     window.openSharedMatchDrawer = async function (matchId, options = {}) {
         const overlay = document.getElementById('match-drawer-overlay'), drawer = overlay.querySelector('.match-drawer'), content = document.getElementById('match-detail-content');
-        overlay.querySelector('.match-drawer-header')?.classList.remove('weekly-mode');
+        const header = overlay.querySelector('.match-drawer-header');
+        header?.classList.remove('weekly-mode');
+        header?.querySelector('.match-drawer-back')?.remove();
+        if (header && options.backButtonMarkup) header.insertAdjacentHTML('afterbegin', options.backButtonMarkup);
         document.getElementById('match-drawer-title').textContent = 'Match details';
         drawer.scrollTop = 0; overlay.classList.add('is-open'); overlay.setAttribute('aria-hidden', 'false'); document.body.classList.add('drawer-open'); content.innerHTML = '<p class="empty-detail">Loading match details...</p>';
-        try { content.innerHTML = `${options.backMarkup || ''}${window.renderSharedMatchDetail(await window.fetchSharedMatchById(matchId))}`; }
+        try { content.innerHTML = window.renderSharedMatchDetail(await window.fetchSharedMatchById(matchId)); }
         catch (error) { console.error('Error fetching match details:', error); content.innerHTML = '<p class="empty-detail">Unable to load match details.</p>'; }
     };
 
     window.closeSharedMatchDrawer = function (event) {
         if (event && event.target.id !== 'match-drawer-overlay') return;
         const overlay = document.getElementById('match-drawer-overlay'); overlay.classList.remove('is-open'); overlay.setAttribute('aria-hidden', 'true'); document.body.classList.remove('drawer-open');
+        overlay.querySelector('.match-drawer-back')?.remove();
         overlay.querySelector('.match-drawer-header')?.classList.remove('weekly-mode');
         const title = document.getElementById('match-drawer-title'); if (title) title.textContent = 'Match details';
     };
