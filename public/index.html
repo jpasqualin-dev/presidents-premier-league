@@ -1507,13 +1507,12 @@
 
     function renderWeeklyDetail(week) {
         if (!week) return '<section class="match-detail-section"><p class="empty-detail">No weekly results yet.</p></section>';
-        const matchSections = (week.completedMatches || []).map(match => `<section class="match-hero weekly-detail-match" role="button" tabindex="0" onclick="openMatchDrawer('${escapeHtml(match.id)}')" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMatchDrawer('${escapeHtml(match.id)}'); }"><div class="match-meta">${escapeHtml(formatMatchDate(match.utcDate))} · Full time</div><div class="match-scoreline"><div class="match-team"><span>${escapeHtml(match.homeTeam.name)}</span></div><div class="match-score">${match.score?.fullTime?.home ?? '-'} - ${match.score?.fullTime?.away ?? '-'}</div><div class="match-team"><span>${escapeHtml(match.awayTeam.name)}</span></div></div></section>`).join('');
         const ownerSections = week.ownerDetails.map(owner => {
             const goalDifferenceClass = owner.goalDifference > 0 ? 'pill-green' : owner.goalDifference < 0 ? 'pill-red' : 'pill-gray';
             const goalDifference = `${owner.goalDifference > 0 ? '+' : ''}${owner.goalDifference}`;
             return `<section class="match-hero weekly-detail-leader"><div class="weekly-detail-name-row"><span class="weekly-detail-name">${escapeHtml(owner.owner)}</span><span class="weekly-stars" aria-label="${owner.stars} gold star${owner.stars === 1 ? '' : 's'}">${'★'.repeat(owner.stars)}</span><span class="weekly-detail-points">${owner.points} PTS</span></div><div class="weekly-detail-achievements">${owner.achievements.length ? owner.achievements.map(achievement => escapeHtml(achievement)).join(' · ') : ''}</div><div class="weekly-detail-record-row"><div class="weekly-detail-record">Record: ${owner.wins}-${owner.draws}-${owner.losses}</div><div class="weekly-detail-goal-difference ${goalDifferenceClass}">GD: ${goalDifference}</div></div></section>`;
         }).join('');
-        return matchSections || ownerSections ? `${matchSections}${ownerSections}` : '<section class="match-detail-section"><p class="empty-detail">No completed matches yet.</p></section>';
+        return ownerSections || '<section class="match-detail-section"><p class="empty-detail">No completed matches yet.</p></section>';
     }
 
     async function fetchMatchById(matchId) {
