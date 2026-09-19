@@ -708,6 +708,7 @@
         }
         return "Unassigned";
     }
+    window.matchDrawerOwnerResolver = getOwnerOfTeam;
 
     function getShortTeamName(name) {
         if (!name) return "";
@@ -1323,28 +1324,11 @@
     }
 
     async function openMatchDrawer(matchId) {
-        const overlay = document.getElementById('match-drawer-overlay');
-        const drawer = overlay.querySelector('.match-drawer');
-        const content = document.getElementById('match-detail-content');
-        drawer.scrollTop = 0;
-        overlay.classList.add('is-open');
-        overlay.setAttribute('aria-hidden', 'false');
-        document.body.classList.add('drawer-open');
-        content.innerHTML = '<p class="empty-detail">Loading match details...</p>';
-        try {
-            content.innerHTML = renderMatchDetail(await fetchMatchById(matchId));
-        } catch (error) {
-            console.error('Error fetching match details:', error);
-            content.innerHTML = '<p class="empty-detail">Unable to load match details.</p>';
-        }
+        return window.openSharedMatchDrawer(matchId);
     }
 
     function closeMatchDrawer(event) {
-        if (event && event.target.id !== 'match-drawer-overlay') return;
-        const overlay = document.getElementById('match-drawer-overlay');
-        overlay.classList.remove('is-open');
-        overlay.setAttribute('aria-hidden', 'true');
-        document.body.classList.remove('drawer-open');
+        window.closeSharedMatchDrawer(event);
     }
 
     document.addEventListener('keydown', event => {
