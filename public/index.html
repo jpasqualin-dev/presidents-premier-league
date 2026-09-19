@@ -183,16 +183,16 @@
         .weekly-detail-leader.expanded .weekly-detail-chevron { transform: rotate(90deg); }
         .weekly-form { display: none; grid-template-columns: repeat(4, minmax(78px, 1fr)); gap: 8px; margin-top: 14px; overflow-x: auto; }
         .weekly-detail-leader.expanded .weekly-form { display: grid; }
-        .weekly-form-match { min-width: 78px; padding: 7px 4px; border-radius: 8px; background: var(--border-color); color: var(--text-main); text-align: center; }
-        .weekly-form-date { margin-bottom: 7px; color: var(--text-muted); font-size: 0.64rem; }
-        .weekly-form-team { min-height: 28px; font-size: 0.66rem; font-weight: 700; line-height: 1.05; }
-        .weekly-form-crest { display: block; width: 26px; height: 26px; margin: 4px auto; object-fit: contain; }
+        .weekly-form-match { display: flex; min-width: 78px; flex-direction: column; align-items: center; gap: 2px; padding: 4px 2px; background: transparent; color: var(--text-main); text-align: center; }
+        .weekly-form-date { margin: 0; color: var(--text-muted); font-size: 0.64rem; line-height: 1; }
+        .weekly-form-team { min-height: 0; font-size: 0.66rem; font-weight: 700; line-height: 1.05; }
+        .weekly-form-crest { display: block; width: 26px; height: 26px; margin: 0 auto; object-fit: contain; }
         .weekly-form-crest.empty { visibility: hidden; }
-        .weekly-form-score { display: table; min-width: 38px; margin: 5px auto; padding: 3px 6px; border-radius: 4px; color: var(--text-main); font-size: 0.82rem; font-weight: 800; }
+        .weekly-form-score { display: table; min-width: 38px; margin: 0 auto; padding: 3px 6px; border-radius: 4px; color: var(--text-main); font-size: 0.82rem; font-weight: 800; line-height: 1.1; }
         .weekly-form-score-win { background: var(--win-color); color: #ffffff; }
         .weekly-form-score-draw { background: var(--draw-color); color: #ffffff; }
         .weekly-form-score-loss { background: var(--loss-color); color: #ffffff; }
-        .weekly-form-opponent-owner { min-height: 20px; color: var(--text-muted); font-size: 0.62rem; line-height: 1.05; }
+        .weekly-form-opponent-owner { min-height: 0; color: var(--text-muted); font-size: 0.62rem; line-height: 1.05; }
         .weekly-detail-goal-difference { display: inline-block; padding: 3px 7px; border-radius: 4px; font-size: 0.95rem; font-weight: 400; white-space: nowrap; }
         .weekly-detail-achievements { margin: 8px 0 0; color: var(--text-muted); font-size: 0.76rem; line-height: 1.15; text-align: center; }
 
