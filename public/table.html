@@ -376,6 +376,19 @@
         .team-drawer-bar-rank { color: var(--text-main, #1a1a1a); font-size: .82rem; font-weight: 600; line-height: 1; text-align: left; white-space: nowrap; }
         .team-drawer-bar-fill.yellow { background: #facc15; }
         .team-drawer-bar-fill.red { background: #ef4444; }
+        .team-form-grid { display: grid; grid-template-columns: repeat(5, minmax(78px, 1fr)); gap: 8px; overflow-x: auto; }
+        .team-form-grid .weekly-form-match { display: flex; min-width: 78px; flex-direction: column; align-items: center; gap: 5px; padding: 4px 2px; background: transparent; color: var(--text-main, #1a1a1a); text-align: center; }
+        .team-form-grid .weekly-form-date { margin: 0; color: var(--text-muted, #718096); font-size: .64rem; line-height: 1; }
+        .team-form-grid .weekly-form-venue { padding: 1px 6px; border-radius: 4px; background: #f1f5f9; color: var(--text-muted, #718096); font-size: .58rem; font-weight: 600; line-height: 1.1; }
+        .team-form-grid .weekly-form-team { min-height: 0; font-size: .66rem; font-weight: 700; line-height: 1.05; }
+        .team-form-grid .weekly-form-crest { display: block; width: 26px; height: 26px; margin: 0 auto; object-fit: contain; }
+        .team-form-grid .weekly-form-crest.empty { visibility: hidden; }
+        .team-form-grid .weekly-form-score { display: table; min-width: 38px; margin: 0 auto; padding: 3px 6px; border-radius: 4px; color: var(--text-main, #1a1a1a); font-size: .82rem; font-weight: 800; line-height: 1.1; }
+        .team-form-grid .weekly-form-score-win { background: var(--win-color, #16a37a); color: #fff; }
+        .team-form-grid .weekly-form-score-draw { background: var(--draw-color, #d99a00); color: #fff; }
+        .team-form-grid .weekly-form-score-loss { background: var(--loss-color, #d05a62); color: #fff; }
+        .team-form-grid .weekly-form-opponent-owner { min-height: 0; color: var(--text-muted, #718096); font-size: .62rem; line-height: 1.05; }
+        body.dark-mode .team-form-grid .weekly-form-venue { background: #303030; color: #b8b8b8; }
         body.dark-mode .team-drawer-bar-fill { background: #00ff87; }
         body.dark-mode .team-drawer-bar-fill.yellow { background: #facc15; }
         body.dark-mode .team-drawer-bar-fill.red { background: #ef4444; }
@@ -728,6 +741,49 @@
         return `<div class="team-drawer-stat"><span>${label}</span><strong>${value}</strong><div class="team-drawer-bar" aria-label="${label} rank ${rank} of 20"><div class="team-drawer-bar-fill${barClass ? ` ${barClass}` : ''}" style="width: ${percentage}%"></div></div><span class="team-drawer-bar-rank">Rank: ${rank}</span></div>`;
     }
 
+    function isPlayedMatch(match) {
+        return match?.status === 'FINISHED' || match?.status === 'FT' || match?.status === 'post' || match?.status_completed === true;
+    }
+
+    function isTeamMatch(match, teamName) {
+        return match.homeTeam.name.toLowerCase().includes(teamName.toLowerCase())
+            || teamName.toLowerCase().includes(match.homeTeam.name.toLowerCase())
+            || match.awayTeam.name.toLowerCase().includes(teamName.toLowerCase())
+            || teamName.toLowerCase().includes(match.awayTeam.name.toLowerCase());
+    }
+
+    function renderTeamForm(teamName) {
+        const teamMatches = (cachedMatches || [])
+            .filter(match => isTeamMatch(match, teamName))
+            .sort((matchA, matchB) => new Date(matchB.utcDate) - new Date(matchA.utcDate));
+        if (!teamMatches.length) return '<p class="empty-detail">No matches available</p>';
+
+        const playedMatchdays = teamMatches.filter(isPlayedMatch).map(match => Number(match.matchday)).filter(Number.isFinite);
+        const latestPlayedMatchday = playedMatchdays.length ? Math.max(...playedMatchdays) : -Infinity;
+        const upcomingMatchdays = teamMatches
+            .filter(match => !isPlayedMatch(match) && new Date(match.utcDate).getTime() >= Date.now())
+            .map(match => Number(match.matchday))
+            .filter(matchday => Number.isFinite(matchday) && matchday >= latestPlayedMatchday);
+        const currentMatchday = upcomingMatchdays.length
+            ? Math.min(...upcomingMatchdays)
+            : Number.isFinite(latestPlayedMatchday) ? latestPlayedMatchday : Number(teamMatches[teamMatches.length - 1].matchday);
+        const visibleMatches = teamMatches.filter(match => Number(match.matchday) <= currentMatchday).slice(0, 5).reverse();
+        const form = visibleMatches.map(match => {
+            const isHome = match.homeTeam.name.toLowerCase().includes(teamName.toLowerCase()) || teamName.toLowerCase().includes(match.homeTeam.name.toLowerCase());
+            const team = isHome ? match.homeTeam : match.awayTeam;
+            const opponent = isHome ? match.awayTeam : match.homeTeam;
+            const teamScore = isHome ? match.score?.fullTime?.home : match.score?.fullTime?.away;
+            const opponentScore = isHome ? match.score?.fullTime?.away : match.score?.fullTime?.home;
+            const hasScore = isPlayedMatch(match) && teamScore != null && opponentScore != null;
+            const scoreClass = hasScore ? teamScore > opponentScore ? ' weekly-form-score-win' : teamScore < opponentScore ? ' weekly-form-score-loss' : ' weekly-form-score-draw' : '';
+            const date = match.utcDate ? new Date(match.utcDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+            const teamLogo = getLogoByName(team.name) || team.crest || '';
+            const opponentLogo = getLogoByName(opponent.name) || opponent.crest || '';
+            return `<div class="weekly-form-match"><div class="weekly-form-date">${escapeTeamDrawerText(date)}</div><div class="weekly-form-team">${escapeTeamDrawerText(getShortTeamName(team.name))}</div><div class="weekly-form-venue">${isHome ? 'HOME' : 'AWAY'}</div>${teamLogo ? `<img class="weekly-form-crest" src="${escapeTeamDrawerText(teamLogo)}" alt="${escapeTeamDrawerText(team.name)} crest">` : '<span class="weekly-form-crest empty"></span>'}<div class="weekly-form-score${scoreClass}">${hasScore ? `${teamScore} - ${opponentScore}` : ' - '}</div><div class="weekly-form-team">${escapeTeamDrawerText(getShortTeamName(opponent.name))}</div>${opponentLogo ? `<img class="weekly-form-crest" src="${escapeTeamDrawerText(opponentLogo)}" alt="${escapeTeamDrawerText(opponent.name)} crest">` : '<span class="weekly-form-crest empty"></span>'}<div class="weekly-form-opponent-owner">${escapeTeamDrawerText(getOwnerOfTeam(opponent.name))}</div></div>`;
+        }).join('');
+        return `<div class="team-form-grid">${form}</div>`;
+    }
+
     window.openTeamDrawer = function(teamName) {
         const team = cachedStats?.allStats?.[teamName];
         if (!team) return;
@@ -750,6 +806,10 @@
                         <div class="team-drawer-record"><span>Away record</span><strong>${formatTeamRecord(cachedStats.awayStats[team.team])}</strong></div>
                     </div>
                 </div>
+            </section>
+            <section class="team-drawer-card">
+                <h2 class="team-drawer-card-title">Team Form</h2>
+                ${renderTeamForm(team.team)}
             </section>
             <section class="team-drawer-card">
                 <h2 class="team-drawer-card-title">Team stats</h2>
@@ -960,6 +1020,7 @@
 
     // --- State & Rendering ---
     let cachedStats = null;
+    let cachedMatches = [];
     let currentView = 'all';
     let dvpSort = 'rank';
 
@@ -1010,6 +1071,7 @@
         try {
             const data = await getMatchData({ includeDetails: true });
 
+            cachedMatches = data.matches || [];
             cachedStats = computeStats(data.matches || []);
             renderView();
         } catch (error) {
