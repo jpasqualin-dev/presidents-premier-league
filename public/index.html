@@ -933,6 +933,13 @@
     let weeklyCardWeekIndex = -1;
     let lastStandingsMatchSignature = '';
 
+    function isCompletedMatch(match) {
+        return match?.status === 'FINISHED'
+            || match?.status === 'FT'
+            || match?.status === 'post'
+            || match?.status_completed === true;
+    }
+
     function getPplStandingsRankMap() {
         const rankedPlayers = Object.values(cachedPlayerStats || {}).sort((playerA, playerB) =>
             playerB.PTS - playerA.PTS || playerB.GD - playerA.GD || playerB.GF - playerA.GF
@@ -952,7 +959,7 @@
         return Array.from(weeks.entries()).sort(([weekA], [weekB]) => Number(weekA) - Number(weekB)).map(([week, matches]) => {
             const owners = {};
             matches.forEach(match => {
-                if (match.status !== 'FINISHED') return;
+                if (!isCompletedMatch(match)) return;
                 const homeOwner = getOwnerOfTeam(match.homeTeam.name);
                 const awayOwner = getOwnerOfTeam(match.awayTeam.name);
                 const homeScore = match.score?.fullTime?.home ?? 0;
@@ -2144,9 +2151,10 @@
             if (data.matches) {
                 processMatchDates(data.matches);
                 renderMatchdayCard();
+                renderWeeklyCard();
 
                 data.matches.forEach(match => {
-                    if (match.status === 'FINISHED') {
+                    if (isCompletedMatch(match)) {
                         gamesProcessed++;
                         const homeTeamName = match.homeTeam.name;
                         const awayTeamName = match.awayTeam.name;
@@ -2248,7 +2256,7 @@
             }
 
             const finishedMatchesByWeek = {};
-            data.matches.filter(match => match.status === 'FINISHED').forEach(match => {
+            data.matches.filter(isCompletedMatch).forEach(match => {
                 finishedMatchesByWeek[match.matchday] = (finishedMatchesByWeek[match.matchday] || 0) + 1;
             });
             Object.entries(weeklyPlayerPoints).forEach(([matchweek, playerPoints]) => {
@@ -2259,7 +2267,7 @@
                 });
             });
 
-            data.matches.filter(match => match.status !== 'FINISHED').forEach(match => {
+            data.matches.filter(match => !isCompletedMatch(match)).forEach(match => {
                 const matchweek = match.matchday;
                 [findPlayerByTeam(match.homeTeam.name, playerStats), findPlayerByTeam(match.awayTeam.name, playerStats)].forEach(player => {
                     if (player) (incompletePlayerWeeks[matchweek] ||= {})[player] = true;
