@@ -750,6 +750,8 @@
         .match-drawer-close { width: 34px; height: 34px; border: 0; border-radius: 50%; background: var(--border-color); color: var(--text-main); font-size: 1.3rem; line-height: 1; cursor: pointer; }
         .match-drawer-header > .match-drawer-close { position: absolute; right: 18px; }
         .match-detail-content { padding: 18px; }
+        .weekly-match-back { display: inline-flex; align-items: center; gap: 5px; margin-bottom: 12px; padding: 0; border: 0; background: transparent; color: var(--text-muted); font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+        .weekly-match-back:hover { color: var(--text-main); }
         .match-hero, .match-detail-section { margin-bottom: 14px; padding: 18px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; }
         .match-meta { color: var(--text-muted); font-size: 0.82rem; text-align: center; }
         .match-venue { margin-top: 5px; color: var(--text-muted); font-size: 0.78rem; text-align: center; }
@@ -944,6 +946,7 @@
     let weeklyCardWeeks = [];
     let weeklyCardWeekIndex = -1;
     const weeklyFormExpanded = new Set();
+    let weeklyMatchReturn = false;
     let lastStandingsMatchSignature = '';
 
     function isCompletedMatch(match) {
@@ -1541,7 +1544,7 @@
                 const opponentLogo = getLogoByName(opponentTeam.name) || opponentTeam.crest || '';
                 const opponentOwner = getOwnerOfTeam(opponentTeam.name) || '';
                 const date = match.utcDate ? new Date(match.utcDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
-                return `<div class="weekly-form-match" onclick="event.stopPropagation()"><div class="weekly-form-date">${escapeHtml(date)}</div><div class="weekly-form-team">${escapeHtml(getShortTeamName(ownerTeam.name))}</div>${ownerLogo ? `<img class="weekly-form-crest" src="${escapeHtml(ownerLogo)}" alt="${escapeHtml(ownerTeam.name)} crest">` : '<span class="weekly-form-crest empty"></span>'}<div class="weekly-form-score">${hasScore ? `${ownerScore} - ${opponentScore}` : ' - '}</div><div class="weekly-form-team">${escapeHtml(getShortTeamName(opponentTeam.name))}</div>${opponentLogo ? `<img class="weekly-form-crest" src="${escapeHtml(opponentLogo)}" alt="${escapeHtml(opponentTeam.name)} crest">` : '<span class="weekly-form-crest empty"></span>'}<div class="weekly-form-opponent-owner">${escapeHtml(opponentOwner)}</div></div>`;
+                return `<div class="weekly-form-match" role="button" tabindex="0" aria-label="View details for ${escapeHtml(ownerTeam.name)} versus ${escapeHtml(opponentTeam.name)}" onclick="event.stopPropagation(); openWeeklyMatchDrawer('${escapeHtml(String(match.id))}')" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); openWeeklyMatchDrawer('${escapeHtml(String(match.id))}'); }"><div class="weekly-form-date">${escapeHtml(date)}</div><div class="weekly-form-team">${escapeHtml(getShortTeamName(ownerTeam.name))}</div>${ownerLogo ? `<img class="weekly-form-crest" src="${escapeHtml(ownerLogo)}" alt="${escapeHtml(ownerTeam.name)} crest">` : '<span class="weekly-form-crest empty"></span>'}<div class="weekly-form-score">${hasScore ? `${ownerScore} - ${opponentScore}` : ' - '}</div><div class="weekly-form-team">${escapeHtml(getShortTeamName(opponentTeam.name))}</div>${opponentLogo ? `<img class="weekly-form-crest" src="${escapeHtml(opponentLogo)}" alt="${escapeHtml(opponentTeam.name)} crest">` : '<span class="weekly-form-crest empty"></span>'}<div class="weekly-form-opponent-owner">${escapeHtml(opponentOwner)}</div></div>`;
             }).join('');
             return `<section class="match-hero weekly-detail-leader${expanded ? ' expanded' : ''}" role="button" tabindex="0" aria-expanded="${expanded}" onclick="toggleWeeklyForm('${escapeHtml(String(week.week))}', '${escapeHtml(owner.owner)}')" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleWeeklyForm('${escapeHtml(String(week.week))}', '${escapeHtml(owner.owner)}'); }"><div class="weekly-detail-toggle"><span class="weekly-detail-chevron" aria-hidden="true">›</span><span class="weekly-detail-name-row"><span class="weekly-detail-name">${escapeHtml(owner.owner)}</span><span class="weekly-stars" aria-label="${owner.stars} gold star${owner.stars === 1 ? '' : 's'}">${'★'.repeat(owner.stars)}</span><span class="weekly-detail-points">${owner.points} PTS</span></span></div><div class="weekly-detail-achievements">${owner.achievements.length ? owner.achievements.map(achievement => escapeHtml(achievement)).join(' · ') : ''}</div><div class="weekly-detail-record-row"><div class="weekly-detail-record">Record: ${owner.wins}-${owner.draws}-${owner.losses}</div><div class="weekly-detail-goal-difference ${goalDifferenceClass}">GD: ${goalDifference}</div></div><div class="weekly-form" onclick="event.stopPropagation()">${form || '<div class="empty-detail">No matches available</div>'}</div></section>`;
         }).join('');
@@ -1554,6 +1557,11 @@
         else weeklyFormExpanded.add(key);
         const weekData = weeklyCardWeeks.find(item => String(item.week) === String(week));
         document.getElementById('match-detail-content').innerHTML = renderWeeklyDetail(weekData);
+    };
+
+    window.openWeeklyMatchDrawer = function(matchId) {
+        weeklyMatchReturn = true;
+        openMatchDrawer(matchId);
     };
 
     async function fetchMatchById(matchId) {
@@ -1584,11 +1592,21 @@
         overlay.setAttribute('aria-hidden', 'false');
         document.body.classList.add('drawer-open');
         content.innerHTML = '<p class="empty-detail">Loading match details...</p>';
-        try { content.innerHTML = renderMatchDetail(await fetchMatchById(matchId)); }
+        try {
+            const matchDetail = renderMatchDetail(await fetchMatchById(matchId));
+            content.innerHTML = `${weeklyMatchReturn ? '<button class="weekly-match-back" type="button" onclick="returnToWeeklyDrawer()">‹ Back to PPL Weekly</button>' : ''}${matchDetail}`;
+        }
         catch (error) { console.error('Error fetching match details:', error); content.innerHTML = '<p class="empty-detail">Unable to load match details.</p>'; }
     }
 
+    window.returnToWeeklyDrawer = function() {
+        weeklyMatchReturn = false;
+        updateWeeklyDrawerHeader();
+        document.getElementById('match-detail-content').innerHTML = renderWeeklyDetail(weeklyCardWeeks[weeklyCardWeekIndex]);
+    };
+
     window.openWeeklyDrawer = function() {
+        weeklyMatchReturn = false;
         const overlay = document.getElementById('match-drawer-overlay');
         const drawer = overlay.querySelector('.match-drawer');
         const content = document.getElementById('match-detail-content');
@@ -1629,6 +1647,7 @@
         document.body.classList.remove('drawer-open');
         overlay.querySelector('.match-drawer-header').classList.remove('weekly-mode');
         document.getElementById('match-drawer-title').textContent = 'Match details';
+        weeklyMatchReturn = false;
     }
 
     document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMatchDrawer(); });
