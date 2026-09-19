@@ -3,8 +3,8 @@ const { normalizeEspnEvent, normalizeNeonMatch } = require('../lib/match-contrac
 const { fetchScoringDetails } = require('./sync-espn');
 
 const ESPN_ENDPOINT = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard';
-const RECENT_DAYS = 3;
-const SEASON_END = '2027-06-01';
+const DATE_LOOKBACK = 1;
+const DATE_LOOKAHEAD = 1;
 
 function espnDate(value) {
     return value.toISOString().slice(0, 10).replaceAll('-', '');
@@ -14,8 +14,10 @@ function espnDateRange() {
     const today = new Date();
     today.setUTCHours(12, 0, 0, 0);
     const start = new Date(today);
-    start.setUTCDate(today.getUTCDate() - RECENT_DAYS);
-    return `${espnDate(start)}-${SEASON_END.replaceAll('-', '')}`;
+    const end = new Date(today);
+    start.setUTCDate(start.getUTCDate() - DATE_LOOKBACK);
+    end.setUTCDate(end.getUTCDate() + DATE_LOOKAHEAD);
+    return `${espnDate(start)}-${espnDate(end)}`;
 }
 
 async function fetchRecentEspnMatches() {
@@ -42,7 +44,7 @@ async function fetchRecentEspnMatches() {
 async function readHistoricalMatches(sql) {
     const rows = await sql`
         SELECT
-            m.provider, m.provider_event_id, m.kickoff_at, m.status, m.status_completed, m.status_clock,
+            m.provider, m.provider_event_id, m.kickoff_at, m.status_state, m.status_completed, m.status_clock,
             m.home_score, m.away_score,
             (to_jsonb(m)->>'home_half_time_score')::integer AS home_half_time_score,
             (to_jsonb(m)->>'away_half_time_score')::integer AS away_half_time_score,
@@ -126,7 +128,8 @@ module.exports = async function handler(req, res) {
             console.error('ESPN live feed unavailable; serving Neon history:', error);
         }
 
-        res.setHeader('Cache-Control', 's-maxage=15, stale-while-revalidate=30');
+        // Match scores can change immediately after the upstream final whistle.
+        res.setHeader('Cache-Control', 'no-store, max-age=0');
         return res.status(200).json({
             matches: mergeMatches(historicalMatches, liveMatches),
             sources: { historical: 'neon', live: liveAvailable ? 'espn' : null },

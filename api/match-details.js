@@ -23,7 +23,7 @@ module.exports = async function handler(req, res) {
                 goingOff: detail.athletesInvolved?.[1]?.displayName || null
             }));
 
-        res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=900');
+        res.setHeader('Cache-Control', 'no-store, max-age=0');
         return res.status(200).json({ substitutions, teamStats, lineups });
     } catch (error) {
         console.error('Match detail read failed:', error);

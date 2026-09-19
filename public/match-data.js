@@ -4,9 +4,9 @@
         cacheTimeKey: 'pl_match_data_time',
         lockKey: 'pl_match_data_lock',
         channelName: 'ppl-match-data',
-        ttl: 30 * 1000,
-        pollInterval: 30 * 1000,
-        lockDuration: 15 * 1000
+        ttl: 15 * 1000,
+        pollInterval: 15 * 1000,
+        lockDuration: 10 * 1000
     };
     const subscribers = new Set();
     const channel = 'BroadcastChannel' in window ? new BroadcastChannel(config.channelName) : null;

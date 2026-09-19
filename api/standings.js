@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
     // 1. Target URL for the 2026/2027 PL season
-    const targetUrl = 'https://api.football-data.org/v4/competitions/PL/matches?season=2026';
+    const targetUrl = 'https://api.football-data.org/v4/competitions/PL/matches?season=2026&status=SCHEDULED,LIVE,IN_PLAY,PAUSED,FINISHED,POSTPONED,SUSPENDED';
     
     // 2. Access the API key securely from Vercel Environment Variables
     const apiKey = process.env.API_KEY;
@@ -24,8 +24,8 @@ export default async function handler(req, res) {
 
         const data = await response.json();
 
-        // 4. Edge Caching Strategy: Cache for 30s to prevent exceeding API rate limits during live polling
-        res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=29');
+        // Status and scores can change during the current calendar day.
+        res.setHeader('Cache-Control', 'no-store, max-age=0');
 
         // 5. Return match payload to frontend
         res.status(200).json(data);

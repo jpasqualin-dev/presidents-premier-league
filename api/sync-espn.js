@@ -13,7 +13,15 @@ const teamOwners = {
 };
 
 function dayKeys() {
-    return [`${SEASON_START.replaceAll('-', '')}-${SEASON_END.replaceAll('-', '')}`];
+    const today = new Date();
+    today.setUTCHours(12, 0, 0, 0);
+    const dates = [];
+    for (let offset = -1; offset <= 1; offset += 1) {
+        const date = new Date(today);
+        date.setUTCDate(today.getUTCDate() + offset);
+        dates.push(date.toISOString().slice(0, 10).replaceAll('-', ''));
+    }
+    return dates;
 }
 
 function findTeamOwner(name) {
@@ -49,7 +57,8 @@ async function fetchEvents() {
         if (!response.ok) throw new Error(`ESPN returned HTTP ${response.status} for ${date}`);
         return response.json();
     }));
-    return responses.flatMap(payload => payload.events || []);
+    const events = responses.flatMap(payload => payload.events || []);
+    return [...new Map(events.map(event => [String(event.id), event])).values()];
 }
 
 async function fetchEventsForDates(dates) {
@@ -133,25 +142,28 @@ async function syncEvent(sql, event) {
     const awayOwner = findTeamOwner(away.team.displayName);
     const homeName = findCanonicalTeam(home.team.displayName);
     const awayName = findCanonicalTeam(away.team.displayName);
-    const details = await fetchScoringDetails(event);
+    const [details, matchStatistics] = await Promise.all([
+        fetchScoringDetails(event),
+        fetchMatchStatistics(event.id)
+    ]);
     const [existingMatch] = await sql`
         SELECT id, kickoff_at, matchday
         FROM matches
         WHERE provider = 'espn' AND provider_event_id = ${String(event.id)}`;
     const [homeTeam] = await sql`
-        INSERT INTO teams (provider, provider_team_id, canonical_name, short_name, owner, division, logo_url)
+        INSERT INTO teams (provider, provider_team_id, canonical_name, short_name, owner_name, division, logo_url)
         VALUES ('espn', ${String(home.team.id)}, ${homeName}, ${home.team.shortDisplayName || home.team.abbreviation}, ${homeOwner[0]}, ${homeOwner[1]}, ${home.team.logo || null})
-        ON CONFLICT (canonical_name) DO UPDATE SET provider = EXCLUDED.provider, provider_team_id = EXCLUDED.provider_team_id, short_name = EXCLUDED.short_name, owner = EXCLUDED.owner, division = EXCLUDED.division, logo_url = EXCLUDED.logo_url, updated_at = NOW()
+        ON CONFLICT (canonical_name) DO UPDATE SET provider = EXCLUDED.provider, provider_team_id = EXCLUDED.provider_team_id, short_name = EXCLUDED.short_name, owner_name = EXCLUDED.owner_name, division = EXCLUDED.division, logo_url = EXCLUDED.logo_url, updated_at = NOW()
         RETURNING id`;
     const [awayTeam] = await sql`
-        INSERT INTO teams (provider, provider_team_id, canonical_name, short_name, owner, division, logo_url)
+        INSERT INTO teams (provider, provider_team_id, canonical_name, short_name, owner_name, division, logo_url)
         VALUES ('espn', ${String(away.team.id)}, ${awayName}, ${away.team.shortDisplayName || away.team.abbreviation}, ${awayOwner[0]}, ${awayOwner[1]}, ${away.team.logo || null})
-        ON CONFLICT (canonical_name) DO UPDATE SET provider = EXCLUDED.provider, provider_team_id = EXCLUDED.provider_team_id, short_name = EXCLUDED.short_name, owner = EXCLUDED.owner, division = EXCLUDED.division, logo_url = EXCLUDED.logo_url, updated_at = NOW()
+        ON CONFLICT (canonical_name) DO UPDATE SET provider = EXCLUDED.provider, provider_team_id = EXCLUDED.provider_team_id, short_name = EXCLUDED.short_name, owner_name = EXCLUDED.owner_name, division = EXCLUDED.division, logo_url = EXCLUDED.logo_url, updated_at = NOW()
         RETURNING id`;
     const [match] = await sql`
-        INSERT INTO matches (provider, provider_event_id, competition, season, kickoff_at, matchday, status, status_completed, status_detail, status_clock, home_team_id, away_team_id, home_score, away_score, home_half_time_score, away_half_time_score, venue)
+        INSERT INTO matches (provider, provider_event_id, competition, season, kickoff_at, matchday, status_state, status_completed, status_detail, status_clock, home_team_id, away_team_id, home_score, away_score, home_half_time_score, away_half_time_score, venue)
         VALUES ('espn', ${String(event.id)}, 'eng.1', ${Number(event.season?.year || 2026)}, ${event.date}, ${getMatchday(event)}, ${status.state || 'scheduled'}, ${Boolean(status.completed)}, ${status.detail || null}, ${competition.status?.displayClock || null}, ${homeTeam.id}, ${awayTeam.id}, ${home.score == null ? null : Number(home.score)}, ${away.score == null ? null : Number(away.score)}, ${getHalfTimeScore(home)}, ${getHalfTimeScore(away)}, ${competition.venue?.fullName || null})
-        ON CONFLICT (provider, provider_event_id) DO UPDATE SET original_kickoff_at = COALESCE(matches.original_kickoff_at, matches.kickoff_at), rescheduled_at = CASE WHEN matches.kickoff_at IS DISTINCT FROM EXCLUDED.kickoff_at THEN NOW() ELSE matches.rescheduled_at END, kickoff_at = EXCLUDED.kickoff_at, matchday = COALESCE(matches.matchday, EXCLUDED.matchday), status = EXCLUDED.status, status_completed = EXCLUDED.status_completed, status_detail = EXCLUDED.status_detail, status_clock = EXCLUDED.status_clock, home_team_id = EXCLUDED.home_team_id, away_team_id = EXCLUDED.away_team_id, home_score = EXCLUDED.home_score, away_score = EXCLUDED.away_score, home_half_time_score = EXCLUDED.home_half_time_score, away_half_time_score = EXCLUDED.away_half_time_score, venue = EXCLUDED.venue, updated_at = NOW()
+        ON CONFLICT (provider, provider_event_id) DO UPDATE SET original_kickoff_at = COALESCE(matches.original_kickoff_at, matches.kickoff_at), rescheduled_at = CASE WHEN matches.kickoff_at IS DISTINCT FROM EXCLUDED.kickoff_at THEN NOW() ELSE matches.rescheduled_at END, kickoff_at = EXCLUDED.kickoff_at, matchday = COALESCE(matches.matchday, EXCLUDED.matchday), status_state = EXCLUDED.status_state, status_completed = EXCLUDED.status_completed, status_detail = EXCLUDED.status_detail, status_clock = EXCLUDED.status_clock, home_team_id = EXCLUDED.home_team_id, away_team_id = EXCLUDED.away_team_id, home_score = EXCLUDED.home_score, away_score = EXCLUDED.away_score, home_half_time_score = EXCLUDED.home_half_time_score, away_half_time_score = EXCLUDED.away_half_time_score, venue = EXCLUDED.venue, updated_at = NOW()
         RETURNING id`;
     if (existingMatch?.kickoff_at && new Date(existingMatch.kickoff_at).getTime() !== new Date(event.date).getTime()) {
         await sql`
@@ -178,15 +190,15 @@ async function syncEvent(sql, event) {
             INSERT INTO match_scorers (match_id, provider_athlete_id, team_id, athlete_name, assist_provider_id, assist_name, minute, own_goal, penalty)
             VALUES (${match.id}, ${scorer?.id ? String(scorer.id) : null}, ${scorerTeam.id}, ${scorer?.displayName || 'Unknown scorer'}, ${detail.athletesInvolved?.[1]?.id ? String(detail.athletesInvolved[1].id) : null}, ${detail.athletesInvolved?.[1]?.displayName || null}, ${detail.clock?.value == null ? null : Math.floor(Number(detail.clock.value) / 60)}, ${Boolean(detail.ownGoal)}, ${Boolean(detail.penaltyKick)})`;
     }
-    for (const competitor of [home, away]) {
-        const team = competitor.homeAway === 'home' ? homeTeam : awayTeam;
-        for (const stat of competitor.statistics || []) {
-            const numericValue = Number.parseFloat(stat.displayValue);
-            await sql`
+    for (const stat of matchStatistics) {
+        const team = stat.teamProviderId === String(home.team.id) ? homeTeam
+            : stat.teamProviderId === String(away.team.id) ? awayTeam
+                : null;
+        if (!team) continue;
+        await sql`
                 INSERT INTO match_team_stats (match_id, team_id, stat_name, stat_value, display_value)
-                VALUES (${match.id}, ${team.id}, ${stat.name}, ${Number.isNaN(numericValue) ? null : numericValue}, ${stat.displayValue || null})
+                VALUES (${match.id}, ${team.id}, ${stat.name}, ${stat.value}, ${stat.displayValue})
                 ON CONFLICT (match_id, team_id, stat_name) DO UPDATE SET stat_value = EXCLUDED.stat_value, display_value = EXCLUDED.display_value`;
-        }
     }
     return true;
 }
