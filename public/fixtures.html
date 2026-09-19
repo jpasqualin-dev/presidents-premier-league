@@ -501,15 +501,17 @@
             top: 0;
             z-index: 1;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            padding: 14px 18px;
+            min-height: 50px;
+            padding: 8px 58px;
             background: var(--card-bg);
             border-bottom: 1px solid var(--border-color);
         }
 
         .match-drawer-title { font-size: 0.9rem; font-weight: 700; color: var(--text-muted); }
-        .match-drawer-close { width: 34px; height: 34px; border: 0; border-radius: 50%; background: var(--border-color); color: var(--text-main); font-size: 1.3rem; line-height: 1; cursor: pointer; }
+        .match-drawer-close { position: absolute; right: 18px; width: 34px; height: 34px; border: 0; border-radius: 50%; background: var(--border-color); color: var(--text-main); font-size: 1.3rem; line-height: 1; cursor: pointer; }
+        .match-drawer-back { position: absolute; left: 18px; width: 34px; height: 34px; border: 0; border-radius: 50%; background: var(--border-color); color: var(--text-main); font-size: 1.3rem; line-height: 1; cursor: pointer; }
         .match-detail-content { padding: 18px; }
         .match-hero, .match-detail-section { margin-bottom: 14px; padding: 18px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; }
         .match-meta { color: var(--text-muted); font-size: 0.82rem; text-align: center; }
@@ -874,7 +876,7 @@
         const content = document.getElementById('match-detail-content');
         header?.querySelector('.match-drawer-back')?.remove();
         header?.insertAdjacentHTML('afterbegin', '<button class="match-drawer-back" type="button" aria-label="Back to match details" onclick="returnToMatchFromTeamDrawer()">‹</button>');
-        title.textContent = `${getShortTeamName(teamName)} details`;
+        title.textContent = getShortTeamName(teamName);
         content.innerHTML = TeamDrawerShared.render(teamName, {
             stats: fixtureTeamStats,
             matches: fixtureMatches,
