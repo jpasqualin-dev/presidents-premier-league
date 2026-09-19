@@ -786,7 +786,7 @@
     function preserveProfileContentPosition(previousPosition) {
         requestAnimationFrame(() => {
             updatePlayerCardBackdrop();
-            if (!previousPosition) return;
+            if (!previousPosition || window.scrollY <= 1) return;
             const positionDelta = previousPosition.element.getBoundingClientRect().top - previousPosition.top;
             if (positionDelta) window.scrollBy(0, positionDelta);
         });
