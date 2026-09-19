@@ -2219,7 +2219,7 @@
         }
 
         try {
-            const data = matchData || await getMatchData();
+            const data = await getMatchData({ includeDetails: true });
 
             let gamesProcessed = 0;
 

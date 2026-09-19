@@ -129,7 +129,7 @@
     };
 
     window.fetchSharedMatchById = async function (matchId) {
-        const data = await getMatchData(), match = data?.matches?.find(item => String(item.id) === String(matchId));
+        const data = await getMatchData({ includeDetails: true }), match = data?.matches?.find(item => String(item.id) === String(matchId));
         if (!match) throw new Error('Match details were not found.');
         if (match.provider === 'espn' || String(match.id).startsWith('espn:')) {
             try {
