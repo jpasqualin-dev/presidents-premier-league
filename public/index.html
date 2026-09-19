@@ -1530,14 +1530,13 @@
             const goalDifferenceClass = owner.goalDifference > 0 ? 'pill-green' : owner.goalDifference < 0 ? 'pill-red' : 'pill-gray';
             const goalDifference = `${owner.goalDifference > 0 ? '+' : ''}${owner.goalDifference}`;
             const expanded = weeklyFormExpanded.has(`${week.week}:${owner.owner}`);
-            const ownerTeams = new Set(draftData[owner.owner] || []);
-            const formMatches = week.matches.filter(match => {
-                const homeOwner = getOwnerOfTeam(match.homeTeam.name);
-                const awayOwner = getOwnerOfTeam(match.awayTeam.name);
-                return homeOwner === owner.owner || awayOwner === owner.owner || ownerTeams.has(match.homeTeam.name) || ownerTeams.has(match.awayTeam.name);
-            }).sort((matchA, matchB) => new Date(matchA.utcDate) - new Date(matchB.utcDate));
-            const form = formMatches.map(match => {
-                const ownerIsHome = getOwnerOfTeam(match.homeTeam.name) === owner.owner;
+            const ownerTeams = draftData[owner.owner] || [];
+            const matchesOwnedByTeam = (teamName, match) => teamName.toLowerCase().includes(match.name.toLowerCase()) || match.name.toLowerCase().includes(teamName.toLowerCase());
+            const formMatches = ownerTeams.flatMap(teamName => week.matches
+                .filter(match => matchesOwnedByTeam(teamName, match.homeTeam) || matchesOwnedByTeam(teamName, match.awayTeam))
+                .map(match => ({ match, ownerIsHome: matchesOwnedByTeam(teamName, match.homeTeam) })))
+                .sort((entryA, entryB) => new Date(entryA.match.utcDate) - new Date(entryB.match.utcDate));
+            const form = formMatches.map(({ match, ownerIsHome }) => {
                 const ownerTeam = ownerIsHome ? match.homeTeam : match.awayTeam;
                 const opponentTeam = ownerIsHome ? match.awayTeam : match.homeTeam;
                 const ownerScore = ownerIsHome ? match.score?.fullTime?.home : match.score?.fullTime?.away;
