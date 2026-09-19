@@ -1545,48 +1545,10 @@
         return `<section class="match-hero"><div class="match-meta">${escapeHtml(formatMatchDate(match.utcDate))}</div><div class="match-scoreline"><div class="match-team"><span>${escapeHtml(home.name)}</span>${home.crest ? `<img src="${escapeHtml(home.crest)}" alt="">` : ''}<span class="match-team-owner">${escapeHtml(getOwnerOfTeam(home.name) || '')}</span></div><div class="match-score">${escapeHtml(score)}<span class="match-status">${escapeHtml(status)}</span></div><div class="match-team"><span>${escapeHtml(away.name)}</span>${away.crest ? `<img src="${escapeHtml(away.crest)}" alt="">` : ''}<span class="match-team-owner">${escapeHtml(getOwnerOfTeam(away.name) || '')}</span></div></div><div class="match-venue">${escapeHtml(match.venue || 'Venue unavailable')}</div>${renderMatchScorers(match)}</section><section class="match-detail-section"><h3>Match Stats</h3>${renderMatchStats(match)}</section><section class="match-detail-section"><h3>Match Events</h3>${renderMatchEvents(match)}</section><section class="match-detail-section"><h3>Lineups</h3>${renderLineups(match)}</section>`;
     }
 
-    function getMatchDrawerVenueStats() {
-        const homeStats = {}, awayStats = {};
-        Object.entries(cachedTeamStats || {}).forEach(([teamName, team]) => {
-            homeStats[teamName] = { ...team, PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0 };
-            awayStats[teamName] = { ...team, PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0 };
-        });
-        const applyVenueResult = (stat, goalsFor, goalsAgainst) => {
-            stat.PL += 1;
-            stat.GF += goalsFor;
-            stat.GA += goalsAgainst;
-            if (goalsFor > goalsAgainst) { stat.W += 1; stat.PTS += 3; }
-            else if (goalsFor === goalsAgainst) { stat.D += 1; stat.PTS += 1; }
-            else stat.L += 1;
-            stat.GD = stat.GF - stat.GA;
-        };
-        (allMatchesData || []).filter(isCompletedMatch).forEach(match => {
-            const homeKey = findTeamKey(match.homeTeam.name, cachedTeamStats);
-            const awayKey = findTeamKey(match.awayTeam.name, cachedTeamStats);
-            const homeScore = match.score?.fullTime?.home;
-            const awayScore = match.score?.fullTime?.away;
-            if (homeKey && homeScore != null && awayScore != null) applyVenueResult(homeStats[homeKey], homeScore, awayScore);
-            if (awayKey && homeScore != null && awayScore != null) applyVenueResult(awayStats[awayKey], awayScore, homeScore);
-        });
-        return { homeStats, awayStats };
-    }
-
-    function renderMatchTeamDetail(teamName) {
-        const venueStats = getMatchDrawerVenueStats();
-        return TeamDrawerShared.render(teamName, {
-            stats: { allStats: cachedTeamStats, ...venueStats },
-            matches: allMatchesData,
-            getLogoByName,
-            getShortTeamName,
-            getOwnerOfTeam,
-            openMatch: true
-        });
-    }
-
     window.openTeamDrawerFromMatch = function(teamName) {
         matchDrawerTeamReturn = true;
         TeamDrawerShared.openFromMatch(teamName, {
-            stats: { allStats: cachedTeamStats, ...getMatchDrawerVenueStats() },
+            stats: TeamDrawerShared.buildStats(allMatchesData, Object.values(draftData).flat(), getOwnerOfTeam),
             matches: allMatchesData,
             getLogoByName,
             getShortTeamName,

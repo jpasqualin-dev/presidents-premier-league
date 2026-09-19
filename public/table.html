@@ -692,7 +692,7 @@
         const overlay = document.getElementById('team-drawer-overlay');
         document.getElementById('team-drawer-title').textContent = getShortTeamName(team.team);
         document.getElementById('team-drawer-content').innerHTML = TeamDrawerShared.render(team.team, {
-            stats: cachedStats,
+            stats: TeamDrawerShared.buildStats(cachedMatches, Object.values(draftData).flat(), getOwnerOfTeam),
             matches: cachedMatches,
             getLogoByName,
             getShortTeamName,

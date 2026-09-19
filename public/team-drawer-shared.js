@@ -20,6 +20,51 @@
         return home.includes(name) || name.includes(home) || away.includes(name) || name.includes(away);
     }
 
+    function buildStats(matches, teamNames, getOwnerOfTeam) {
+        const create = team => ({ team, owner: getOwnerOfTeam(team), PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 });
+        const allStats = {}, homeStats = {}, awayStats = {};
+        teamNames.forEach(team => {
+            allStats[team] = create(team);
+            homeStats[team] = create(team);
+            awayStats[team] = create(team);
+        });
+        const findKey = name => Object.keys(allStats).find(key => name.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(name.toLowerCase()));
+        const apply = (stat, goalsFor, goalsAgainst) => {
+            stat.PL += 1;
+            stat.GF += goalsFor;
+            stat.GA += goalsAgainst;
+            if (goalsFor > goalsAgainst) { stat.W += 1; stat.PTS += 3; }
+            else if (goalsFor === goalsAgainst) { stat.D += 1; stat.PTS += 1; }
+            else stat.L += 1;
+            stat.GD = stat.GF - stat.GA;
+        };
+        (matches || []).forEach(match => {
+            if (!isPlayed(match) || match.score?.fullTime?.home == null || match.score?.fullTime?.away == null) return;
+            const homeKey = findKey(match.homeTeam.name);
+            const awayKey = findKey(match.awayTeam.name);
+            const homeScore = match.score.fullTime.home;
+            const awayScore = match.score.fullTime.away;
+            if (homeKey) {
+                apply(allStats[homeKey], homeScore, awayScore);
+                apply(homeStats[homeKey], homeScore, awayScore);
+                if (awayScore === 0) allStats[homeKey].cleanSheets += 1;
+            }
+            if (awayKey) {
+                apply(allStats[awayKey], awayScore, homeScore);
+                apply(awayStats[awayKey], awayScore, homeScore);
+                if (homeScore === 0) allStats[awayKey].cleanSheets += 1;
+            }
+            (match.events || []).forEach(event => {
+                const eventTeamId = String(event.teamProviderId || '');
+                const teamKey = eventTeamId === String(match.homeTeam.id || match.homeTeam.providerId) ? homeKey : eventTeamId === String(match.awayTeam.id || match.awayTeam.providerId) ? awayKey : null;
+                if (!teamKey) return;
+                if (event.yellowCard) allStats[teamKey].yellowCards += 1;
+                if (event.redCard) allStats[teamKey].redCards += 1;
+            });
+        });
+        return { allStats, homeStats, awayStats };
+    }
+
     function render(teamName, options) {
         const allStats = options.stats.allStats || options.stats;
         const teamKey = Object.keys(allStats).find(key => key.toLowerCase() === teamName.toLowerCase()) || Object.keys(allStats).find(key => matchesTeam({ homeTeam: { name: key }, awayTeam: { name: key } }, teamName));
@@ -79,5 +124,5 @@
         return options.getShortTeamName(teamName);
     }
 
-    window.TeamDrawerShared = { render, openFromMatch };
+    window.TeamDrawerShared = { render, openFromMatch, buildStats };
 })();
