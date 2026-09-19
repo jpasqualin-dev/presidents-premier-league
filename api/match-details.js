@@ -43,7 +43,10 @@ module.exports = async function handler(req, res) {
 
     try {
         const summary = await fetchMatchSummary(eventId);
-        if (!summary) return res.status(502).json({ error: 'Unable to read ESPN match summary.' });
+        if (!summary) {
+            res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+            return res.status(200).json({ events: [], scorers: [], substitutions: [], teamStats: [], lineups: null, source: 'unavailable' });
+        }
         const [details, teamStats, lineups] = await Promise.all([
             fetchScoringDetails({ id: eventId, competitions: [] }, summary),
             fetchMatchStatistics(eventId, summary),
