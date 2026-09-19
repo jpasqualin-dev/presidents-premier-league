@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { normalizeEspnEvent } = require('../lib/match-contract');
 const { dedupeByKey, mergeMatches } = require('../lib/match-aggregation');
+const { applyMatchCorrections } = require('../api/matches');
 
 const baseMatch = {
     id: 'espn:1',
@@ -48,4 +49,16 @@ test('deduplicates provider records and preserves zero scores', () => {
     assert.equal(match.status, 'FINISHED');
     assert.equal(match.score.fullTime.home, 0);
     assert.equal(match.score.fullTime.away, 0);
+});
+
+test('repairs the Brentford-Chelsea result when ESPN no longer serves the event', () => {
+    const [match] = applyMatchCorrections([{
+        provider: 'espn',
+        providerEventId: '401879275',
+        status: 'SCHEDULED',
+        score: { fullTime: { home: 0, away: 0 } }
+    }]);
+
+    assert.equal(match.status, 'FINISHED');
+    assert.deepEqual(match.score.fullTime, { home: 3, away: 0 });
 });

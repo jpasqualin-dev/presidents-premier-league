@@ -2,6 +2,7 @@ const { neon } = require('@neondatabase/serverless');
 const { normalizeEspnEvent, normalizeNeonMatch } = require('../lib/match-contract');
 const { mergeMatches } = require('../lib/match-aggregation');
 const { fetchScoringDetails } = require('./sync-espn');
+const matchCorrections = require('../data/match-corrections.json');
 
 const ESPN_ENDPOINT = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard';
 const DATE_LOOKBACK = 1;
@@ -26,6 +27,29 @@ function shouldFetchDetails(event) {
     if (status.state !== 'post' && !status.completed) return false;
     const eventTime = new Date(event.date).getTime();
     return Number.isFinite(eventTime) && Date.now() - eventTime <= RECENT_FINAL_WINDOW_MS;
+}
+
+function applyMatchCorrections(matches) {
+    const corrections = new Map(matchCorrections.map(correction => [
+        `${correction.provider}:${correction.providerEventId}`,
+        correction
+    ]));
+    return matches.map(match => {
+        const correction = corrections.get(`${match.provider}:${match.providerEventId}`);
+        if (!correction) return match;
+        return {
+            ...match,
+            status: correction.status,
+            score: {
+                ...(match.score || {}),
+                fullTime: {
+                    ...(match.score?.fullTime || {}),
+                    home: correction.homeScore,
+                    away: correction.awayScore
+                }
+            }
+        };
+    });
 }
 
 async function fetchRecentEspnMatches() {
@@ -139,7 +163,7 @@ module.exports = async function handler(req, res) {
 
         res.setHeader('Cache-Control', 'public, s-maxage=15, stale-while-revalidate=45');
         return res.status(200).json({
-            matches: mergeMatches([...historicalMatches, ...liveMatches]),
+            matches: mergeMatches(applyMatchCorrections([...historicalMatches, ...liveMatches])),
             sources: { historical: historyResult.status === 'fulfilled' ? 'neon' : null, live: liveAvailable ? 'espn' : null },
             liveAvailable,
             generatedAt: new Date().toISOString()
@@ -149,3 +173,5 @@ module.exports = async function handler(req, res) {
         return res.status(500).json({ error: 'Unable to read normalized match data.' });
     }
 };
+
+module.exports.applyMatchCorrections = applyMatchCorrections;
