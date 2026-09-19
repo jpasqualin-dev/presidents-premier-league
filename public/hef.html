@@ -436,6 +436,7 @@
 
 <script src="theme.js"></script>
 <script src="match-data.js"></script>
+<script src="match-drawer-shared.js"></script>
 <script>
     let shouldPositionInitialCard = true;
 
@@ -480,6 +481,7 @@
         }
         return "Free Agent / Unassigned";
     }
+    window.matchDrawerOwnerResolver = getOwnerOfTeam;
 
     // Shorten names for cleaner mobile display
     function cleanName(name) {
@@ -511,6 +513,7 @@
 
         mwObj.weeklyPoints += points;
         mwObj.fixtures.push({
+            matchId: match.id,
             team: cleanName(myTeam),
             teamFull: myTeam,
             venue: venue,
@@ -600,7 +603,7 @@
                 }
 
                 fixturesHTML += `
-                    <div class="fixture-item">
+                    <div class="fixture-item" data-match-id="${fix.matchId}" role="button" tabindex="0" aria-label="View details for ${fix.teamFull} versus ${fix.oppFull}">
                         <div class="match-details">
                             <div class="my-team">
                                 ${fix.team} <span class="venue-tag">${fix.venue}</span>
@@ -624,6 +627,7 @@
             `;
             container.appendChild(card);
         });
+        window.bindSharedMatchRows(container);
 
         document.getElementById('total-pts').textContent = totalPts;
         updateAchievements(data, matches);
