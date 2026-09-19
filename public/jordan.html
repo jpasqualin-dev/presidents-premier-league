@@ -190,7 +190,7 @@
             right: 0;
             left: 0;
             height: calc(var(--profile-card-height, 0px) - 14px);
-            z-index: 18;
+            z-index: 9;
             background: #f4f6f8;
             pointer-events: none;
         }
@@ -776,11 +776,13 @@
         event.stopPropagation();
         const toggle = event.currentTarget;
         toggle.setAttribute('aria-expanded', String(toggle.getAttribute('aria-expanded') !== 'true'));
+        requestAnimationFrame(updatePlayerCardBackdrop);
     }
 
     function collapseHeadToHead(event) {
         event.stopPropagation();
         document.querySelector('.head-to-head-toggle')?.setAttribute('aria-expanded', 'false');
+        requestAnimationFrame(updatePlayerCardBackdrop);
     }
 
     function handleHeadToHeadKeydown(event) {
@@ -793,6 +795,7 @@
     function toggleProfileCard() {
         const card = document.querySelector('.profile-card');
         card.setAttribute('aria-expanded', String(card.getAttribute('aria-expanded') !== 'true'));
+        requestAnimationFrame(updatePlayerCardBackdrop);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
