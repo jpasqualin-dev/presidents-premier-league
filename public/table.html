@@ -366,12 +366,12 @@
         .team-drawer-record { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color, #dfe5eb); }
         .team-drawer-record strong { color: var(--text-main, #1a1a1a); font-size: .9rem; }
         .team-drawer-card-title { margin-bottom: 16px; color: var(--text-main, #1a1a1a); font-size: .95rem; text-align: center; }
-        .team-drawer-stat { display: grid; grid-template-columns: 120px minmax(0, 1fr) 42px; align-items: center; gap: 10px; color: var(--text-muted, #718096); font-size: .82rem; }
+        .team-drawer-stat { display: grid; grid-template-columns: 120px 42px minmax(0, 1fr); align-items: center; gap: 10px; color: var(--text-muted, #718096); font-size: .82rem; }
         .team-drawer-stat > span { white-space: nowrap; }
         .team-drawer-stat strong { color: var(--text-main, #1a1a1a); text-align: right; }
-        .team-drawer-bar { position: relative; display: flex; align-items: center; height: 26px; overflow: hidden; padding: 0 8px; border-radius: 6px; background: var(--border-color, #dfe5eb); }
+        .team-drawer-bar { position: relative; height: 10px; border-radius: 99px; background: var(--border-color, #dfe5eb); }
         .team-drawer-bar-fill { position: absolute; inset: 0 auto 0 0; height: 100%; border-radius: inherit; background: #00a667; }
-        .team-drawer-bar-rank { position: relative; z-index: 1; color: var(--text-main, #1a1a1a); font-size: .82rem; font-weight: 600; white-space: nowrap; }
+        .team-drawer-bar-rank { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); z-index: 1; color: var(--text-main, #1a1a1a); font-size: .82rem; font-weight: 600; line-height: 1; white-space: nowrap; }
         .team-drawer-bar-fill.yellow { background: #facc15; }
         .team-drawer-bar-fill.red { background: #ef4444; }
         body.dark-mode .team-drawer-bar-fill { background: #00ff87; }
@@ -383,7 +383,7 @@
             .team-drawer { width: 100%; }
             .team-drawer-content { padding: 12px; }
             .team-drawer-crest { width: 120px; height: 120px; }
-            .team-drawer-stat { grid-template-columns: 108px minmax(0, 1fr) 36px; gap: 7px; }
+            .team-drawer-stat { grid-template-columns: 108px 36px minmax(0, 1fr); gap: 7px; }
         }
 
         /* Mobile tweaks */
@@ -718,7 +718,7 @@
     function renderTeamStatRow(team, label, field, barClass = '') {
         const rank = getTeamStatRank(team, field);
         const percentage = Math.max(5, 100 - (rank - 1) * 5);
-        return `<div class="team-drawer-stat"><span>${label}</span><div class="team-drawer-bar" aria-label="${label} rank ${rank} of 20"><div class="team-drawer-bar-fill${barClass ? ` ${barClass}` : ''}" style="width: ${percentage}%"></div><span class="team-drawer-bar-rank">Rank: ${rank}</span></div><strong>${team[field]}</strong></div>`;
+        return `<div class="team-drawer-stat"><span>${label}</span><strong>${team[field]}</strong><div class="team-drawer-bar" aria-label="${label} rank ${rank} of 20"><div class="team-drawer-bar-fill${barClass ? ` ${barClass}` : ''}" style="width: ${percentage}%"></div><span class="team-drawer-bar-rank">Rank: ${rank}</span></div></div>`;
     }
 
     window.openTeamDrawer = function(teamName) {
