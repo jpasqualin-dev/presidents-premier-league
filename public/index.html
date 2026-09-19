@@ -966,6 +966,7 @@
     let weeklyMatchReturn = false;
     let matchDrawerMatchId = null;
     let matchDrawerTeamReturn = false;
+    let teamDrawerTeamName = null;
     let lastStandingsMatchSignature = '';
 
     function isCompletedMatch(match) {
@@ -1547,6 +1548,7 @@
 
     window.openTeamDrawerFromMatch = function(teamName) {
         matchDrawerTeamReturn = true;
+        teamDrawerTeamName = teamName;
         TeamDrawerShared.openFromMatch(teamName, {
             stats: TeamDrawerShared.buildStats(allMatchesData, Object.values(draftData).flat(), getOwnerOfTeam),
             matches: allMatchesData,
@@ -1561,6 +1563,10 @@
         matchDrawerTeamReturn = false;
         document.querySelector('.match-drawer-back')?.remove();
         openMatchDrawer(matchDrawerMatchId);
+    };
+
+    window.returnToTeamDrawer = function() {
+        if (teamDrawerTeamName) openTeamDrawerFromMatch(teamDrawerTeamName);
     };
 
     function renderWeeklyDetail(week) {
@@ -1626,9 +1632,15 @@
     }
 
     async function openMatchDrawer(matchId) {
+        const openedFromTeamDrawer = matchDrawerTeamReturn;
         matchDrawerMatchId = matchId;
         matchDrawerTeamReturn = false;
-        return window.openSharedMatchDrawer(matchId, { backButtonMarkup: weeklyMatchReturn ? '<button class="match-drawer-back" type="button" aria-label="Back to PPL Weekly" onclick="returnToWeeklyDrawer()">‹</button>' : '' });
+        const backButtonMarkup = openedFromTeamDrawer
+            ? '<button class="match-drawer-back" type="button" aria-label="Back to team details" onclick="returnToTeamDrawer()">‹</button>'
+            : weeklyMatchReturn
+                ? '<button class="match-drawer-back" type="button" aria-label="Back to PPL Weekly" onclick="returnToWeeklyDrawer()">‹</button>'
+                : '';
+        return window.openSharedMatchDrawer(matchId, { backButtonMarkup });
     }
 
     window.returnToWeeklyDrawer = function() {

@@ -741,6 +741,7 @@
     let fixtureMatches = [];
     let matchDrawerTeamReturn = false;
     let matchDrawerMatchId = null;
+    let teamDrawerTeamName = null;
     let currentView = 'round';
     let selectedTeam = null;
     let shouldPositionInitialCard = true;
@@ -815,6 +816,7 @@
 
     window.openTeamDrawerFromMatch = function(teamName) {
         matchDrawerTeamReturn = true;
+        teamDrawerTeamName = teamName;
         TeamDrawerShared.openFromMatch(teamName, {
             stats: TeamDrawerShared.buildStats(fixtureMatches, Object.values(draftData).flat(), getOwnerOfTeam),
             matches: fixtureMatches,
@@ -829,6 +831,10 @@
         matchDrawerTeamReturn = false;
         document.querySelector('.match-drawer-back')?.remove();
         if (matchDrawerMatchId != null) openMatchDrawer(matchDrawerMatchId);
+    };
+
+    window.returnToTeamDrawer = function() {
+        if (teamDrawerTeamName) openTeamDrawerFromMatch(teamDrawerTeamName);
     };
 
     function formatGroupDate(d) {
@@ -1349,8 +1355,13 @@
     }
 
     async function openMatchDrawer(matchId) {
+        const openedFromTeamDrawer = matchDrawerTeamReturn;
         matchDrawerMatchId = matchId;
-        return window.openSharedMatchDrawer(matchId);
+        matchDrawerTeamReturn = false;
+        const backButtonMarkup = openedFromTeamDrawer
+            ? '<button class="match-drawer-back" type="button" aria-label="Back to team details" onclick="returnToTeamDrawer()">‹</button>'
+            : '';
+        return window.openSharedMatchDrawer(matchId, { backButtonMarkup });
     }
 
     function closeMatchDrawer(event) {
