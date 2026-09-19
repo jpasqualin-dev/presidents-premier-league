@@ -1528,13 +1528,7 @@
                 if (detailData.lineups) match.lineups = detailData.lineups;
                 if (detailData.scorers?.length) match.scorers = detailData.scorers;
                 const events = [...(match.events || []), ...(detailData.events || []), ...(detailData.substitutions || [])];
-                const seenSubstitutions = new Set();
-                match.events = events.filter(event => {
-                    const key = [event.teamProviderId, event.minute, event.eventType, event.athleteProviderId, event.comingOn, event.goingOff].join('|');
-                    if (seenSubstitutions.has(key)) return false;
-                    seenSubstitutions.add(key);
-                    return true;
-                });
+                match.events = dedupeDrawerEvents(events);
             }
         }
         return match;
