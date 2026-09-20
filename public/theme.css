@@ -20,6 +20,7 @@
     --nav-hover-bg: #f0fff4;
     --nav-hover-border: #c6f6d5;
     --card-shadow: 0 3px 10px rgba(56,0,60,0.08);
+    --accent-green: #00ff87;
 }
 
 /* Shared page header */
@@ -89,6 +90,7 @@ body.dark-mode {
     --nav-hover-bg: #2a2a2a;
     --nav-hover-border: #4b4b4b;
     --card-shadow: 0 3px 10px rgba(0,0,0,0.35);
+    --accent-green: #00ff87;
     color-scheme: dark;
     background: var(--page-bg);
     color: #e6e6e6;
@@ -127,7 +129,7 @@ body.dark-mode {
 
 .mw-header {
     background-color: var(--surface-bg);
-    border-bottom: 2px solid var(--win-color);
+    border-bottom: 2px solid var(--accent-green);
 }
 
 .profile-card {
@@ -234,7 +236,7 @@ body.dark-mode .nested-teams-container {
 
 body.dark-mode .mw-header {
     background: var(--surface-bg);
-    border-bottom-color: var(--win-color);
+    border-bottom-color: var(--accent-green);
 }
 
 @media (hover: hover) {
