@@ -60,7 +60,9 @@
             body.wide-page { --menu-max-width: 800px; }
             .menu-backdrop { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: min(calc(100vw - 2 * var(--menu-page-pad)), var(--menu-max-width)); height: 5px; background: var(--mask-bg); z-index: 15; pointer-events: none; }
             .header-container .theme-toggle:focus-visible { outline-offset: 3px; }
-            .site-menu { position: sticky; top: 0; z-index: 20; height: auto; padding: 10px 3px 12px; margin-bottom: 0; background: var(--sticky-bg); border: 0; border-radius: 0; box-shadow: none; }
+            .site-menu { position: sticky; top: 0; z-index: 20; isolation: isolate; height: auto; padding: 10px 3px 12px; margin-bottom: 0; background: var(--sticky-bg); border: 0; border-radius: 0; box-shadow: none; }
+            .site-menu::before { content: ""; position: absolute; z-index: -1; top: -8px; bottom: -8px; left: 50%; width: 100vw; transform: translateX(-50%); background: var(--sticky-bg); pointer-events: none; }
+            .site-menu > * { position: relative; z-index: 1; }
             .site-menu a, .players-menu summary { color: var(--brand-color); }
             .players-menu[open] summary { background: var(--nav-hover-bg); border-color: var(--nav-hover-border); }
             .site-menu a.active::after, .players-menu summary.active::before { right: 8px; left: 8px; background: var(--brand-color); }
