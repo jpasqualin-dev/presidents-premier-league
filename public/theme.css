@@ -126,7 +126,8 @@ body.dark-mode {
 }
 
 .mw-header {
-    background-color: #f0f0f0;
+    background-color: var(--surface-bg);
+    border-bottom: 2px solid var(--win-color);
 }
 
 .profile-card {
@@ -227,9 +228,13 @@ body.dark-mode .players-dropdown a {
 }
 
 body.dark-mode .nested-table-row,
-body.dark-mode .nested-teams-container,
-body.dark-mode .mw-header {
+body.dark-mode .nested-teams-container {
     background: #292929;
+}
+
+body.dark-mode .mw-header {
+    background: var(--surface-bg);
+    border-bottom-color: var(--win-color);
 }
 
 @media (hover: hover) {
