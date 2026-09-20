@@ -771,30 +771,6 @@
         renderView();
     }
 
-    window.openTeamDrawerFromMatch = function(teamName) {
-        matchDrawerTeamReturn = true;
-        teamDrawerTeamName = teamName;
-        TeamDrawerShared.openFromMatch(teamName, {
-            stats: TeamDrawerShared.buildStats(fixtureMatches, Object.values(draftData).flat(), getOwnerOfTeam),
-            matches: fixtureMatches,
-            getLogoByName,
-            getShortTeamName,
-            getOwnerOfTeam,
-            openMatch: true,
-            showBackButton: openedFromMatch
-        });
-    };
-
-    window.returnToMatchFromTeamDrawer = function() {
-        matchDrawerTeamReturn = false;
-        document.querySelector('.match-drawer-back')?.remove();
-        if (matchDrawerMatchId != null) openMatchDrawer(matchDrawerMatchId);
-    };
-
-    window.returnToTeamDrawer = function() {
-        if (teamDrawerTeamName) openTeamDrawerFromMatch(teamDrawerTeamName);
-    };
-
     function formatGroupDate(d) {
         const today = new Date();
         const matchD = new Date(d);
