@@ -480,6 +480,8 @@
     }
 
     function getLogoByName(teamName) {
+        const canonicalLogo = TeamNames.crest(teamName);
+        if (canonicalLogo) return canonicalLogo;
         for (let key in teamLogos) {
             if (teamName.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(teamName.toLowerCase())) {
                 return teamLogos[key];

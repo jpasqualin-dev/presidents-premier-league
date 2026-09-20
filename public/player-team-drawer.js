@@ -4,6 +4,8 @@
     let teamDrawerOpen = false;
 
     function getLogoByName(teamName) {
+        const canonicalLogo = window.TeamNames?.crest(teamName);
+        if (canonicalLogo) return canonicalLogo;
         const logos = window.playerTeamLogos || {};
         const key = Object.keys(logos).find(name => teamName.toLowerCase().includes(name.toLowerCase()) || name.toLowerCase().includes(teamName.toLowerCase()));
         return key ? logos[key] : '';

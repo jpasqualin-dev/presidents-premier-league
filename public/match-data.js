@@ -74,6 +74,7 @@
     };
 
     async function getMatchData({ force = false, includeDetails = false } = {}) {
+        if (window.TeamNames?.ready) await window.TeamNames.ready;
         const cached = force ? null : getFreshCache(includeDetails);
         if (cached) {
             memoryData = cached.data;
@@ -149,8 +150,9 @@
         return () => subscribers.delete(listener);
     }
 
-    function start() {
+    async function start() {
         if (pollTimer) return;
+        if (window.TeamNames?.ready) await window.TeamNames.ready;
         const cached = getFreshCache();
         if (cached) {
             memoryData = cached.data;

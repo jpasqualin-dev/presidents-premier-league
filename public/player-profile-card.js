@@ -24,6 +24,8 @@
         teamButtons.className = 'profile-card-teams';
         const logos = window.playerTeamLogos || {};
         const getLogo = teamName => {
+            const canonicalLogo = window.TeamNames?.crest(teamName);
+            if (canonicalLogo) return canonicalLogo;
             const key = Object.keys(logos).find(name => teamName.toLowerCase().includes(name.toLowerCase()) || name.toLowerCase().includes(teamName.toLowerCase()));
             return key ? logos[key] : '';
         };
