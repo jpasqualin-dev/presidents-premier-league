@@ -61,25 +61,25 @@
             .menu-backdrop { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: min(calc(100vw - 2 * var(--menu-page-pad)), var(--menu-max-width)); height: 5px; background: var(--mask-bg); z-index: 15; pointer-events: none; }
             .header-container .theme-toggle:focus-visible { outline-offset: 3px; }
             .site-menu { position: sticky; top: 0; z-index: 20; height: auto; padding: 10px 3px 12px; margin-bottom: 0; background: var(--sticky-bg); border: 0; border-radius: 0; box-shadow: none; }
-            .site-menu a, .players-menu summary { color: #38003c; }
-            .players-menu[open] summary { background: #f0fff4; border-color: #c6f6d5; }
-            .site-menu a.active::after, .players-menu summary.active::before { right: 8px; left: 8px; background: #38003c; }
+            .site-menu a, .players-menu summary { color: var(--brand-color); }
+            .players-menu[open] summary { background: var(--nav-hover-bg); border-color: var(--nav-hover-border); }
+            .site-menu a.active::after, .players-menu summary.active::before { right: 8px; left: 8px; background: var(--brand-color); }
             body.wide-page .site-menu { margin: 0 16px; }
             body.wide-page .sticky-nav-wrapper { position: static; background: transparent; }
             body.wide-page .pills-nav-container { position: sticky; top: var(--primary-menu-height, 36px); z-index: 19; padding: 2px 20px 10px; background: var(--sticky-bg); }
             body:not(.wide-page) .profile-card { top: var(--primary-menu-height, 36px); z-index: 19; }
             body.wide-page::before { display: none; }
-            @media (hover: hover) { .site-menu a:hover, .players-menu summary:hover { background: #f0fff4; border-color: #c6f6d5; } }
+            @media (hover: hover) { .site-menu a:hover, .players-menu summary:hover { background: var(--nav-hover-bg); border-color: var(--nav-hover-border); } }
             @media (max-width: 768px) {
                 body { --menu-page-pad: 10px; }
                 body.wide-page .site-menu { margin: 0 10px; }
             }
             body.dark-mode .menu-backdrop, body.dark-mode .site-menu { background: var(--sticky-bg); }
             body.dark-mode.wide-page .pills-nav-container { background: var(--sticky-bg); }
-            body.dark-mode .site-menu a, body.dark-mode .players-menu summary { color: #f2f2f2; }
+            body.dark-mode .site-menu a, body.dark-mode .players-menu summary { color: var(--brand-color); }
             body.dark-mode .site-menu a.active::after, body.dark-mode .players-menu summary.active::before { background: #00ff87; }
-            body.dark-mode .players-menu[open] summary { background: #2a2a2a; border-color: #4b4b4b; }
-            @media (hover: hover) { body.dark-mode .site-menu a:hover, body.dark-mode .players-menu summary:hover { background: #2a2a2a; border-color: #4b4b4b; } }
+            body.dark-mode .players-menu[open] summary { background: var(--nav-hover-bg); border-color: var(--nav-hover-border); }
+            @media (hover: hover) { body.dark-mode .site-menu a:hover, body.dark-mode .players-menu summary:hover { background: var(--nav-hover-bg); border-color: var(--nav-hover-border); } }
         `;
         document.head.append(navigationStyles);
     };
