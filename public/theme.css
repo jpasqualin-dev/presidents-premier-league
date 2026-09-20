@@ -2,8 +2,8 @@
 :root {
     --page-bg: #f4f6f8;
     --surface-bg: #ffffff;
-    --sticky-bg: #ffffff;
-    --mask-bg: #ffffff;
+    --sticky-bg: var(--page-bg);
+    --mask-bg: var(--page-bg);
 }
 
 /* Shared page header */
@@ -61,8 +61,8 @@ body.wide-page .header-container { margin: 16px 16px 0; }
 body.dark-mode {
     --page-bg: #121212;
     --surface-bg: #202020;
-    --sticky-bg: #121212;
-    --mask-bg: #121212;
+    --sticky-bg: var(--page-bg);
+    --mask-bg: var(--page-bg);
     --bg-color: #121212;
     --card-bg: #202020;
     --text-main: #f1f1f1;
