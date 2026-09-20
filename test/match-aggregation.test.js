@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { normalizeEspnEvent } = require('../lib/match-contract');
+const { normalizeEspnEvent, normalizeNeonMatch } = require('../lib/match-contract');
 const { dedupeByKey, mergeMatches } = require('../lib/match-aggregation');
 const { applyMatchCorrections } = require('../api/matches');
 
@@ -49,6 +49,31 @@ test('deduplicates provider records and preserves zero scores', () => {
     assert.equal(match.status, 'FINISHED');
     assert.equal(match.score.fullTime.home, 0);
     assert.equal(match.score.fullTime.away, 0);
+});
+
+test('normalizes approved long team names from ESPN and Neon records', () => {
+    const espnMatch = normalizeEspnEvent({
+        id: '3',
+        date: '2026-09-19T12:00:00Z',
+        competitions: [{
+            status: { type: { state: 'post', completed: true } },
+            competitors: [
+                { homeAway: 'home', team: { id: '331', displayName: 'Brighton' }, score: 0 },
+                { homeAway: 'away', team: { id: '361', displayName: 'Newcastle' }, score: 0 }
+            ]
+        }]
+    });
+    assert.equal(espnMatch.homeTeam.name, 'Brighton & Hove Albion');
+    assert.equal(espnMatch.awayTeam.name, 'Newcastle United');
+
+    const neonMatch = normalizeNeonMatch({
+        provider: 'espn', provider_event_id: '4', kickoff_at: '2026-09-19T12:00:00Z',
+        status_state: 'post', status_completed: true, home_provider_id: '349', home_name: 'Bournemouth',
+        away_provider_id: '367', away_name: 'Tottenham', home_score: 0, away_score: 0,
+        scorers: [], events: [], team_stats: []
+    });
+    assert.equal(neonMatch.homeTeam.name, 'AFC Bournemouth');
+    assert.equal(neonMatch.awayTeam.name, 'Tottenham Hotspur');
 });
 
 test('repairs the Brentford-Chelsea result when ESPN no longer serves the event', () => {

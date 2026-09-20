@@ -17,6 +17,10 @@
     let pendingRequest = null;
     let pollTimer = null;
 
+    const normalizeData = data => window.TeamNames
+        ? { ...data, matches: (data?.matches || []).map(window.TeamNames.normalizeMatch) }
+        : data;
+
     const cacheKeys = includeDetails => ({
         data: includeDetails ? `${config.cacheKey}_details` : config.cacheKey,
         time: includeDetails ? `${config.cacheTimeKey}_details` : config.cacheTimeKey
@@ -40,7 +44,7 @@
             const cachedData = localStorage.getItem(keys.data);
             const cachedTime = Number(localStorage.getItem(keys.time));
             if (!cachedData || !cachedTime || Date.now() - cachedTime >= config.ttl) return null;
-            return { data: JSON.parse(cachedData), time: cachedTime };
+            return { data: normalizeData(JSON.parse(cachedData)), time: cachedTime };
         } catch (error) {
             console.warn('Unable to read match data cache:', error);
             return null;
@@ -114,7 +118,7 @@
             try {
                 const response = await fetch(`/api/matches${includeDetails ? '?details=1' : ''}`, { cache: 'no-store' });
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data = await response.json();
+                const data = normalizeData(await response.json());
                 const time = Date.now();
                 const keys = cacheKeys(includeDetails);
                 localStorage.setItem(keys.data, JSON.stringify(data));
@@ -167,10 +171,10 @@
     function handleExternalUpdate(event) {
         const update = event.data || event.newValue && JSON.parse(event.newValue);
         if (!update?.data || !update.time || update.time <= memoryTime) return;
-        memoryData = update.data;
+        memoryData = normalizeData(update.data);
         memoryTime = update.time;
         memoryIncludesDetails = Boolean(update.includeDetails);
-        notifySubscribers(update.data);
+        notifySubscribers(memoryData);
     }
 
     channel?.addEventListener('message', handleExternalUpdate);

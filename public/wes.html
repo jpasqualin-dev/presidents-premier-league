@@ -428,6 +428,7 @@
     </div>
 
 <script src="theme.js"></script>
+<script src="team-names.js"></script>
 <script src="match-data.js"></script>
 <script src="drawer-router.js"></script>
 <script src="match-drawer-shared.js"></script>
@@ -439,11 +440,11 @@
 
     // 1. Integrated data mappings directly from your main site configuration
     const draftData = {
-        "Hef": ["Arsenal", "Bournemouth", "Nottingham Forest", "Hull City"],
-        "Jordan": ["Manchester City", "Brighton", "Brentford", "Ipswich Town"],
-        "Wes": ["Liverpool", "Newcastle", "Sunderland", "Coventry City"],
+        "Hef": ["Arsenal", "AFC Bournemouth", "Nottingham Forest", "Hull City"],
+        "Jordan": ["Manchester City", "Brighton & Hove Albion", "Brentford", "Ipswich Town"],
+        "Wes": ["Liverpool", "Newcastle United", "Sunderland", "Coventry City"],
         "Nate": ["Manchester United", "Aston Villa", "Everton", "Fulham"],
-        "Jamey": ["Chelsea", "Tottenham", "Crystal Palace", "Leeds United"]
+        "Jamey": ["Chelsea", "Tottenham Hotspur", "Crystal Palace", "Leeds United"]
     };
 
     const teamLogos = {
@@ -468,6 +469,7 @@
         "Ipswich Town": "https://upload.wikimedia.org/wikipedia/en/4/43/Ipswich_Town.svg",
         "Hull City": "https://upload.wikimedia.org/wikipedia/en/5/54/Hull_City_A.F.C._logo.svg"
     };
+    TeamNames.addAliases(teamLogos);
     window.playerTeamLogos = teamLogos;
     window.playerTeams = draftData.Wes;
 
@@ -485,11 +487,7 @@
 
     // Shorten names for cleaner mobile display
     function cleanName(name) {
-        return name
-            .replace(" FC", "")
-            .replace(" & Hove Albion", "")
-            .replace(" Hotspur", "")
-            .replace("A.F.C. ", "");
+        return TeamNames.shortName(name);
     }
 
     function addFixtureToMatchweek(mwObj, match, myTeam, oppTeam, venue, isHome) {

@@ -268,14 +268,15 @@
     <div id="individual-stats-container" class="stats-grid"></div>
 
 <script src="theme.js"></script>
+<script src="team-names.js"></script>
 <script src="match-data.js"></script>
 <script>
     const draftData = {
-        "Hef": ["Arsenal", "Bournemouth", "Nottingham Forest", "Hull City"],
-        "Jordan": ["Manchester City", "Brighton", "Brentford", "Ipswich Town"],
-        "Wes": ["Liverpool", "Newcastle", "Sunderland", "Coventry City"],
+        "Hef": ["Arsenal", "AFC Bournemouth", "Nottingham Forest", "Hull City"],
+        "Jordan": ["Manchester City", "Brighton & Hove Albion", "Brentford", "Ipswich Town"],
+        "Wes": ["Liverpool", "Newcastle United", "Sunderland", "Coventry City"],
         "Nate": ["Manchester United", "Aston Villa", "Everton", "Fulham"],
-        "Jamey": ["Chelsea", "Tottenham", "Crystal Palace", "Leeds United"]
+        "Jamey": ["Chelsea", "Tottenham Hotspur", "Crystal Palace", "Leeds United"]
     };
 
     const teamLogos = {
@@ -300,10 +301,11 @@
         "Ipswich Town": "https://upload.wikimedia.org/wikipedia/en/4/43/Ipswich_Town.svg",
         "Hull City": "https://upload.wikimedia.org/wikipedia/en/5/54/Hull_City_A.F.C._logo.svg"
     };
+    TeamNames.addAliases(teamLogos);
 
     const divisionData = {
         "Red and Blue Division": ["Arsenal", "Manchester City", "Liverpool", "Manchester United", "Chelsea"],
-        "Birds and Beasts Division": ["Tottenham", "Aston Villa", "Newcastle", "Brighton", "Bournemouth"],
+        "Birds and Beasts Division": ["Tottenham Hotspur", "Aston Villa", "Newcastle United", "Brighton & Hove Albion", "AFC Bournemouth"],
         "Field and Forest Division": ["Nottingham Forest", "Brentford", "Sunderland", "Everton", "Crystal Palace"],
         "Cottage and Country Division": ["Leeds United", "Fulham", "Coventry City", "Ipswich Town", "Hull City"]
     };
@@ -379,16 +381,7 @@
     }
 
     function getShortTeamName(name) {
-        let n = name;
-        if (n.includes("Manchester City")) return "Man City";
-        if (n.includes("Manchester United")) return "Man United";
-        if (n.includes("Nottingham Forest")) return "Nottm Forest";
-        if (n.includes("Tottenham Hotspur") || n === "Tottenham") return "Tottenham";
-        if (n.includes("Leeds United")) return "Leeds";
-        if (n.includes("Hull City")) return "Hull";
-        if (n.includes("Ipswich Town")) return "Ipswich";
-        if (n.includes("Sunderland")) return "Sunderland";
-        return n.replace(" FC", "").replace(" & Hove Albion", "").replace("A.F.C. ", "").trim();
+        return TeamNames.shortName(name);
     }
 
     function toggleCard(titleEl) {

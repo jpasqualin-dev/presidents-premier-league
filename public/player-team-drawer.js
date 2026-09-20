@@ -10,11 +10,7 @@
     }
 
     function getShortTeamName(teamName) {
-        return String(teamName)
-            .replace(' FC', '')
-            .replace(' & Hove Albion', '')
-            .replace(' Hotspur', '')
-            .replace('A.F.C. ', '');
+        return window.TeamNames ? window.TeamNames.shortName(teamName) : String(teamName);
     }
 
     window.openTeamDrawerFromMatch = function (teamName) {

@@ -871,22 +871,23 @@
     <div id="divisions-container"></div>
     
 <script src="theme.js"></script>
+<script src="team-names.js"></script>
 <script src="match-data.js"></script>
 <script src="drawer-router.js"></script>
 <script src="match-drawer-shared.js"></script>
 <script src="team-drawer-shared.js"></script>
 <script>
     const draftData = {
-        "Hef": ["Arsenal", "Bournemouth", "Nottingham Forest", "Hull City"],
-        "Jordan": ["Manchester City", "Brighton", "Brentford", "Ipswich Town"],
-        "Wes": ["Liverpool", "Newcastle", "Sunderland", "Coventry City"],
+        "Hef": ["Arsenal", "AFC Bournemouth", "Nottingham Forest", "Hull City"],
+        "Jordan": ["Manchester City", "Brighton & Hove Albion", "Brentford", "Ipswich Town"],
+        "Wes": ["Liverpool", "Newcastle United", "Sunderland", "Coventry City"],
         "Nate": ["Manchester United", "Aston Villa", "Everton", "Fulham"],
-        "Jamey": ["Chelsea", "Tottenham", "Crystal Palace", "Leeds United"]
+        "Jamey": ["Chelsea", "Tottenham Hotspur", "Crystal Palace", "Leeds United"]
     };
 
     const draftPicks = {
         "Arsenal": 1, "Manchester City": 2, "Liverpool": 3, "Manchester United": 4, "Chelsea": 5,
-        "Tottenham": 6, "Aston Villa": 7, "Newcastle": 8, "Brighton": 9, "Bournemouth": 10,
+        "Tottenham Hotspur": 6, "Aston Villa": 7, "Newcastle United": 8, "Brighton & Hove Albion": 9, "AFC Bournemouth": 10,
         "Nottingham Forest": 11, "Brentford": 12, "Sunderland": 13, "Everton": 14, "Crystal Palace": 15,
         "Leeds United": 16, "Fulham": 17, "Coventry City": 18, "Ipswich Town": 19, "Hull City": 20
     };
@@ -913,6 +914,7 @@
         "Ipswich Town": "https://upload.wikimedia.org/wikipedia/en/4/43/Ipswich_Town.svg",
         "Hull City": "https://upload.wikimedia.org/wikipedia/en/5/54/Hull_City_A.F.C._logo.svg"
     };
+    TeamNames.addAliases(teamLogos);
 
     const divisionData = {
         "Red and Blue Division": ["Arsenal", "Manchester City", "Liverpool", "Manchester United", "Chelsea"],
@@ -1401,16 +1403,7 @@
     }
 
     function getShortTeamName(name) {
-        let n = name;
-        if (n.includes("Manchester City")) return "Man City";
-        if (n.includes("Manchester United")) return "Man United";
-        if (n.includes("Nottingham Forest")) return "Nottm Forest";
-        if (n.includes("Tottenham Hotspur") || n === "Tottenham") return "Tottenham";
-        if (n.includes("Leeds United")) return "Leeds";
-        if (n.includes("Hull City")) return "Hull";
-        if (n.includes("Ipswich Town")) return "Ipswich";
-        if (n.includes("Sunderland")) return "Sunderland"; 
-        return n.replace(" FC", "").replace(" & Hove Albion", "").replace("A.F.C. ", "").trim();
+        return TeamNames.shortName(name);
     }
 
     const detailStatLabels = { possession: 'Ball Possession', possessionpct: 'Ball Possession', ballpossession: 'Ball Possession', shots: 'Total Shots', totalshots: 'Total Shots', shotsontarget: 'Shots on Target' };

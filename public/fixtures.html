@@ -646,6 +646,7 @@
 </div>
 
 <script src="theme.js"></script>
+<script src="team-names.js"></script>
 <script src="match-data.js"></script>
 <script src="drawer-router.js"></script>
 <script src="match-drawer-shared.js"></script>
@@ -655,11 +656,11 @@
 
     // --- Data Definitions (Shared with Index Page) ---
     const draftData = {
-        "Hef": ["Arsenal", "Bournemouth", "Nottingham Forest", "Hull City"],
-        "Jordan": ["Manchester City", "Brighton", "Brentford", "Ipswich Town"],
-        "Wes": ["Liverpool", "Newcastle", "Sunderland", "Coventry City"],
+        "Hef": ["Arsenal", "AFC Bournemouth", "Nottingham Forest", "Hull City"],
+        "Jordan": ["Manchester City", "Brighton & Hove Albion", "Brentford", "Ipswich Town"],
+        "Wes": ["Liverpool", "Newcastle United", "Sunderland", "Coventry City"],
         "Nate": ["Manchester United", "Aston Villa", "Everton", "Fulham"],
-        "Jamey": ["Chelsea", "Tottenham", "Crystal Palace", "Leeds United"]
+        "Jamey": ["Chelsea", "Tottenham Hotspur", "Crystal Palace", "Leeds United"]
     };
 
     const teamLogos = {
@@ -684,6 +685,7 @@
         "Ipswich Town": "https://upload.wikimedia.org/wikipedia/en/4/43/Ipswich_Town.svg",
         "Hull City": "https://upload.wikimedia.org/wikipedia/en/5/54/Hull_City_A.F.C._logo.svg"
     };
+    TeamNames.addAliases(teamLogos);
 
     // Helper functions from main index page
     function getOwnerOfTeam(teamName) {
@@ -698,17 +700,7 @@
     window.matchDrawerOwnerResolver = getOwnerOfTeam;
 
     function getShortTeamName(name) {
-        if (!name) return "";
-        let n = name;
-        if (n.includes("Manchester City")) return "Man City";
-        if (n.includes("Manchester United")) return "Man United";
-        if (n.includes("Nottingham Forest")) return "Nottm Forest";
-        if (n.includes("Tottenham Hotspur") || n === "Tottenham") return "Tottenham";
-        if (n.includes("Leeds United")) return "Leeds";
-        if (n.includes("Hull City")) return "Hull";
-        if (n.includes("Ipswich Town")) return "Ipswich";
-        if (n.includes("Sunderland")) return "Sunderland";
-        return n.replace(" FC", "").replace(" & Hove Albion", "").replace("A.F.C. ", "").trim();
+        return TeamNames.shortName(name);
     }
 
     function getLogoByName(teamName) {
