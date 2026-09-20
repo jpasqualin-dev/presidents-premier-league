@@ -3,6 +3,7 @@
     style.id = 'shared-team-drawer-styles';
     style.textContent = `.team-drawer-card{margin-bottom:14px;padding:18px;background:var(--card-bg,#fff);border:1px solid var(--border-color,#dfe5eb);border-radius:12px}.team-drawer-summary{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:18px}.team-drawer-identity{display:flex;width:150px;flex-direction:column;align-items:center;justify-self:start}.team-drawer-crest{width:150px;height:150px;object-fit:contain}.team-drawer-owner{width:100%;margin-top:8px;color:var(--text-main,#1a1a1a);font-size:.85rem;font-weight:600;text-align:center}.team-drawer-records{display:grid;gap:10px;color:var(--text-muted,#718096);font-size:.78rem}.team-drawer-record{display:flex;justify-content:space-between;gap:12px;padding-bottom:8px;border-bottom:1px solid var(--border-color,#dfe5eb)}.team-drawer-record strong{color:var(--text-main,#1a1a1a);font-size:.9rem}.team-drawer-card-title{margin-bottom:16px;color:var(--text-main,#1a1a1a);font-size:.95rem;text-align:center}.team-drawer-stat{display:grid;grid-template-columns:120px 42px minmax(0,1fr) 62px;align-items:center;gap:10px;color:var(--text-muted,#718096);font-size:.82rem}.team-drawer-stat+.team-drawer-stat{margin-top:10px}.team-drawer-stat>span{white-space:nowrap}.team-drawer-stat strong{color:var(--text-main,#1a1a1a);text-align:right}.team-drawer-bar{position:relative;height:10px;border-radius:99px;background:var(--border-color,#dfe5eb)}.team-drawer-bar-fill{position:absolute;inset:0 auto 0 0;height:100%;border-radius:inherit;background:#00a667}.team-drawer-bar-rank{color:var(--text-main,#1a1a1a);font-size:.82rem;font-weight:600;line-height:1;text-align:left;white-space:nowrap}.team-drawer-bar-fill.yellow{background:#facc15}.team-drawer-bar-fill.red{background:#ef4444}.team-form-grid{display:grid;grid-template-columns:repeat(5,minmax(78px,1fr));gap:8px;overflow-x:auto}.team-form-grid .weekly-form-match{display:flex;min-width:78px;flex-direction:column;align-items:center;gap:5px;padding:4px 2px;background:transparent;color:var(--text-main,#1a1a1a);text-align:center}.team-form-grid .weekly-form-date{margin:0;color:var(--text-muted,#718096);font-size:.64rem;line-height:1}.team-form-grid .weekly-form-venue{padding:1px 6px;border-radius:4px;background:#f1f5f9;color:var(--text-muted,#718096);font-size:.58rem;font-weight:600;line-height:1.1}.team-form-grid .weekly-form-team{min-height:0;font-size:.66rem;font-weight:700;line-height:1.05}.team-form-grid .weekly-form-crest{display:block;width:26px;height:26px;margin:0 auto;object-fit:contain}.team-form-grid .weekly-form-crest.empty{visibility:hidden}.team-form-grid .weekly-form-score{display:table;min-width:38px;margin:0 auto;padding:3px 6px;border-radius:4px;color:#fff;font-size:.82rem;font-weight:800;line-height:1.1}.team-form-grid .weekly-form-score-win{background:var(--win-color,#00a667);color:#fff}.team-form-grid .weekly-form-score-draw{background:var(--draw-color,#718096);color:#fff}.team-form-grid .weekly-form-score-loss{background:var(--loss-color,#e53e3e);color:#fff}.team-form-grid .weekly-form-opponent-owner{min-height:0;color:var(--text-muted,#718096);font-size:.62rem;line-height:1.05}body.dark-mode .team-drawer-owner{color:#f1f1f1}body.dark-mode .team-drawer-bar-fill{background:#00ff87}body.dark-mode .team-drawer-bar-fill.yellow{background:#facc15}body.dark-mode .team-drawer-bar-fill.red{background:#ef4444}body.dark-mode .team-form-grid .weekly-form-venue{background:#303030;color:#b8b8b8}@media(max-width:600px){.team-drawer-identity,.team-drawer-crest{width:120px}.team-drawer-crest{height:120px}.team-drawer-stat{grid-template-columns:108px 36px minmax(0,1fr) 62px;gap:7px}}`;
     style.textContent += '.team-drawer-card-title{margin-top:0;margin-bottom:16px;border-bottom:2px solid #00ff87;padding-bottom:8px}';
+    style.textContent += '.team-drawer-player-stat{display:grid;grid-template-columns:28px minmax(0,1fr) 42px;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-color,#dfe5eb);color:var(--text-main,#1a1a1a);font-size:.85rem}.team-drawer-player-stat:last-child{border-bottom:0}.team-drawer-player-rank{color:var(--text-muted,#718096);font-weight:600}.team-drawer-player-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.team-drawer-player-stat strong{text-align:right}';
     document.head.appendChild(style);
 
     function escape(value) {
@@ -65,6 +66,45 @@
         return { allStats, homeStats, awayStats };
     }
 
+    function buildPlayerStats(matches, teamName) {
+        const players = {};
+        const teamMatches = (matches || []).filter(match => isPlayed(match) && matchesTeam(match, teamName));
+        teamMatches.forEach(match => {
+            (match.scorers || []).forEach(scorer => {
+                const scorerTeamId = String(scorer.teamProviderId || '');
+                const homeTeamId = String(match.homeTeam.id || match.homeTeam.providerId || '');
+                const awayTeamId = String(match.awayTeam.id || match.awayTeam.providerId || '');
+                const scorerTeam = scorerTeamId === homeTeamId ? match.homeTeam.name : scorerTeamId === awayTeamId ? match.awayTeam.name : '';
+                if (!scorerTeam || !matchesTeam({ homeTeam: { name: scorerTeam }, awayTeam: { name: teamName } }, teamName)) return;
+                const scorerKey = String(scorer.athleteProviderId || scorer.athleteName || 'Unknown scorer');
+                if (!players[scorerKey]) players[scorerKey] = { name: scorer.athleteName || 'Unknown scorer', goals: 0, assists: 0 };
+                players[scorerKey].goals += 1;
+                if (scorer.assistName || scorer.assistProviderId) {
+                    const assistKey = String(scorer.assistProviderId || scorer.assistName);
+                    if (!players[assistKey]) players[assistKey] = { name: scorer.assistName || 'Unknown assister', goals: 0, assists: 0 };
+                    players[assistKey].assists += 1;
+                }
+            });
+        });
+        return Object.values(players);
+    }
+
+    function renderPlayerStatCards(matches, teamName) {
+        const players = buildPlayerStats(matches, teamName);
+        const configs = [
+            { title: 'Goal involvements', value: player => player.goals + player.assists },
+            { title: 'Goals', value: player => player.goals },
+            { title: 'Assists', value: player => player.assists }
+        ];
+        return configs.map(config => {
+            const rankedPlayers = players
+                .filter(player => config.value(player) > 0)
+                .sort((a, b) => config.value(b) - config.value(a) || a.name.localeCompare(b.name));
+            const rows = rankedPlayers.map((player, index) => `<div class="team-drawer-player-stat"><span class="team-drawer-player-rank">${index + 1}</span><span class="team-drawer-player-name">${escape(player.name)}</span><strong>${config.value(player)}</strong></div>`).join('');
+            return `<section class="team-drawer-card team-drawer-player-card"><h2 class="team-drawer-card-title">${config.title}</h2>${rows || '<p class="empty-detail">No player stats available</p>'}</section>`;
+        }).join('');
+    }
+
     function render(teamName, options) {
         const allStats = options.stats.allStats || options.stats;
         const teamKey = Object.keys(allStats).find(key => key.toLowerCase() === teamName.toLowerCase()) || Object.keys(allStats).find(key => matchesTeam({ homeTeam: { name: key }, awayTeam: { name: key } }, teamName));
@@ -106,7 +146,7 @@
             const date = match.utcDate ? new Date(match.utcDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
             return `<div class="weekly-form-match" role="button" tabindex="0" aria-label="View details for ${escape(ownTeam.name)} versus ${escape(opponent.name)}" onclick="event.stopPropagation(); ${options.openMatch ? `openMatchDrawer('${escape(String(match.id))}')` : ''}" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); ${options.openMatch ? `openMatchDrawer('${escape(String(match.id))}');` : ''} }"><div class="weekly-form-date">${escape(date)}</div><div class="weekly-form-team">${escape(options.getShortTeamName(ownTeam.name))}</div>${ownLogo ? `<img class="weekly-form-crest" src="${escape(ownLogo)}" alt="${escape(ownTeam.name)} crest">` : '<span class="weekly-form-crest empty"></span>'}<div class="weekly-form-venue">${isHome ? 'HOME' : 'AWAY'}</div><div class="weekly-form-score${scoreClass}">${hasScore ? `${ownScore} - ${opponentScore}` : ' - '}</div><div class="weekly-form-team">${escape(options.getShortTeamName(opponent.name))}</div>${opponentLogo ? `<img class="weekly-form-crest" src="${escape(opponentLogo)}" alt="${escape(opponent.name)} crest">` : '<span class="weekly-form-crest empty"></span>'}<div class="weekly-form-opponent-owner">${escape(options.getOwnerOfTeam(opponent.name) || '')}</div></div>`;
         }).join('');
-        return `<section class="team-drawer-card"><div class="team-drawer-summary"><div class="team-drawer-identity">${logo ? `<img class="team-drawer-crest" src="${escape(logo)}" alt="${escape(team.team)} crest">` : ''}<div class="team-drawer-owner">${escape(team.owner || 'Unassigned')}</div></div><div class="team-drawer-records"><div class="team-drawer-record"><span>Overall rank</span><strong>${rank}</strong></div><div class="team-drawer-record"><span>Overall record</span><strong>${formatRecord(team)}</strong></div><div class="team-drawer-record"><span>Home record</span><strong>${formatRecord(options.stats.homeStats?.[team.team] || team)}</strong></div><div class="team-drawer-record"><span>Away record</span><strong>${formatRecord(options.stats.awayStats?.[team.team] || team)}</strong></div></div></div></section><section class="team-drawer-card"><h2 class="team-drawer-card-title">Team Form</h2>${form ? `<div class="team-form-grid">${form}</div>` : '<p class="empty-detail">No matches available</p>'}</section><section class="team-drawer-card"><h2 class="team-drawer-card-title">Team stats</h2>${statRow('Goals', 'GF')}${statRow('Goal differential', 'GD')}${statRow('Clean sheets', 'cleanSheets')}${statRow('Yellow cards', 'yellowCards', 'yellow')}${statRow('Red cards', 'redCards', 'red')}</section>`;
+        return `<section class="team-drawer-card"><div class="team-drawer-summary"><div class="team-drawer-identity">${logo ? `<img class="team-drawer-crest" src="${escape(logo)}" alt="${escape(team.team)} crest">` : ''}<div class="team-drawer-owner">${escape(team.owner || 'Unassigned')}</div></div><div class="team-drawer-records"><div class="team-drawer-record"><span>Overall rank</span><strong>${rank}</strong></div><div class="team-drawer-record"><span>Overall record</span><strong>${formatRecord(team)}</strong></div><div class="team-drawer-record"><span>Home record</span><strong>${formatRecord(options.stats.homeStats?.[team.team] || team)}</strong></div><div class="team-drawer-record"><span>Away record</span><strong>${formatRecord(options.stats.awayStats?.[team.team] || team)}</strong></div></div></div></section><section class="team-drawer-card"><h2 class="team-drawer-card-title">Team Form</h2>${form ? `<div class="team-form-grid">${form}</div>` : '<p class="empty-detail">No matches available</p>'}</section><section class="team-drawer-card"><h2 class="team-drawer-card-title">Team stats</h2>${statRow('Goals', 'GF')}${statRow('Goal differential', 'GD')}${statRow('Clean sheets', 'cleanSheets')}${statRow('Yellow cards', 'yellowCards', 'yellow')}${statRow('Red cards', 'redCards', 'red')}</section>${renderPlayerStatCards(options.matches, team.team)}`;
     }
 
     function openFromMatch(teamName, options) {
