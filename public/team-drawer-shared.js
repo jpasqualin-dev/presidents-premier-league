@@ -115,7 +115,7 @@
         const content = document.getElementById('match-detail-content');
         header?.classList.remove('weekly-mode');
         header?.querySelector('.match-drawer-back')?.remove();
-        header?.insertAdjacentHTML('afterbegin', '<button class="match-drawer-back" type="button" aria-label="Back to match details" onclick="returnToMatchFromTeamDrawer()">‹</button>');
+        if (options.showBackButton !== false) header?.insertAdjacentHTML('afterbegin', '<button class="match-drawer-back" type="button" aria-label="Back to match details" onclick="returnToMatchFromTeamDrawer()">‹</button>');
         if (title) title.textContent = getShortTeamNameForDrawer(teamName, options);
         if (content) content.innerHTML = render(teamName, options);
     }

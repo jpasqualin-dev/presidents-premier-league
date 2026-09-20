@@ -29,7 +29,8 @@
             getLogoByName,
             getShortTeamName,
             getOwnerOfTeam,
-            openMatch: true
+            openMatch: true,
+            showBackButton: openedFromMatch
         });
         if (!openedFromMatch) {
             overlay?.classList.add('is-open');

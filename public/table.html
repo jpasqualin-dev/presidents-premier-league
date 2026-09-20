@@ -690,10 +690,13 @@
         document.getElementById('content-area').innerHTML = html;
     }
 
+    let activeTeamDrawerName = '';
+
     window.openTeamDrawer = function(teamName) {
         const team = cachedStats?.allStats?.[teamName];
         if (!team) return;
 
+        activeTeamDrawerName = teamName;
         const overlay = document.getElementById('team-drawer-overlay');
         document.getElementById('team-drawer-title').textContent = getShortTeamName(team.team);
         document.getElementById('team-drawer-content').innerHTML = TeamDrawerShared.render(team.team, {
@@ -707,6 +710,17 @@
         overlay.classList.add('is-open');
         overlay.setAttribute('aria-hidden', 'false');
         document.body.classList.add('team-drawer-open');
+    };
+
+    window.openMatchDrawer = function(matchId) {
+        return window.openSharedMatchDrawer(matchId, {
+            backButtonMarkup: '<button class="match-drawer-back" type="button" aria-label="Back to team details" onclick="returnToTeamDrawer()">‹</button>'
+        });
+    };
+
+    window.returnToTeamDrawer = function() {
+        window.closeSharedMatchDrawer();
+        if (activeTeamDrawerName) window.openTeamDrawer(activeTeamDrawerName);
     };
 
     window.closeTeamDrawer = function(event) {

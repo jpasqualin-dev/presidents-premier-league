@@ -23,7 +23,8 @@
 
         * {
             box-sizing: border-box;
-            margin: 0;
+        const openedFromMatch = document.getElementById('match-drawer-overlay')?.classList.contains('is-open');
+        matchDrawerTeamReturn = openedFromMatch;
             padding: 0;
         }
 
@@ -823,7 +824,8 @@
             getLogoByName,
             getShortTeamName,
             getOwnerOfTeam,
-            openMatch: true
+            openMatch: true,
+            showBackButton: openedFromMatch
         });
     };
 
