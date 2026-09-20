@@ -98,6 +98,10 @@ body.dark-mode {
     color: #e6e6e6;
 }
 
+body.dark-mode img[src$="/367.png"] {
+    filter: drop-shadow(0 0 1px #ffffff) drop-shadow(0 0 1px #ffffff);
+}
+
 .header-container .theme-toggle {
     align-self: stretch;
 }
