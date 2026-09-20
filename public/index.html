@@ -887,6 +887,7 @@
     
 <script src="theme.js"></script>
 <script src="match-data.js"></script>
+<script src="drawer-router.js"></script>
 <script src="match-drawer-shared.js"></script>
 <script src="team-drawer-shared.js"></script>
 <script>
@@ -967,6 +968,7 @@
     let weeklyMatchReturn = false;
     let matchDrawerMatchId = null;
     let matchDrawerTeamReturn = false;
+    let teamDrawerOpen = false;
     let teamDrawerTeamName = null;
     let lastStandingsMatchSignature = '';
 
@@ -1550,6 +1552,7 @@
     window.openTeamDrawerFromMatch = function(teamName) {
         const overlay = document.getElementById('match-drawer-overlay');
         const openedFromMatch = overlay?.classList.contains('is-open');
+        teamDrawerOpen = true;
         matchDrawerTeamReturn = openedFromMatch;
         teamDrawerTeamName = teamName;
         TeamDrawerShared.openFromMatch(teamName, {
@@ -1570,6 +1573,7 @@
     };
 
     window.returnToMatchFromTeamDrawer = function() {
+        teamDrawerOpen = false;
         matchDrawerTeamReturn = false;
         document.querySelector('.match-drawer-back')?.remove();
         openMatchDrawer(matchDrawerMatchId);
@@ -1642,7 +1646,7 @@
     }
 
     async function openMatchDrawer(matchId) {
-        const openedFromTeamDrawer = matchDrawerTeamReturn;
+        const openedFromTeamDrawer = teamDrawerOpen;
         matchDrawerMatchId = matchId;
         matchDrawerTeamReturn = false;
         const backButtonMarkup = openedFromTeamDrawer
@@ -1660,7 +1664,7 @@
         document.getElementById('match-detail-content').innerHTML = renderWeeklyDetail(weeklyCardWeeks[weeklyCardWeekIndex]);
     };
 
-    window.openWeeklyDrawer = function() {
+    function renderWeeklyDrawer() {
         weeklyMatchReturn = false;
         weeklyFormExpanded.clear();
         const overlay = document.getElementById('match-drawer-overlay');
@@ -1673,6 +1677,18 @@
         overlay.setAttribute('aria-hidden', 'false');
         document.body.classList.add('drawer-open');
         content.innerHTML = renderWeeklyDetail(week);
+    }
+
+    window.openWeeklyDrawer = function() {
+        window.DrawerRouter?.closeAll();
+        if (window.DrawerRouter) {
+            return window.DrawerRouter.open({
+                type: 'weekly',
+                id: String(weeklyCardWeekIndex),
+                render: renderWeeklyDrawer
+            });
+        }
+        return renderWeeklyDrawer();
     };
 
     function updateWeeklyDrawerHeader() {
@@ -1700,6 +1716,7 @@
         window.closeSharedMatchDrawer(event);
         weeklyMatchReturn = false;
         matchDrawerTeamReturn = false;
+        teamDrawerOpen = false;
     }
 
     document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMatchDrawer(); });

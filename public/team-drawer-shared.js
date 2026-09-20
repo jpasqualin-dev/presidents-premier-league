@@ -110,12 +110,23 @@
     }
 
     function openFromMatch(teamName, options) {
+        if (window.DrawerRouter && !options.skipRouter) {
+            return window.DrawerRouter.open({
+                type: 'team',
+                teamName,
+                render: () => openFromMatch(teamName, { ...options, skipRouter: true })
+            });
+        }
+
         const header = document.querySelector('.match-drawer-header');
         const title = document.getElementById('match-drawer-title');
         const content = document.getElementById('match-detail-content');
         header?.classList.remove('weekly-mode');
         header?.querySelector('.match-drawer-back')?.remove();
-        if (options.showBackButton !== false) header?.insertAdjacentHTML('afterbegin', '<button class="match-drawer-back" type="button" aria-label="Back to match details" onclick="returnToMatchFromTeamDrawer()">‹</button>');
+        if (window.DrawerRouter?.canGoBack() || options.showBackButton !== false && !window.DrawerRouter) {
+            const backAction = window.DrawerRouter ? 'DrawerRouter.back()' : 'returnToMatchFromTeamDrawer()';
+            header?.insertAdjacentHTML('afterbegin', `<button class="match-drawer-back" type="button" aria-label="Back to previous drawer" onclick="${backAction}">‹</button>`);
+        }
         if (title) title.textContent = getShortTeamNameForDrawer(teamName, options);
         if (content) content.innerHTML = render(teamName, options);
     }

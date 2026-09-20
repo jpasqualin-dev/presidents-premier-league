@@ -149,11 +149,22 @@
     };
 
     window.openSharedMatchDrawer = async function (matchId, options = {}) {
+        if (window.DrawerRouter && !options.skipRouter) {
+            return window.DrawerRouter.open({
+                type: 'match',
+                id: String(matchId),
+                render: () => window.openSharedMatchDrawer(matchId, { ...options, skipRouter: true })
+            });
+        }
+
         const overlay = document.getElementById('match-drawer-overlay'), drawer = overlay.querySelector('.match-drawer'), content = document.getElementById('match-detail-content');
         const header = overlay.querySelector('.match-drawer-header');
         header?.classList.remove('weekly-mode');
         header?.querySelector('.match-drawer-back')?.remove();
-        if (header && options.backButtonMarkup) header.insertAdjacentHTML('afterbegin', options.backButtonMarkup);
+        const backButtonMarkup = window.DrawerRouter?.canGoBack()
+            ? '<button class="match-drawer-back" type="button" aria-label="Back to previous drawer" onclick="DrawerRouter.back()">‹</button>'
+            : options.backButtonMarkup || '';
+        if (header && backButtonMarkup) header.insertAdjacentHTML('afterbegin', backButtonMarkup);
         document.getElementById('match-drawer-title').textContent = 'Match details';
         drawer.scrollTop = 0; overlay.classList.add('is-open'); overlay.setAttribute('aria-hidden', 'false'); document.body.classList.add('drawer-open'); content.innerHTML = '<p class="empty-detail">Loading match details...</p>';
         try { content.innerHTML = window.renderSharedMatchDetail(await window.fetchSharedMatchById(matchId)); }
@@ -162,6 +173,7 @@
 
     window.closeSharedMatchDrawer = function (event) {
         if (event && event.target.id !== 'match-drawer-overlay') return;
+        window.DrawerRouter?.closeAll();
         const overlay = document.getElementById('match-drawer-overlay'); overlay.classList.remove('is-open'); overlay.setAttribute('aria-hidden', 'true'); document.body.classList.remove('drawer-open');
         overlay.querySelector('.match-drawer-back')?.remove();
         overlay.querySelector('.match-drawer-header')?.classList.remove('weekly-mode');

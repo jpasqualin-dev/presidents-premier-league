@@ -434,6 +434,7 @@
 
 <script src="theme.js"></script>
 <script src="match-data.js"></script>
+<script src="drawer-router.js"></script>
 <script src="match-drawer-shared.js"></script>
 <script src="team-drawer-shared.js"></script>
 <script>
@@ -692,7 +693,15 @@
 
     let activeTeamDrawerName = '';
 
-    window.openTeamDrawer = function(teamName) {
+    window.openTeamDrawer = function(teamName, options = {}) {
+        if (window.DrawerRouter && !options.skipRouter) {
+            return window.DrawerRouter.open({
+                type: 'team',
+                teamName,
+                render: () => window.openTeamDrawer(teamName, { skipRouter: true })
+            });
+        }
+
         const team = cachedStats?.allStats?.[teamName];
         if (!team) return;
 
@@ -719,12 +728,22 @@
     };
 
     window.returnToTeamDrawer = function() {
+        const teamName = activeTeamDrawerName;
         window.closeSharedMatchDrawer();
-        if (activeTeamDrawerName) window.openTeamDrawer(activeTeamDrawerName);
+        if (teamName) window.openTeamDrawer(teamName);
     };
+
+    document.addEventListener('drawer-router-closed', () => {
+        const overlay = document.getElementById('team-drawer-overlay');
+        overlay?.classList.remove('is-open');
+        overlay?.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('team-drawer-open');
+        activeTeamDrawerName = '';
+    });
 
     window.closeTeamDrawer = function(event) {
         if (event && event.target.id !== 'team-drawer-overlay') return;
+        window.DrawerRouter?.closeAll();
         const overlay = document.getElementById('team-drawer-overlay');
         overlay.classList.remove('is-open');
         overlay.setAttribute('aria-hidden', 'true');

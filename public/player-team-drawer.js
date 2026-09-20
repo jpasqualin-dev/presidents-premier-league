@@ -60,4 +60,9 @@
     window.returnToTeamDrawer = function () {
         if (teamDrawerTeamName) window.openTeamDrawerFromMatch(teamDrawerTeamName);
     };
+
+    document.addEventListener('drawer-router-closed', () => {
+        teamDrawerReturn = false;
+        teamDrawerOpen = false;
+    });
 })();
