@@ -71,6 +71,7 @@
         const teamMatches = (matches || []).filter(match => isPlayed(match) && matchesTeam(match, teamName));
         teamMatches.forEach(match => {
             (match.scorers || []).forEach(scorer => {
+                if (scorer.ownGoal) return;
                 const scorerTeamId = String(scorer.teamProviderId || '');
                 const homeTeamId = String(match.homeTeam.id || match.homeTeam.providerId || '');
                 const awayTeamId = String(match.awayTeam.id || match.awayTeam.providerId || '');
