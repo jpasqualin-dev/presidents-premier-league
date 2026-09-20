@@ -502,6 +502,7 @@
         .icons-container { display: flex; gap: 4px; margin-top: 4px; }
         .team-icon { width: 18px; height: 18px; object-fit: contain; vertical-align: middle; }
         .team-inline { display: inline-flex; align-items: center; gap: 8px; }
+        .team-standings-row { cursor: pointer; }
 
         @media (hover: hover) {
             tr:hover { background-color: #f8f9fa; }
@@ -1547,7 +1548,9 @@
     }
 
     window.openTeamDrawerFromMatch = function(teamName) {
-        matchDrawerTeamReturn = true;
+        const overlay = document.getElementById('match-drawer-overlay');
+        const openedFromMatch = overlay?.classList.contains('is-open');
+        matchDrawerTeamReturn = openedFromMatch;
         teamDrawerTeamName = teamName;
         TeamDrawerShared.openFromMatch(teamName, {
             stats: TeamDrawerShared.buildStats(allMatchesData, Object.values(draftData).flat(), getOwnerOfTeam),
@@ -1557,6 +1560,12 @@
             getOwnerOfTeam,
             openMatch: true
         });
+        if (!openedFromMatch) {
+            overlay?.classList.add('is-open');
+            overlay?.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('drawer-open');
+            overlay?.querySelector('.match-drawer-back')?.remove();
+        }
     };
 
     window.returnToMatchFromTeamDrawer = function() {
@@ -1853,10 +1862,13 @@
                 
                 const teamCellHTML = `<div class="team-inline">${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="crest">` : ''}<div style="line-height: 1.2;"><div style="font-weight: 600; color: #1a1a1a;">${displayName}</div><div style="font-size: 0.70rem; color: #888;">${t.owner}</div></div></div>`;
 
+                const escapedTeamName = t.team.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                const teamRowAttributes = `class="team-standings-row" role="button" tabindex="0" onclick="openTeamDrawerFromMatch('${escapedTeamName}')" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openTeamDrawerFromMatch('${escapedTeamName}'); }"`;
+
                 if (mode === 'PTS') {
-                    html += `<tr><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PL}</td><td>${t.W}</td><td>${t.D}</td><td>${t.L}</td><td>${t.GF}-${t.GA}</td><td>${t.GD > 0 ? '+' + t.GD : t.GD}</td><td><strong>${t.PTS}</strong></td></tr>`;
+                    html += `<tr ${teamRowAttributes}><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PL}</td><td>${t.W}</td><td>${t.D}</td><td>${t.L}</td><td>${t.GF}-${t.GA}</td><td>${t.GD > 0 ? '+' + t.GD : t.GD}</td><td><strong>${t.PTS}</strong></td></tr>`;
                 } else {
-                    html += `<tr><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PTS}</td><td>${t.pvpWins}</td><td>${t.PGA > 0 ? '+' + t.PGA : t.PGA}</td><td class="highlight-col">${t.ptsPga}</td></tr>`;
+                    html += `<tr ${teamRowAttributes}><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PTS}</td><td>${t.pvpWins}</td><td>${t.PGA > 0 ? '+' + t.PGA : t.PGA}</td><td class="highlight-col">${t.ptsPga}</td></tr>`;
                 }
             });
 

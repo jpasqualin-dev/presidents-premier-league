@@ -434,6 +434,7 @@
 
 <script src="theme.js"></script>
 <script src="match-data.js"></script>
+<script src="match-drawer-shared.js"></script>
 <script src="team-drawer-shared.js"></script>
 <script>
     // --- Data Definitions (Shared with Index Page) ---
@@ -585,11 +586,15 @@
         return [...teamsArray].sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
     }
 
+    function getTeamRowAttributes(teamName) {
+        const escapedTeamName = teamName.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        return `class="team-standings-row" role="button" tabindex="0" onclick="openTeamDrawer('${escapedTeamName}')" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openTeamDrawer('${escapedTeamName}'); }"`;
+    }
+
     function renderStandingsCard(title, teamsArray) {
         const sorted = sortTeams(teamsArray);
 
         if (title !== 'DVP') {
-            const isOverall = title === 'Overall Standings';
             let headerHtml = `
                 <div class="table-wrapper table-card standings-header" style="margin-top: 0px;">
                     <table id="standings-table-header" class="overall-standings-table">
@@ -614,7 +619,7 @@
                 const displayName = getShortTeamName(t.team);
                 const logo = getLogoByName(t.team);
                 headerHtml += `
-                    <tr${isOverall ? ` class="team-standings-row" role="button" tabindex="0" onclick="openTeamDrawer('${t.team}')" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openTeamDrawer('${t.team}'); }"` : ''}>
+                    <tr ${getTeamRowAttributes(t.team)}>
                         <td class="fotmob-rank">${idx + 1}</td>
                         <td class="text-left">
                             <div class="team-inline">
@@ -659,7 +664,7 @@
             const displayName = getShortTeamName(t.team);
             const logo = getLogoByName(t.team);
             html += `
-                <tr>
+                <tr ${getTeamRowAttributes(t.team)}>
                     <td class="fotmob-rank">${idx + 1}</td>
                     <td class="text-left">
                         <div class="team-inline">
@@ -696,7 +701,8 @@
             matches: cachedMatches,
             getLogoByName,
             getShortTeamName,
-            getOwnerOfTeam
+            getOwnerOfTeam,
+            openMatch: true
         });
         overlay.classList.add('is-open');
         overlay.setAttribute('aria-hidden', 'false');
@@ -778,7 +784,7 @@
             const logo = getLogoByName(t.team);
 
             rankHtml += `
-                <tr>
+                <tr ${getTeamRowAttributes(t.team)}>
                     <td class="fotmob-rank">${rank}</td>
                     <td class="text-left">
                         <div class="team-inline">
@@ -877,7 +883,7 @@
                 const logo = getLogoByName(teamName);
 
                 playerHtml += `
-                    <tr class="nested-table-row ${targetClass}">
+                    <tr class="nested-table-row ${targetClass}" ${getTeamRowAttributes(teamName)}>
                         <td></td>
                         <td class="text-left">
                             <div style="display: flex; align-items: center; gap: 8px; padding-left: 10px; flex-wrap: wrap;">

@@ -170,6 +170,8 @@
 
     window.closeMatchDrawer = window.closeSharedMatchDrawer;
 
+    if (typeof window.openMatchDrawer !== 'function') window.openMatchDrawer = window.openSharedMatchDrawer;
+
     window.bindSharedMatchRows = function (container) {
         container.querySelectorAll('[data-match-id]').forEach(row => {
             row.addEventListener('click', () => window.openSharedMatchDrawer(row.dataset.matchId));
