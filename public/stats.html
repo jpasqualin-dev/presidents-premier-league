@@ -1006,8 +1006,7 @@
                             }
                         }
 
-                        for (const scorer of match.scorers || []) {
-                            if (scorer.ownGoal) continue;
+                        for (const scorer of window.getIndividualScoringEvents(match.scorers)) {
                             const scorerName = scorer.athleteName || 'Unknown scorer';
                             const scorerKey = scorer.athleteProviderId || scorerName;
                             const scorerTeam = scorer.teamProviderId === match.homeTeam.id ? homeTeamName
@@ -1124,8 +1123,7 @@
                             }
                         }
 
-                        for (const scorer of match.scorers || []) {
-                            if (scorer.ownGoal) continue;
+                        for (const scorer of window.getIndividualScoringEvents(match.scorers)) {
                             if (!scorer.assistName && !scorer.assistProviderId) continue;
                             const assistingTeam = scorer.teamProviderId === match.homeTeam.id ? homeTeamKey : scorer.teamProviderId === match.awayTeam.id ? awayTeamKey : null;
                             const assistingPlayer = assistingTeam ? teamStats[assistingTeam]?.owner : null;

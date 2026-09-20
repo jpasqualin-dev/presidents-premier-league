@@ -15,10 +15,13 @@
     }
 
     function matchesTeam(match, teamName) {
-        const name = teamName.toLowerCase();
-        const home = match.homeTeam.name.toLowerCase();
-        const away = match.awayTeam.name.toLowerCase();
-        return home.includes(name) || name.includes(home) || away.includes(name) || name.includes(away);
+        return sameTeam(match.homeTeam.name, teamName) || sameTeam(match.awayTeam.name, teamName);
+    }
+
+    function sameTeam(leftName, rightName) {
+        const left = String(leftName || '').toLowerCase();
+        const right = String(rightName || '').toLowerCase();
+        return left.includes(right) || right.includes(left);
     }
 
     function buildStats(matches, teamNames, getOwnerOfTeam) {
@@ -70,13 +73,12 @@
         const players = {};
         const teamMatches = (matches || []).filter(match => isPlayed(match) && matchesTeam(match, teamName));
         teamMatches.forEach(match => {
-            (match.scorers || []).forEach(scorer => {
-                if (scorer.ownGoal) return;
+            window.getIndividualScoringEvents(match.scorers).forEach(scorer => {
                 const scorerTeamId = String(scorer.teamProviderId || '');
                 const homeTeamId = String(match.homeTeam.id || match.homeTeam.providerId || '');
                 const awayTeamId = String(match.awayTeam.id || match.awayTeam.providerId || '');
                 const scorerTeam = scorerTeamId === homeTeamId ? match.homeTeam.name : scorerTeamId === awayTeamId ? match.awayTeam.name : '';
-                if (!scorerTeam || !matchesTeam({ homeTeam: { name: scorerTeam }, awayTeam: { name: teamName } }, teamName)) return;
+                if (!scorerTeam || !sameTeam(scorerTeam, teamName)) return;
                 const scorerKey = String(scorer.athleteProviderId || scorer.athleteName || 'Unknown scorer');
                 if (!players[scorerKey]) players[scorerKey] = { name: scorer.athleteName || 'Unknown scorer', goals: 0, assists: 0 };
                 players[scorerKey].goals += 1;

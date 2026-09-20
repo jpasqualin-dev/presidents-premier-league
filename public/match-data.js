@@ -183,5 +183,6 @@
     });
 
     window.DataManager = { config, getMatchData, refresh, subscribe, start };
+    window.getIndividualScoringEvents = scorers => (scorers || []).filter(scorer => scorer?.ownGoal !== true);
     window.getMatchData = getMatchData;
 })();
