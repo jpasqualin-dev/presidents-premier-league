@@ -1,5 +1,6 @@
 const { neon } = require('@neondatabase/serverless');
 const { getMatchday } = require('../lib/match-contract');
+const { crestForTeam } = require('../lib/team-names');
 const { dedupeByKey } = require('../lib/match-aggregation');
 
 const ESPN_ENDPOINT = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard';
@@ -160,12 +161,12 @@ async function syncEvent(sql, event) {
         WHERE provider = 'espn' AND provider_event_id = ${String(event.id)}`;
     const [homeTeam] = await sql`
         INSERT INTO teams (provider, provider_team_id, canonical_name, short_name, owner_name, division, logo_url)
-        VALUES ('espn', ${String(home.team.id)}, ${homeName}, ${home.team.shortDisplayName || home.team.abbreviation}, ${homeOwner[0]}, ${homeOwner[1]}, ${home.team.logo || null})
+        VALUES ('espn', ${String(home.team.id)}, ${homeName}, ${home.team.shortDisplayName || home.team.abbreviation}, ${homeOwner[0]}, ${homeOwner[1]}, ${crestForTeam(homeName, home.team.id)})
         ON CONFLICT (canonical_name) DO UPDATE SET provider = EXCLUDED.provider, provider_team_id = EXCLUDED.provider_team_id, short_name = EXCLUDED.short_name, owner_name = EXCLUDED.owner_name, division = EXCLUDED.division, logo_url = EXCLUDED.logo_url, updated_at = NOW()
         RETURNING id`;
     const [awayTeam] = await sql`
         INSERT INTO teams (provider, provider_team_id, canonical_name, short_name, owner_name, division, logo_url)
-        VALUES ('espn', ${String(away.team.id)}, ${awayName}, ${away.team.shortDisplayName || away.team.abbreviation}, ${awayOwner[0]}, ${awayOwner[1]}, ${away.team.logo || null})
+        VALUES ('espn', ${String(away.team.id)}, ${awayName}, ${away.team.shortDisplayName || away.team.abbreviation}, ${awayOwner[0]}, ${awayOwner[1]}, ${crestForTeam(awayName, away.team.id)})
         ON CONFLICT (canonical_name) DO UPDATE SET provider = EXCLUDED.provider, provider_team_id = EXCLUDED.provider_team_id, short_name = EXCLUDED.short_name, owner_name = EXCLUDED.owner_name, division = EXCLUDED.division, logo_url = EXCLUDED.logo_url, updated_at = NOW()
         RETURNING id`;
     const [match] = await sql`

@@ -1,5 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const teams = require('../public/data/teams.json');
 const matchData = require('../data/matches.json');
 const { resolveTeam, longTeamName, shortTeamName, crestForTeam } = require('../lib/team-names');
@@ -13,7 +15,8 @@ test('team registry has 20 unique complete entries', () => {
         assert.ok(team.id);
         assert.ok(team.longName);
         assert.ok(team.shortName);
-        assert.ok(team.crest);
+        assert.match(team.crest, new RegExp(`^/assets/crests/${team.id}\\.png$`));
+        assert.ok(fs.statSync(path.join(__dirname, '..', 'public', team.crest.slice(1))).size > 0);
     });
 });
 

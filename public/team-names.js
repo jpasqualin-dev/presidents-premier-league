@@ -44,11 +44,23 @@
         return resolve(name, providerId)?.crest || '';
     }
 
+    function logoMap() {
+        return new Proxy({}, {
+            get: (_, property) => typeof property === 'string' ? crest(property) : undefined,
+            ownKeys: () => teams.map(team => team.longName),
+            getOwnPropertyDescriptor: () => ({ enumerable: true, configurable: true })
+        });
+    }
+
     function normalizeMatch(match) {
+        const homeName = longName(match.homeTeam?.name, match.homeTeam?.id || match.homeTeam?.providerId);
+        const awayName = longName(match.awayTeam?.name, match.awayTeam?.id || match.awayTeam?.providerId);
+        const homeCrest = crest(homeName, match.homeTeam?.id || match.homeTeam?.providerId);
+        const awayCrest = crest(awayName, match.awayTeam?.id || match.awayTeam?.providerId);
         return {
             ...match,
-            homeTeam: { ...match.homeTeam, name: longName(match.homeTeam?.name, match.homeTeam?.id || match.homeTeam?.providerId) },
-            awayTeam: { ...match.awayTeam, name: longName(match.awayTeam?.name, match.awayTeam?.id || match.awayTeam?.providerId) }
+            homeTeam: { ...match.homeTeam, name: homeName, crest: homeCrest, logo: homeCrest },
+            awayTeam: { ...match.awayTeam, name: awayName, crest: awayCrest, logo: awayCrest }
         };
     }
 
@@ -67,5 +79,5 @@
         return logoMap;
     }
 
-    window.TeamNames = { get teams() { return teams; }, ready, resolve, longName, shortName, crest, normalizeMatch, addAliases };
+    window.TeamNames = { get teams() { return teams; }, ready, resolve, longName, shortName, crest, logoMap, normalizeMatch, addAliases };
 })();
