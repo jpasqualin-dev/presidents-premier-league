@@ -99,7 +99,7 @@ body.dark-mode {
 }
 
 body.dark-mode img[src$="/367.png"] {
-    filter: drop-shadow(0 0 1px #ffffff) drop-shadow(0 0 1px #ffffff);
+    filter: drop-shadow(1px 0 0 #ffffff) drop-shadow(-1px 0 0 #ffffff) drop-shadow(0 1px 0 #ffffff) drop-shadow(0 -1px 0 #ffffff);
 }
 
 .header-container .theme-toggle {
