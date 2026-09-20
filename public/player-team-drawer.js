@@ -18,12 +18,13 @@
     window.openTeamDrawerFromMatch = function (teamName) {
         const overlay = document.getElementById('match-drawer-overlay');
         const openedFromMatch = overlay?.classList.contains('is-open');
+        const matches = window.matchDrawerMatches || window.playerMatches || [];
         teamDrawerReturn = openedFromMatch;
         teamDrawerOpen = true;
         teamDrawerTeamName = teamName;
         TeamDrawerShared.openFromMatch(teamName, {
-            stats: TeamDrawerShared.buildStats(window.playerMatches || [], Object.values(draftData).flat(), getOwnerOfTeam),
-            matches: window.playerMatches || [],
+            stats: TeamDrawerShared.buildStats(matches, Object.values(draftData).flat(), getOwnerOfTeam),
+            matches,
             getLogoByName,
             getShortTeamName,
             getOwnerOfTeam,
