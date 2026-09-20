@@ -17,6 +17,7 @@
     --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --header-purple: #38003c;
     --brand-color: #38003c;
+    --title-color: #38003c;
     --nav-hover-bg: #f0fff4;
     --nav-hover-border: #c6f6d5;
     --card-shadow: 0 3px 10px rgba(56,0,60,0.08);
@@ -53,7 +54,7 @@
 
 .header-container h1 {
     margin: 0;
-    color: #38003c;
+    color: var(--title-color);
     font-size: 1.45rem;
     font-weight: 700;
     line-height: 1.05;
@@ -87,6 +88,7 @@ body.dark-mode {
     --pill-active: #202020;
     --border-color: #3d3d3d;
     --brand-color: #f2f2f2;
+    --title-color: #f1f1f1;
     --nav-hover-bg: #2a2a2a;
     --nav-hover-border: #4b4b4b;
     --card-shadow: 0 3px 10px rgba(0,0,0,0.35);
@@ -124,7 +126,7 @@ body.dark-mode {
 }
 
 .mw-title {
-    color: #38003c;
+    color: var(--title-color);
 }
 
 .mw-header {
