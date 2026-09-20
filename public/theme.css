@@ -1,3 +1,11 @@
+/* Shared page surfaces */
+:root {
+    --page-bg: #f4f6f8;
+    --surface-bg: #ffffff;
+    --sticky-bg: #ffffff;
+    --mask-bg: #ffffff;
+}
+
 /* Shared page header */
 .header-container {
     position: relative;
@@ -5,7 +13,7 @@
     min-height: 60px;
     margin: 0;
     border-radius: 4px;
-    background-color: #f4f6f8;
+    background-color: var(--page-bg);
     background-image: url("header-background_new.png");
     background-size: cover;
     background-position: center;
@@ -51,6 +59,10 @@ body.wide-page .header-container { margin: 16px 16px 0; }
 }
 
 body.dark-mode {
+    --page-bg: #121212;
+    --surface-bg: #202020;
+    --sticky-bg: #121212;
+    --mask-bg: #121212;
     --bg-color: #121212;
     --card-bg: #202020;
     --text-main: #f1f1f1;
@@ -58,7 +70,7 @@ body.dark-mode {
     --pill-active: #202020;
     --border-color: #3d3d3d;
     color-scheme: dark;
-    background: #121212;
+    background: var(--page-bg);
     color: #e6e6e6;
 }
 
@@ -102,16 +114,16 @@ body.dark-mode {
 }
 
 body.dark-mode .header-container {
-    background-color: #232323;
+    background-color: var(--surface-bg);
     background-blend-mode: soft-light;
 }
 
 body.dark-mode .site-menu,
 body.dark-mode .sticky-nav-wrapper {
-    background: #121212;
+    background: var(--sticky-bg);
 }
 
-body.dark-mode::before { background: #121212; }
+body.dark-mode::before { background: var(--mask-bg); }
 
 body.dark-mode h1,
 body.dark-mode h2,

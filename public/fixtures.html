@@ -23,14 +23,12 @@
 
         * {
             box-sizing: border-box;
-        const openedFromMatch = document.getElementById('match-drawer-overlay')?.classList.contains('is-open');
-        matchDrawerTeamReturn = openedFromMatch;
             padding: 0;
         }
 
         body {
             font-family: var(--font-family);
-            background-color: var(--bg-color);
+            background-color: var(--page-bg);
             color: var(--text-main);
             -webkit-font-smoothing: antialiased;
         }
@@ -43,7 +41,7 @@
             left: 0;
             height: calc(var(--fixtures-header-top, 0px) + 4px);
             z-index: 39;
-            background: var(--bg-color);
+            background: var(--mask-bg);
             pointer-events: none;
         }
 
@@ -142,7 +140,7 @@
             right: 0;
             min-width: 145px;
             padding: 6px;
-            background: #ffffff;
+            background: var(--surface-bg);
             border: 1px solid #dfe5eb;
             border-radius: 6px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.12);
@@ -160,7 +158,7 @@
         }
 
         @media (hover: hover) {
-            .players-dropdown a:hover { background: #f4f6f8; border-color: transparent; }
+            .players-dropdown a:hover { background: var(--page-bg); border-color: transparent; }
         }
 
         /* Navigation Pills */

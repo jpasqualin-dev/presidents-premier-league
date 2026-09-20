@@ -53,20 +53,20 @@
 
         const navigationStyles = document.createElement('style');
         navigationStyles.textContent = `
-            html { background: #ffffff; }
-            html:has(body.dark-mode) { background: #121212; }
+            html { background: var(--page-bg); }
+            html:has(body.dark-mode) { background: var(--page-bg); }
             body { --menu-page-pad: 16px; --menu-max-width: 600px; }
-            body:not(.dark-mode) { background-color: #ffffff; }
+            body:not(.dark-mode) { background-color: var(--page-bg); }
             body.wide-page { --menu-max-width: 800px; }
-            .menu-backdrop { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: min(calc(100vw - 2 * var(--menu-page-pad)), var(--menu-max-width)); height: 5px; background: rgba(255,255,255,0.96); z-index: 15; pointer-events: none; }
+            .menu-backdrop { position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: min(calc(100vw - 2 * var(--menu-page-pad)), var(--menu-max-width)); height: 5px; background: var(--mask-bg); z-index: 15; pointer-events: none; }
             .header-container .theme-toggle:focus-visible { outline-offset: 3px; }
-            .site-menu { position: sticky; top: 0; z-index: 20; height: auto; padding: 10px 3px 12px; margin-bottom: 0; background: #ffffff; border: 0; border-radius: 0; box-shadow: none; }
+            .site-menu { position: sticky; top: 0; z-index: 20; height: auto; padding: 10px 3px 12px; margin-bottom: 0; background: var(--sticky-bg); border: 0; border-radius: 0; box-shadow: none; }
             .site-menu a, .players-menu summary { color: #38003c; }
             .players-menu[open] summary { background: #f0fff4; border-color: #c6f6d5; }
             .site-menu a.active::after, .players-menu summary.active::before { right: 8px; left: 8px; background: #38003c; }
             body.wide-page .site-menu { margin: 0 16px; }
             body.wide-page .sticky-nav-wrapper { position: static; background: transparent; }
-            body.wide-page .pills-nav-container { position: sticky; top: var(--primary-menu-height, 36px); z-index: 19; padding: 2px 20px 10px; background: #ffffff; }
+            body.wide-page .pills-nav-container { position: sticky; top: var(--primary-menu-height, 36px); z-index: 19; padding: 2px 20px 10px; background: var(--sticky-bg); }
             body:not(.wide-page) .profile-card { top: var(--primary-menu-height, 36px); z-index: 19; }
             body.wide-page::before { display: none; }
             @media (hover: hover) { .site-menu a:hover, .players-menu summary:hover { background: #f0fff4; border-color: #c6f6d5; } }
@@ -74,8 +74,8 @@
                 body { --menu-page-pad: 10px; }
                 body.wide-page .site-menu { margin: 0 10px; }
             }
-            body.dark-mode .menu-backdrop, body.dark-mode .site-menu { background: #121212; }
-            body.dark-mode.wide-page .pills-nav-container { background: #121212; }
+            body.dark-mode .menu-backdrop, body.dark-mode .site-menu { background: var(--sticky-bg); }
+            body.dark-mode.wide-page .pills-nav-container { background: var(--sticky-bg); }
             body.dark-mode .site-menu a, body.dark-mode .players-menu summary { color: #f2f2f2; }
             body.dark-mode .site-menu a.active::after, body.dark-mode .players-menu summary.active::before { background: #00ff87; }
             body.dark-mode .players-menu[open] summary { background: #2a2a2a; border-color: #4b4b4b; }

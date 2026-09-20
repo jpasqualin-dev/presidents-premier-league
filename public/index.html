@@ -33,7 +33,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #fff;
+            background-color: var(--page-bg);
             color: #333;
             margin: 0;
             padding: 16px;
@@ -120,7 +120,7 @@
             right: 0;
             min-width: 145px;
             padding: 6px;
-            background: #ffffff;
+            background: var(--surface-bg);
             border: 1px solid #dfe5eb;
             border-radius: 6px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.12);
@@ -138,14 +138,14 @@
 
         @media (hover: hover) {
             .players-dropdown a:hover {
-                background: #f4f6f8;
+                background: var(--page-bg);
                 border-color: transparent;
             }
         }
 
         /* FotMob Style Matchday Card */
         .today-card {
-            background: #ffffff;
+            background: var(--surface-bg);
             border-radius: 16px;
             border: 1px solid #dfe5eb;
             margin-bottom: 18px;

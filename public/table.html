@@ -26,7 +26,7 @@
 
         body {
             font-family: var(--font-family);
-            background-color: var(--bg-color);
+            background-color: var(--page-bg);
             color: var(--text-main);
             -webkit-font-smoothing: antialiased;
         }
@@ -39,7 +39,7 @@
             left: 0;
             height: calc(var(--fixtures-header-top, 0px) + 4px);
             z-index: 39;
-            background: var(--bg-color);
+            background: var(--mask-bg);
             pointer-events: none;
         }
 
@@ -55,7 +55,7 @@
             position: sticky;
             top: calc(var(--fixtures-header-height, 65px) + 21px);
             z-index: 40;
-            background-color: var(--bg-color);
+            background-color: var(--sticky-bg);
         }
 
         .site-menu {
@@ -133,7 +133,7 @@
             right: 0;
             min-width: 145px;
             padding: 6px;
-            background: #ffffff;
+            background: var(--surface-bg);
             border: 1px solid #dfe5eb;
             border-radius: 6px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.12);
@@ -238,13 +238,13 @@
             left: 0;
             height: calc(var(--overall-standings-header-height, 0px) + 12px);
             z-index: 17;
-            background: #ffffff;
+            background: var(--mask-bg);
             pointer-events: none;
         }
 
         .standings-backdrop.visible { display: block; }
 
-        body.dark-mode .standings-backdrop { background: #121212; }
+        body.dark-mode .standings-backdrop { background: var(--mask-bg); }
 
         .standings-body {
             margin-top: 0;
@@ -265,7 +265,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            background: #ffffff;
+            background: var(--surface-bg);
             font-size: 0.9rem;
             white-space: nowrap;
         }
@@ -277,7 +277,7 @@
         }
 
         th {
-            background-color: #fff;
+            background-color: var(--surface-bg);
             color: #666;
             font-weight: 500;
             font-size: 0.8rem;
