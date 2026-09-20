@@ -19,6 +19,7 @@
     --brand-color: #38003c;
     --nav-hover-bg: #f0fff4;
     --nav-hover-border: #c6f6d5;
+    --card-shadow: 0 3px 10px rgba(56,0,60,0.08);
 }
 
 /* Shared page header */
@@ -87,6 +88,7 @@ body.dark-mode {
     --brand-color: #f2f2f2;
     --nav-hover-bg: #2a2a2a;
     --nav-hover-border: #4b4b4b;
+    --card-shadow: 0 3px 10px rgba(0,0,0,0.35);
     color-scheme: dark;
     background: var(--page-bg);
     color: #e6e6e6;
@@ -116,7 +118,7 @@ body.dark-mode {
 .loading-state {
     border: 1px solid #dfe5eb;
     border-radius: 8px;
-    box-shadow: 0 3px 10px rgba(56,0,60,0.08);
+    box-shadow: var(--card-shadow);
 }
 
 .mw-title {
@@ -199,7 +201,7 @@ body.dark-mode .stat-card,
 body.dark-mode .profile-card,
 body.dark-mode .mw-card,
 body.dark-mode .loading-state {
-    box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+    box-shadow: var(--card-shadow);
 }
 
 body.dark-mode .players-dropdown,
