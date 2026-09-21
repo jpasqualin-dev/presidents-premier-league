@@ -16,6 +16,13 @@
 
     ensureSharedDrawer();
 
+        window.resetSharedMatchDrawerHeader = function () {
+            const header = document.querySelector('#match-drawer-overlay .match-drawer-header');
+            if (!header) return;
+            header.classList.remove('weekly-mode');
+            header.innerHTML = '<span class="match-drawer-title" id="match-drawer-title">Match details</span><button class="match-drawer-close" type="button" aria-label="Close match details" onclick="closeMatchDrawer()">&times;</button>';
+        };
+
     const eventText = value => String(value || '').trim().toLowerCase();
 
     window.dedupeDrawerEvents = function (events) {
@@ -158,9 +165,8 @@
         }
 
         const overlay = document.getElementById('match-drawer-overlay'), drawer = overlay.querySelector('.match-drawer'), content = document.getElementById('match-detail-content');
+        window.resetSharedMatchDrawerHeader();
         const header = overlay.querySelector('.match-drawer-header');
-        header?.classList.remove('weekly-mode');
-        header?.querySelector('.match-drawer-back')?.remove();
         const backButtonMarkup = window.DrawerRouter?.canGoBack()
             ? '<button class="match-drawer-back" type="button" aria-label="Back to previous drawer" onclick="DrawerRouter.back()">‹</button>'
             : options.backButtonMarkup || '';
@@ -175,9 +181,7 @@
         if (event && event.target.id !== 'match-drawer-overlay') return;
         window.DrawerRouter?.closeAll();
         const overlay = document.getElementById('match-drawer-overlay'); overlay.classList.remove('is-open'); overlay.setAttribute('aria-hidden', 'true'); document.body.classList.remove('drawer-open');
-        overlay.querySelector('.match-drawer-back')?.remove();
-        overlay.querySelector('.match-drawer-header')?.classList.remove('weekly-mode');
-        const title = document.getElementById('match-drawer-title'); if (title) title.textContent = 'Match details';
+        window.resetSharedMatchDrawerHeader();
     };
 
     window.closeMatchDrawer = window.closeSharedMatchDrawer;
