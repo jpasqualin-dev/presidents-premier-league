@@ -1040,13 +1040,17 @@
 
         const achievementDetails = week.ownerDetails.filter(owner => owner.achievements.length);
         const leaderText = achievementDetails.length ? achievementDetails.map(owner => `${escapeHtml(owner.owner)} <span class="weekly-stars" aria-label="${owner.stars} gold star${owner.stars === 1 ? '' : 's'}">${'★'.repeat(owner.stars)}</span>`).join(' <span aria-hidden="true">·</span> ') : 'No completed matches yet';
-        const isCurrentWeek = weeklyCardWeekIndex === getCurrentWeeklyCardIndex(weeklyCardWeeks);
-        container.innerHTML = `<div class="today-card" role="button" tabindex="0" aria-label="View PPL Matchweek ${escapeHtml(String(week.week))} details" onclick="openWeeklyDrawer()" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openWeeklyDrawer(); }"><div class="today-header"><div class="today-header-left"><span class="today-header-text">PPL Matchweek ${escapeHtml(String(week.week))}</span></div><div class="matchday-nav"><button class="nav-btn ${weeklyCardWeekIndex <= 0 ? 'disabled' : ''}" type="button" aria-label="View previous week" onclick="event.stopPropagation(); changeWeeklyCardWeek(-1)" ${weeklyCardWeekIndex <= 0 ? 'disabled' : ''}>❮</button><button class="nav-btn ${isCurrentWeek ? 'disabled' : ''}" type="button" aria-label="View next week" onclick="event.stopPropagation(); changeWeeklyCardWeek(1)" ${isCurrentWeek ? 'disabled' : ''}>❯</button></div></div><div class="weekly-leader-row">${leaderText}</div></div>`;
+        const latestResultsIndex = weeklyCardWeeks.reduce((latest, item, index) => item.completedMatches.length ? index : latest, -1);
+        const isCurrentWeek = weeklyCardWeekIndex >= latestResultsIndex;
+        const hasResults = week.completedMatches.length > 0;
+        const cardAttributes = hasResults ? 'role="button" tabindex="0" aria-label="View PPL Matchweek details" onclick="openWeeklyDrawer()" onkeydown="if (event.key === \'Enter\' || event.key === \' \') { event.preventDefault(); openWeeklyDrawer(); }"' : 'aria-disabled="true"';
+        container.innerHTML = `<div class="today-card" ${cardAttributes}><div class="today-header"><div class="today-header-left"><span class="today-header-text">PPL Matchweek ${escapeHtml(String(week.week))}</span></div><div class="matchday-nav"><button class="nav-btn ${weeklyCardWeekIndex <= 0 ? 'disabled' : ''}" type="button" aria-label="View previous week" onclick="event.stopPropagation(); changeWeeklyCardWeek(-1)" ${weeklyCardWeekIndex <= 0 ? 'disabled' : ''}>❮</button><button class="nav-btn ${isCurrentWeek ? 'disabled' : ''}" type="button" aria-label="View next week" onclick="event.stopPropagation(); changeWeeklyCardWeek(1)" ${isCurrentWeek ? 'disabled' : ''}>❯</button></div></div><div class="weekly-leader-row">${leaderText}</div></div>`;
     }
 
     window.changeWeeklyCardWeek = function(direction) {
         const nextIndex = weeklyCardWeekIndex + direction;
-        if (nextIndex < 0 || nextIndex >= weeklyCardWeeks.length) return;
+        const latestResultsIndex = weeklyCardWeeks.reduce((latest, item, index) => item.completedMatches.length ? index : latest, -1);
+        if (nextIndex < 0 || nextIndex > latestResultsIndex) return;
         weeklyCardWeekIndex = nextIndex;
         weeklyFormExpanded.clear();
         renderWeeklyCard();
