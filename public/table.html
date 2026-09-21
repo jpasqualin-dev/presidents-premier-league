@@ -667,7 +667,7 @@
 
         activeTeamDrawerName = teamName;
         const overlay = document.getElementById('team-drawer-overlay');
-        document.getElementById('team-drawer-title').textContent = getShortTeamName(team.team);
+        document.getElementById('team-drawer-title').textContent = TeamNames.longName(team.team);
         document.getElementById('team-drawer-content').innerHTML = TeamDrawerShared.render(team.team, {
             stats: TeamDrawerShared.buildStats(cachedMatches, Object.values(draftData).flat(), getOwnerOfTeam),
             matches: cachedMatches,
