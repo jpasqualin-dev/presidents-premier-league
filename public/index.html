@@ -848,9 +848,9 @@
         <aside class="match-drawer" role="dialog" aria-modal="true" aria-labelledby="match-drawer-title" onclick="event.stopPropagation()">
             <div class="match-drawer-header">
                 <div class="weekly-drawer-nav" id="weekly-drawer-nav">
-                    <button class="drawer-week-btn" id="weekly-drawer-prev" type="button" aria-label="View previous week" onclick="changeWeeklyDrawerWeek(-1)">‹</button>
+                    <button class="drawer-week-btn" id="weekly-drawer-prev" type="button" aria-label="View previous week" onclick="PplWeeklyDrawer.changeWeek(-1)">‹</button>
                     <span class="match-drawer-title" id="weekly-drawer-title">Week</span>
-                    <button class="drawer-week-btn" id="weekly-drawer-next" type="button" aria-label="View next week" onclick="changeWeeklyDrawerWeek(1)">›</button>
+                    <button class="drawer-week-btn" id="weekly-drawer-next" type="button" aria-label="View next week" onclick="PplWeeklyDrawer.changeWeek(1)">›</button>
                 </div>
                 <span class="match-drawer-title" id="match-drawer-title">Match details</span>
                 <button class="match-drawer-close" type="button" aria-label="Close match details" onclick="closeMatchDrawer()">&times;</button>
@@ -1542,44 +1542,6 @@
         if (teamDrawerTeamName) openTeamDrawerFromMatch(teamDrawerTeamName);
     };
 
-    function renderWeeklyDetail(week) {
-        if (!week) return '<section class="match-detail-section"><p class="empty-detail">No weekly results yet.</p></section>';
-        const ownerSections = week.ownerDetails.map((owner, ownerIndex) => {
-            const goalDifferenceClass = owner.goalDifference > 0 ? 'pill-green' : owner.goalDifference < 0 ? 'pill-red' : 'pill-gray';
-            const goalDifference = `${owner.goalDifference > 0 ? '+' : ''}${owner.goalDifference}`;
-            const expanded = weeklyFormExpanded.has(`${week.week}:${owner.owner}`);
-            const ownerTeams = draftData[owner.owner] || [];
-            const matchesOwnedByTeam = (teamName, match) => teamName.toLowerCase().includes(match.name.toLowerCase()) || match.name.toLowerCase().includes(teamName.toLowerCase());
-            const formMatches = ownerTeams.flatMap(teamName => week.matches
-                .filter(match => matchesOwnedByTeam(teamName, match.homeTeam) || matchesOwnedByTeam(teamName, match.awayTeam))
-                .map(match => ({ match, ownerIsHome: matchesOwnedByTeam(teamName, match.homeTeam) })))
-                .sort((entryA, entryB) => new Date(entryA.match.utcDate) - new Date(entryB.match.utcDate));
-            const form = formMatches.map(({ match, ownerIsHome }) => {
-                const ownerTeam = ownerIsHome ? match.homeTeam : match.awayTeam;
-                const opponentTeam = ownerIsHome ? match.awayTeam : match.homeTeam;
-                const ownerScore = ownerIsHome ? match.score?.fullTime?.home : match.score?.fullTime?.away;
-                const opponentScore = ownerIsHome ? match.score?.fullTime?.away : match.score?.fullTime?.home;
-                const hasScore = isCompletedMatch(match) && ownerScore != null && opponentScore != null;
-                const scoreClass = hasScore ? ownerScore > opponentScore ? ' weekly-form-score-win' : ownerScore < opponentScore ? ' weekly-form-score-loss' : ' weekly-form-score-draw' : '';
-                const ownerLogo = getLogoByName(ownerTeam.name) || ownerTeam.crest || '';
-                const opponentLogo = getLogoByName(opponentTeam.name) || opponentTeam.crest || '';
-                const opponentOwner = getOwnerOfTeam(opponentTeam.name) || '';
-                const date = match.utcDate ? new Date(match.utcDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
-                return `<div class="weekly-form-match" role="button" tabindex="0" aria-label="View details for ${escapeHtml(ownerTeam.name)} versus ${escapeHtml(opponentTeam.name)}" onclick="event.stopPropagation(); openWeeklyMatchDrawer('${escapeHtml(String(match.id))}')" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); openWeeklyMatchDrawer('${escapeHtml(String(match.id))}'); }"><div class="weekly-form-date">${escapeHtml(date)}</div><div class="weekly-form-team">${escapeHtml(getShortTeamName(ownerTeam.name))}</div><div class="weekly-form-venue">${ownerIsHome ? 'HOME' : 'AWAY'}</div>${ownerLogo ? `<img class="weekly-form-crest" src="${escapeHtml(ownerLogo)}" alt="${escapeHtml(ownerTeam.name)} crest">` : '<span class="weekly-form-crest empty"></span>'}<div class="weekly-form-score${scoreClass}">${hasScore ? `${ownerScore} - ${opponentScore}` : ' - '}</div><div class="weekly-form-team">${escapeHtml(getShortTeamName(opponentTeam.name))}</div>${opponentLogo ? `<img class="weekly-form-crest" src="${escapeHtml(opponentLogo)}" alt="${escapeHtml(opponentTeam.name)} crest">` : '<span class="weekly-form-crest empty"></span>'}<div class="weekly-form-opponent-owner">${escapeHtml(opponentOwner)}</div></div>`;
-            }).join('');
-            return `<section class="match-hero weekly-detail-leader${expanded ? ' expanded' : ''}" role="button" tabindex="0" aria-expanded="${expanded}" onclick="toggleWeeklyForm('${escapeHtml(String(week.week))}', '${escapeHtml(owner.owner)}')" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleWeeklyForm('${escapeHtml(String(week.week))}', '${escapeHtml(owner.owner)}'); }"><div class="weekly-detail-toggle"><span class="weekly-detail-name-row"><span class="weekly-detail-name">${escapeHtml(owner.owner)}</span><span class="weekly-stars" aria-label="${owner.stars} gold star${owner.stars === 1 ? '' : 's'}">${'★'.repeat(owner.stars)}</span><span class="weekly-detail-points">${owner.points} PTS</span></span></div>${owner.achievements.length ? `<div class="weekly-detail-achievements">${owner.achievements.map(achievement => escapeHtml(achievement)).join(' · ')}</div>` : ''}<div class="weekly-detail-record-row"><span>Record:</span><span class="weekly-detail-record">${owner.wins}-${owner.draws}-${owner.losses}</span><span class="weekly-detail-goal-difference ${goalDifferenceClass}">GD: ${goalDifference}</span><span class="weekly-detail-chevron" aria-hidden="true">›</span></div><div class="weekly-form" onclick="event.stopPropagation()">${form || '<div class="empty-detail">No matches available</div>'}</div></section>`;
-        }).join('');
-        return ownerSections || '<section class="match-detail-section"><p class="empty-detail">No completed matches yet.</p></section>';
-    }
-
-    window.toggleWeeklyForm = function(week, owner) {
-        const key = `${week}:${owner}`;
-        if (weeklyFormExpanded.has(key)) weeklyFormExpanded.delete(key);
-        else weeklyFormExpanded.add(key);
-        const weekData = weeklyCardWeeks.find(item => String(item.week) === String(week));
-        document.getElementById('match-detail-content').innerHTML = renderWeeklyDetail(weekData);
-    };
-
     window.openWeeklyMatchDrawer = function(matchId) {
         weeklyMatchReturn = true;
         openMatchDrawer(matchId);
@@ -1619,55 +1581,27 @@
     window.returnToWeeklyDrawer = function() {
         weeklyMatchReturn = false;
         document.querySelector('.match-drawer-back')?.remove();
-        updateWeeklyDrawerHeader();
-        document.getElementById('match-detail-content').innerHTML = renderWeeklyDetail(weeklyCardWeeks[weeklyCardWeekIndex]);
-    };
-
-    function renderWeeklyDrawer() {
-        weeklyMatchReturn = false;
-        weeklyFormExpanded.clear();
-        const overlay = document.getElementById('match-drawer-overlay');
-        const drawer = overlay.querySelector('.match-drawer');
-        const content = document.getElementById('match-detail-content');
-        const week = weeklyCardWeeks[weeklyCardWeekIndex];
-        updateWeeklyDrawerHeader();
-        drawer.scrollTop = 0;
-        overlay.classList.add('is-open');
-        overlay.setAttribute('aria-hidden', 'false');
-        document.body.classList.add('drawer-open');
-        content.innerHTML = renderWeeklyDetail(week);
+        PplWeeklyDrawer.render();
     }
 
     window.openWeeklyDrawer = function() {
         const week = weeklyCardWeeks[weeklyCardWeekIndex];
         if (!week) return;
         window.DrawerRouter?.closeAll();
-        return PplWeeklyDrawer.open(week.week, {
+        return PplWeeklyDrawer.open({
+            weeks: weeklyCardWeeks,
+            index: weeklyCardWeekIndex,
             matches: allMatchesData,
             draftData,
-            shortName: getShortTeamName
+            getShortTeamName,
+            getOwnerOfTeam,
+            getLogoByName,
+            openMatch: 'openWeeklyMatchDrawer',
+            onWeekChange: index => {
+                weeklyCardWeekIndex = index;
+                renderWeeklyCard();
+            }
         });
-    };
-
-    function updateWeeklyDrawerHeader() {
-        const header = document.querySelector('.match-drawer-header');
-        const week = weeklyCardWeeks[weeklyCardWeekIndex];
-        const currentWeekIndex = getCurrentWeeklyCardIndex(weeklyCardWeeks);
-        header.classList.add('weekly-mode');
-        document.getElementById('weekly-drawer-title').textContent = `Week ${week ? week.week : ''}`;
-        document.getElementById('weekly-drawer-prev').disabled = weeklyCardWeekIndex <= 0;
-        document.getElementById('weekly-drawer-next').disabled = weeklyCardWeekIndex >= currentWeekIndex;
-    }
-
-    window.changeWeeklyDrawerWeek = function(direction) {
-        const nextIndex = weeklyCardWeekIndex + direction;
-        const maxWeekIndex = direction > 0 ? getCurrentWeeklyCardIndex(weeklyCardWeeks) : weeklyCardWeeks.length - 1;
-        if (nextIndex < 0 || nextIndex > maxWeekIndex) return;
-        weeklyCardWeekIndex = nextIndex;
-        weeklyFormExpanded.clear();
-        renderWeeklyCard();
-        updateWeeklyDrawerHeader();
-        document.getElementById('match-detail-content').innerHTML = renderWeeklyDetail(weeklyCardWeeks[weeklyCardWeekIndex]);
     };
 
     function closeMatchDrawer(event) {

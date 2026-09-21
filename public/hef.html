@@ -598,7 +598,7 @@
             const matchweekStars = getMatchweekStars(mw, matches);
             card.innerHTML = `
                 <div class="mw-header">
-                    <span class="mw-title" role="button" tabindex="0" onclick="event.stopPropagation(); PplWeeklyDrawer.open(${mw.matchweek}, { matches: window.playerMatches, draftData, shortName: cleanName })" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); PplWeeklyDrawer.open(${mw.matchweek}, { matches: window.playerMatches, draftData, shortName: cleanName }); }">Matchweek ${mw.matchweek}${matchweekStars}</span>
+                    <span class="mw-title" role="button" tabindex="0" onclick="event.stopPropagation(); PplWeeklyDrawer.open({ week: ${mw.matchweek}, matches: window.playerMatches, draftData, getOwnerOfTeam, getShortTeamName: cleanName, getLogoByName, openMatch: 'openMatchDrawer' })" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); PplWeeklyDrawer.open({ week: ${mw.matchweek}, matches: window.playerMatches, draftData, getOwnerOfTeam, getShortTeamName: cleanName, getLogoByName, openMatch: 'openMatchDrawer' }); }">Matchweek ${mw.matchweek}${matchweekStars}</span>
                     <span class="mw-points">+${mw.weeklyPoints} PTS</span>
                 </div>
                 <div>${fixturesHTML}</div>
