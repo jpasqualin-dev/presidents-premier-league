@@ -69,3 +69,27 @@ test('Newcastle drawer excludes Leeds player from the same match', () => {
     assert.equal(output.includes('Dominic Calvert-Lewin'), false);
     assert.equal(output.includes('Newcastle Player'), true);
 });
+
+test('team form keeps the full schedule and highlights the latest played match', () => {
+    const matches = [1, 2, 3, 4, 5].map((matchday, index) => ({
+        id: String(matchday),
+        status: matchday < 4 ? 'FINISHED' : 'SCHEDULED',
+        matchday,
+        utcDate: `2026-09-${15 + index}T12:00:00Z`,
+        homeTeam: { id: '1', name: 'Brighton' },
+        awayTeam: { id: String(matchday + 1), name: `Opponent ${matchday}` },
+        score: { fullTime: { home: matchday, away: 0 } }
+    }));
+    const output = loadTeamDrawer().render('Brighton', {
+        stats: teamStats(['Brighton']),
+        matches,
+        getLogoByName: () => '',
+        getShortTeamName: name => name,
+        getOwnerOfTeam: () => 'Test'
+    });
+
+    assert.equal((output.match(/class="weekly-form-match/g) || []).length, 5);
+    assert.equal((output.match(/latest-played/g) || []).length, 1);
+    assert.match(output, /Most recently played match/);
+    assert.ok(output.indexOf('Opponent 4') < output.indexOf('Opponent 5'));
+});
