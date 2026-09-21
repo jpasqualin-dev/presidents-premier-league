@@ -875,6 +875,7 @@
 <script src="match-data.js"></script>
 <script src="drawer-router.js"></script>
 <script src="match-drawer-shared.js"></script>
+<script src="ppl-weekly-drawer.js"></script>
 <script src="team-drawer-shared.js"></script>
 <script>
     const draftData = {
@@ -1638,15 +1639,14 @@
     }
 
     window.openWeeklyDrawer = function() {
+        const week = weeklyCardWeeks[weeklyCardWeekIndex];
+        if (!week) return;
         window.DrawerRouter?.closeAll();
-        if (window.DrawerRouter) {
-            return window.DrawerRouter.open({
-                type: 'weekly',
-                id: String(weeklyCardWeekIndex),
-                render: renderWeeklyDrawer
-            });
-        }
-        return renderWeeklyDrawer();
+        return PplWeeklyDrawer.open(week.week, {
+            matches: allMatchesData,
+            draftData,
+            shortName: getShortTeamName
+        });
     };
 
     function updateWeeklyDrawerHeader() {

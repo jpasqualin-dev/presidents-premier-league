@@ -433,6 +433,7 @@
 <script src="match-data.js"></script>
 <script src="drawer-router.js"></script>
 <script src="match-drawer-shared.js"></script>
+<script src="ppl-weekly-drawer.js"></script>
 <script src="team-drawer-shared.js"></script>
 <script src="player-team-drawer.js"></script>
 <script src="player-profile-card.js"></script>
@@ -598,7 +599,7 @@
             const matchweekStars = getMatchweekStars(mw, matches);
             card.innerHTML = `
                 <div class="mw-header">
-                    <span class="mw-title">Matchweek ${mw.matchweek}${matchweekStars}</span>
+                    <span class="mw-title" role="button" tabindex="0" onclick="event.stopPropagation(); PplWeeklyDrawer.open(${mw.matchweek}, { matches: window.playerMatches, draftData, shortName: cleanName })" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); PplWeeklyDrawer.open(${mw.matchweek}, { matches: window.playerMatches, draftData, shortName: cleanName }); }">Matchweek ${mw.matchweek}${matchweekStars}</span>
                     <span class="mw-points">+${mw.weeklyPoints} PTS</span>
                 </div>
                 <div>${fixturesHTML}</div>
