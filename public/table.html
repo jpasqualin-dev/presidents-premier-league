@@ -421,37 +421,15 @@
 
 <script src="theme.js"></script>
 <script src="team-names.js"></script>
+<script src="league-config.js"></script>
 <script src="match-data.js"></script>
 <script src="drawer-router.js"></script>
 <script src="match-drawer-shared.js"></script>
 <script src="team-drawer-shared.js"></script>
 <script>
-    // --- Data Definitions (Shared with Index Page) ---
-    const draftData = {
-        "Hef": ["Arsenal", "AFC Bournemouth", "Nottingham Forest", "Hull City"],
-        "Jordan": ["Manchester City", "Brighton & Hove Albion", "Brentford", "Ipswich Town"],
-        "Wes": ["Liverpool", "Newcastle United", "Sunderland", "Coventry City"],
-        "Nate": ["Manchester United", "Aston Villa", "Everton", "Fulham"],
-        "Jamey": ["Chelsea", "Tottenham Hotspur", "Crystal Palace", "Leeds United"]
-    };
-
-    const draftPicks = {
-        "Arsenal": 1, "Manchester City": 2, "Liverpool": 3, "Manchester United": 4, "Chelsea": 5,
-        "Tottenham Hotspur": 6, "Aston Villa": 7, "Newcastle United": 8, "Brighton & Hove Albion": 9, "AFC Bournemouth": 10,
-        "Nottingham Forest": 11, "Brentford": 12, "Sunderland": 13, "Everton": 14, "Crystal Palace": 15,
-        "Leeds United": 16, "Fulham": 17, "Coventry City": 18, "Ipswich Town": 19, "Hull City": 20
-    };
+    const { draftData, draftPicks, getOwnerOfTeam } = PplLeagueConfig;
 
     const teamLogos = TeamNames.logoMap();
-
-    function getOwnerOfTeam(teamName) {
-        for (let player in draftData) {
-            if (draftData[player].some(t => teamName.toLowerCase().includes(t.toLowerCase()) || t.toLowerCase().includes(teamName.toLowerCase()))) {
-                return player;
-            }
-        }
-        return "Unassigned";
-    }
 
     function getShortTeamName(name) {
         return TeamNames.shortName(name);

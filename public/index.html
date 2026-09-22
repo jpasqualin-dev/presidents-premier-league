@@ -171,7 +171,7 @@
         .weekly-form-match { display: flex; min-width: 78px; flex-direction: column; align-items: center; gap: 5px; padding: 4px 2px; background: transparent; color: var(--text-main); text-align: center; }
         .weekly-form-date { margin: 0; color: var(--text-muted); font-size: 0.64rem; line-height: 1; }
         .weekly-form-venue { padding: 1px 6px; border-radius: 4px; background: #f1f5f9; color: var(--text-muted); font-size: 0.58rem; font-weight: 600; line-height: 1.1; }
-        .weekly-form-team { min-height: 0; font-size: 0.66rem; font-weight: 700; line-height: 1.05; }
+        .weekly-form-team { display: block; width: 100%; max-width: 100%; min-height: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.66rem; font-weight: 700; line-height: 1.05; }
         .weekly-form-crest { display: block; width: 26px; height: 26px; margin: 0 auto; object-fit: contain; }
         .weekly-form-crest.empty { visibility: hidden; }
         .weekly-form-score { display: table; min-width: 38px; margin: 0 auto; padding: 3px 6px; border-radius: 4px; color: var(--text-main); font-size: 0.82rem; font-weight: 800; line-height: 1.1; }
@@ -855,35 +855,16 @@
     
 <script src="theme.js"></script>
 <script src="team-names.js"></script>
+<script src="league-config.js"></script>
 <script src="match-data.js"></script>
 <script src="drawer-router.js"></script>
 <script src="match-drawer-shared.js"></script>
 <script src="ppl-weekly-drawer.js"></script>
 <script src="team-drawer-shared.js"></script>
 <script>
-    const draftData = {
-        "Hef": ["Arsenal", "AFC Bournemouth", "Nottingham Forest", "Hull City"],
-        "Jordan": ["Manchester City", "Brighton & Hove Albion", "Brentford", "Ipswich Town"],
-        "Wes": ["Liverpool", "Newcastle United", "Sunderland", "Coventry City"],
-        "Nate": ["Manchester United", "Aston Villa", "Everton", "Fulham"],
-        "Jamey": ["Chelsea", "Tottenham Hotspur", "Crystal Palace", "Leeds United"]
-    };
-
-    const draftPicks = {
-        "Arsenal": 1, "Manchester City": 2, "Liverpool": 3, "Manchester United": 4, "Chelsea": 5,
-        "Tottenham Hotspur": 6, "Aston Villa": 7, "Newcastle United": 8, "Brighton & Hove Albion": 9, "AFC Bournemouth": 10,
-        "Nottingham Forest": 11, "Brentford": 12, "Sunderland": 13, "Everton": 14, "Crystal Palace": 15,
-        "Leeds United": 16, "Fulham": 17, "Coventry City": 18, "Ipswich Town": 19, "Hull City": 20
-    };
+    const { draftData, draftPicks, divisions: divisionData, getOwnerOfTeam } = PplLeagueConfig;
 
     const teamLogos = TeamNames.logoMap();
-
-    const divisionData = {
-        "Red and Blue Division": ["Arsenal", "Manchester City", "Liverpool", "Manchester United", "Chelsea"],
-        "Birds and Beasts Division": ["Tottenham Hotspur", "Aston Villa", "Newcastle United", "Brighton & Hove Albion", "AFC Bournemouth"],
-        "Field and Forest Division": ["Nottingham Forest", "Brentford", "Sunderland", "Everton", "Crystal Palace"],
-        "Cottage and Country Division": ["Leeds United", "Fulham", "Coventry City", "Ipswich Town", "Hull City"]
-    };
 
     let cachedPlayerStats = null;
     let cachedTeamStats = null;
@@ -1331,14 +1312,6 @@
         return stats;
     }
 
-    function getOwnerOfTeam(teamName) {
-        for (let player in draftData) {
-            if (draftData[player].some(t => teamName.toLowerCase().includes(t.toLowerCase()) || t.toLowerCase().includes(teamName.toLowerCase()))) {
-                return player;
-            }
-        }
-        return null;
-    }
     window.matchDrawerOwnerResolver = getOwnerOfTeam;
 
     function findPlayerByTeam(teamName, playerStats) {

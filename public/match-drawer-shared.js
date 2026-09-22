@@ -1,5 +1,17 @@
 (function () {
     const ignoredEventPattern = /kick.?off|match start|half.?time|halftime|start (of )?(the )?(second|2nd) half|second half|delay|delayed|end regular time|end of regular time|full time/i;
+    let lastDrawerTrigger = null;
+
+    function getDrawerFocusableElements() {
+        const overlay = document.getElementById('match-drawer-overlay');
+        return [...(overlay?.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])') || [])]
+            .filter(element => !element.disabled && element.offsetParent !== null);
+    }
+
+    function focusDrawer() {
+        const closeButton = document.querySelector('#match-drawer-overlay .match-drawer-close');
+        closeButton?.focus();
+    }
 
     function ensureSharedDrawer() {
         if (!document.getElementById('match-drawer-overlay')) {
@@ -157,6 +169,7 @@
     };
 
     window.openSharedMatchDrawer = async function (matchId, options = {}) {
+        if (!options.skipRouter) lastDrawerTrigger = document.activeElement;
         if (window.DrawerRouter && !options.skipRouter) {
             return window.DrawerRouter.open({
                 type: 'match',
@@ -174,6 +187,7 @@
         if (header && backButtonMarkup) header.insertAdjacentHTML('afterbegin', backButtonMarkup);
         document.getElementById('match-drawer-title').textContent = 'Match details';
         drawer.scrollTop = 0; overlay.classList.add('is-open'); overlay.setAttribute('aria-hidden', 'false'); document.body.classList.add('drawer-open'); content.innerHTML = '<p class="empty-detail">Loading match details...</p>';
+        focusDrawer();
         try { content.innerHTML = window.renderSharedMatchDetail(await window.fetchSharedMatchById(matchId)); }
         catch (error) { console.error('Error fetching match details:', error); content.innerHTML = '<p class="empty-detail">Unable to load match details.</p>'; }
     };
@@ -183,6 +197,8 @@
         window.DrawerRouter?.closeAll();
         const overlay = document.getElementById('match-drawer-overlay'); overlay.classList.remove('is-open'); overlay.setAttribute('aria-hidden', 'true'); document.body.classList.remove('drawer-open');
         window.resetSharedMatchDrawerHeader();
+        if (lastDrawerTrigger && typeof lastDrawerTrigger.focus === 'function') lastDrawerTrigger.focus();
+        lastDrawerTrigger = null;
     };
 
     window.closeMatchDrawer = window.closeSharedMatchDrawer;
@@ -202,6 +218,23 @@
     };
 
     document.addEventListener('keydown', event => {
-        if (event.key === 'Escape') window.closeSharedMatchDrawer();
+        const overlay = document.getElementById('match-drawer-overlay');
+        if (!overlay?.classList.contains('is-open')) return;
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            window.closeSharedMatchDrawer();
+            return;
+        }
+        if (event.key !== 'Tab') return;
+        const focusable = getDrawerFocusableElements();
+        if (!focusable.length) return;
+        const first = focusable[0], last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
     });
 })();

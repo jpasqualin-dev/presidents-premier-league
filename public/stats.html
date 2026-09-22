@@ -269,24 +269,12 @@
 
 <script src="theme.js"></script>
 <script src="team-names.js"></script>
+<script src="league-config.js"></script>
 <script src="match-data.js"></script>
 <script>
-    const draftData = {
-        "Hef": ["Arsenal", "AFC Bournemouth", "Nottingham Forest", "Hull City"],
-        "Jordan": ["Manchester City", "Brighton & Hove Albion", "Brentford", "Ipswich Town"],
-        "Wes": ["Liverpool", "Newcastle United", "Sunderland", "Coventry City"],
-        "Nate": ["Manchester United", "Aston Villa", "Everton", "Fulham"],
-        "Jamey": ["Chelsea", "Tottenham Hotspur", "Crystal Palace", "Leeds United"]
-    };
+    const { draftData, divisions: divisionData, getOwnerOfTeam } = PplLeagueConfig;
 
     const teamLogos = TeamNames.logoMap();
-
-    const divisionData = {
-        "Red and Blue Division": ["Arsenal", "Manchester City", "Liverpool", "Manchester United", "Chelsea"],
-        "Birds and Beasts Division": ["Tottenham Hotspur", "Aston Villa", "Newcastle United", "Brighton & Hove Albion", "AFC Bournemouth"],
-        "Field and Forest Division": ["Nottingham Forest", "Brentford", "Sunderland", "Everton", "Crystal Palace"],
-        "Cottage and Country Division": ["Leeds United", "Fulham", "Coventry City", "Ipswich Town", "Hull City"]
-    };
 
     const seasonAwardsState = {};
     const statsExpansionState = {};
@@ -329,15 +317,6 @@
             });
         }
         return stats;
-    }
-
-    function getOwnerOfTeam(teamName) {
-        for (let player in draftData) {
-            if (draftData[player].some(t => teamName.toLowerCase().includes(t.toLowerCase()) || t.toLowerCase().includes(teamName.toLowerCase()))) {
-                return player;
-            }
-        }
-        return null;
     }
 
     function findPlayerByTeam(teamName, playerStats) {
