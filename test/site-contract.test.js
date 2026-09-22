@@ -22,11 +22,19 @@ test('league configuration is not duplicated in primary page shells', () => {
 });
 
 test('drawer form labels keep a bounded single-line contract', () => {
-    ['ppl-weekly-drawer.js', 'team-drawer-shared.js', 'index.html'].forEach(file => {
+    ['ppl-weekly-drawer.js', 'team-drawer-shared.js', 'drawers.css'].forEach(file => {
         const source = readPublic(file);
         assert.match(source, /weekly-form-team[^}]*white-space:\s*nowrap/u, file);
         assert.match(source, /weekly-form-team[^}]*text-overflow:\s*ellipsis/u, file);
     });
+});
+
+test('drawer presentation styles are centralized', () => {
+    const source = readPublic('drawers.css');
+    assert.match(source, /\.match-drawer-overlay\s*\{/u);
+    assert.match(source, /\.match-drawer\s*\{[^}]*height:\s*100%/u);
+    assert.match(source, /\.weekly-form\s*\{/u);
+    assert.doesNotMatch(readPublic('index.html'), /\.match-drawer-overlay\s*\{/u);
 });
 
 test('primary pages load shared drawer dependencies in the expected order', () => {
