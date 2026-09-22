@@ -190,6 +190,25 @@ test('browser surfaces match API failures without an unhandled page error', asyn
     await context.close();
 });
 
+test('browser keeps stale cached data visible during a live API outage', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext();
+    await context.addInitScript(data => {
+        localStorage.setItem('pl_match_data_v2', JSON.stringify(data));
+        localStorage.setItem('pl_match_data_time', String(Date.now() - 60 * 1000));
+    }, fixtureData());
+    const page = await context.newPage();
+    const diagnostics = diagnosticState(page);
+    await page.route('**/api/matches**', route => route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: 'live outage' }) }));
+    await page.goto(`${baseUrl}/hef.html`);
+    await page.locator('body.player-page-ready').waitFor();
+    await page.locator('#match-data-status').waitFor();
+    assert.match(await page.locator('#match-data-status').textContent(), /Showing cached match data from/);
+    assert.ok(await page.locator('.mw-header').count() > 0);
+    assert.equal(diagnostics.pageErrors.length, 0);
+    await context.close();
+});
+
 test('browser handles upcoming matches and incomplete match details', async t => {
     if (browserError) return t.skip('Chromium runtime unavailable');
     const context = await browser.newContext();

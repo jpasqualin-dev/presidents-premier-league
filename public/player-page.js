@@ -6,6 +6,22 @@
     const teamLogos = TeamNames.logoMap();
     const cleanName = name => TeamNames.shortName(name);
 
+    function updateDataStatus(status) {
+        const container = document.getElementById('fixtures-container');
+        if (!container) return;
+        let statusElement = document.getElementById('match-data-status');
+        if (!status.stale) {
+            statusElement?.remove();
+            return;
+        }
+        statusElement ||= document.createElement('div');
+        statusElement.id = 'match-data-status';
+        statusElement.className = 'loading';
+        statusElement.setAttribute('role', 'status');
+        statusElement.textContent = `Showing cached match data from ${new Date(status.lastSuccessfulSync).toLocaleString()}.`;
+        container.prepend(statusElement);
+    }
+
     window.playerTeamLogos = teamLogos;
     window.playerTeams = draftData[playerName] || [];
     window.matchDrawerOwnerResolver = getOwnerOfTeam;
@@ -73,6 +89,7 @@
     function renderPage(matchweeks, matches) {
         const container = document.getElementById('fixtures-container');
         container.innerHTML = '';
+        updateDataStatus(DataManager.getStatus());
         if (!matchweeks.length) {
             container.innerHTML = '<div class="loading">No matchweek fixtures found.</div>';
             revealPlayerPage();
@@ -240,6 +257,7 @@
             }
             fetchPlayerFixtures();
         });
+        window.addEventListener('match-data-status', event => updateDataStatus(event.detail));
         DataManager.start();
     });
 })();

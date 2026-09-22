@@ -7,7 +7,8 @@
         ttl: 15 * 1000,
         pollInterval: 2 * 60 * 1000,
         livePollInterval: 15 * 1000,
-        lockDuration: 10 * 1000
+        lockDuration: 10 * 1000,
+        staleMaxAge: 24 * 60 * 60 * 1000
     };
     const subscribers = new Set();
     const channel = 'BroadcastChannel' in window ? new BroadcastChannel(config.channelName) : null;
@@ -16,6 +17,7 @@
     let memoryIncludesDetails = false;
     let pendingRequest = null;
     let pollTimer = null;
+    let status = { stale: false, lastSuccessfulSync: 0 };
 
     const normalizeData = data => window.TeamNames
         ? { ...data, matches: (data?.matches || []).map(window.TeamNames.normalizeMatch) }
@@ -49,6 +51,25 @@
             console.warn('Unable to read match data cache:', error);
             return null;
         }
+    };
+
+    const readStaleCache = (includeDetails = false) => {
+        for (const cacheType of includeDetails ? [true, false] : [false]) {
+            const cached = readCache(cacheType);
+            if (cached) return cached;
+            try {
+                const keys = cacheKeys(cacheType), data = localStorage.getItem(keys.data), time = Number(localStorage.getItem(keys.time));
+                if (data && time && Date.now() - time <= config.staleMaxAge) return { data: normalizeData(JSON.parse(data)), time };
+            } catch (error) {
+                console.warn('Unable to read stale match data cache:', error);
+            }
+        }
+        return null;
+    };
+
+    const updateStatus = nextStatus => {
+        status = nextStatus;
+        window.dispatchEvent(new CustomEvent('match-data-status', { detail: status }));
     };
 
     const wait = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
@@ -124,8 +145,18 @@
                 const keys = cacheKeys(includeDetails);
                 localStorage.setItem(keys.data, JSON.stringify(data));
                 localStorage.setItem(keys.time, time.toString());
+                updateStatus({ stale: false, lastSuccessfulSync: time });
                 publish(data, time, includeDetails);
                 return data;
+            } catch (error) {
+                const stale = readStaleCache(includeDetails);
+                if (!stale) throw error;
+                memoryData = stale.data;
+                memoryTime = stale.time;
+                memoryIncludesDetails = includeDetails;
+                updateStatus({ stale: true, lastSuccessfulSync: stale.time });
+                notifySubscribers(stale.data);
+                return stale.data;
             } finally {
                 const currentLock = JSON.parse(localStorage.getItem(config.lockKey) || 'null');
                 if (currentLock?.owner === owner) localStorage.removeItem(config.lockKey);
@@ -149,6 +180,8 @@
         subscribers.add(listener);
         return () => subscribers.delete(listener);
     }
+
+    function getStatus() { return status; }
 
     async function start() {
         if (pollTimer) return;
@@ -189,7 +222,7 @@
         if (cached) handleExternalUpdate({ newValue: JSON.stringify({ ...cached, includeDetails }) });
     });
 
-    window.DataManager = { config, getMatchData, refresh, subscribe, start };
+    window.DataManager = { config, getMatchData, refresh, subscribe, getStatus, start };
     window.getIndividualScoringEvents = scorers => (scorers || []).filter(scorer => scorer?.ownGoal !== true);
     window.getMatchData = getMatchData;
 })();
