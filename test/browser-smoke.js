@@ -89,6 +89,9 @@ for (const pageName of playerPages) {
         assert.equal(await page.evaluate(() => window.SharedPlayerPage), true, `${pageName}: shared player renderer did not initialize`);
         await page.locator('.mw-header[role="button"]').click();
         await page.locator('#match-drawer-overlay.is-open').waitFor();
+        assert.equal(await page.evaluate(() => document.activeElement?.closest('#match-drawer-overlay')?.id), 'match-drawer-overlay', `${pageName}: drawer did not receive focus`);
+        await page.keyboard.press('Shift+Tab');
+        assert.equal(await page.evaluate(() => document.activeElement?.closest('#match-drawer-overlay')?.id), 'match-drawer-overlay', `${pageName}: Shift+Tab escaped drawer`);
         const ownerCard = page.locator('.weekly-detail-leader').filter({ has: page.locator('.weekly-detail-name', { hasText: 'Jamey' }) });
         await ownerCard.click();
         const teamLabel = page.locator('.weekly-form-team', { hasText: 'Crystal Palace' }).first();
@@ -103,6 +106,7 @@ for (const pageName of playerPages) {
         await page.locator('#match-drawer-title').filter({ hasText: 'Match details' }).waitFor();
         await page.keyboard.press('Escape');
         await page.locator('#match-drawer-overlay:not(.is-open)').waitFor();
+        assert.equal(await page.evaluate(() => document.activeElement?.isConnected), true, `${pageName}: focus was not restored after Escape`);
         await context.close();
         });
     }

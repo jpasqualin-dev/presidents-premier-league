@@ -80,6 +80,7 @@
         overlay.classList.add('is-open');
         overlay.setAttribute('aria-hidden', 'false');
         document.body.classList.add('drawer-open');
+        overlay.querySelector('.match-drawer-close')?.focus();
     }
 
     function open(options) {
