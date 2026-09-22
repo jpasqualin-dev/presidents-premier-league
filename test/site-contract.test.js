@@ -37,3 +37,7 @@ test('primary pages load shared drawer dependencies in the expected order', () =
         assert.ok(configIndex >= 0 && configIndex < matchDataIndex, file);
     });
 });
+
+test('player pages load the shared player renderer', () => {
+    playerPages.forEach(file => assert.match(readPublic(file), /<script src="player-page\.js"><\/script>/u, file));
+});

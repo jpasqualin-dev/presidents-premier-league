@@ -439,7 +439,9 @@
 <script src="team-drawer-shared.js"></script>
 <script src="player-team-drawer.js"></script>
 <script src="player-profile-card.js"></script>
+<script src="player-page.js"></script>
 <script>
+    if (!window.SharedPlayerPage) {
     let shouldPositionInitialCard = true;
 
     // 1. Integrated data mappings directly from your main site configuration
@@ -750,6 +752,7 @@
         DataManager.subscribe(data => fetchHefFixtures(data));
         DataManager.start();
     });
+    }
 </script>
 
 </body>

@@ -7,19 +7,31 @@ const { chromium } = require('playwright');
 
 const publicDir = path.join(__dirname, '..', 'public');
 const playerPages = ['hef.html', 'jamey.html', 'jordan.html', 'nate.html', 'wes.html'];
+const viewports = [
+    { name: 'desktop-light', theme: 'light', viewport: { width: 1280, height: 900 } },
+    { name: 'desktop-dark', theme: 'dark', viewport: { width: 1280, height: 900 } },
+    { name: 'mobile-light', theme: 'light', viewport: { width: 390, height: 844 } },
+    { name: 'mobile-dark', theme: 'dark', viewport: { width: 390, height: 844 } }
+];
 
 function fixtureData() {
     return {
-        matches: [{
-            id: 'smoke-match-5',
+        matches: [
+            ['smoke-match-1', 'Crystal Palace', 'Arsenal'],
+            ['smoke-match-2', 'Manchester City', 'Chelsea'],
+            ['smoke-match-3', 'Liverpool', 'Manchester United'],
+            ['smoke-match-4', 'Aston Villa', 'Tottenham Hotspur'],
+            ['smoke-match-5', 'Everton', 'Brighton & Hove Albion']
+        ].map(([id, homeName, awayName], index) => ({
+            id,
             matchday: 5,
             status: 'FINISHED',
-            utcDate: '2026-09-19T12:00:00Z',
-            homeTeam: { id: '15', name: 'Crystal Palace', crest: '' },
-            awayTeam: { id: '1', name: 'Arsenal', crest: '' },
+            utcDate: `2026-09-${19 + index}T12:00:00Z`,
+            homeTeam: { id: String(index * 2 + 1), name: homeName, crest: '' },
+            awayTeam: { id: String(index * 2 + 2), name: awayName, crest: '' },
             score: { fullTime: { home: 2, away: 1 }, halfTime: { home: 1, away: 0 } },
             scorers: []
-        }]
+        }))
     };
 }
 
@@ -61,9 +73,12 @@ test.after(async () => {
 });
 
 for (const pageName of playerPages) {
-    test(`${pageName} loads through the shared player and drawer path`, async t => {
+    for (const view of viewports) {
+        test(`${pageName} loads through the shared player and drawer path (${view.name})`, async t => {
         if (browserError) return t.skip('Chromium runtime unavailable');
-        const page = await browser.newPage();
+        const context = await browser.newContext({ viewport: view.viewport });
+        await context.addInitScript(theme => localStorage.setItem('ppl-theme', theme), view.theme);
+        const page = await context.newPage();
         await page.route('**/api/matches**', route => route.fulfill({
             status: 200,
             contentType: 'application/json',
@@ -73,7 +88,7 @@ for (const pageName of playerPages) {
         await page.locator('body.player-page-ready').waitFor();
         await page.locator('.mw-header[role="button"]').click();
         await page.locator('#match-drawer-overlay.is-open').waitFor();
-        const ownerCard = page.locator('.weekly-detail-leader', { hasText: 'Jamey' });
+        const ownerCard = page.locator('.weekly-detail-leader').filter({ has: page.locator('.weekly-detail-name', { hasText: 'Jamey' }) });
         await ownerCard.click();
         const teamLabel = page.locator('.weekly-form-team', { hasText: 'Crystal Palace' }).first();
         await teamLabel.waitFor();
@@ -81,6 +96,7 @@ for (const pageName of playerPages) {
         assert.ok(box && box.height < 20, `${pageName}: Crystal Palace wrapped or disappeared`);
         await page.keyboard.press('Escape');
         await page.locator('#match-drawer-overlay:not(.is-open)').waitFor();
-        await page.close();
-    });
+        await context.close();
+        });
+    }
 }
