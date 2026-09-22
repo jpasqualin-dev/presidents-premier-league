@@ -86,6 +86,7 @@ for (const pageName of playerPages) {
         }));
         await page.goto(`${baseUrl}/${pageName}`);
         await page.locator('body.player-page-ready').waitFor();
+        assert.equal(await page.evaluate(() => window.SharedPlayerPage), true, `${pageName}: shared player renderer did not initialize`);
         await page.locator('.mw-header[role="button"]').click();
         await page.locator('#match-drawer-overlay.is-open').waitFor();
         const ownerCard = page.locator('.weekly-detail-leader').filter({ has: page.locator('.weekly-detail-name', { hasText: 'Jamey' }) });
@@ -94,6 +95,12 @@ for (const pageName of playerPages) {
         await teamLabel.waitFor();
         const box = await teamLabel.boundingBox();
         assert.ok(box && box.height < 20, `${pageName}: Crystal Palace wrapped or disappeared`);
+        await teamLabel.click();
+        await page.locator('#match-drawer-overlay.is-open .match-team-link').first().click();
+        await page.locator('#match-drawer-title').filter({ hasText: 'Crystal Palace' }).waitFor();
+        await page.locator('#match-detail-content .team-drawer-card').first().waitFor();
+        await page.locator('.match-drawer-back').click();
+        await page.locator('#match-drawer-title').filter({ hasText: 'Match details' }).waitFor();
         await page.keyboard.press('Escape');
         await page.locator('#match-drawer-overlay:not(.is-open)').waitFor();
         await context.close();

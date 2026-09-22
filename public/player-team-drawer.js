@@ -2,6 +2,7 @@
     let teamDrawerReturn = false;
     let teamDrawerTeamName = '';
     let teamDrawerOpen = false;
+    const { draftData, getOwnerOfTeam } = window.PplLeagueConfig;
 
     function getLogoByName(teamName) {
         const canonicalLogo = window.TeamNames?.crest(teamName);
