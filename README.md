@@ -7,7 +7,7 @@ Static Vercel site for the Presidents Premier League.
 Install dependencies with `npm ci`, then run:
 
 - `npm run check` runs JavaScript syntax checks plus unit and contract tests.
-- `npm run test:browser` runs the Playwright smoke matrix across all five player pages, light/dark themes, and desktop/mobile viewports.
+- `npm run test:browser` runs the Playwright smoke matrix across all five player pages, light/dark themes, and desktop/mobile viewports. It also covers keyboard and focus behavior, drawer routing, empty and failed API responses, upcoming fixtures, incomplete match details, and browser diagnostics.
 
 Browser checks require Chromium. Install it locally with:
 

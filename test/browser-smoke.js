@@ -35,6 +35,30 @@ function fixtureData() {
     };
 }
 
+function upcomingFixtureData() {
+    return {
+        matches: [{
+            id: 'upcoming-match-1',
+            matchday: 9,
+            status: 'SCHEDULED',
+            utcDate: '2026-10-18T12:00:00Z',
+            homeTeam: { id: '1', name: 'Arsenal' },
+            awayTeam: { id: '999', name: 'Unknown FC' },
+            score: { fullTime: { home: null, away: null } }
+        }]
+    };
+}
+
+function diagnosticState(page) {
+    const consoleErrors = [], pageErrors = [], failedRequests = [];
+    page.on('console', message => {
+        if (message.type() === 'error') consoleErrors.push(message.text());
+    });
+    page.on('pageerror', error => pageErrors.push(error.message));
+    page.on('requestfailed', request => failedRequests.push(`${request.method()} ${request.url()}: ${request.failure()?.errorText || 'failed'}`));
+    return { consoleErrors, pageErrors, failedRequests };
+}
+
 function startStaticServer() {
     const server = http.createServer((request, response) => {
         const requestedPath = decodeURIComponent(new URL(request.url, 'http://localhost').pathname);
@@ -79,6 +103,7 @@ for (const pageName of playerPages) {
         const context = await browser.newContext({ viewport: view.viewport });
         await context.addInitScript(theme => localStorage.setItem('ppl-theme', theme), view.theme);
         const page = await context.newPage();
+        const diagnostics = diagnosticState(page);
         await page.route('**/api/matches**', route => route.fulfill({
             status: 200,
             contentType: 'application/json',
@@ -87,27 +112,96 @@ for (const pageName of playerPages) {
         await page.goto(`${baseUrl}/${pageName}`);
         await page.locator('body.player-page-ready').waitFor();
         assert.equal(await page.evaluate(() => window.SharedPlayerPage), true, `${pageName}: shared player renderer did not initialize`);
-        await page.locator('.mw-header[role="button"]').click();
+        const profileCard = page.locator('.profile-card');
+        await profileCard.press('Enter');
+        await assert.equal(await profileCard.getAttribute('aria-expanded'), 'true');
+        await profileCard.press(' ');
+        await assert.equal(await profileCard.getAttribute('aria-expanded'), 'false');
+        const weekHeader = page.locator('.mw-header[role="button"]');
+        await weekHeader.focus();
+        await page.keyboard.press('Enter');
         await page.locator('#match-drawer-overlay.is-open').waitFor();
+        assert.equal(await page.locator('#match-drawer-overlay').getAttribute('aria-hidden'), 'false', `${pageName}: weekly drawer aria-hidden state is incorrect`);
+        assert.deepEqual(await page.evaluate(() => window.DrawerRouter.current()), { type: 'weekly', id: '5' }, `${pageName}: weekly drawer was not routed`);
         assert.equal(await page.evaluate(() => document.activeElement?.closest('#match-drawer-overlay')?.id), 'match-drawer-overlay', `${pageName}: drawer did not receive focus`);
         await page.keyboard.press('Shift+Tab');
         assert.equal(await page.evaluate(() => document.activeElement?.closest('#match-drawer-overlay')?.id), 'match-drawer-overlay', `${pageName}: Shift+Tab escaped drawer`);
         const ownerCard = page.locator('.weekly-detail-leader').filter({ has: page.locator('.weekly-detail-name', { hasText: 'Jamey' }) });
-        await ownerCard.click();
+        await ownerCard.press('Enter');
+        assert.equal(await ownerCard.getAttribute('aria-expanded'), 'true', `${pageName}: owner card did not expand from keyboard`);
         const teamLabel = page.locator('.weekly-form-team', { hasText: 'Crystal Palace' }).first();
         await teamLabel.waitFor();
         const box = await teamLabel.boundingBox();
         assert.ok(box && box.height < 20, `${pageName}: Crystal Palace wrapped or disappeared`);
-        await teamLabel.click();
+        const matchTrigger = page.locator('.weekly-form-match:visible').first();
+        const selectedMatchId = await matchTrigger.getAttribute('data-match-id');
+        await matchTrigger.click();
+        assert.deepEqual(await page.evaluate(matchId => window.DrawerRouter.current(), selectedMatchId), { type: 'match', id: selectedMatchId }, `${pageName}: match drawer was not routed from weekly form`);
         await page.locator('#match-drawer-overlay.is-open .match-team-link').first().click();
         await page.locator('#match-drawer-title').filter({ hasText: 'Crystal Palace' }).waitFor();
+        assert.deepEqual(await page.evaluate(() => window.DrawerRouter.current()), { type: 'team', teamName: 'Crystal Palace' }, `${pageName}: team drawer was not routed from match details`);
         await page.locator('#match-detail-content .team-drawer-card').first().waitFor();
+        assert.equal(await page.evaluate(() => document.activeElement?.getAttribute('aria-label')), 'Close match details', `${pageName}: team drawer did not receive focus`);
         await page.locator('.match-drawer-back').click();
         await page.locator('#match-drawer-title').filter({ hasText: 'Match details' }).waitFor();
+        assert.deepEqual(await page.evaluate(matchId => window.DrawerRouter.current(), selectedMatchId), { type: 'match', id: selectedMatchId }, `${pageName}: team back navigation did not restore match drawer`);
+        await page.locator('.match-drawer-back').click();
+        await page.locator('.match-drawer-title').filter({ hasText: 'Week 5' }).waitFor();
+        assert.deepEqual(await page.evaluate(() => window.DrawerRouter.current()), { type: 'weekly', id: '5' }, `${pageName}: match back navigation did not restore weekly drawer`);
+        assert.equal(await page.evaluate(matchId => document.activeElement?.dataset.matchId, selectedMatchId), selectedMatchId, `${pageName}: back navigation did not restore the weekly match trigger`);
         await page.keyboard.press('Escape');
         await page.locator('#match-drawer-overlay:not(.is-open)').waitFor();
-        assert.equal(await page.evaluate(() => document.activeElement?.isConnected), true, `${pageName}: focus was not restored after Escape`);
+        assert.equal(await page.evaluate(() => document.activeElement?.classList.contains('mw-header')), true, `${pageName}: closing weekly drawer did not restore its opener`);
+        assert.deepEqual(await page.evaluate(() => window.DrawerRouter.entries()), [], `${pageName}: drawer router did not clear after Escape`);
+        assert.deepEqual(diagnostics.consoleErrors, [], `${pageName}: unexpected console errors: ${diagnostics.consoleErrors.join(' | ')}`);
+        assert.deepEqual(diagnostics.pageErrors, [], `${pageName}: unexpected page errors: ${diagnostics.pageErrors.join(' | ')}`);
+        assert.deepEqual(diagnostics.failedRequests, [], `${pageName}: failed requests: ${diagnostics.failedRequests.join(' | ')}`);
         await context.close();
         });
     }
 }
+
+test('browser handles empty match data without rendering a broken page', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    const diagnostics = diagnosticState(page);
+    await page.route('**/api/matches**', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ matches: [] }) }));
+    await page.goto(`${baseUrl}/hef.html`);
+    await page.locator('body.player-page-ready').waitFor();
+    assert.equal(await page.locator('#fixtures-container').textContent(), 'No matchweek fixtures found.');
+    assert.equal(await page.locator('.mw-header').count(), 0);
+    assert.deepEqual(diagnostics.consoleErrors, []);
+    assert.deepEqual(diagnostics.pageErrors, []);
+    assert.deepEqual(diagnostics.failedRequests, []);
+    await context.close();
+});
+
+test('browser surfaces match API failures without an unhandled page error', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    const diagnostics = diagnosticState(page);
+    await page.route('**/api/matches**', route => route.fulfill({ status: 503, contentType: 'application/json', body: JSON.stringify({ error: 'test failure' }) }));
+    await page.goto(`${baseUrl}/hef.html`);
+    await page.waitForFunction(() => document.querySelector('#fixtures-container')?.textContent.includes('Unable to load match data'));
+    assert.equal(diagnostics.pageErrors.length, 0);
+    assert.equal(diagnostics.failedRequests.length, 0);
+    await context.close();
+});
+
+test('browser handles upcoming matches and incomplete match details', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    const diagnostics = diagnosticState(page);
+    await page.route('**/api/matches**', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(upcomingFixtureData()) }));
+    await page.goto(`${baseUrl}/hef.html`);
+    await page.locator('body.player-page-ready').waitFor();
+    assert.equal(await page.locator('.mw-header').getAttribute('aria-disabled'), 'true');
+    assert.equal(await page.locator('.fixture-item').getAttribute('data-match-id'), 'upcoming-match-1');
+    await page.evaluate(() => window.openMatchDrawer('missing-match'));
+    await page.locator('#match-detail-content').getByText('Unable to load match details.').waitFor();
+    assert.equal(diagnostics.pageErrors.length, 0);
+    await context.close();
+});

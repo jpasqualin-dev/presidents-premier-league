@@ -164,6 +164,7 @@
                 .then(data => schedulePoll(data))
                 .catch(error => {
                     console.error('Unable to load match data:', error);
+                    notifySubscribers(null);
                     schedulePoll(null);
                 });
         }

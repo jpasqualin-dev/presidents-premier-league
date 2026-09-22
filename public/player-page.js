@@ -232,7 +232,14 @@
         card.addEventListener('keydown', event => {
             if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleProfileCard(); }
         });
-        DataManager.subscribe(() => fetchPlayerFixtures());
+        DataManager.subscribe(data => {
+            if (data === null) {
+                document.getElementById('fixtures-container').innerHTML = '<div class="loading">Unable to load match data. Please check your backend route connection.</div>';
+                revealPlayerPage();
+                return;
+            }
+            fetchPlayerFixtures();
+        });
         DataManager.start();
     });
 })();

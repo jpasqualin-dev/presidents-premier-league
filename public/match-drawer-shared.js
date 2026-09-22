@@ -1,6 +1,8 @@
 (function () {
     const ignoredEventPattern = /kick.?off|match start|half.?time|halftime|start (of )?(the )?(second|2nd) half|second half|delay|delayed|end regular time|end of regular time|full time/i;
     let lastDrawerTrigger = null;
+    let lastDrawerMatchId = null;
+    let lastDrawerFromWeekly = false;
 
     function getDrawerFocusableElements() {
         const overlay = document.getElementById('match-drawer-overlay');
@@ -12,6 +14,8 @@
         const closeButton = document.querySelector('#match-drawer-overlay .match-drawer-close');
         closeButton?.focus();
     }
+
+    window.setSharedMatchDrawerTrigger = trigger => { lastDrawerTrigger = trigger; };
 
     function ensureSharedDrawer() {
         if (!document.getElementById('match-drawer-overlay')) {
@@ -169,7 +173,14 @@
     };
 
     window.openSharedMatchDrawer = async function (matchId, options = {}) {
-        if (!options.skipRouter) lastDrawerTrigger = document.activeElement;
+        if (!options.skipRouter) {
+            lastDrawerMatchId = String(matchId);
+            lastDrawerFromWeekly = Boolean(document.querySelector(`#match-drawer-overlay .weekly-form-match[data-match-id="${CSS.escape(lastDrawerMatchId)}"]`));
+            const activeElement = document.activeElement;
+            lastDrawerTrigger = activeElement?.dataset?.matchId === String(matchId)
+                ? activeElement
+                : document.querySelector(`[data-match-id="${CSS.escape(String(matchId))}"]`) || activeElement;
+        }
         if (window.DrawerRouter && !options.skipRouter) {
             return window.DrawerRouter.open({
                 type: 'match',
@@ -194,11 +205,20 @@
 
     window.closeSharedMatchDrawer = function (event) {
         if (event && event.target.id !== 'match-drawer-overlay') return;
+        const closingWeeklyDrawer = window.DrawerRouter?.current()?.type === 'weekly';
         window.DrawerRouter?.closeAll();
         const overlay = document.getElementById('match-drawer-overlay'); overlay.classList.remove('is-open'); overlay.setAttribute('aria-hidden', 'true'); document.body.classList.remove('drawer-open');
         window.resetSharedMatchDrawerHeader();
-        if (lastDrawerTrigger && typeof lastDrawerTrigger.focus === 'function') lastDrawerTrigger.focus();
+        const weeklyTrigger = lastDrawerFromWeekly && lastDrawerMatchId
+            ? document.querySelector(`.weekly-form-match[data-match-id="${CSS.escape(lastDrawerMatchId)}"]`)
+            : null;
+        const weeklyOpener = document.querySelector('.mw-header[role="button"]');
+        if (closingWeeklyDrawer && weeklyOpener) weeklyOpener.focus();
+        else if (weeklyTrigger) weeklyTrigger.focus();
+        else if (lastDrawerTrigger && typeof lastDrawerTrigger.focus === 'function' && lastDrawerTrigger.isConnected) lastDrawerTrigger.focus();
         lastDrawerTrigger = null;
+        lastDrawerMatchId = null;
+        lastDrawerFromWeekly = false;
     };
 
     window.closeMatchDrawer = window.closeSharedMatchDrawer;

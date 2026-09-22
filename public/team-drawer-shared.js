@@ -198,6 +198,7 @@
             content.innerHTML = render(displayTeamName, options);
             resetFormScroll(content);
         }
+        header?.querySelector('.match-drawer-close')?.focus();
     }
 
     function getShortTeamNameForDrawer(teamName, options) {

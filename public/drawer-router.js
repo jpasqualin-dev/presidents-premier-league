@@ -6,7 +6,8 @@
     }
 
     function describe(entry) {
-        return entry ? { type: entry.type, id: entry.id, teamName: entry.teamName } : null;
+        if (!entry) return null;
+        return Object.fromEntries(Object.entries({ type: entry.type, id: entry.id, teamName: entry.teamName }).filter(([, value]) => value !== undefined));
     }
 
     window.DrawerRouter = {
@@ -20,8 +21,10 @@
                 this.closeAll();
                 return;
             }
-            stack.pop();
-            return render(stack[stack.length - 1]);
+            const from = describe(stack.pop());
+            const result = render(stack[stack.length - 1]);
+            document.dispatchEvent(new CustomEvent('drawer-router-back', { detail: { from, to: describe(stack[stack.length - 1]) } }));
+            return result;
         },
 
         closeAll() {
