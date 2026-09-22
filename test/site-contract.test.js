@@ -47,5 +47,10 @@ test('primary pages load shared drawer dependencies in the expected order', () =
 });
 
 test('player pages load the shared player renderer', () => {
-    playerPages.forEach(file => assert.match(readPublic(file), /<script src="player-page\.js"><\/script>/u, file));
+    playerPages.forEach(file => {
+        const source = readPublic(file);
+        assert.match(source, /<script src="player-page\.js"><\/script>/u, file);
+        assert.doesNotMatch(source, /fetch(?:Hef|Jamey|Jordan|Nate|Wes)Fixtures/u, file);
+        assert.doesNotMatch(source, /SharedPlayerPage/u, file);
+    });
 });
