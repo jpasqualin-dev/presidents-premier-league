@@ -1541,7 +1541,7 @@
             `;
 
             if (overallMode === 'PTS') {
-                tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${p.PL}</td><td>${p.W}</td><td>${p.D}</td><td>${p.L}</td><td>${p.GF}-${p.GA}</td><td>${p.GD > 0 ? '+' + p.GD : p.GD}</td><td><strong>${p.PTS}</strong></td>`;
+                tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${p.PL}</td><td>${p.W}</td><td>${p.D}</td><td>${p.L}</td><td>${p.GF}-${p.GA}</td><td>${p.GD > 0 ? '+' + p.GD : p.GD}</td><td class="highlight-col"><strong>${p.PTS}</strong></td>`;
             } else {
                 tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${p.PTS}</td><td>${p.pvpWins}</td><td>${p.pga > 0 ? '+' + p.pga : p.pga}</td><td class="highlight-col">${p.ptsPga}</td>`;
             }
@@ -1577,7 +1577,7 @@
                         <td>${t.L}</td>
                         <td>${t.GF}-${t.GA}</td>
                         <td>${t.GD > 0 ? '+'+t.GD : t.GD}</td>
-                        <td><strong>${t.PTS}</strong></td>
+                        <td class="highlight-col"><strong>${t.PTS}</strong></td>
                     `;
                 } else {
                     nestedTr.innerHTML = `
