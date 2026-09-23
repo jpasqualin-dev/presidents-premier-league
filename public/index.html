@@ -1666,7 +1666,6 @@
     function renderDivisions(teamStatsObj) {
         const container = document.getElementById('divisions-container');
         container.innerHTML = '';
-        const latestFormMatchday = getLatestFormMatchday(teamStatsObj);
 
         for (let divName in divisionData) {
             const mode = divisionModes[divName];
@@ -1708,8 +1707,8 @@
                 } else if (mode === 'PGA') {
                     html += `<tr ${teamRowAttributes}><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PTS}</td><td>${t.pvpWins}</td><td>${t.PGA > 0 ? '+' + t.PGA : t.PGA}</td><td class="highlight-col">${t.ptsPga}</td></tr>`;
                 } else {
-                    const form = (t.form || []).filter(result => Number(result.matchday) === latestFormMatchday);
-                    html += `<tr ${teamRowAttributes}><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td><div class="team-form">${renderFormResults(getOrderedFormResults(form))}${renderNextOpponent(t.team)}</div></td></tr>`;
+                    const form = getOrderedFormResults(t.form || []).slice(-5);
+                    html += `<tr ${teamRowAttributes}><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td><div class="team-form">${renderFormResults(form)}${renderNextOpponent(t.team)}</div></td></tr>`;
                 }
             });
 
