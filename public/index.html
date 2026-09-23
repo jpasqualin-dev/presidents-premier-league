@@ -482,13 +482,15 @@
         .nested-table-row td { font-size: 0.85rem; color: #555; padding-top: 8px; padding-bottom: 8px; border-bottom: 1px dashed #eaeaea; }
         .highlight-col { font-weight: bold; color: #38003c; }
 
-        .form-results { display: inline-flex; gap: 4px; align-items: center; justify-content: flex-start; }
+        .form-results { display: inline-flex; gap: 8px; align-items: center; justify-content: flex-start; }
         .form-result { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 4px; color: #ffffff; font-size: 0.7rem; font-weight: 700; line-height: 1; }
         .form-result-win { background: #00a667; }
         .form-result-draw { background: #8a9298; }
         .form-result-loss { background: #e53e3e; }
         .team-form { display: inline-flex; align-items: center; gap: 8px; }
-        .team-form .form-results { min-width: 116px; }
+        .team-form .form-results { min-width: 128px; }
+        .next-opponent { display: inline-flex; align-items: center; margin-left: 10px; }
+        .next-opponent .team-icon { width: 22px; height: 22px; }
 
         .division-header-container, .overall-header-container {
             display: flex;
@@ -1168,17 +1170,15 @@
             if (Math.abs(distance) < 50) return;
 
             const modes = ['PTS', 'PGA', 'FORM'];
-            if (toggle.dataset.toggleGroup === 'overall') {
-                const currentMode = overallMode;
-                const currentIndex = modes.indexOf(currentMode);
-                const nextIndex = distance < 0
-                    ? (currentIndex + 1) % modes.length
-                    : (currentIndex - 1 + modes.length) % modes.length;
-                setOverallMode(modes[nextIndex]);
-            } else {
-                const mode = distance < 0 ? 'PTS' : 'PGA';
-                toggleDivisionMode(toggle.dataset.toggleGroup, mode);
-            }
+            const currentMode = toggle.dataset.toggleGroup === 'overall'
+                ? overallMode
+                : divisionModes[toggle.dataset.toggleGroup];
+            const currentIndex = modes.indexOf(currentMode);
+            const nextIndex = distance < 0
+                ? (currentIndex + 1) % modes.length
+                : (currentIndex - 1 + modes.length) % modes.length;
+            if (toggle.dataset.toggleGroup === 'overall') setOverallMode(modes[nextIndex]);
+            else toggleDivisionMode(toggle.dataset.toggleGroup, modes[nextIndex]);
 
             toggle.dataset.swipeClickSuppressed = 'true';
         }, { passive: true });
@@ -1505,6 +1505,30 @@
         if (cachedTeamStats) renderDivisions(cachedTeamStats);
     }
 
+    function getNextOpponent(teamName) {
+        const teamNameLower = teamName.toLowerCase();
+        return allMatchesData
+            .filter(match => !isCompletedMatch(match) && match.utcDate && new Date(match.utcDate).getTime() >= Date.now())
+            .filter(match => {
+                const homeName = match.homeTeam?.name?.toLowerCase() || '';
+                const awayName = match.awayTeam?.name?.toLowerCase() || '';
+                return homeName.includes(teamNameLower) || teamNameLower.includes(homeName)
+                    || awayName.includes(teamNameLower) || teamNameLower.includes(awayName);
+            })
+            .sort((matchA, matchB) => new Date(matchA.utcDate) - new Date(matchB.utcDate))
+            .map(match => {
+                const homeName = match.homeTeam.name.toLowerCase();
+                const isHome = homeName.includes(teamNameLower) || teamNameLower.includes(homeName);
+                return isHome ? match.awayTeam.name : match.homeTeam.name;
+            })[0] || '';
+    }
+
+    function renderNextOpponent(teamName) {
+        const opponent = getNextOpponent(teamName);
+        const crest = opponent ? getLogoByName(opponent) : '';
+        return crest ? `<span class="next-opponent" title="Next opponent: ${escapeHtml(getShortTeamName(opponent))}"><img src="${crest}" class="team-icon" alt="${escapeHtml(opponent)} crest"></span>` : '';
+    }
+
     function getLatestFormMatchday(teamStatsObj) {
         return Object.values(teamStatsObj || {}).reduce((latest, team) =>
             (team.form || []).reduce((teamLatest, result) => Math.max(teamLatest, Number(result.matchday) || -1), latest), -1);
@@ -1630,7 +1654,7 @@
                     nestedTr.innerHTML = `
                         <td></td>
                         <td class="text-left">${teamNameCell}</td>
-                        <td><div class="team-form">${renderFormResults(getOrderedFormResults(t.form || []).slice(-4))}</div></td>
+                        <td><div class="team-form">${renderFormResults(getOrderedFormResults(t.form || []).slice(-4))}${renderNextOpponent(t.team)}</div></td>
                     `;
                 }
                 primaryTbody.appendChild(nestedTr);
@@ -1641,13 +1665,14 @@
     function renderDivisions(teamStatsObj) {
         const container = document.getElementById('divisions-container');
         container.innerHTML = '';
+        const latestFormMatchday = getLatestFormMatchday(teamStatsObj);
 
         for (let divName in divisionData) {
             const mode = divisionModes[divName];
             const teamsInDiv = divisionData[divName].map(t => teamStatsObj[t]).filter(Boolean);
 
             if (mode === 'PTS') teamsInDiv.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
-            else teamsInDiv.sort((a, b) => b.ptsPga - a.ptsPga || b.PGA - a.PGA);
+            else if (mode === 'PGA') teamsInDiv.sort((a, b) => b.ptsPga - a.ptsPga || b.PGA - a.PGA);
 
             let html = `<div class="table-wrapper table-card"><table><thead>
                 <tr class="title-row">
@@ -1657,13 +1682,15 @@
                             <div class="toggle-switch" data-toggle-group="${divName}">
                                 <button class="toggle-btn ${mode === 'PTS' ? 'active' : ''}" onclick="toggleDivisionMode('${divName}', 'PTS')">PTS</button>
                                 <button class="toggle-btn ${mode === 'PGA' ? 'active' : ''}" onclick="toggleDivisionMode('${divName}', 'PGA')">PGA</button>
+                                <button class="toggle-btn ${mode === 'FORM' ? 'active' : ''}" onclick="toggleDivisionMode('${divName}', 'FORM')">Form</button>
                             </div>
                         </div>
                     </th>
                 </tr>`;
 
             if (mode === 'PTS') html += `<tr><th>#</th><th class="text-left">Team</th><th>PL</th><th>W</th><th>D</th><th>L</th><th>+/-</th><th>GD</th><th>PTS</th></tr>`;
-            else html += `<tr><th>#</th><th class="text-left">Team</th><th>PTS</th><th>PvP Wins</th><th>PGA</th><th>PTS+PGA</th></tr>`;
+            else if (mode === 'PGA') html += `<tr><th>#</th><th class="text-left">Team</th><th>PTS</th><th>PvP Wins</th><th>PGA</th><th>PTS+PGA</th></tr>`;
+            else html += `<tr><th>#</th><th class="text-left">Team</th><th>Form</th></tr>`;
 
             html += `</thead><tbody>`;
 
@@ -1677,8 +1704,11 @@
 
                 if (mode === 'PTS') {
                     html += `<tr ${teamRowAttributes}><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PL}</td><td>${t.W}</td><td>${t.D}</td><td>${t.L}</td><td>${t.GF}-${t.GA}</td><td>${t.GD > 0 ? '+' + t.GD : t.GD}</td><td><strong>${t.PTS}</strong></td></tr>`;
-                } else {
+                } else if (mode === 'PGA') {
                     html += `<tr ${teamRowAttributes}><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PTS}</td><td>${t.pvpWins}</td><td>${t.PGA > 0 ? '+' + t.PGA : t.PGA}</td><td class="highlight-col">${t.ptsPga}</td></tr>`;
+                } else {
+                    const form = (t.form || []).filter(result => Number(result.matchday) === latestFormMatchday);
+                    html += `<tr ${teamRowAttributes}><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td><div class="team-form">${renderFormResults(getOrderedFormResults(form))}${renderNextOpponent(t.team)}</div></td></tr>`;
                 }
             });
 
