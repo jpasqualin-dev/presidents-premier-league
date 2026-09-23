@@ -482,6 +482,14 @@
         .nested-table-row td { font-size: 0.85rem; color: #555; padding-top: 8px; padding-bottom: 8px; border-bottom: 1px dashed #eaeaea; }
         .highlight-col { font-weight: bold; color: #38003c; }
 
+        .form-results { display: inline-flex; gap: 4px; align-items: center; justify-content: flex-start; }
+        .form-result { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 4px; color: #ffffff; font-size: 0.7rem; font-weight: 700; line-height: 1; }
+        .form-result-win { background: #00a667; }
+        .form-result-draw { background: #8a9298; }
+        .form-result-loss { background: #e53e3e; }
+        .team-form { display: inline-flex; align-items: center; gap: 8px; }
+        .team-form .form-results { min-width: 116px; }
+
         .division-header-container, .overall-header-container {
             display: flex;
             justify-content: space-between;
@@ -680,6 +688,9 @@
         body.dark-mode .nested-team-name { color: #c8c8c8; }
         body.dark-mode .highlight-col,
         body.dark-mode .stat-card.expanded > .stat-card-title { color: #00ff87; }
+        body.dark-mode .form-result-win { background: #00a667; }
+        body.dark-mode .form-result-draw { background: #8a9298; }
+        body.dark-mode .form-result-loss { background: #e53e3e; }
 
         body.dark-mode .toggle-switch,
         body.dark-mode .dvp-sort-toggle { background-color: #303030; }
@@ -1156,10 +1167,16 @@
 
             if (Math.abs(distance) < 50) return;
 
-            const mode = distance < 0 ? 'PTS' : 'PGA';
+            const modes = ['PTS', 'PGA', 'FORM'];
             if (toggle.dataset.toggleGroup === 'overall') {
-                setOverallMode(mode);
+                const currentMode = overallMode;
+                const currentIndex = modes.indexOf(currentMode);
+                const nextIndex = distance < 0
+                    ? (currentIndex + 1) % modes.length
+                    : (currentIndex - 1 + modes.length) % modes.length;
+                setOverallMode(modes[nextIndex]);
             } else {
+                const mode = distance < 0 ? 'PTS' : 'PGA';
                 toggleDivisionMode(toggle.dataset.toggleGroup, mode);
             }
 
@@ -1184,7 +1201,7 @@
                 teams: draftData[player],
                 PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0,
                 goldenBoot: 0, goldenGloves: 0, ppm: 0, gpm: 0, gcpm: 0,
-                pvpWins: 0, pga: 0, ptsPga: 0, roundsWon: 0,
+                pvpWins: 0, pga: 0, ptsPga: 0, roundsWon: 0, form: [],
                 undefeatedWeeks: 0, perfectWeeks: 0
             };
         }
@@ -1200,7 +1217,7 @@
                     team: team,
                     division: divName,
                     owner: owner || "Unassigned",
-                    PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0, PGA: 0, pvpWins: 0, ptsPga: 0,
+                    PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0, PGA: 0, pvpWins: 0, ptsPga: 0, form: [],
                     goldenGloves: 0
                 };
             });
@@ -1488,12 +1505,27 @@
         if (cachedTeamStats) renderDivisions(cachedTeamStats);
     }
 
+    function getLatestFormMatchday(teamStatsObj) {
+        return Object.values(teamStatsObj || {}).reduce((latest, team) =>
+            (team.form || []).reduce((teamLatest, result) => Math.max(teamLatest, Number(result.matchday) || -1), latest), -1);
+    }
+
+    function renderFormResults(results) {
+        if (!results.length) return '<span class="form-empty">-</span>';
+        return `<div class="form-results">${results.map(result => `<span class="form-result form-result-${result.result}" title="${result.result.toUpperCase()}">${result.result.charAt(0).toUpperCase()}</span>`).join('')}</div>`;
+    }
+
+    function getOrderedFormResults(results) {
+        return [...results].sort((a, b) => new Date(a.utcDate || 0) - new Date(b.utcDate || 0));
+    }
+
     function renderPrimaryTable(playerStatsObj, teamStatsObj) {
         let playerStatsArray = Object.values(playerStatsObj);
+        const latestFormMatchday = getLatestFormMatchday(teamStatsObj);
         
         if (overallMode === 'PTS') {
             playerStatsArray.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
-        } else {
+        } else if (overallMode === 'PGA') {
             playerStatsArray.sort((a, b) => b.ptsPga - a.ptsPga || b.pga - a.pga);
         }
 
@@ -1507,6 +1539,7 @@
                         <div class="toggle-switch" data-toggle-group="overall">
                             <button class="toggle-btn ${overallMode === 'PTS' ? 'active' : ''}" onclick="setOverallMode('PTS')">PTS</button>
                             <button class="toggle-btn ${overallMode === 'PGA' ? 'active' : ''}" onclick="setOverallMode('PGA')">PGA</button>
+                            <button class="toggle-btn ${overallMode === 'FORM' ? 'active' : ''}" onclick="setOverallMode('FORM')">Form</button>
                         </div>
                     </div>
                 </th>
@@ -1515,8 +1548,10 @@
 
         if (overallMode === 'PTS') {
             theadHtml += `<tr><th>#</th><th class="text-left">Player</th><th>PL</th><th>W</th><th>D</th><th>L</th><th>+/-</th><th>GD</th><th>PTS</th></tr>`;
-        } else {
+        } else if (overallMode === 'PGA') {
             theadHtml += `<tr><th>#</th><th class="text-left">Player</th><th>PTS</th><th>PvP Wins</th><th>PGA</th><th>PTS+PGA</th></tr>`;
+        } else {
+            theadHtml += `<tr><th>#</th><th class="text-left">Player</th><th>Form</th></tr>`;
         }
         primaryTable.querySelector('thead').innerHTML = theadHtml;
 
@@ -1540,19 +1575,22 @@
                 <div class="icons-container">${iconsHtml}</div>
             `;
 
-            if (overallMode === 'PTS') {
-                tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${p.PL}</td><td>${p.W}</td><td>${p.D}</td><td>${p.L}</td><td>${p.GF}-${p.GA}</td><td>${p.GD > 0 ? '+' + p.GD : p.GD}</td><td class="highlight-col"><strong>${p.PTS}</strong></td>`;
-            } else {
-                tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${p.PTS}</td><td>${p.pvpWins}</td><td>${p.pga > 0 ? '+' + p.pga : p.pga}</td><td class="highlight-col">${p.ptsPga}</td>`;
-            }
-            primaryTbody.appendChild(tr);
-
             let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
             if (overallMode === 'PTS') {
                 playerTeams.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
-            } else {
+            } else if (overallMode === 'PGA') {
                 playerTeams.sort((a, b) => b.ptsPga - a.ptsPga || b.PGA - a.PGA);
             }
+
+            if (overallMode === 'PTS') {
+                tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${p.PL}</td><td>${p.W}</td><td>${p.D}</td><td>${p.L}</td><td>${p.GF}-${p.GA}</td><td>${p.GD > 0 ? '+' + p.GD : p.GD}</td><td class="highlight-col"><strong>${p.PTS}</strong></td>`;
+            } else if (overallMode === 'PGA') {
+                tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${p.PTS}</td><td>${p.pvpWins}</td><td>${p.pga > 0 ? '+' + p.pga : p.pga}</td><td class="highlight-col">${p.ptsPga}</td>`;
+            } else {
+                const playerForm = getOrderedFormResults(playerTeams.flatMap(team => (team.form || []).filter(result => Number(result.matchday) === latestFormMatchday)));
+                tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${renderFormResults(playerForm)}</td>`;
+            }
+            primaryTbody.appendChild(tr);
 
             playerTeams.forEach(t => {
                 let displayName = getShortTeamName(t.team);
@@ -1579,7 +1617,7 @@
                         <td>${t.GD > 0 ? '+'+t.GD : t.GD}</td>
                         <td class="highlight-col"><strong>${t.PTS}</strong></td>
                     `;
-                } else {
+                } else if (overallMode === 'PGA') {
                     nestedTr.innerHTML = `
                         <td></td>
                         <td class="text-left">${teamNameCell}</td>
@@ -1587,6 +1625,12 @@
                         <td>${t.pvpWins}</td>
                         <td>${t.PGA > 0 ? '+'+t.PGA : t.PGA}</td>
                         <td><strong>${t.ptsPga}</strong></td>
+                    `;
+                } else {
+                    nestedTr.innerHTML = `
+                        <td></td>
+                        <td class="text-left">${teamNameCell}</td>
+                        <td><div class="team-form">${renderFormResults(getOrderedFormResults(t.form || []).slice(-4))}</div></td>
                     `;
                 }
                 primaryTbody.appendChild(nestedTr);
@@ -2032,6 +2076,11 @@
                         const homeTeamKey = findTeamKey(homeTeamName, teamStats);
                         const awayTeamKey = findTeamKey(awayTeamName, teamStats);
                         const matchweek = match.matchday;
+                        const homeResult = homeScore > awayScore ? 'win' : homeScore === awayScore ? 'draw' : 'loss';
+                        const awayResult = awayScore > homeScore ? 'win' : awayScore === homeScore ? 'draw' : 'loss';
+
+                        if (homeTeamKey) teamStats[homeTeamKey].form.push({ matchday: matchweek, utcDate: match.utcDate, result: homeResult });
+                        if (awayTeamKey) teamStats[awayTeamKey].form.push({ matchday: matchweek, utcDate: match.utcDate, result: awayResult });
 
                         if (!weeklyPlayerPoints[matchweek]) {
                             weeklyPlayerPoints[matchweek] = Object.fromEntries(
