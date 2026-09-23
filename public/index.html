@@ -1547,7 +1547,7 @@
         let playerStatsArray = Object.values(playerStatsObj);
         const latestFormMatchday = getLatestFormMatchday(teamStatsObj);
         
-        if (overallMode === 'PTS') {
+        if (overallMode === 'PTS' || overallMode === 'FORM') {
             playerStatsArray.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
         } else if (overallMode === 'PGA') {
             playerStatsArray.sort((a, b) => b.ptsPga - a.ptsPga || b.pga - a.pga);
@@ -1600,7 +1600,7 @@
             `;
 
             let playerTeams = p.teams.map(t => teamStatsObj[t]).filter(Boolean);
-            if (overallMode === 'PTS') {
+            if (overallMode === 'PTS' || overallMode === 'FORM') {
                 playerTeams.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
             } else if (overallMode === 'PGA') {
                 playerTeams.sort((a, b) => b.ptsPga - a.ptsPga || b.PGA - a.PGA);
@@ -1671,7 +1671,7 @@
             const mode = divisionModes[divName];
             const teamsInDiv = divisionData[divName].map(t => teamStatsObj[t]).filter(Boolean);
 
-            if (mode === 'PTS') teamsInDiv.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
+            if (mode === 'PTS' || mode === 'FORM') teamsInDiv.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
             else if (mode === 'PGA') teamsInDiv.sort((a, b) => b.ptsPga - a.ptsPga || b.PGA - a.PGA);
 
             let html = `<div class="table-wrapper table-card"><table><thead>
