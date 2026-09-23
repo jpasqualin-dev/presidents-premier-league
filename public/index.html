@@ -483,7 +483,7 @@
         .highlight-col { font-weight: bold; color: #38003c; }
 
         .form-results { display: inline-flex; gap: 8px; align-items: center; justify-content: flex-start; }
-        .form-result { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 4px; color: #ffffff; font-size: 0.7rem; font-weight: 700; line-height: 1; }
+        .form-result { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 4px; color: #ffffff; font-size: 0.7rem; font-weight: 700; line-height: 1; cursor: pointer; }
         .form-result-win { background: #00a667; }
         .form-result-draw { background: #8a9298; }
         .form-result-loss { background: #e53e3e; }
@@ -1536,7 +1536,7 @@
 
     function renderFormResults(results) {
         if (!results.length) return '<span class="form-empty">-</span>';
-        return `<div class="form-results">${results.map(result => `<span class="form-result form-result-${result.result}" title="${result.result.toUpperCase()}">${result.result.charAt(0).toUpperCase()}</span>`).join('')}</div>`;
+        return `<div class="form-results">${results.map(result => `<span class="form-result form-result-${result.result}" role="button" tabindex="0" title="${result.result.toUpperCase()} - View match" onclick="event.stopPropagation(); openMatchDrawer(this.dataset.matchId)" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); openMatchDrawer(this.dataset.matchId); }" data-match-id="${escapeHtml(result.matchId)}">${result.result.charAt(0).toUpperCase()}</span>`).join('')}</div>`;
     }
 
     function getOrderedFormResults(results) {
@@ -1619,8 +1619,9 @@
             playerTeams.forEach(t => {
                 let displayName = getShortTeamName(t.team);
 
+                const escapedTeamName = t.team.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
                 const teamNameCell = `
-                    <div class="team-inline" style="padding-left: 10px;">
+                    <div class="team-inline" role="button" tabindex="0" aria-label="View ${escapeHtml(displayName)} team details" style="padding-left: 10px;" onclick="event.stopPropagation(); openTeamDrawerFromMatch('${escapedTeamName}')" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); openTeamDrawerFromMatch('${escapedTeamName}'); }">
                         ${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="${t.team}">` : ''}
                         ${displayName}
                     </div>
@@ -1696,10 +1697,10 @@
 
             teamsInDiv.forEach((t, idx) => {
                 let displayName = getShortTeamName(t.team);
-                
-                const teamCellHTML = `<div class="team-inline">${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="crest">` : ''}<div style="line-height: 1.2;"><div style="font-weight: 600; color: #1a1a1a;">${displayName}</div><div style="font-size: 0.70rem; color: #888;">${t.owner}</div></div></div>`;
-
                 const escapedTeamName = t.team.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                
+                const teamCellHTML = `<div class="team-inline" role="button" tabindex="0" aria-label="View ${escapeHtml(displayName)} team details" onclick="event.stopPropagation(); openTeamDrawerFromMatch('${escapedTeamName}')" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); openTeamDrawerFromMatch('${escapedTeamName}'); }">${teamLogos[t.team] ? `<img src="${teamLogos[t.team]}" class="team-icon" alt="crest">` : ''}<div style="line-height: 1.2;"><div style="font-weight: 600; color: #1a1a1a;">${displayName}</div><div style="font-size: 0.70rem; color: #888;">${t.owner}</div></div></div>`;
+
                 const teamRowAttributes = `class="team-standings-row" role="button" tabindex="0" onclick="openTeamDrawerFromMatch('${escapedTeamName}')" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openTeamDrawerFromMatch('${escapedTeamName}'); }"`;
 
                 if (mode === 'PTS') {
@@ -2109,8 +2110,8 @@
                         const homeResult = homeScore > awayScore ? 'win' : homeScore === awayScore ? 'draw' : 'loss';
                         const awayResult = awayScore > homeScore ? 'win' : awayScore === homeScore ? 'draw' : 'loss';
 
-                        if (homeTeamKey) teamStats[homeTeamKey].form.push({ matchday: matchweek, utcDate: match.utcDate, result: homeResult });
-                        if (awayTeamKey) teamStats[awayTeamKey].form.push({ matchday: matchweek, utcDate: match.utcDate, result: awayResult });
+                        if (homeTeamKey) teamStats[homeTeamKey].form.push({ matchId: match.id, matchday: matchweek, utcDate: match.utcDate, result: homeResult });
+                        if (awayTeamKey) teamStats[awayTeamKey].form.push({ matchId: match.id, matchday: matchweek, utcDate: match.utcDate, result: awayResult });
 
                         if (!weeklyPlayerPoints[matchweek]) {
                             weeklyPlayerPoints[matchweek] = Object.fromEntries(
