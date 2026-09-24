@@ -489,7 +489,7 @@
         .form-result-loss { background: #e53e3e; }
         .team-form { display: inline-flex; align-items: center; gap: 8px; }
         .team-form .form-results { min-width: 128px; }
-        .next-opponent { display: inline-flex; align-items: center; margin-left: 10px; }
+        .next-opponent { display: inline-flex; align-items: center; margin-left: 10px; margin-right: 4px; cursor: pointer; }
         .next-opponent .team-icon { width: 22px; height: 22px; }
 
         .division-header-container, .overall-header-container {
@@ -1476,14 +1476,15 @@
             .map(match => {
                 const homeName = match.homeTeam.name.toLowerCase();
                 const isHome = homeName.includes(teamNameLower) || teamNameLower.includes(homeName);
-                return isHome ? match.awayTeam.name : match.homeTeam.name;
+                return { match, opponent: isHome ? match.awayTeam.name : match.homeTeam.name };
             })[0] || '';
     }
 
     function renderNextOpponent(teamName) {
-        const opponent = getNextOpponent(teamName);
+        const nextMatch = getNextOpponent(teamName);
+        const opponent = nextMatch?.opponent || '';
         const crest = opponent ? getLogoByName(opponent) : '';
-        return crest ? `<span class="next-opponent" title="Next opponent: ${escapeHtml(getShortTeamName(opponent))}"><img src="${crest}" class="team-icon" alt="${escapeHtml(opponent)} crest"></span>` : '';
+        return crest ? `<span class="next-opponent" role="button" tabindex="0" aria-label="View next match against ${escapeHtml(getShortTeamName(opponent))}" title="View next match against ${escapeHtml(getShortTeamName(opponent))}" data-match-id="${escapeHtml(nextMatch.match.id)}" onclick="event.stopPropagation(); openMatchDrawer(this.dataset.matchId)" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); openMatchDrawer(this.dataset.matchId); }"><img src="${crest}" class="team-icon" alt="${escapeHtml(opponent)} crest"></span>` : '';
     }
 
     function getLatestFormMatchday(teamStatsObj) {
