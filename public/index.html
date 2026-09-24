@@ -526,7 +526,7 @@
         #divisions-container .division-header-container { align-items: center; flex-wrap: wrap; gap: 8px; }
         #divisions-container .division-header-container h2 { font-size: 1.4rem; white-space: normal; line-height: 1.2; flex: 1; }
 
-        .toggle-switch { display: inline-flex; background-color: #e5e5ea; border-radius: 20px; padding: 4px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.08); flex-shrink: 0; touch-action: pan-x; }
+        .toggle-switch { display: inline-flex; background-color: #e5e5ea; border-radius: 20px; padding: 4px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.08); flex-shrink: 0; }
         .toggle-btn { background-color: transparent; color: #666; border: none; padding: 6px 16px; border-radius: 16px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.25s ease; font-family: inherit; }
         .toggle-btn.active { background-color: #ffffff; color: #1a1a1a; box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 0 1px rgba(0,0,0,0.05); }
 
@@ -1150,49 +1150,6 @@
         }
     }
 
-    function setupToggleSwipeListeners() {
-        let activeToggle = null;
-        let touchstartX = 0;
-
-        document.addEventListener('touchstart', e => {
-            activeToggle = e.target.closest('.toggle-switch');
-            if (activeToggle) touchstartX = e.changedTouches[0].screenX;
-        }, { passive: true });
-
-        document.addEventListener('touchend', e => {
-            if (!activeToggle) return;
-
-            const toggle = activeToggle;
-            activeToggle = null;
-            const touchendX = e.changedTouches[0].screenX;
-            const distance = touchendX - touchstartX;
-
-            if (Math.abs(distance) < 50) return;
-
-            const modes = ['PTS', 'PGA', 'FORM'];
-            const currentMode = toggle.dataset.toggleGroup === 'overall'
-                ? overallMode
-                : divisionModes[toggle.dataset.toggleGroup];
-            const currentIndex = modes.indexOf(currentMode);
-            const nextIndex = distance < 0
-                ? (currentIndex + 1) % modes.length
-                : (currentIndex - 1 + modes.length) % modes.length;
-            if (toggle.dataset.toggleGroup === 'overall') setOverallMode(modes[nextIndex]);
-            else toggleDivisionMode(toggle.dataset.toggleGroup, modes[nextIndex]);
-
-            toggle.dataset.swipeClickSuppressed = 'true';
-        }, { passive: true });
-
-        document.addEventListener('click', e => {
-            const toggle = e.target.closest('.toggle-switch');
-            if (toggle?.dataset.swipeClickSuppressed !== 'true') return;
-
-            delete toggle.dataset.swipeClickSuppressed;
-            e.preventDefault();
-            e.stopPropagation();
-        }, true);
-    }
-
     function initializePlayerStats() {
         let stats = {};
         for (let player in draftData) {
@@ -1611,7 +1568,10 @@
             } else if (overallMode === 'PGA') {
                 tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${p.PTS}</td><td>${p.pvpWins}</td><td>${p.pga > 0 ? '+' + p.pga : p.pga}</td><td class="highlight-col">${p.ptsPga}</td>`;
             } else {
-                const playerForm = getOrderedFormResults(playerTeams.flatMap(team => (team.form || []).filter(result => Number(result.matchday) === latestFormMatchday)));
+                const playerForm = p.teams.flatMap(teamName => {
+                    const team = teamStatsObj[teamName];
+                    return team ? getOrderedFormResults((team.form || []).filter(result => Number(result.matchday) === latestFormMatchday)) : [];
+                });
                 tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${renderFormResults(playerForm)}</td>`;
             }
             primaryTbody.appendChild(tr);
@@ -2246,7 +2206,6 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         setupSwipeListeners();
-        setupToggleSwipeListeners();
         DataManager.subscribe(data => fetchAndUpdateStandings(data));
         DataManager.start();
     });
