@@ -37,6 +37,15 @@ test('drawer presentation styles are centralized', () => {
     assert.doesNotMatch(readPublic('index.html'), /\.match-drawer-overlay\s*\{/u);
 });
 
+test('match drawer rendering stays in the shared renderer', () => {
+    ['index.html', 'fixtures.html'].forEach(file => {
+        const source = readPublic(file);
+        assert.doesNotMatch(source, /function\s+render(?:MatchDetail|Lineups|MatchStats|MatchEvents|MatchScorers)\s*\(/u, file);
+        assert.doesNotMatch(source, /async\s+function\s+fetchMatchById\s*\(/u, file);
+    });
+    assert.match(readPublic('match-drawer-shared.js'), /renderSharedMatchDetail/u);
+});
+
 test('primary pages load shared drawer dependencies in the expected order', () => {
     sharedConfigPages.forEach(file => {
         const source = readPublic(file);
