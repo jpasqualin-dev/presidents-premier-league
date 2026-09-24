@@ -1,5 +1,4 @@
 (function () {
-    let teamDrawerReturn = false;
     let teamDrawerTeamName = '';
     let teamDrawerOpen = false;
     const { draftData, getOwnerOfTeam } = window.PplLeagueConfig;
@@ -20,7 +19,6 @@
         const overlay = document.getElementById('match-drawer-overlay');
         const openedFromMatch = overlay?.classList.contains('is-open');
         const matches = window.matchDrawerMatches || window.playerMatches || [];
-        teamDrawerReturn = openedFromMatch;
         teamDrawerOpen = true;
         teamDrawerTeamName = teamName;
         TeamDrawerShared.openFromMatch(teamName, {
@@ -42,7 +40,6 @@
 
     window.openMatchDrawer = function (matchId) {
         const openedFromTeamDrawer = teamDrawerOpen;
-        teamDrawerReturn = false;
         teamDrawerOpen = false;
         return window.openSharedMatchDrawer(matchId, {
             backButtonMarkup: openedFromTeamDrawer
@@ -52,7 +49,6 @@
     };
 
     window.returnToMatchFromTeamDrawer = function () {
-        teamDrawerReturn = false;
         teamDrawerOpen = false;
         window.openMatchDrawer(window.activeSharedMatchId);
     };
@@ -62,7 +58,6 @@
     };
 
     document.addEventListener('drawer-router-closed', () => {
-        teamDrawerReturn = false;
         teamDrawerOpen = false;
     });
 })();

@@ -1217,8 +1217,6 @@
         return TeamNames.shortName(name);
     }
 
-    const detailStatLabels = { possession: 'Ball Possession', possessionpct: 'Ball Possession', ballpossession: 'Ball Possession', shots: 'Total Shots', totalshots: 'Total Shots', shotsontarget: 'Shots on Target' };
-
     function escapeHtml(value) {
         return String(value ?? '').replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
     }

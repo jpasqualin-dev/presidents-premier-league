@@ -679,9 +679,6 @@
     // --- State & Schedule Variables ---
     let fixtures = [];
     let fixtureMatches = [];
-    let matchDrawerTeamReturn = false;
-    let matchDrawerMatchId = null;
-    let teamDrawerTeamName = null;
     let currentView = 'date';
     let selectedTeam = null;
     let shouldPositionInitialCard = true;
@@ -1047,31 +1044,8 @@
         document.getElementById('team-modal').style.display = 'none';
     }
 
-    const detailStatLabels = {
-        possession: 'Ball Possession',
-        possessionpct: 'Ball Possession',
-        ballpossession: 'Ball Possession',
-        shots: 'Total Shots',
-        totalshots: 'Total Shots',
-        shotsontarget: 'Shots on Target',
-        expectedGoals: 'Expected goals (xG)',
-        xgoals: 'Expected goals (xG)'
-    };
-
-    function escapeHtml(value) {
-        return String(value ?? '').replace(/[&<>'"]/g, character => ({
-            '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-        }[character]));
-    }
-
     async function openMatchDrawer(matchId) {
-        const openedFromTeamDrawer = matchDrawerTeamReturn;
-        matchDrawerMatchId = matchId;
-        matchDrawerTeamReturn = false;
-        const backButtonMarkup = openedFromTeamDrawer
-            ? '<button class="match-drawer-back" type="button" aria-label="Back to team details" onclick="returnToTeamDrawer()">‹</button>'
-            : '';
-        return window.openSharedMatchDrawer(matchId, { backButtonMarkup });
+        return window.openSharedMatchDrawer(matchId);
     }
 
     function closeMatchDrawer(event) {
