@@ -224,3 +224,74 @@ test('browser handles upcoming matches and incomplete match details', async t =>
     assert.equal(diagnostics.pageErrors.length, 0);
     await context.close();
 });
+
+test('table switches between points and scoped match form with working fixture links', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    const diagnostics = diagnosticState(page);
+    const opponents = {
+        home: ['Manchester City', 'Liverpool', 'Newcastle United', 'Everton', 'Brentford'],
+        away: ['Aston Villa', 'Brighton & Hove Albion', 'Bournemouth', 'Fulham', 'West Ham United']
+    };
+    const results = ['win', 'draw', 'loss', 'win', 'loss'];
+    const finishedMatches = ['home', 'away'].flatMap(side => opponents[side].map((opponent, index) => {
+        const result = results[index];
+        const arsenalScore = result === 'win' ? 2 : result === 'draw' ? 1 : 0;
+        const opponentScore = result === 'win' ? 0 : result === 'draw' ? 1 : 2;
+        const homeName = side === 'home' ? 'Arsenal' : opponent;
+        const awayName = side === 'home' ? opponent : 'Arsenal';
+        const homeScore = side === 'home' ? arsenalScore : opponentScore;
+        const awayScore = side === 'home' ? opponentScore : arsenalScore;
+        return {
+            id: `arsenal-${side}-${index + 1}`,
+            matchday: 9,
+            status: 'FINISHED',
+            utcDate: `2026-09-${String(index + 1 + (side === 'away' ? 5 : 0)).padStart(2, '0')}T12:00:00Z`,
+            homeTeam: { id: `${side}-${index}-home`, name: homeName },
+            awayTeam: { id: `${side}-${index}-away`, name: awayName },
+            score: { fullTime: { home: homeScore, away: awayScore } },
+            scorers: []
+        };
+    }));
+    const matches = [...finishedMatches,
+        { id: 'arsenal-next-home', matchday: 10, status: 'SCHEDULED', utcDate: '2026-10-10T12:00:00Z', homeTeam: { id: 'next-home', name: 'Arsenal' }, awayTeam: { id: 'chelsea', name: 'Chelsea' }, score: { fullTime: { home: null, away: null } }, scorers: [] },
+        { id: 'arsenal-next-away', matchday: 11, status: 'SCHEDULED', utcDate: '2026-10-17T12:00:00Z', homeTeam: { id: 'next-away-home', name: 'Chelsea' }, awayTeam: { id: 'arsenal-away', name: 'Arsenal' }, score: { fullTime: { home: null, away: null } }, scorers: [] }
+    ];
+    await page.route('**/api/matches**', route => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ matches })
+    }));
+    await page.goto(`${baseUrl}/table.html`);
+    await page.locator('#standings-table-body tr.team-standings-row').first().waitFor();
+    const formToggle = page.locator('.standings-mode-toggle button').filter({ hasText: 'Form' });
+    await formToggle.click();
+    const arsenalRow = page.locator('#standings-table-body tr.team-standings-row').filter({ hasText: 'Arsenal' });
+    const overallMatchIds = await arsenalRow.locator('.table-form-result').evaluateAll(elements => elements.map(element => element.dataset.matchId));
+    assert.deepEqual(overallMatchIds, ['arsenal-away-1', 'arsenal-away-2', 'arsenal-away-3', 'arsenal-away-4', 'arsenal-away-5']);
+    await arsenalRow.locator('.table-form-result').last().click();
+    await page.locator('#match-drawer-overlay.is-open').waitFor();
+    assert.deepEqual(await page.evaluate(() => window.DrawerRouter.current()), { type: 'match', id: 'arsenal-away-5' });
+    await page.keyboard.press('Escape');
+
+    await page.locator('#btn-home').click();
+    await page.locator('.standings-mode-toggle button').filter({ hasText: 'Form' }).click();
+    const homeArsenalRow = page.locator('#standings-table-body tr.team-standings-row').filter({ hasText: 'Arsenal' });
+    assert.deepEqual(await homeArsenalRow.locator('.table-form-result').evaluateAll(elements => elements.map(element => element.dataset.matchId)), ['arsenal-home-1', 'arsenal-home-2', 'arsenal-home-3', 'arsenal-home-4', 'arsenal-home-5']);
+    assert.equal(await page.locator('#standings-table-body tr.team-standings-row').filter({ hasText: 'Chelsea' }).locator('.table-form-result').count(), 0);
+    await homeArsenalRow.locator('[data-match-id="arsenal-next-home"]').click();
+    await page.locator('#match-drawer-overlay.is-open').waitFor();
+    assert.deepEqual(await page.evaluate(() => window.DrawerRouter.current()), { type: 'match', id: 'arsenal-next-home' });
+    await page.keyboard.press('Escape');
+
+    await page.locator('#btn-away').click();
+    await page.locator('.standings-mode-toggle button').filter({ hasText: 'Form' }).click();
+    const awayArsenalRow = page.locator('#standings-table-body tr.team-standings-row').filter({ hasText: 'Arsenal' });
+    assert.deepEqual(await awayArsenalRow.locator('.table-form-result').evaluateAll(elements => elements.map(element => element.dataset.matchId)), ['arsenal-away-1', 'arsenal-away-2', 'arsenal-away-3', 'arsenal-away-4', 'arsenal-away-5']);
+    await awayArsenalRow.locator('[data-match-id="arsenal-next-away"]').click();
+    await page.locator('#match-drawer-overlay.is-open').waitFor();
+    assert.deepEqual(await page.evaluate(() => window.DrawerRouter.current()), { type: 'match', id: 'arsenal-next-away' });
+    assert.deepEqual(diagnostics.pageErrors, []);
+    await context.close();
+});

@@ -292,7 +292,18 @@
         .icons-container { display: flex; gap: 4px; margin-top: 4px; }
         .team-icon { width: 18px; height: 18px; object-fit: contain; vertical-align: middle; }
         .team-inline { display: inline-flex; align-items: center; gap: 8px; }
+        .table-team-form { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+        .table-form-results { display: inline-flex; align-items: center; justify-content: flex-start; gap: 8px; min-width: 162px; }
+        .table-form-result { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; flex: 0 0 26px; border-radius: 4px; color: #ffffff; font-size: 0.7rem; font-weight: 700; line-height: 1; cursor: pointer; }
+        .table-form-result-win { background: #00a667; }
+        .table-form-result-draw { background: #8a9298; }
+        .table-form-result-loss { background: #e53e3e; }
+        .table-next-opponent { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; flex: 0 0 26px; cursor: pointer; }
+        .overall-standings-table col.form { width: 52%; }
         body.dark-mode .table-team-name { color: #f1f1f1 !important; }
+        body.dark-mode .table-form-result-win { background: #00a667; }
+        body.dark-mode .table-form-result-draw { background: #8a9298; }
+        body.dark-mode .table-form-result-loss { background: #e53e3e; }
 
         .expandable-row { cursor: pointer; transition: background-color 0.15s ease; }
         .expandable-row.expanded, .expandable-row.expanded:hover { background-color: #ffffff !important; }
@@ -432,6 +443,10 @@
 
     const teamLogos = TeamNames.logoMap();
 
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>\'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
+    }
+
     function getShortTeamName(name) {
         return TeamNames.shortName(name);
     }
@@ -460,7 +475,7 @@
         return {
             team: team,
             owner: getOwnerOfTeam(team),
-            PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0, cleanSheets: 0, yellowCards: 0, redCards: 0
+            PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0, cleanSheets: 0, yellowCards: 0, redCards: 0, form: []
         };
     }
 
@@ -497,10 +512,18 @@
             if (homeKey) {
                 applyResult(allStats[homeKey], homeScore, awayScore);
                 applyResult(homeStats[homeKey], homeScore, awayScore);
+                const result = homeScore > awayScore ? 'win' : homeScore === awayScore ? 'draw' : 'loss';
+                const formResult = { matchId: match.id, utcDate: match.utcDate, result };
+                allStats[homeKey].form.push(formResult);
+                homeStats[homeKey].form.push(formResult);
             }
             if (awayKey) {
                 applyResult(allStats[awayKey], awayScore, homeScore);
                 applyResult(awayStats[awayKey], awayScore, homeScore);
+                const result = awayScore > homeScore ? 'win' : awayScore === homeScore ? 'draw' : 'loss';
+                const formResult = { matchId: match.id, utcDate: match.utcDate, result };
+                allStats[awayKey].form.push(formResult);
+                awayStats[awayKey].form.push(formResult);
             }
 
             if (homeKey && awayScore === 0) allStats[homeKey].cleanSheets += 1;
@@ -526,26 +549,80 @@
         return [...teamsArray].sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
     }
 
+    function standingsColgroup(mode) {
+        return mode === 'FORM'
+            ? '<colgroup><col class="rank"><col class="team"><col class="form"></colgroup>'
+            : '<colgroup><col class="rank"><col class="team"><col class="stat"><col class="stat"><col class="stat"><col class="stat"><col class="goals"><col class="gd"><col class="points"></colgroup>';
+    }
+
+    function renderStandingsModeToggle(view) {
+        const mode = standingsModes[view];
+        return `<div class="dvp-sort-toggle standings-mode-toggle" role="group" aria-label="Standings display"><button class="dvp-sort-btn ${mode === 'PTS' ? 'active' : ''}" aria-pressed="${mode === 'PTS'}" onclick="setStandingsMode('${view}', 'PTS')">PTS</button><button class="dvp-sort-btn ${mode === 'FORM' ? 'active' : ''}" aria-pressed="${mode === 'FORM'}" onclick="setStandingsMode('${view}', 'FORM')">Form</button></div>`;
+    }
+
+    function getTeamFormResults(team, view) {
+        const results = [...(team.form || [])].sort((a, b) => new Date(a.utcDate || 0) - new Date(b.utcDate || 0)).slice(-5);
+        if ((view === 'home' || view === 'away') && results.length < 5) return [];
+        return results;
+    }
+
+    function renderTableFormResults(results) {
+        if (!results.length) return '';
+        return `<div class="table-form-results">${results.map(result => `<span class="table-form-result table-form-result-${result.result}" role="button" tabindex="0" title="${result.result.toUpperCase()} - View match" data-match-id="${escapeHtml(result.matchId)}" onclick="event.stopPropagation(); openMatchDrawer(this.dataset.matchId)" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); openMatchDrawer(this.dataset.matchId); }">${result.result.charAt(0).toUpperCase()}</span>`).join('')}</div>`;
+    }
+
+    function getNextTableFixture(teamName, view) {
+        return cachedMatches
+            .filter(match => match.status !== 'FINISHED' && match.utcDate && new Date(match.utcDate).getTime() >= Date.now())
+            .filter(match => {
+                const homeTeam = findTeamKey(match.homeTeam?.name || '', cachedStats?.allStats || {});
+                const awayTeam = findTeamKey(match.awayTeam?.name || '', cachedStats?.allStats || {});
+                return view === 'home' ? homeTeam === teamName : view === 'away' ? awayTeam === teamName : homeTeam === teamName || awayTeam === teamName;
+            })
+            .sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate))
+            .map(match => {
+                const homeTeam = findTeamKey(match.homeTeam?.name || '', cachedStats?.allStats || {});
+                const isHome = homeTeam === teamName;
+                return { match, opponent: isHome ? match.awayTeam?.name : match.homeTeam?.name };
+            })[0] || null;
+    }
+
+    function renderTableNextOpponent(teamName, view) {
+        const nextFixture = getNextTableFixture(teamName, view);
+        const opponent = nextFixture?.opponent || '';
+        const crest = opponent ? getLogoByName(opponent) : '';
+        if (!crest) return '';
+        const shortName = escapeHtml(getShortTeamName(opponent));
+        return `<span class="table-next-opponent" role="button" tabindex="0" aria-label="View next match against ${shortName}" title="View next match against ${shortName}" data-match-id="${escapeHtml(nextFixture.match.id)}" onclick="event.stopPropagation(); openMatchDrawer(this.dataset.matchId)" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); openMatchDrawer(this.dataset.matchId); }"><img src="${crest}" class="team-icon" alt="${shortName} crest"></span>`;
+    }
+
+    function renderFormCell(team, view) {
+        return `<div class="table-team-form">${renderTableFormResults(getTeamFormResults(team, view))}${renderTableNextOpponent(team.team, view)}</div>`;
+    }
+
     function getTeamRowAttributes(teamName) {
         const escapedTeamName = teamName.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
         return `class="team-standings-row" role="button" tabindex="0" onclick="openTeamDrawer('${escapedTeamName}')" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openTeamDrawer('${escapedTeamName}'); }"`;
     }
 
-    function renderStandingsCard(title, teamsArray) {
+    function renderStandingsCard(title, teamsArray, view) {
         const sorted = sortTeams(teamsArray);
+        const mode = standingsModes[view];
+        const colgroup = standingsColgroup(mode);
+        const columnCount = mode === 'FORM' ? 3 : 9;
 
         if (title !== 'DVP') {
             let headerHtml = `
                 <div class="table-wrapper table-card standings-header" style="margin-top: 0px;">
                     <table id="standings-table-header" class="overall-standings-table">
-                        <colgroup><col class="rank"><col class="team"><col class="stat"><col class="stat"><col class="stat"><col class="stat"><col class="goals"><col class="gd"><col class="points"></colgroup>
+                        ${colgroup}
                         <thead>
                             <tr class="title-row">
-                                <th colspan="9" class="text-left" style="border-bottom: 1px solid #00ff87; padding-bottom: 4px;">
-                                    <div class="overall-header-container"><h2>${title}</h2></div>
+                                <th colspan="${columnCount}" class="text-left" style="border-bottom: 1px solid #00ff87; padding-bottom: 4px;">
+                                    <div class="overall-header-container"><h2>${title}</h2>${renderStandingsModeToggle(view)}</div>
                                 </th>
                             </tr>
-                            <tr><th>#</th><th class="text-left">Team</th><th>PL</th><th>W</th><th>D</th><th>L</th><th>+/-</th><th>GD</th><th>PTS</th></tr>
+                            ${mode === 'FORM' ? '<tr><th>#</th><th class="text-left">Team</th><th>Form</th></tr>' : '<tr><th>#</th><th class="text-left">Team</th><th>PL</th><th>W</th><th>D</th><th>L</th><th>+/-</th><th>GD</th><th>PTS</th></tr>'}
                         </thead>
                     </table>
                 </div>
@@ -558,6 +635,10 @@
             sorted.forEach((t, idx) => {
                 const displayName = getShortTeamName(t.team);
                 const logo = getLogoByName(t.team);
+                if (mode === 'FORM') {
+                    headerHtml += `<tr ${getTeamRowAttributes(t.team)}><td class="fotmob-rank">${idx + 1}</td><td class="text-left"><div class="team-inline">${logo ? `<img src="${logo}" class="team-icon" alt="crest">` : ''}<div style="line-height: 1.2;"><div class="table-team-name" style="font-weight: 600; color: #1a1a1a;">${displayName}</div><div style="font-size: 0.70rem; color: #888;">${t.owner}</div></div></div></td><td>${renderFormCell(t, view)}</td></tr>`;
+                    return;
+                }
                 headerHtml += `
                     <tr ${getTeamRowAttributes(t.team)}>
                         <td class="fotmob-rank">${idx + 1}</td>
@@ -880,6 +961,12 @@
     let cachedMatches = [];
     let currentView = 'all';
     let dvpSort = 'rank';
+    const standingsModes = { all: 'PTS', home: 'PTS', away: 'PTS' };
+
+    function setStandingsMode(view, mode) {
+        standingsModes[view] = mode;
+        renderView();
+    }
 
     function setView(view) {
         currentView = view;
@@ -902,9 +989,9 @@
     function renderView() {
         if (!cachedStats) return;
 
-        if (currentView === 'all') renderStandingsCard('Overall Standings', Object.values(cachedStats.allStats));
-        else if (currentView === 'home') renderStandingsCard('Home Standings', Object.values(cachedStats.homeStats));
-        else if (currentView === 'away') renderStandingsCard('Away Standings', Object.values(cachedStats.awayStats));
+        if (currentView === 'all') renderStandingsCard('Overall Standings', Object.values(cachedStats.allStats), 'all');
+        else if (currentView === 'home') renderStandingsCard('Home Standings', Object.values(cachedStats.homeStats), 'home');
+        else if (currentView === 'away') renderStandingsCard('Away Standings', Object.values(cachedStats.awayStats), 'away');
         else if (currentView === 'dvp') renderDvpCards(cachedStats.allStats);
 
         updateOverallStandingsBackdrop();
