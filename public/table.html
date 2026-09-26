@@ -293,7 +293,7 @@
         .team-icon { width: 18px; height: 18px; object-fit: contain; vertical-align: middle; }
         .team-inline { display: inline-flex; align-items: center; gap: 8px; }
         .table-team-form { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
-        .table-form-results { display: inline-flex; align-items: center; justify-content: flex-start; gap: 8px; min-width: 162px; }
+        .table-form-results { display: inline-flex; align-items: center; justify-content: flex-end; gap: 8px; min-width: 162px; }
         .table-form-result { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; flex: 0 0 26px; border-radius: 4px; color: #ffffff; font-size: 0.7rem; font-weight: 700; line-height: 1; cursor: pointer; }
         .table-form-result-win { background: #00a667; }
         .table-form-result-draw { background: #8a9298; }
@@ -560,10 +560,8 @@
         return `<div class="dvp-sort-toggle standings-mode-toggle" role="group" aria-label="Standings display"><button class="dvp-sort-btn ${mode === 'PTS' ? 'active' : ''}" aria-pressed="${mode === 'PTS'}" onclick="setStandingsMode('${view}', 'PTS')">PTS</button><button class="dvp-sort-btn ${mode === 'FORM' ? 'active' : ''}" aria-pressed="${mode === 'FORM'}" onclick="setStandingsMode('${view}', 'FORM')">Form</button></div>`;
     }
 
-    function getTeamFormResults(team, view) {
-        const results = [...(team.form || [])].sort((a, b) => new Date(a.utcDate || 0) - new Date(b.utcDate || 0)).slice(-5);
-        if ((view === 'home' || view === 'away') && results.length < 5) return [];
-        return results;
+    function getTeamFormResults(team) {
+        return [...(team.form || [])].sort((a, b) => new Date(a.utcDate || 0) - new Date(b.utcDate || 0)).slice(-5);
     }
 
     function renderTableFormResults(results) {
@@ -597,7 +595,7 @@
     }
 
     function renderFormCell(team, view) {
-        return `<div class="table-team-form">${renderTableFormResults(getTeamFormResults(team, view))}${renderTableNextOpponent(team.team, view)}</div>`;
+        return `<div class="table-team-form">${renderTableFormResults(getTeamFormResults(team))}${renderTableNextOpponent(team.team, view)}</div>`;
     }
 
     function getTeamRowAttributes(teamName) {

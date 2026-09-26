@@ -254,7 +254,17 @@ test('table switches between points and scoped match form with working fixture l
             scorers: []
         };
     }));
-    const matches = [...finishedMatches,
+    const chelseaFormMatches = ['home', 'away'].flatMap(side => [1, 2].map(index => ({
+        id: `chelsea-${side}-${index}`,
+        matchday: 8,
+        status: 'FINISHED',
+        utcDate: `2026-09-${String(12 + (side === 'away' ? 2 : 0) + index).padStart(2, '0')}T12:00:00Z`,
+        homeTeam: { id: `chelsea-${side}-${index}-home`, name: side === 'home' ? 'Chelsea' : ['Wolves', 'Crystal Palace'][index - 1] },
+        awayTeam: { id: `chelsea-${side}-${index}-away`, name: side === 'away' ? 'Chelsea' : ['Leicester City', 'Nottingham Forest'][index - 1] },
+        score: { fullTime: { home: 1, away: 0 } },
+        scorers: []
+    })));
+    const matches = [...finishedMatches, ...chelseaFormMatches,
         { id: 'arsenal-next-home', matchday: 10, status: 'SCHEDULED', utcDate: '2026-10-10T12:00:00Z', homeTeam: { id: 'next-home', name: 'Arsenal' }, awayTeam: { id: 'chelsea', name: 'Chelsea' }, score: { fullTime: { home: null, away: null } }, scorers: [] },
         { id: 'arsenal-next-away', matchday: 11, status: 'SCHEDULED', utcDate: '2026-10-17T12:00:00Z', homeTeam: { id: 'next-away-home', name: 'Chelsea' }, awayTeam: { id: 'arsenal-away', name: 'Arsenal' }, score: { fullTime: { home: null, away: null } }, scorers: [] }
     ];
@@ -279,7 +289,16 @@ test('table switches between points and scoped match form with working fixture l
     await page.locator('.standings-mode-toggle button').filter({ hasText: 'Form' }).click();
     const homeArsenalRow = page.locator('#standings-table-body tr.team-standings-row').filter({ hasText: 'Arsenal' });
     assert.deepEqual(await homeArsenalRow.locator('.table-form-result').evaluateAll(elements => elements.map(element => element.dataset.matchId)), ['arsenal-home-1', 'arsenal-home-2', 'arsenal-home-3', 'arsenal-home-4', 'arsenal-home-5']);
-    assert.equal(await page.locator('#standings-table-body tr.team-standings-row').filter({ hasText: 'Chelsea' }).locator('.table-form-result').count(), 0);
+    const homeChelseaRow = page.locator('#standings-table-body tr.team-standings-row').filter({ hasText: 'Chelsea' });
+    assert.deepEqual(await homeChelseaRow.locator('.table-form-result').evaluateAll(elements => elements.map(element => element.dataset.matchId)), ['chelsea-home-1', 'chelsea-home-2']);
+    const homeChelseaForm = homeChelseaRow.locator('.table-form-results');
+    const homeChelseaAlignment = await homeChelseaForm.evaluate(element => {
+        const container = element.getBoundingClientRect();
+        const lastResult = element.lastElementChild.getBoundingClientRect();
+        return { justifyContent: getComputedStyle(element).justifyContent, width: container.width, rightGap: container.right - lastResult.right };
+    });
+    assert.equal(homeChelseaAlignment.justifyContent, 'flex-end');
+    assert.ok(homeChelseaAlignment.width >= 162 && homeChelseaAlignment.rightGap < 1, 'short home form should occupy the rightmost result slots');
     await homeArsenalRow.locator('[data-match-id="arsenal-next-home"]').click();
     await page.locator('#match-drawer-overlay.is-open').waitFor();
     assert.deepEqual(await page.evaluate(() => window.DrawerRouter.current()), { type: 'match', id: 'arsenal-next-home' });
@@ -289,6 +308,16 @@ test('table switches between points and scoped match form with working fixture l
     await page.locator('.standings-mode-toggle button').filter({ hasText: 'Form' }).click();
     const awayArsenalRow = page.locator('#standings-table-body tr.team-standings-row').filter({ hasText: 'Arsenal' });
     assert.deepEqual(await awayArsenalRow.locator('.table-form-result').evaluateAll(elements => elements.map(element => element.dataset.matchId)), ['arsenal-away-1', 'arsenal-away-2', 'arsenal-away-3', 'arsenal-away-4', 'arsenal-away-5']);
+    const awayChelseaRow = page.locator('#standings-table-body tr.team-standings-row').filter({ hasText: 'Chelsea' });
+    assert.deepEqual(await awayChelseaRow.locator('.table-form-result').evaluateAll(elements => elements.map(element => element.dataset.matchId)), ['chelsea-away-1', 'chelsea-away-2']);
+    const awayChelseaForm = awayChelseaRow.locator('.table-form-results');
+    const awayChelseaAlignment = await awayChelseaForm.evaluate(element => {
+        const container = element.getBoundingClientRect();
+        const lastResult = element.lastElementChild.getBoundingClientRect();
+        return { justifyContent: getComputedStyle(element).justifyContent, width: container.width, rightGap: container.right - lastResult.right };
+    });
+    assert.equal(awayChelseaAlignment.justifyContent, 'flex-end');
+    assert.ok(awayChelseaAlignment.width >= 162 && awayChelseaAlignment.rightGap < 1, 'short away form should occupy the rightmost result slots');
     await awayArsenalRow.locator('[data-match-id="arsenal-next-away"]').click();
     await page.locator('#match-drawer-overlay.is-open').waitFor();
     assert.deepEqual(await page.evaluate(() => window.DrawerRouter.current()), { type: 'match', id: 'arsenal-next-away' });
