@@ -353,6 +353,12 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.equal(await page.locator('#head-to-head-details').isVisible(), true);
     await page.locator('#tab-h2h').press('ArrowLeft');
     assert.equal(await page.locator('#tab-draft').getAttribute('aria-selected'), 'true');
+    assert.deepEqual(await page.locator('#draft-table-body tr').allTextContents(), [
+        '1Liverpool3',
+        '2Newcastle United8',
+        '3Sunderland13',
+        '4Coventry City18'
+    ]);
     assert.deepEqual(diagnostics.consoleErrors, []);
     assert.deepEqual(diagnostics.pageErrors, []);
     assert.deepEqual(diagnostics.failedRequests, []);
