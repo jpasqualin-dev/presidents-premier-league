@@ -324,3 +324,24 @@ test('table switches between points and scoped match form with working fixture l
     assert.deepEqual(diagnostics.pageErrors, []);
     await context.close();
 });
+
+test('Jordan prototype renders its shared shell and switches local tabs', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const page = await context.newPage();
+    const diagnostics = diagnosticState(page);
+    await page.goto(`${baseUrl}/jordan2.html`);
+    assert.equal(await page.locator('.header-container h1').textContent(), 'Can be Jordan');
+    assert.deepEqual(await page.locator('[role="tab"]').allTextContents(), ['Jordan', 'Draft', 'Teams', 'H2H', 'TOTW']);
+    assert.equal(await page.locator('#tab-jordan').getAttribute('aria-selected'), 'true');
+    await page.locator('#tab-teams').click();
+    assert.equal(await page.locator('#tab-teams').getAttribute('aria-selected'), 'true');
+    assert.equal(await page.locator('#panel-teams').isVisible(), true);
+    assert.equal(await page.locator('#panel-jordan').isVisible(), false);
+    await page.locator('#tab-teams').press('ArrowLeft');
+    assert.equal(await page.locator('#tab-draft').getAttribute('aria-selected'), 'true');
+    assert.deepEqual(diagnostics.consoleErrors, []);
+    assert.deepEqual(diagnostics.pageErrors, []);
+    assert.deepEqual(diagnostics.failedRequests, []);
+    await context.close();
+});

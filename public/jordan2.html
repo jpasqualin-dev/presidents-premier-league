@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Can be Jordan | Presidents Premier League</title>
+    <link rel="stylesheet" href="theme.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--page-bg);
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .main-container {
+            max-width: 600px;
+            min-height: 100vh;
+            margin: 0 auto;
+            padding-bottom: 40px;
+            position: relative;
+        }
+
+        .sticky-nav-wrapper {
+            background-color: var(--sticky-bg);
+        }
+
+        .site-menu {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            min-height: 30px;
+            margin: 5px 16px 8px;
+            background: var(--sticky-bg);
+            border: 1px solid var(--sticky-bg);
+            border-radius: 8px;
+        }
+
+        .site-menu a,
+        .players-menu summary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 20px;
+            flex: 1 1 0;
+            padding: 2px 6px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            color: #ffffff;
+            font: inherit;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            list-style: none;
+        }
+
+        .players-menu {
+            position: relative;
+            flex: 1 1 0;
+        }
+
+        .players-menu summary::-webkit-details-marker { display: none; }
+        .players-menu summary::after { content: "v"; margin-left: 6px; font-size: 0.7rem; }
+        .players-menu[open] summary { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.24); }
+
+        .players-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            right: 0;
+            min-width: 145px;
+            padding: 6px;
+            background: var(--surface-bg);
+            border: 1px solid #dfe5eb;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            z-index: 30;
+        }
+
+        .players-dropdown a {
+            display: flex;
+            justify-content: flex-start;
+            width: 100%;
+            min-height: 32px;
+            padding: 6px 10px;
+            color: var(--text-main);
+            font-size: 1rem;
+        }
+
+        .players-menu summary.active {
+            position: relative;
+        }
+
+        .players-menu summary.active::before {
+            content: "";
+            position: absolute;
+            right: 2px;
+            bottom: -1px;
+            left: 2px;
+            height: 3px;
+            border-radius: 999px;
+            background: #00ff87;
+        }
+
+        .pills-nav-container {
+            display: flex;
+            gap: 8px;
+            margin: 0;
+        }
+
+        .pill {
+            min-height: 38px;
+            flex: 1 1 0;
+            padding: 8px 10px;
+            border: 1px solid transparent;
+            border-radius: 20px;
+            background-color: var(--pill-inactive);
+            color: var(--text-muted);
+            font: inherit;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+        }
+
+        .pill.active {
+            background-color: var(--pill-active);
+            color: var(--text-main);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+        }
+
+        .pill:focus-visible {
+            outline: 2px solid var(--accent-green);
+            outline-offset: 2px;
+        }
+
+        .prototype-content {
+            padding: 28px 16px 0;
+        }
+
+        .prototype-panel {
+            display: none;
+            min-height: 220px;
+            padding: 22px;
+            background: var(--surface-bg);
+            border: 1px solid #dfe5eb;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .prototype-panel.active {
+            display: block;
+        }
+
+        .prototype-panel h2 {
+            color: var(--title-color);
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+        }
+
+        .prototype-panel p {
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        @media (hover: hover) {
+            .site-menu a:hover,
+            .players-menu summary:hover {
+                background: rgba(255,255,255,0.12);
+                border-color: rgba(255,255,255,0.24);
+            }
+
+            .pill:hover {
+                background-color: #e2e8f0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .site-menu { margin-right: 10px; margin-left: 10px; }
+            .pills-nav-container { gap: 4px; }
+            .pill { padding-right: 6px; padding-left: 6px; font-size: 0.78rem; }
+            .prototype-content { padding-top: 24px; }
+        }
+
+        body.dark-mode .players-dropdown,
+        body.dark-mode .prototype-panel {
+            border-color: #3d3d3d;
+        }
+
+        body.dark-mode .pill:hover {
+            background-color: #2a2a2a;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header-container">
+            <button class="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false">
+                <h1>Can be Jordan</h1>
+                <img src="lion-logo.png" alt="Premier League Lion Logo" class="header-logo">
+            </button>
+        </div>
+
+        <div class="sticky-nav-wrapper">
+            <nav class="site-menu" aria-label="Primary navigation">
+                <a href="index.html">Home</a>
+                <a href="table.html">Table</a>
+                <a href="fixtures.html">Fixtures</a>
+                <a href="stats.html">Stats</a>
+                <details class="players-menu">
+                    <summary class="active">Players</summary>
+                    <div class="players-dropdown">
+                        <a href="hef.html">Hef</a>
+                        <a href="jamey.html">Jamey</a>
+                        <a href="jordan.html" aria-current="page">Jordan</a>
+                        <a href="nate.html">Nate</a>
+                        <a href="wes.html">Wes</a>
+                    </div>
+                </details>
+            </nav>
+
+            <div class="pills-nav-container" role="tablist" aria-label="Jordan page sections">
+                <button class="pill active" id="tab-jordan" type="button" role="tab" aria-selected="true" aria-controls="panel-jordan" tabindex="0">Jordan</button>
+                <button class="pill" id="tab-draft" type="button" role="tab" aria-selected="false" aria-controls="panel-draft" tabindex="-1">Draft</button>
+                <button class="pill" id="tab-teams" type="button" role="tab" aria-selected="false" aria-controls="panel-teams" tabindex="-1">Teams</button>
+                <button class="pill" id="tab-h2h" type="button" role="tab" aria-selected="false" aria-controls="panel-h2h" tabindex="-1">H2H</button>
+                <button class="pill" id="tab-totw" type="button" role="tab" aria-selected="false" aria-controls="panel-totw" tabindex="-1">TOTW</button>
+            </div>
+        </div>
+
+        <main class="prototype-content">
+            <section class="prototype-panel active" id="panel-jordan" role="tabpanel" aria-labelledby="tab-jordan" tabindex="0">
+                <h2>Jordan</h2>
+                <p>Jordan's player page prototype starts here.</p>
+            </section>
+            <section class="prototype-panel" id="panel-draft" role="tabpanel" aria-labelledby="tab-draft" tabindex="0" hidden>
+                <h2>Draft</h2>
+                <p>Draft details will be added to this section.</p>
+            </section>
+            <section class="prototype-panel" id="panel-teams" role="tabpanel" aria-labelledby="tab-teams" tabindex="0" hidden>
+                <h2>Teams</h2>
+                <p>Jordan's teams will be added to this section.</p>
+            </section>
+            <section class="prototype-panel" id="panel-h2h" role="tabpanel" aria-labelledby="tab-h2h" tabindex="0" hidden>
+                <h2>H2H</h2>
+                <p>Head-to-head details will be added to this section.</p>
+            </section>
+            <section class="prototype-panel" id="panel-totw" role="tabpanel" aria-labelledby="tab-totw" tabindex="0" hidden>
+                <h2>TOTW</h2>
+                <p>Team of the week details will be added to this section.</p>
+            </section>
+        </main>
+    </div>
+
+    <script src="theme.js"></script>
+    <script>
+        const tabs = [...document.querySelectorAll('[role="tab"]')];
+
+        function activateTab(tab) {
+            tabs.forEach(candidate => {
+                const isActive = candidate === tab;
+                const panel = document.getElementById(candidate.getAttribute('aria-controls'));
+                candidate.classList.toggle('active', isActive);
+                candidate.setAttribute('aria-selected', String(isActive));
+                candidate.tabIndex = isActive ? 0 : -1;
+                panel.hidden = !isActive;
+                panel.classList.toggle('active', isActive);
+            });
+        }
+
+        tabs.forEach((tab, index) => {
+            tab.addEventListener('click', () => activateTab(tab));
+            tab.addEventListener('keydown', event => {
+                if (!['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(event.key)) return;
+                event.preventDefault();
+                const nextIndex = event.key === 'ArrowRight'
+                    ? (index + 1) % tabs.length
+                    : event.key === 'ArrowLeft'
+                        ? (index - 1 + tabs.length) % tabs.length
+                        : event.key === 'Home'
+                            ? 0
+                            : tabs.length - 1;
+                tabs[nextIndex].focus();
+                activateTab(tabs[nextIndex]);
+            });
+        });
+    </script>
+</body>
+</html>
