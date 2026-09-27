@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Can be Jordan | Presidents Premier League</title>
+    <title>Jordan | Presidents Premier League</title>
     <link rel="stylesheet" href="theme.css">
     <style>
         * {
@@ -169,6 +169,100 @@
             line-height: 1.5;
         }
 
+        .profile-card {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 88px;
+            padding: 12px;
+            background: var(--surface-bg);
+            border: 1px solid #e2e8f0;
+            border-left: 5px solid #38003c;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            cursor: pointer;
+        }
+
+        .profile-card:focus-visible {
+            outline: 2px solid #00a667;
+            outline-offset: 2px;
+        }
+
+        .profile-info h1 {
+            color: var(--title-color);
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .profile-info h1::after {
+            content: ">";
+            display: inline-block;
+            margin-left: 8px;
+            color: #718096;
+            font-size: 0.85rem;
+            transition: transform 0.25s ease;
+        }
+
+        .profile-card[aria-expanded="true"] .profile-info h1::after { transform: rotate(90deg); }
+
+        .points-badge {
+            padding: 8px 14px;
+            border-radius: 8px;
+            background: #00ff87;
+            color: #38003c;
+            text-align: center;
+        }
+
+        .points-badge .label {
+            display: block;
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .points-badge .value {
+            font-size: 1.15rem;
+            font-weight: 900;
+        }
+
+        .achievement-summary {
+            display: none;
+            width: 100%;
+            gap: 10px;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .profile-card[aria-expanded="true"] { flex-wrap: wrap; }
+        .profile-card[aria-expanded="true"] .achievement-summary { display: grid; }
+
+        .achievement-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.825rem;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        .achievement-stars { color: #d69e00; letter-spacing: 2px; }
+        .achievement-value { min-width: 2ch; text-align: right; font-weight: 800; }
+        .head-to-head-divider { border-top: 1px solid #e2e8f0; }
+
+        .head-to-head-details { display: none; gap: 10px; }
+        .profile-card[aria-expanded="true"] .head-to-head-details { display: grid; }
+
+        .prototype-panel.profile-panel {
+            min-height: 0;
+            padding: 0;
+            background: transparent;
+            border: 0;
+            box-shadow: none;
+        }
+
         @media (hover: hover) {
             .site-menu a:hover,
             .players-menu summary:hover {
@@ -193,6 +287,8 @@
             border-color: #3d3d3d;
         }
 
+        body.dark-mode .profile-card { border-color: #3d3d3d; border-left-color: #00ff87; }
+
         body.dark-mode .pill:hover {
             background-color: #2a2a2a;
         }
@@ -202,7 +298,7 @@
     <div class="main-container">
         <div class="header-container">
             <button class="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false">
-                <h1>Can be Jordan</h1>
+                <h1 id="page-title">Jordan</h1>
                 <img src="lion-logo.png" alt="Premier League Lion Logo" class="header-logo">
             </button>
         </div>
@@ -216,36 +312,44 @@
                 <details class="players-menu">
                     <summary class="active">Players</summary>
                     <div class="players-dropdown">
-                        <a href="hef.html">Hef</a>
-                        <a href="jamey.html">Jamey</a>
-                        <a href="jordan.html" aria-current="page">Jordan</a>
-                        <a href="nate.html">Nate</a>
-                        <a href="wes.html">Wes</a>
+                        <a href="jordan2.html?player=Hef" data-player="Hef">Hef</a>
+                        <a href="jordan2.html?player=Jamey" data-player="Jamey">Jamey</a>
+                        <a href="jordan2.html?player=Jordan" data-player="Jordan">Jordan</a>
+                        <a href="jordan2.html?player=Nate" data-player="Nate">Nate</a>
+                        <a href="jordan2.html?player=Wes" data-player="Wes">Wes</a>
                     </div>
                 </details>
             </nav>
 
             <div class="pills-nav-container" role="tablist" aria-label="Jordan page sections">
-                <button class="pill active" id="tab-jordan" type="button" role="tab" aria-selected="true" aria-controls="panel-jordan" tabindex="0">Jordan</button>
+                <button class="pill active" id="tab-teams" type="button" role="tab" aria-selected="true" aria-controls="panel-teams" tabindex="0">Teams</button>
                 <button class="pill" id="tab-draft" type="button" role="tab" aria-selected="false" aria-controls="panel-draft" tabindex="-1">Draft</button>
-                <button class="pill" id="tab-teams" type="button" role="tab" aria-selected="false" aria-controls="panel-teams" tabindex="-1">Teams</button>
                 <button class="pill" id="tab-h2h" type="button" role="tab" aria-selected="false" aria-controls="panel-h2h" tabindex="-1">H2H</button>
                 <button class="pill" id="tab-totw" type="button" role="tab" aria-selected="false" aria-controls="panel-totw" tabindex="-1">TOTW</button>
             </div>
         </div>
 
         <main class="prototype-content">
-            <section class="prototype-panel active" id="panel-jordan" role="tabpanel" aria-labelledby="tab-jordan" tabindex="0">
-                <h2>Jordan</h2>
-                <p>Jordan's player page prototype starts here.</p>
+            <section class="prototype-panel profile-panel active" id="panel-teams" role="tabpanel" aria-labelledby="tab-teams" tabindex="0">
+                <div class="profile-card" role="button" tabindex="0" aria-expanded="false" aria-controls="achievement-summary">
+                    <div class="profile-info"><h1 id="profile-player-name">Jordan</h1></div>
+                    <div class="points-badge">
+                        <span class="label">Total Pts</span>
+                        <span class="value">--</span>
+                    </div>
+                    <div class="achievement-summary" id="achievement-summary">
+                        <div class="achievement-row"><span><span class="achievement-stars" aria-hidden="true">*</span> Weeks Won (Most Points)</span><span class="achievement-value">--</span></div>
+                        <div class="achievement-row"><span><span class="achievement-stars" aria-hidden="true">*</span> Undefeated Weeks (No Loss)</span><span class="achievement-value">--</span></div>
+                        <div class="achievement-row"><span><span class="achievement-stars" aria-hidden="true">*</span> Perfect Weeks (All Wins)</span><span class="achievement-value">--</span></div>
+                        <div class="head-to-head-divider"></div>
+                        <div class="achievement-row"><span id="head-to-head-label">Jordan Head to Head</span></div>
+                        <div class="head-to-head-details"></div>
+                    </div>
+                </div>
             </section>
             <section class="prototype-panel" id="panel-draft" role="tabpanel" aria-labelledby="tab-draft" tabindex="0" hidden>
                 <h2>Draft</h2>
                 <p>Draft details will be added to this section.</p>
-            </section>
-            <section class="prototype-panel" id="panel-teams" role="tabpanel" aria-labelledby="tab-teams" tabindex="0" hidden>
-                <h2>Teams</h2>
-                <p>Jordan's teams will be added to this section.</p>
             </section>
             <section class="prototype-panel" id="panel-h2h" role="tabpanel" aria-labelledby="tab-h2h" tabindex="0" hidden>
                 <h2>H2H</h2>
@@ -260,6 +364,22 @@
 
     <script src="theme.js"></script>
     <script>
+        const playerNames = ['Hef', 'Jamey', 'Jordan', 'Nate', 'Wes'];
+        const requestedPlayer = new URLSearchParams(window.location.search).get('player');
+        const playerName = playerNames.find(name => name.toLowerCase() === requestedPlayer?.toLowerCase()) || 'Jordan';
+        const playerTitle = document.getElementById('page-title');
+        const profilePlayerName = document.getElementById('profile-player-name');
+        const headToHeadLabel = document.getElementById('head-to-head-label');
+
+        document.title = `${playerName} | Presidents Premier League`;
+        playerTitle.textContent = playerName;
+        profilePlayerName.textContent = playerName;
+        headToHeadLabel.textContent = `${playerName} Head to Head`;
+        document.querySelector('.pills-nav-container').setAttribute('aria-label', `${playerName} page sections`);
+        document.querySelectorAll('[data-player]').forEach(link => {
+            if (link.dataset.player === playerName) link.setAttribute('aria-current', 'page');
+        });
+
         const tabs = [...document.querySelectorAll('[role="tab"]')];
 
         function activateTab(tab) {
@@ -289,6 +409,18 @@
                 tabs[nextIndex].focus();
                 activateTab(tabs[nextIndex]);
             });
+        });
+
+        const profileCard = document.querySelector('.profile-card');
+        const toggleProfileCard = () => {
+            const isExpanded = profileCard.getAttribute('aria-expanded') === 'true';
+            profileCard.setAttribute('aria-expanded', String(!isExpanded));
+        };
+        profileCard.addEventListener('click', toggleProfileCard);
+        profileCard.addEventListener('keydown', event => {
+            if (event.key !== 'Enter' && event.key !== ' ') return;
+            event.preventDefault();
+            toggleProfileCard();
         });
     </script>
 </body>
