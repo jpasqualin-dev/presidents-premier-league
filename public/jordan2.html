@@ -220,6 +220,47 @@
 
         .prototype-panel.profile-panel { min-height: 0; padding: 0; background: transparent; border: 0; box-shadow: none; }
 
+        .profile-card,
+        .prototype-card {
+            margin-bottom: 14px;
+        }
+
+        .profile-card-top-row {
+            grid-template-columns: minmax(0, 1fr) auto !important;
+        }
+
+        .profile-card-chevron { display: none !important; }
+
+        .prototype-card {
+            padding: 16px;
+            background: var(--surface-bg);
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .prototype-card h2 {
+            margin-bottom: 12px;
+            color: var(--title-color);
+            font-size: 1.05rem;
+        }
+
+        .achievement-card .achievement-summary {
+            display: grid;
+            gap: 10px;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            border-top: 0;
+        }
+
+        .h2h-card .head-to-head-details {
+            display: grid;
+            gap: 10px;
+        }
+
+        .prototype-fixtures { display: none; }
+
         @media (hover: hover) {
             .site-menu a:hover,
             .players-menu summary:hover {
@@ -244,7 +285,8 @@
             border-color: #3d3d3d;
         }
 
-        body.dark-mode .profile-card { border-color: #3d3d3d; }
+        body.dark-mode .profile-card,
+        body.dark-mode .prototype-card { border-color: #3d3d3d; }
 
         body.dark-mode .pill:hover {
             background-color: #2a2a2a;
@@ -289,19 +331,19 @@
         <main class="prototype-content">
             <section class="prototype-panel profile-panel active" id="panel-teams" role="tabpanel" aria-labelledby="tab-teams" tabindex="0">
                 <div class="profile-card-backdrop" aria-hidden="true"></div>
-                <div class="profile-card" role="button" tabindex="0" aria-expanded="false" aria-controls="achievement-summary">
+                <div class="profile-card">
                     <div class="profile-info"><h1>Jordan</h1></div>
                     <div class="points-badge">
                         <span class="label">Total Pts</span>
                         <span class="value" id="total-pts">--</span>
                     </div>
-                    <div class="achievement-summary" id="achievement-summary">
+                </div>
+                <section class="prototype-card achievement-card" aria-labelledby="achievements-title">
+                    <h2 id="achievements-title">Achievements</h2>
+                    <div class="achievement-summary">
                         <div class="achievement-row"><span><span class="achievement-stars" aria-hidden="true">&#9733;</span> Weeks Won (Most Points)</span><span class="achievement-value" id="weeks-won">--</span></div>
                         <div class="achievement-row"><span><span class="achievement-stars" aria-hidden="true">&#9733;</span> Undefeated Weeks (No Loss)</span><span class="achievement-value" id="undefeated-weeks">--</span></div>
                         <div class="achievement-row"><span><span class="achievement-stars" aria-hidden="true">&#9733;</span> Perfect Weeks (All Wins)</span><span class="achievement-value" id="perfect-weeks">--</span></div>
-                        <div class="head-to-head-divider"></div>
-                        <div class="achievement-row"><span id="head-to-head-label">Jordan Head to Head</span></div>
-                        <div class="head-to-head-details" id="head-to-head-details"></div>
                     </div>
                 </div>
             </section>
@@ -310,20 +352,32 @@
                 <p>Draft details will be added to this section.</p>
             </section>
             <section class="prototype-panel" id="panel-h2h" role="tabpanel" aria-labelledby="tab-h2h" tabindex="0" hidden>
-                <h2>H2H</h2>
-                <p>Head-to-head details will be added to this section.</p>
+                <section class="prototype-card h2h-card" aria-labelledby="h2h-title">
+                    <h2 id="h2h-title">H2H</h2>
+                    <div class="head-to-head-details" id="head-to-head-details">
+                        <div class="achievement-row"><span id="head-to-head-label">Jordan Head to Head</span></div>
+                    </div>
+                </section>
             </section>
             <section class="prototype-panel" id="panel-totw" role="tabpanel" aria-labelledby="tab-totw" tabindex="0" hidden>
                 <h2>TOTW</h2>
                 <p>Team of the week details will be added to this section.</p>
             </section>
         </main>
+        <div class="prototype-fixtures" id="fixtures-container"></div>
     </div>
 
     <script src="theme.js"></script>
     <script src="team-names.js"></script>
     <script src="league-config.js"></script>
+    <script src="match-data.js"></script>
+    <script src="drawer-router.js"></script>
+    <script src="match-drawer-shared.js"></script>
+    <script src="ppl-weekly-drawer.js"></script>
+    <script src="team-drawer-shared.js"></script>
+    <script src="player-team-drawer.js"></script>
     <script src="player-profile-card.js"></script>
+    <script src="player-page.js"></script>
     <script>
         const playerNames = ['Hef', 'Jamey', 'Jordan', 'Nate', 'Wes'];
         const requestedPlayer = new URLSearchParams(window.location.search).get('player');
@@ -375,17 +429,6 @@
         });
 
         const profileCard = document.querySelector('.profile-card');
-        const toggleProfileCard = () => {
-            const isExpanded = profileCard.getAttribute('aria-expanded') === 'true';
-            profileCard.setAttribute('aria-expanded', String(!isExpanded));
-        };
-        profileCard.addEventListener('click', toggleProfileCard);
-        profileCard.addEventListener('keydown', event => {
-            if (event.key !== 'Enter' && event.key !== ' ') return;
-            event.preventDefault();
-            toggleProfileCard();
-        });
-
         const updateProfileCardBackdrop = () => {
             document.documentElement.style.setProperty('--profile-card-sticky-top', getComputedStyle(profileCard).top);
             document.documentElement.style.setProperty('--profile-card-height', `${profileCard.getBoundingClientRect().height}px`);

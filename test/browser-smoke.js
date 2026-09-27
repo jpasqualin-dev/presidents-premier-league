@@ -330,6 +330,11 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const page = await context.newPage();
     const diagnostics = diagnosticState(page);
+    await page.route('**/api/matches**', route => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(fixtureData())
+    }));
     await page.goto(`${baseUrl}/jordan2.html?player=Wes`);
     assert.equal(await page.locator('.header-container h1').textContent(), 'Wes');
     assert.equal(await page.title(), 'Wes | Presidents Premier League');
@@ -337,12 +342,15 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.equal(await page.locator('#tab-teams').getAttribute('aria-selected'), 'true');
     assert.equal(await page.locator('.profile-card .profile-info h1').textContent(), 'Wes');
     assert.equal(await page.locator('.profile-card-team').count(), 4);
-    await page.locator('.profile-card').press('Enter');
-    assert.equal(await page.locator('.profile-card').getAttribute('aria-expanded'), 'true');
+    assert.equal(await page.locator('.achievement-card').isVisible(), true);
+    assert.equal(await page.locator('#total-pts').textContent(), '3');
+    assert.equal(await page.locator('#head-to-head-details').isVisible(), false);
     await page.locator('#tab-h2h').click();
     assert.equal(await page.locator('#tab-h2h').getAttribute('aria-selected'), 'true');
     assert.equal(await page.locator('#panel-h2h').isVisible(), true);
     assert.equal(await page.locator('#panel-teams').isVisible(), false);
+    assert.equal(await page.locator('.h2h-card').isVisible(), true);
+    assert.equal(await page.locator('#head-to-head-details').isVisible(), true);
     await page.locator('#tab-h2h').press('ArrowLeft');
     assert.equal(await page.locator('#tab-draft').getAttribute('aria-selected'), 'true');
     assert.deepEqual(diagnostics.consoleErrors, []);
