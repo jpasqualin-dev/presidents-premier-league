@@ -335,7 +335,8 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.equal(await page.title(), 'Wes | Presidents Premier League');
     assert.deepEqual(await page.locator('[role="tab"]').allTextContents(), ['Teams', 'Draft', 'H2H', 'TOTW']);
     assert.equal(await page.locator('#tab-teams').getAttribute('aria-selected'), 'true');
-    assert.equal(await page.locator('#profile-player-name').textContent(), 'Wes');
+    assert.equal(await page.locator('.profile-card .profile-info h1').textContent(), 'Wes');
+    assert.equal(await page.locator('.profile-card-team').count(), 4);
     await page.locator('.profile-card').press('Enter');
     assert.equal(await page.locator('.profile-card').getAttribute('aria-expanded'), 'true');
     await page.locator('#tab-h2h').click();
