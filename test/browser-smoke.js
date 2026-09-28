@@ -342,6 +342,7 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.equal(await page.locator('#tab-teams').getAttribute('aria-selected'), 'true');
     assert.equal(await page.locator('.profile-card .profile-info h1').textContent(), 'Wes');
     assert.equal(await page.locator('.profile-card-team').count(), 4);
+    assert.equal(await page.locator('#panel-teams').evaluate(element => getComputedStyle(element).paddingTop), '0px');
     assert.equal(await page.locator('.achievement-card').isVisible(), true);
     assert.equal(await page.locator('#total-pts').textContent(), '3');
     assert.equal(await page.locator('#head-to-head-details').isVisible(), false);
@@ -360,6 +361,8 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
         '4Coventry City18'
     ]);
     assert.equal(await page.locator('#panel-draft .prototype-card').count(), 0);
+    assert.equal(await page.locator('#draft-title').textContent(), 'Draft: Wes');
+    assert.equal(await page.locator('.draft-table-shell').evaluate(element => getComputedStyle(element).marginTop), '0px');
     assert.deepEqual(diagnostics.consoleErrors, []);
     assert.deepEqual(diagnostics.pageErrors, []);
     assert.deepEqual(diagnostics.failedRequests, []);
