@@ -248,6 +248,19 @@
             object-fit: contain;
         }
 
+        .team-fixture-filter {
+            display: flex;
+            gap: 6px;
+            padding: 0 16px 12px;
+        }
+
+        .team-fixture-filter .pill {
+            flex: 1;
+            justify-content: center;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+        }
+
         /* Match Rows */
         .fixture-row {
             display: grid;
@@ -681,6 +694,7 @@
     let fixtureMatches = [];
     let currentView = 'date';
     let selectedTeam = null;
+    let teamFixtureFilter = 'all';
     let shouldPositionInitialCard = true;
     let shouldPositionViewCard = false;
 
@@ -782,6 +796,7 @@
 
     function selectTeam(teamName) {
         selectedTeam = teamName;
+        teamFixtureFilter = 'all';
         currentView = 'team';
         shouldPositionViewCard = true;
         closeTeamDropdown();
@@ -946,6 +961,22 @@
         `;
         card.appendChild(header);
 
+        const filter = document.createElement('div');
+        filter.className = 'team-fixture-filter';
+        ['all', 'home', 'away'].forEach(filterMode => {
+            const button = document.createElement('button');
+            button.className = `pill${teamFixtureFilter === filterMode ? ' active' : ''}`;
+            button.type = 'button';
+            button.textContent = filterMode[0].toUpperCase() + filterMode.slice(1);
+            button.setAttribute('aria-pressed', String(teamFixtureFilter === filterMode));
+            button.addEventListener('click', () => {
+                teamFixtureFilter = filterMode;
+                renderView();
+            });
+            filter.appendChild(button);
+        });
+        card.appendChild(filter);
+
         // Filter all matches involving this team
         const teamMatches = fixtures.filter(m => 
             m.rawHome.toLowerCase().includes(teamName.toLowerCase()) || 
@@ -954,7 +985,21 @@
             m.away.toLowerCase().includes(teamName.toLowerCase())
         );
 
-        teamMatches.forEach(match => {
+        const filteredMatches = teamMatches.filter(match => {
+            if (teamFixtureFilter === 'all') return true;
+            const isHomeMatch = match.rawHome.toLowerCase().includes(teamName.toLowerCase()) ||
+                match.home.toLowerCase().includes(teamName.toLowerCase());
+            return teamFixtureFilter === 'home' ? isHomeMatch : !isHomeMatch;
+        });
+
+        if (filteredMatches.length === 0) {
+            const emptyState = document.createElement('div');
+            emptyState.className = 'empty-state';
+            emptyState.textContent = `No ${teamFixtureFilter} fixtures.`;
+            card.appendChild(emptyState);
+        }
+
+        filteredMatches.forEach(match => {
             const rowHeader = document.createElement('div');
             rowHeader.className = 'team-view-row-header';
             rowHeader.innerHTML = `<span>${match.dateLabel}</span> <span>${match.round}</span>`;
