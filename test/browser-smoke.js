@@ -353,6 +353,11 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.equal(await page.locator('.profile-card-team').first().evaluate(element => getComputedStyle(element).paddingBottom), '8px');
     assert.equal(await page.locator('#panel-teams').evaluate(element => getComputedStyle(element).paddingTop), '0px');
     assert.equal(await page.locator('.achievement-card').isVisible(), true);
+    assert.equal(await page.locator('#last-week-title').textContent(), 'Last Week - Matchweek 5');
+    assert.equal(await page.locator('#last-week-card .mw-card').count(), 1);
+    assert.equal(await page.locator('#last-week-card .mw-points').textContent(), '+3 PTS');
+    assert.equal(await page.locator('#last-week-card .fixture-item').count(), 2);
+    assert.equal(await page.locator('#up-next-title').textContent(), 'Up Next - Matchweek --');
     assert.equal(await page.locator('#highest-scoring-week').textContent(), '3 PTS (Week 5)');
     assert.equal(await page.locator('#lowest-scoring-week').textContent(), '3 PTS (Week 5)');
     assert.equal(await page.locator('#average-weekly-score').textContent(), '3.0 PTS (Rank 2)');
@@ -363,6 +368,7 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.equal(await page.locator('#panel-h2h').isVisible(), true);
     assert.equal(await page.locator('#panel-teams').isVisible(), false);
     assert.equal(await page.locator('.h2h-card').isVisible(), true);
+    assert.equal(await page.locator('.scoring-card').isVisible(), true);
     assert.equal(await page.locator('#head-to-head-details').isVisible(), true);
     await page.locator('#tab-h2h').press('ArrowLeft');
     assert.equal(await page.locator('#tab-draft').getAttribute('aria-selected'), 'true');
