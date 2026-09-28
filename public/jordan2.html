@@ -514,7 +514,8 @@
                     pointsBadge.className = 'profile-card-team-points';
                     button.append(pointsBadge);
                 }
-                pointsBadge.textContent = `${teamPoints[teamName] || 0} PTS`;
+                const pointsText = `${teamPoints[teamName] || 0} PTS`;
+                if (pointsBadge.textContent !== pointsText) pointsBadge.textContent = pointsText;
             });
         };
 
