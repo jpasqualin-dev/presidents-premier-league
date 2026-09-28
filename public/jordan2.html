@@ -241,7 +241,7 @@
         }
 
         .profile-card-team-name {
-            font-size: 1.02rem !important;
+            font-size: 0.68rem !important;
         }
 
         .profile-card-team-points {
@@ -250,7 +250,7 @@
             padding: 2px 6px;
             border-radius: 4px;
             background: #00ff87;
-            color: #38003c;
+            color: #ffffff;
             font-size: 0.975rem;
             font-weight: 700;
             line-height: 1.2;
@@ -261,6 +261,11 @@
         .profile-card-team-points-value { display: block; }
         .profile-card-team-points-label { font-size: 0.65rem; font-weight: 800; letter-spacing: 0.04em; }
         .profile-card-team-points-value { font-size: 0.975rem; font-weight: 900; }
+
+        .profile-card-team {
+            gap: 8px !important;
+            padding-bottom: 8px !important;
+        }
 
         .prototype-card {
             padding: 16px;
@@ -289,6 +294,12 @@
             display: grid;
             gap: 10px;
         }
+
+        .scoring-card { margin-top: 14px; }
+        .scoring-rows { display: grid; gap: 10px; }
+        .scoring-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 0.825rem; font-weight: 600; line-height: 1.2; }
+        .scoring-label { color: var(--text-muted); }
+        .scoring-value { color: var(--text-main); text-align: right; }
 
         .table-wrapper {
             width: 100%;
@@ -449,6 +460,14 @@
                         <div class="achievement-row"><span><span class="achievement-stars" aria-hidden="true">&#9733;</span> Perfect Weeks (All Wins)</span><span class="achievement-value" id="perfect-weeks">--</span></div>
                     </div>
                 </section>
+                <section class="prototype-card scoring-card" aria-labelledby="scoring-title">
+                    <h2 id="scoring-title">Scoring</h2>
+                    <div class="scoring-rows">
+                        <div class="scoring-row"><span class="scoring-label">Highest Scoring Week</span><span class="scoring-value" id="highest-scoring-week">--</span></div>
+                        <div class="scoring-row"><span class="scoring-label">Lowest Scoring Week(s)</span><span class="scoring-value" id="lowest-scoring-week">--</span></div>
+                        <div class="scoring-row"><span class="scoring-label">Average Weekly Score</span><span class="scoring-value" id="average-weekly-score">--</span></div>
+                    </div>
+                </section>
             </section>
             <section class="prototype-panel" id="panel-draft" role="tabpanel" aria-labelledby="tab-draft" tabindex="0" hidden>
                 <div class="table-wrapper table-card draft-table-shell" aria-labelledby="draft-title">
@@ -539,9 +558,38 @@
             });
         };
 
+        const renderScoring = matches => {
+            const weeklyScores = {};
+            (matches || []).forEach(match => {
+                if (match.status !== 'FINISHED') return;
+                const homeScore = match.score.fullTime.home;
+                const awayScore = match.score.fullTime.away;
+                if (!Number.isFinite(homeScore) || !Number.isFinite(awayScore)) return;
+                const homeTeam = window.playerTeams.find(team => match.homeTeam.name.toLowerCase().includes(team.toLowerCase()));
+                const awayTeam = window.playerTeams.find(team => match.awayTeam.name.toLowerCase().includes(team.toLowerCase()));
+                if (!homeTeam && !awayTeam) return;
+                weeklyScores[match.matchday] ||= 0;
+                if (homeTeam) weeklyScores[match.matchday] += homeScore > awayScore ? 3 : homeScore === awayScore ? 1 : 0;
+                if (awayTeam) weeklyScores[match.matchday] += awayScore > homeScore ? 3 : awayScore === homeScore ? 1 : 0;
+            });
+            const scores = Object.entries(weeklyScores).map(([week, score]) => ({ week, score }));
+            if (!scores.length) {
+                ['highest-scoring-week', 'lowest-scoring-week', 'average-weekly-score'].forEach(id => { document.getElementById(id).textContent = '--'; });
+                return;
+            }
+            const highest = Math.max(...scores.map(item => item.score));
+            const lowest = Math.min(...scores.map(item => item.score));
+            const formatWeeks = score => scores.filter(item => item.score === score).map(item => `Week ${item.week}`).join(', ');
+            const average = scores.reduce((total, item) => total + item.score, 0) / scores.length;
+            document.getElementById('highest-scoring-week').textContent = `${highest} PTS (${formatWeeks(highest)})`;
+            document.getElementById('lowest-scoring-week').textContent = `${lowest} PTS (${formatWeeks(lowest)})`;
+            document.getElementById('average-weekly-score').textContent = `${average.toFixed(1)} PTS`;
+        };
+
         DataManager.subscribe(data => {
             latestMatches = data?.matches || [];
             renderTeamPoints(latestMatches);
+            renderScoring(latestMatches);
         });
         new MutationObserver(() => renderTeamPoints(latestMatches)).observe(document.querySelector('.profile-card'), { childList: true, subtree: true });
 

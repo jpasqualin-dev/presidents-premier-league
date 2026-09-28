@@ -346,10 +346,16 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.deepEqual(await page.locator('.profile-card-team-points-label').allTextContents(), ['PTS', 'PTS', 'PTS', 'PTS']);
     assert.deepEqual(await page.locator('.profile-card-team-points-value').allTextContents(), ['3', '0', '0', '0']);
     assert.equal(await page.locator('.profile-card-team-points').first().evaluate(element => getComputedStyle(element).backgroundColor), 'rgb(0, 255, 135)');
+    assert.equal(await page.locator('.profile-card-team-points').first().evaluate(element => getComputedStyle(element).color), 'rgb(255, 255, 255)');
     assert.equal(await page.locator('.profile-card-team img').first().evaluate(element => getComputedStyle(element).width), '75px');
-    assert.equal(await page.locator('.profile-card-team-name').first().evaluate(element => getComputedStyle(element).fontSize), '16.32px');
+    assert.equal(await page.locator('.profile-card-team-name').first().evaluate(element => getComputedStyle(element).fontSize), '10.88px');
+    assert.equal(await page.locator('.profile-card-team').first().evaluate(element => getComputedStyle(element).gap), '8px');
+    assert.equal(await page.locator('.profile-card-team').first().evaluate(element => getComputedStyle(element).paddingBottom), '8px');
     assert.equal(await page.locator('#panel-teams').evaluate(element => getComputedStyle(element).paddingTop), '0px');
     assert.equal(await page.locator('.achievement-card').isVisible(), true);
+    assert.equal(await page.locator('#highest-scoring-week').textContent(), '3 PTS (Week 5)');
+    assert.equal(await page.locator('#lowest-scoring-week').textContent(), '3 PTS (Week 5)');
+    assert.equal(await page.locator('#average-weekly-score').textContent(), '3.0 PTS');
     assert.equal(await page.locator('#total-pts').textContent(), '3');
     assert.equal(await page.locator('#head-to-head-details').isVisible(), false);
     await page.locator('#tab-h2h').click();
