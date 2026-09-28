@@ -465,12 +465,10 @@
                         <div class="achievement-row"><span><span class="achievement-stars" aria-hidden="true">&#9733;</span> Perfect Weeks (All Wins)</span><span class="achievement-value" id="perfect-weeks">--</span></div>
                     </div>
                 </section>
-                <section class="player-week-section" aria-labelledby="last-week-title">
-                    <h2 class="player-week-title" id="last-week-title">Last Week - Matchweek --</h2>
+                <section class="player-week-section" aria-label="Last Week">
                     <div id="last-week-card"></div>
                 </section>
-                <section class="player-week-section" aria-labelledby="up-next-title">
-                    <h2 class="player-week-title" id="up-next-title">Up Next - Matchweek --</h2>
+                <section class="player-week-section" aria-label="Up Next">
                     <div id="up-next-card"></div>
                 </section>
             </section>
@@ -616,13 +614,11 @@
             const lastWeekCard = completedCards.at(-1);
             const upNextCard = upcomingCards[0];
             const destinations = [
-                { card: lastWeekCard, target: document.getElementById('last-week-card'), title: document.getElementById('last-week-title'), prefix: 'Last Week' },
-                { card: upNextCard, target: document.getElementById('up-next-card'), title: document.getElementById('up-next-title'), prefix: 'Up Next' }
+                { card: lastWeekCard, target: document.getElementById('last-week-card') },
+                { card: upNextCard, target: document.getElementById('up-next-card') }
             ];
-            destinations.forEach(({ card, target, title, prefix }) => {
+            destinations.forEach(({ card, target }) => {
                 target.replaceChildren();
-                const matchweek = card?.querySelector('.mw-title')?.textContent.match(/Matchweek\s+(\d+)/)?.[1] || '--';
-                title.textContent = `${prefix} - Matchweek ${matchweek}`;
                 if (card) target.append(card);
             });
         };

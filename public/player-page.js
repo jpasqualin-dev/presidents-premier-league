@@ -125,6 +125,7 @@
         const profileCard = document.querySelector('.profile-card');
         const currentMatchweek = document.getElementById('current-matchweek');
         if (!profileCard || !currentMatchweek) return revealPlayerPage();
+        if (getComputedStyle(profileCard).position !== 'sticky') return revealPlayerPage();
         const stickyTop = parseFloat(getComputedStyle(profileCard).top) || 0;
         const targetTop = stickyTop + profileCard.getBoundingClientRect().height + 14;
         const y = currentMatchweek.getBoundingClientRect().top + window.pageYOffset - targetTop;

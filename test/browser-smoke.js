@@ -341,6 +341,10 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.deepEqual(await page.locator('[role="tab"]').allTextContents(), ['Teams', 'Draft', 'H2H', 'TOTW']);
     assert.equal(await page.locator('#tab-teams').getAttribute('aria-selected'), 'true');
     assert.equal(await page.locator('.profile-card .profile-info h1').textContent(), 'Wes');
+    assert.deepEqual(await page.locator('.profile-card').evaluate(card => {
+        const pills = document.querySelector('.pills-nav-container').getBoundingClientRect();
+        return { scrollY: window.scrollY, topGap: card.getBoundingClientRect().top - pills.bottom };
+    }), { scrollY: 0, topGap: 0 });
     assert.equal(await page.locator('.profile-card-team').count(), 4);
     assert.equal(await page.locator('.profile-card-top-row').evaluate(element => getComputedStyle(element).flexDirection), 'column');
     assert.deepEqual(await page.locator('.profile-card-team-points-label').allTextContents(), ['PTS', 'PTS', 'PTS', 'PTS']);
@@ -353,11 +357,11 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.equal(await page.locator('.profile-card-team').first().evaluate(element => getComputedStyle(element).paddingBottom), '8px');
     assert.equal(await page.locator('#panel-teams').evaluate(element => getComputedStyle(element).paddingTop), '0px');
     assert.equal(await page.locator('.achievement-card').isVisible(), true);
-    assert.equal(await page.locator('#last-week-title').textContent(), 'Last Week - Matchweek 5');
+    assert.equal(await page.locator('#panel-teams .player-week-section').count(), 2);
+    assert.equal(await page.locator('#panel-teams .player-week-title').count(), 0);
     assert.equal(await page.locator('#last-week-card .mw-card').count(), 1);
     assert.equal(await page.locator('#last-week-card .mw-points').textContent(), '+3 PTS');
     assert.equal(await page.locator('#last-week-card .fixture-item').count(), 2);
-    assert.equal(await page.locator('#up-next-title').textContent(), 'Up Next - Matchweek --');
     assert.equal(await page.locator('#highest-scoring-week').textContent(), '3 PTS (Week 5)');
     assert.equal(await page.locator('#lowest-scoring-week').textContent(), '3 PTS (Week 5)');
     assert.equal(await page.locator('#average-weekly-score').textContent(), '3.0 PTS (Rank 2)');
