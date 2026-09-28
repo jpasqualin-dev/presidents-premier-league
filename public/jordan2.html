@@ -230,18 +230,37 @@
 
         .profile-card-chevron { display: none !important; }
 
+        .profile-card-team {
+            min-height: 130px !important;
+        }
+
+        .profile-card-team img,
+        .profile-card-team .empty {
+            width: 75px !important;
+            height: 75px !important;
+        }
+
+        .profile-card-team-name {
+            font-size: 1.02rem !important;
+        }
+
         .profile-card-team-points {
             display: inline-block;
             min-width: 46px;
             padding: 2px 6px;
             border-radius: 4px;
-            background: #00a667;
-            color: #ffffff;
-            font-size: 0.65rem;
+            background: #00ff87;
+            color: #38003c;
+            font-size: 0.975rem;
             font-weight: 700;
             line-height: 1.2;
             text-align: center;
         }
+
+        .profile-card-team-points-label,
+        .profile-card-team-points-value { display: block; }
+        .profile-card-team-points-label { font-size: 0.65rem; font-weight: 800; letter-spacing: 0.04em; }
+        .profile-card-team-points-value { font-size: 0.975rem; font-weight: 900; }
 
         .prototype-card {
             padding: 16px;
@@ -514,8 +533,9 @@
                     pointsBadge.className = 'profile-card-team-points';
                     button.append(pointsBadge);
                 }
-                const pointsText = `${teamPoints[teamName] || 0} PTS`;
-                if (pointsBadge.textContent !== pointsText) pointsBadge.textContent = pointsText;
+                const pointsValue = teamPoints[teamName] || 0;
+                const pointsText = `<span class="profile-card-team-points-label">PTS</span><span class="profile-card-team-points-value">${pointsValue}</span>`;
+                if (pointsBadge.innerHTML !== pointsText) pointsBadge.innerHTML = pointsText;
             });
         };
 

@@ -343,7 +343,11 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.equal(await page.locator('.profile-card .profile-info h1').textContent(), 'Wes');
     assert.equal(await page.locator('.profile-card-team').count(), 4);
     assert.equal(await page.locator('.profile-card-top-row').evaluate(element => getComputedStyle(element).flexDirection), 'column');
-    assert.deepEqual(await page.locator('.profile-card-team-points').allTextContents(), ['3 PTS', '0 PTS', '0 PTS', '0 PTS']);
+    assert.deepEqual(await page.locator('.profile-card-team-points-label').allTextContents(), ['PTS', 'PTS', 'PTS', 'PTS']);
+    assert.deepEqual(await page.locator('.profile-card-team-points-value').allTextContents(), ['3', '0', '0', '0']);
+    assert.equal(await page.locator('.profile-card-team-points').first().evaluate(element => getComputedStyle(element).backgroundColor), 'rgb(0, 255, 135)');
+    assert.equal(await page.locator('.profile-card-team img').first().evaluate(element => getComputedStyle(element).width), '75px');
+    assert.equal(await page.locator('.profile-card-team-name').first().evaluate(element => getComputedStyle(element).fontSize), '16.32px');
     assert.equal(await page.locator('#panel-teams').evaluate(element => getComputedStyle(element).paddingTop), '0px');
     assert.equal(await page.locator('.achievement-card').isVisible(), true);
     assert.equal(await page.locator('#total-pts').textContent(), '3');
