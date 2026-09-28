@@ -359,6 +359,7 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
         '3Sunderland13',
         '4Coventry City18'
     ]);
+    assert.equal(await page.locator('#panel-draft .prototype-card').count(), 0);
     assert.deepEqual(diagnostics.consoleErrors, []);
     assert.deepEqual(diagnostics.pageErrors, []);
     assert.deepEqual(diagnostics.failedRequests, []);

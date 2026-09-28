@@ -141,17 +141,13 @@
         }
 
         .prototype-content {
-            padding: 28px 16px 0;
+            padding: 0 16px;
         }
 
         .prototype-panel {
             display: none;
             min-height: 220px;
-            padding: 22px;
-            background: var(--surface-bg);
-            border: 1px solid #dfe5eb;
-            border-radius: 16px;
-            box-shadow: var(--card-shadow);
+            padding: 35px 0 10px;
         }
 
         .prototype-panel.active {
@@ -218,7 +214,7 @@
         .head-to-head-record { min-width: 5.5ch; text-align: center; color: #4a5568; }
         .head-to-head-points { min-width: 5ch; text-align: right; }
 
-        .prototype-panel.profile-panel { min-height: 0; padding: 0; background: transparent; border: 0; box-shadow: none; }
+        .prototype-panel.profile-panel { min-height: 0; }
 
         .profile-card,
         .prototype-card {
@@ -259,9 +255,8 @@
             gap: 10px;
         }
 
-        .draft-table-card { overflow: hidden; padding: 0; }
-        .draft-table-card h2 { padding: 16px 16px 4px; margin-bottom: 8px; }
-        .draft-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .draft-table-shell h2 { margin-bottom: 8px; color: var(--title-color); font-size: 1.05rem; }
+        .draft-table { width: 100%; border-collapse: collapse; background: var(--surface-bg); font-size: 0.9rem; }
         .draft-table th,
         .draft-table td { padding: 10px 16px; text-align: left; border-top: 1px solid #edf2f7; }
         .draft-table th { color: var(--text-muted); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
@@ -291,7 +286,7 @@
             .site-menu { margin-right: 10px; margin-left: 10px; }
             .pills-nav-container { gap: 4px; }
             .pill { padding-right: 6px; padding-left: 6px; font-size: 0.78rem; }
-            .prototype-content { padding-top: 24px; }
+            .prototype-panel { padding-top: 35px; }
         }
 
         body.dark-mode .players-dropdown,
@@ -362,7 +357,7 @@
                 </section>
             </section>
             <section class="prototype-panel" id="panel-draft" role="tabpanel" aria-labelledby="tab-draft" tabindex="0" hidden>
-                <section class="prototype-card draft-table-card" aria-labelledby="draft-title">
+                <div class="draft-table-shell" aria-labelledby="draft-title">
                     <h2 id="draft-title">Draft</h2>
                     <table class="draft-table">
                         <thead>
@@ -460,3 +455,4 @@
     </script>
 </body>
 </html>
+                </div>
