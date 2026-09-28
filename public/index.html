@@ -526,10 +526,6 @@
         #divisions-container .division-header-container { align-items: center; flex-wrap: wrap; gap: 8px; }
         #divisions-container .division-header-container h2 { font-size: 1.4rem; white-space: normal; line-height: 1.2; flex: 1; }
 
-        .toggle-switch { display: inline-flex; background-color: #e5e5ea; border-radius: 20px; padding: 4px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.08); flex-shrink: 0; }
-        .toggle-btn { background-color: transparent; color: #666; border: none; padding: 6px 16px; border-radius: 16px; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: all 0.25s ease; font-family: inherit; }
-        .toggle-btn.active { background-color: #ffffff; color: #1a1a1a; box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 0 1px rgba(0,0,0,0.05); }
-
         .draft-title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 10px; }
         .dvp-sort-toggle { display: inline-flex; gap: 2px; padding: 2px; background: #edf2f7; border-radius: 20px; }
         .dvp-sort-btn { min-width: 52px; padding: 6px 12px; border: 1px solid transparent; border-radius: 16px; background: transparent; color: #718096; font: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
@@ -585,7 +581,6 @@
             th, td { padding: 10px 4px; font-size: 0.8rem; }
             h2, .plain-table-title, .overall-header-container h2 { font-size: 1.1rem; }
             .draft-title { font-size: 1rem; }
-            .toggle-btn { padding: 4px 12px; font-size: 0.75rem; }
             #divisions-container .division-header-container h2 { font-size: 1.1rem; } 
             
             /* Responsive Matches adjustments */
@@ -628,7 +623,6 @@
         body.dark-mode table,
         body.dark-mode th,
         body.dark-mode .stat-card,
-        body.dark-mode .toggle-btn.active,
         body.dark-mode .dvp-sort-btn.active {
             background: #202020;
             border-color: #3d3d3d;
@@ -694,9 +688,7 @@
         body.dark-mode .form-result-draw { background: #8a9298; }
         body.dark-mode .form-result-loss { background: #e53e3e; }
 
-        body.dark-mode .toggle-switch,
         body.dark-mode .dvp-sort-toggle { background-color: #303030; }
-        body.dark-mode .toggle-btn,
         body.dark-mode .dvp-sort-btn,
         body.dark-mode .stat-rank,
         body.dark-mode .chevron,

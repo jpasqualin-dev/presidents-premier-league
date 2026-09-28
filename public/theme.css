@@ -24,6 +24,35 @@
     --accent-green: #00ff87;
 }
 
+/* Shared segmented toggles */
+.toggle-switch {
+    display: inline-flex;
+    flex-shrink: 0;
+    padding: 4px;
+    background-color: #e5e5ea;
+    border-radius: 20px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.toggle-btn {
+    padding: 6px 16px;
+    border: none;
+    border-radius: 16px;
+    background-color: transparent;
+    color: #666;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.toggle-btn.active {
+    background-color: #ffffff;
+    color: #1a1a1a;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 0 1px rgba(0,0,0,0.05);
+}
+
 /* Shared page header */
 .header-container {
     position: relative;
@@ -96,6 +125,27 @@ body.dark-mode {
     color-scheme: dark;
     background: var(--page-bg);
     color: #e6e6e6;
+}
+
+body.dark-mode .toggle-switch {
+    background-color: #303030;
+}
+
+body.dark-mode .toggle-btn {
+    color: #a8a8a8;
+}
+
+body.dark-mode .toggle-btn.active {
+    background: #202020;
+    color: #f1f1f1;
+    border-color: #3d3d3d;
+}
+
+@media (max-width: 768px) {
+    .toggle-btn {
+        padding: 4px 12px;
+        font-size: 0.75rem;
+    }
 }
 
 body.dark-mode img[src$="/367.png"] {
