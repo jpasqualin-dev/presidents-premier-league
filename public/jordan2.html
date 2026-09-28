@@ -166,9 +166,6 @@
         }
 
         .profile-card {
-            position: sticky;
-            top: 54px;
-            z-index: 10;
             background: var(--surface-bg);
             border-radius: 16px;
             padding: 12px;
@@ -181,19 +178,7 @@
             cursor: pointer;
         }
 
-        .profile-card-backdrop {
-            position: fixed;
-            top: var(--profile-card-sticky-top, 36px);
-            right: 0;
-            left: 0;
-            height: calc(var(--profile-card-height, 0px) - 14px);
-            z-index: 9;
-            background: var(--mask-bg);
-            pointer-events: none;
-        }
-
         .profile-card:focus-visible { outline: 2px solid #00a667; outline-offset: 2px; }
-        body.dark-mode .profile-card-backdrop { background: var(--mask-bg); }
         .profile-info h1 { font-size: 1.25rem; font-weight: 700; color: var(--title-color); }
         .profile-info h1::after { content: "❯"; display: inline-block; margin-left: 8px; color: #718096; font-size: 0.85rem; transition: transform 0.25s ease; }
         .profile-card[aria-expanded="true"] .profile-info h1::after { transform: rotate(90deg); }
@@ -465,7 +450,6 @@
 
         <main class="prototype-content">
             <section class="prototype-panel profile-panel active" id="panel-teams" role="tabpanel" aria-labelledby="tab-teams" tabindex="0">
-                <div class="profile-card-backdrop" aria-hidden="true"></div>
                 <div class="profile-card">
                     <div class="profile-info"><h1>Jordan</h1></div>
                     <div class="points-badge">
@@ -688,13 +672,6 @@
             });
         });
 
-        const profileCard = document.querySelector('.profile-card');
-        const updateProfileCardBackdrop = () => {
-            document.documentElement.style.setProperty('--profile-card-sticky-top', getComputedStyle(profileCard).top);
-            document.documentElement.style.setProperty('--profile-card-height', `${profileCard.getBoundingClientRect().height}px`);
-        };
-        updateProfileCardBackdrop();
-        if ('ResizeObserver' in window) new ResizeObserver(updateProfileCardBackdrop).observe(profileCard);
     </script>
 </body>
 </html>
