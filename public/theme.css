@@ -58,6 +58,24 @@
     .pill:hover {
         background-color: #e2e8f0;
     }
+
+    .team-list-item:hover {
+        background-color: #f8f9fa;
+    }
+}
+
+.close-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    margin-left: 4px;
+    border-radius: 50%;
+    background: #cbd5e0;
+    color: #fff;
+    font-size: 10px;
+    transition: background 0.2s;
 }
 
 /* Shared page header */
@@ -153,6 +171,16 @@ body.dark-mode .toggle-btn.active {
     body.dark-mode .pill:hover {
         background-color: #2a2a2a;
     }
+
+    body.dark-mode .team-list-item:hover,
+    body.dark-mode .close-icon:hover {
+        background-color: #2a2a2a;
+    }
+}
+
+body.dark-mode .close-icon {
+    background: #4a4a4a;
+    color: #f1f1f1;
 }
 
 @media (max-width: 768px) {
