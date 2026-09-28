@@ -222,10 +222,26 @@
         }
 
         .profile-card-top-row {
-            grid-template-columns: minmax(0, 1fr) auto !important;
+            display: flex !important;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
         }
 
         .profile-card-chevron { display: none !important; }
+
+        .profile-card-team-points {
+            display: inline-block;
+            min-width: 46px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #00a667;
+            color: #ffffff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            line-height: 1.2;
+            text-align: center;
+        }
 
         .prototype-card {
             padding: 16px;
@@ -476,6 +492,37 @@
         document.querySelectorAll('[data-player]').forEach(link => {
             if (link.dataset.player === playerName) link.setAttribute('aria-current', 'page');
         });
+
+        let latestMatches = [];
+        const renderTeamPoints = matches => {
+            const teamPoints = Object.fromEntries(window.playerTeams.map(team => [team, 0]));
+            (matches || []).forEach(match => {
+                if (match.status !== 'FINISHED') return;
+                const homeTeam = window.playerTeams.find(team => match.homeTeam.name.toLowerCase().includes(team.toLowerCase()));
+                const awayTeam = window.playerTeams.find(team => match.awayTeam.name.toLowerCase().includes(team.toLowerCase()));
+                const homeScore = match.score.fullTime.home;
+                const awayScore = match.score.fullTime.away;
+                if (homeTeam) teamPoints[homeTeam] += homeScore > awayScore ? 3 : homeScore === awayScore ? 1 : 0;
+                if (awayTeam) teamPoints[awayTeam] += awayScore > homeScore ? 3 : awayScore === homeScore ? 1 : 0;
+            });
+            document.querySelectorAll('.profile-card-team').forEach(button => {
+                const teamName = button.querySelector('.profile-card-team-name')?.textContent;
+                if (!teamName) return;
+                let pointsBadge = button.querySelector('.profile-card-team-points');
+                if (!pointsBadge) {
+                    pointsBadge = document.createElement('span');
+                    pointsBadge.className = 'profile-card-team-points';
+                    button.append(pointsBadge);
+                }
+                pointsBadge.textContent = `${teamPoints[teamName] || 0} PTS`;
+            });
+        };
+
+        DataManager.subscribe(data => {
+            latestMatches = data?.matches || [];
+            renderTeamPoints(latestMatches);
+        });
+        new MutationObserver(() => renderTeamPoints(latestMatches)).observe(document.querySelector('.profile-card'), { childList: true, subtree: true });
 
         const tabs = [...document.querySelectorAll('[role="tab"]')];
 

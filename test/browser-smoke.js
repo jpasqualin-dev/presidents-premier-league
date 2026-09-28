@@ -342,6 +342,8 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.equal(await page.locator('#tab-teams').getAttribute('aria-selected'), 'true');
     assert.equal(await page.locator('.profile-card .profile-info h1').textContent(), 'Wes');
     assert.equal(await page.locator('.profile-card-team').count(), 4);
+    assert.equal(await page.locator('.profile-card-top-row').evaluate(element => getComputedStyle(element).flexDirection), 'column');
+    assert.deepEqual(await page.locator('.profile-card-team-points').allTextContents(), ['3 PTS', '0 PTS', '0 PTS', '0 PTS']);
     assert.equal(await page.locator('#panel-teams').evaluate(element => getComputedStyle(element).paddingTop), '0px');
     assert.equal(await page.locator('.achievement-card').isVisible(), true);
     assert.equal(await page.locator('#total-pts').textContent(), '3');
