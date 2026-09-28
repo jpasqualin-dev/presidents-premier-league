@@ -14,6 +14,7 @@
     --loss-color: #e53e3e;
     --draw-color: #718096;
     --border-color: #edf2f7;
+    --row-hover-bg: #f8f9fa;
     --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --header-purple: #38003c;
     --brand-color: #38003c;
@@ -116,6 +117,7 @@ body.dark-mode {
     --text-muted: #b8b8b8;
     --pill-active: #202020;
     --border-color: #3d3d3d;
+    --row-hover-bg: #2a2a2a;
     --brand-color: #f2f2f2;
     --title-color: #f1f1f1;
     --nav-hover-bg: #2a2a2a;
@@ -296,6 +298,19 @@ body.dark-mode .mw-header {
 }
 
 @media (hover: hover) {
+    body.dark-mode tr:hover,
+    body.dark-mode .today-match-row:hover,
+    body.dark-mode .fixture-row:hover,
+    body.dark-mode .stat-player-row:hover,
+    body.dark-mode .expandable-row:hover {
+        background-color: var(--row-hover-bg);
+    }
+
+    body.dark-mode .nested-table-row:hover,
+    body.dark-mode .nested-teams-container:hover {
+        background-color: #292929;
+    }
+
     body.dark-mode .players-dropdown a:hover { background: #303030; }
 }
 
