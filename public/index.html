@@ -1503,7 +1503,7 @@
 
             if (mode === 'PTS') html += `<tr><th>#</th><th class="text-left">Team</th><th>PL</th><th>W</th><th>D</th><th>L</th><th>+/-</th><th>GD</th><th>PTS</th></tr>`;
             else if (mode === 'PGA') html += `<tr><th>#</th><th class="text-left">Team</th><th>PTS</th><th>PvP Wins</th><th>PGA</th><th>PTS+PGA</th></tr>`;
-            else html += `<tr><th>#</th><th class="text-left">Team</th><th>Form</th></tr>`;
+            else html += `<tr><th>#</th><th class="text-left">Team</th><th>Form</th><th>PTS</th></tr>`;
 
             html += `</thead><tbody>`;
 
@@ -1520,8 +1520,8 @@
                 } else if (mode === 'PGA') {
                     html += `<tr ${teamRowAttributes}><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td>${t.PTS}</td><td>${t.pvpWins}</td><td>${t.PGA > 0 ? '+' + t.PGA : t.PGA}</td><td class="highlight-col">${t.ptsPga}</td></tr>`;
                 } else {
-                    const form = getOrderedFormResults(t.form || []).slice(-5);
-                    html += `<tr ${teamRowAttributes}><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td><div class="team-form">${renderFormResults(form)}${renderNextOpponent(t.team)}</div></td></tr>`;
+                    const form = getOrderedFormResults(t.form || []).slice(-4);
+                    html += `<tr ${teamRowAttributes}><td class="fotmob-rank">${idx + 1}</td><td class="text-left">${teamCellHTML}</td><td><div class="team-form">${renderFormResults(form)}${renderNextOpponent(t.team)}</div></td><td><strong>${t.PTS}</strong></td></tr>`;
                 }
             });
 
