@@ -511,7 +511,7 @@
         #standings-table, #divisions-container table { table-layout: auto; }
         #standings-table th:nth-child(1), #standings-table td:nth-child(1) { width: 8%; }
         #standings-table th:nth-child(2), #standings-table td:nth-child(2) { width: 38%; white-space: normal; }
-        #divisions-container table { table-layout: fixed; }
+        #divisions-container table.fixed-cols { table-layout: fixed; }
         #divisions-container table td:nth-child(2) { white-space: normal; }
         #divisions-container col.div-rank { width: 6%; }
         #divisions-container col.div-team { width: 36%; }
@@ -520,7 +520,8 @@
         #divisions-container col.div-gd { width: 10%; }
         #divisions-container col.div-points { width: 12%; }
         #divisions-container col.div-form { width: 46%; }
-        #divisions-container col.div-pga { width: 14.5%; }
+        #divisions-container col.div-pga-rank { width: 8%; }
+        #divisions-container col.div-pga-team { width: 38%; }
 
         .nested-table-row td:nth-child(2) { padding-left: 0 !important; }
         .nested-table-row .team-inline { margin-left: -15px; }
@@ -607,6 +608,8 @@
             #divisions-container col.div-goals { width: 14%; }
             #divisions-container col.div-points { width: 11%; }
             #divisions-container col.div-form { width: 48%; }
+            #divisions-container col.div-pga-rank { width: 10%; }
+            #divisions-container col.div-pga-team { width: 35%; }
         }
 
         /* Dark mode palette for this alternate home page. */
@@ -1498,9 +1501,9 @@
             if (mode === 'PTS' || mode === 'FORM') teamsInDiv.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
             else if (mode === 'PGA') teamsInDiv.sort((a, b) => b.ptsPga - a.ptsPga || b.PGA - a.PGA);
 
-            let html = `<div class="table-wrapper table-card"><table>`;
+            let html = `<div class="table-wrapper table-card"><table${mode === 'PGA' ? '' : ' class="fixed-cols"'}>`;
             if (mode === 'PTS') html += `<colgroup><col class="div-rank"><col class="div-team"><col class="div-stat"><col class="div-stat"><col class="div-stat"><col class="div-stat"><col class="div-goals"><col class="div-gd"><col class="div-points"></colgroup>`;
-            else if (mode === 'PGA') html += `<colgroup><col class="div-rank"><col class="div-team"><col class="div-pga"><col class="div-pga"><col class="div-pga"><col class="div-pga"></colgroup>`;
+            else if (mode === 'PGA') html += `<colgroup><col class="div-pga-rank"><col class="div-pga-team"><col><col><col><col></colgroup>`;
             else if (mode === 'FORM') html += `<colgroup><col class="div-rank"><col class="div-team"><col class="div-form"><col class="div-points"></colgroup>`;
             html += `<thead>
                 <tr class="title-row">
