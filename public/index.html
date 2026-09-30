@@ -487,9 +487,9 @@
         .form-result-win { background: #00a667; }
         .form-result-draw { background: #8a9298; }
         .form-result-loss { background: #e53e3e; }
-        .team-form { display: inline-flex; align-items: center; gap: 8px; }
-        .team-form .form-results { min-width: 128px; }
-        .next-opponent { display: inline-flex; align-items: center; margin-right: 2px; cursor: pointer; }
+        .team-form { display: flex; align-items: center; justify-content: flex-end; width: 100%; gap: 8px; }
+        .team-form .form-results { min-width: 128px; justify-content: flex-end; }
+        .next-opponent { display: inline-flex; align-items: center; margin-right: 4px; cursor: pointer; }
         .next-opponent .team-icon { width: 22px; height: 22px; }
 
         .division-header-container, .overall-header-container {
@@ -509,10 +509,18 @@
         }
 
         #standings-table, #divisions-container table { table-layout: auto; }
-        #standings-table th:nth-child(1), #standings-table td:nth-child(1),
-        #divisions-container table th:nth-child(1), #divisions-container table td:nth-child(1) { width: 8%; }
-        #standings-table th:nth-child(2), #standings-table td:nth-child(2),
-        #divisions-container table th:nth-child(2), #divisions-container table td:nth-child(2) { width: 38%; white-space: normal; }
+        #standings-table th:nth-child(1), #standings-table td:nth-child(1) { width: 8%; }
+        #standings-table th:nth-child(2), #standings-table td:nth-child(2) { width: 38%; white-space: normal; }
+        #divisions-container table { table-layout: fixed; }
+        #divisions-container table td:nth-child(2) { white-space: normal; }
+        #divisions-container col.div-rank { width: 6%; }
+        #divisions-container col.div-team { width: 36%; }
+        #divisions-container col.div-stat { width: 6%; }
+        #divisions-container col.div-goals { width: 12%; }
+        #divisions-container col.div-gd { width: 10%; }
+        #divisions-container col.div-points { width: 12%; }
+        #divisions-container col.div-form { width: 46%; }
+        #divisions-container col.div-pga { width: 14.5%; }
 
         .nested-table-row td:nth-child(2) { padding-left: 0 !important; }
         .nested-table-row .team-inline { margin-left: -15px; }
@@ -592,10 +600,13 @@
             .team-block { gap: 6px; }
             .match-content { gap: 8px; }
 
-            #standings-table th:nth-child(1), #standings-table td:nth-child(1),
-            #divisions-container table th:nth-child(1), #divisions-container table td:nth-child(1) { width: 10%; }
-            #standings-table th:nth-child(2), #standings-table td:nth-child(2),
-            #divisions-container table th:nth-child(2), #divisions-container table td:nth-child(2) { width: 35%; }
+            #standings-table th:nth-child(1), #standings-table td:nth-child(1) { width: 10%; }
+            #standings-table th:nth-child(2), #standings-table td:nth-child(2) { width: 35%; }
+            #divisions-container col.div-rank { width: 8%; }
+            #divisions-container col.div-team { width: 33%; }
+            #divisions-container col.div-goals { width: 14%; }
+            #divisions-container col.div-points { width: 11%; }
+            #divisions-container col.div-form { width: 48%; }
         }
 
         /* Dark mode palette for this alternate home page. */
@@ -1487,7 +1498,11 @@
             if (mode === 'PTS' || mode === 'FORM') teamsInDiv.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
             else if (mode === 'PGA') teamsInDiv.sort((a, b) => b.ptsPga - a.ptsPga || b.PGA - a.PGA);
 
-            let html = `<div class="table-wrapper table-card"><table><thead>
+            let html = `<div class="table-wrapper table-card"><table>`;
+            if (mode === 'PTS') html += `<colgroup><col class="div-rank"><col class="div-team"><col class="div-stat"><col class="div-stat"><col class="div-stat"><col class="div-stat"><col class="div-goals"><col class="div-gd"><col class="div-points"></colgroup>`;
+            else if (mode === 'PGA') html += `<colgroup><col class="div-rank"><col class="div-team"><col class="div-pga"><col class="div-pga"><col class="div-pga"><col class="div-pga"></colgroup>`;
+            else if (mode === 'FORM') html += `<colgroup><col class="div-rank"><col class="div-team"><col class="div-form"><col class="div-points"></colgroup>`;
+            html += `<thead>
                 <tr class="title-row">
                     <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
                         <div class="division-header-container">
