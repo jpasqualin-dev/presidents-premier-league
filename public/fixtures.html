@@ -674,7 +674,7 @@
     // Fetch matches from API (same caching strategy as main index)
     async function fetchMatchData(matchData = null) {
         try {
-            const data = await getMatchData({ includeDetails: true });
+            const data = await getMatchData();
 
             if (data && data.matches) {
                 processMatches(data.matches);

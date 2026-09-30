@@ -998,7 +998,7 @@
     // Fetch matches from API (same caching strategy as other pages)
     async function fetchTableData() {
         try {
-            const data = await getMatchData({ includeDetails: true });
+            const data = await getMatchData();
 
             cachedMatches = data.matches || [];
             cachedStats = computeStats(data.matches || []);

@@ -55,6 +55,14 @@ test('primary pages load shared drawer dependencies in the expected order', () =
     });
 });
 
+test('full-season match details are limited to the stats page', () => {
+    ['index.html', 'fixtures.html', 'table.html', 'player-page.js'].forEach(file => {
+        assert.doesNotMatch(readPublic(file), /getMatchData\(\{\s*includeDetails:\s*true/u, file);
+    });
+    assert.match(readPublic('stats.html'), /getMatchData\(\{\s*includeDetails:\s*true/u);
+    assert.match(readPublic('match-drawer-shared.js'), /\/api\/match-details\?event=/u);
+});
+
 test('player pages load the shared player renderer', () => {
     playerPages.forEach(file => {
         const source = readPublic(file);

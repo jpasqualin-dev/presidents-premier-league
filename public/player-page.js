@@ -61,7 +61,7 @@
     async function fetchPlayerFixtures() {
         const myTeams = draftData[playerName] || [];
         try {
-            const data = await getMatchData({ includeDetails: true });
+            const data = await getMatchData();
             const matchweeks = {};
             (data.matches || []).forEach(match => {
                 const home = match.homeTeam.name;
