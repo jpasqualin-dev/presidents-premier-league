@@ -48,6 +48,13 @@ function getHalfTimeScores(summary) {
         : { home: scores.home, away: scores.away };
 }
 
+function cacheControlFor(summary) {
+    const status = summary?.header?.competitions?.[0]?.status?.type || {};
+    if (status.state === 'in') return 'public, s-maxage=10, stale-while-revalidate=20';
+    if (status.state === 'post' || status.completed) return 'public, s-maxage=3600, stale-while-revalidate=86400';
+    return 'public, s-maxage=300, stale-while-revalidate=600';
+}
+
 module.exports = async function handler(req, res) {
     if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed.' });
 
@@ -79,7 +86,7 @@ module.exports = async function handler(req, res) {
         const scorers = details.filter(detail => detail.scoringPlay).map(toClientScorer);
         const halfTime = getHalfTimeScores(summary);
 
-        res.setHeader('Cache-Control', 'no-store, max-age=0');
+        res.setHeader('Cache-Control', cacheControlFor(summary));
         return res.status(200).json({ events, scorers, substitutions, teamStats, lineups, halfTime });
     } catch (error) {
         console.error('Match detail read failed:', error);

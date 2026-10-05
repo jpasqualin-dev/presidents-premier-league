@@ -34,7 +34,11 @@
 
     const schedulePoll = data => {
         if (pollTimer) clearTimeout(pollTimer);
+        pollTimer = null;
+        if (document.visibilityState === 'hidden') return;
         pollTimer = setTimeout(async () => {
+            pollTimer = null;
+            if (document.visibilityState === 'hidden') return;
             const nextData = await refresh();
             schedulePoll(nextData);
         }, pollIntervalFor(data));
@@ -138,7 +142,7 @@
             }
 
             try {
-                const response = await fetch(`/api/matches${includeDetails ? '?details=1' : ''}`, { cache: 'no-store' });
+                const response = await fetch(`/api/matches${includeDetails ? '?details=1' : ''}`);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = normalizeData(await response.json());
                 const time = Date.now();
@@ -182,6 +186,17 @@
     }
 
     function getStatus() { return status; }
+
+    if (typeof document !== 'undefined') {
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                if (pollTimer) clearTimeout(pollTimer);
+                pollTimer = null;
+                return;
+            }
+            if (!pollTimer) refresh().then(data => schedulePoll(data));
+        });
+    }
 
     async function start() {
         if (pollTimer) return;

@@ -161,9 +161,13 @@ module.exports = async function handler(req, res) {
             throw new Error('Both Neon history and ESPN live data are unavailable.');
         }
 
-        res.setHeader('Cache-Control', 'public, s-maxage=15, stale-while-revalidate=45');
+        const mergedMatches = mergeMatches(applyMatchCorrections([...historicalMatches, ...liveMatches]));
+        const hasLiveMatch = mergedMatches.some(match => ['IN_PLAY', 'PAUSED'].includes(match.status));
+        res.setHeader('Cache-Control', hasLiveMatch
+            ? 'public, s-maxage=10, stale-while-revalidate=20'
+            : 'public, s-maxage=60, stale-while-revalidate=120');
         return res.status(200).json({
-            matches: mergeMatches(applyMatchCorrections([...historicalMatches, ...liveMatches])),
+            matches: mergedMatches,
             sources: { historical: historyResult.status === 'fulfilled' ? 'neon' : null, live: liveAvailable ? 'espn' : null },
             liveAvailable,
             generatedAt: new Date().toISOString()

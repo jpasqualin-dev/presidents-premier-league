@@ -1386,8 +1386,8 @@
                         <h2>PPL Standings</h2>
                         <div class="toggle-switch" data-toggle-group="overall">
                             <button class="toggle-btn ${overallMode === 'PTS' ? 'active' : ''}" onclick="setOverallMode('PTS')">PTS</button>
-                            <button class="toggle-btn ${overallMode === 'PGA' ? 'active' : ''}" onclick="setOverallMode('PGA')">PGA</button>
                             <button class="toggle-btn ${overallMode === 'FORM' ? 'active' : ''}" onclick="setOverallMode('FORM')">Form</button>
+                            <button class="toggle-btn ${overallMode === 'PGA' ? 'active' : ''}" onclick="setOverallMode('PGA')">PGA</button>
                         </div>
                     </div>
                 </th>
@@ -1512,8 +1512,8 @@
                             <h2>${divName.replace(' Division', '<br>Division')}</h2>
                             <div class="toggle-switch" data-toggle-group="${divName}">
                                 <button class="toggle-btn ${mode === 'PTS' ? 'active' : ''}" onclick="toggleDivisionMode('${divName}', 'PTS')">PTS</button>
-                                <button class="toggle-btn ${mode === 'PGA' ? 'active' : ''}" onclick="toggleDivisionMode('${divName}', 'PGA')">PGA</button>
                                 <button class="toggle-btn ${mode === 'FORM' ? 'active' : ''}" onclick="toggleDivisionMode('${divName}', 'FORM')">Form</button>
+                                <button class="toggle-btn ${mode === 'PGA' ? 'active' : ''}" onclick="toggleDivisionMode('${divName}', 'PGA')">PGA</button>
                             </div>
                         </div>
                     </th>

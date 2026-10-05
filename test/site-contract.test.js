@@ -5,6 +5,7 @@ const assert = require('node:assert/strict');
 
 const publicDir = path.join(__dirname, '..', 'public');
 const readPublic = file => fs.readFileSync(path.join(publicDir, file), 'utf8');
+const readRepo = file => fs.readFileSync(path.join(__dirname, '..', file), 'utf8');
 const playerPages = ['hef.html', 'jamey.html', 'jordan.html', 'nate.html', 'wes.html'];
 const sharedConfigPages = ['index.html', 'fixtures.html', 'stats.html', 'table.html', ...playerPages];
 
@@ -61,6 +62,22 @@ test('full-season match details are limited to the stats page', () => {
     });
     assert.match(readPublic('stats.html'), /getMatchData\(\{\s*includeDetails:\s*true/u);
     assert.match(readPublic('match-drawer-shared.js'), /\/api\/match-details\?event=/u);
+});
+
+test('match data polling uses shared caching and pauses while hidden', () => {
+    const matchesSource = readRepo('api/matches.js');
+    assert.match(matchesSource, /s-maxage=60, stale-while-revalidate=120/u);
+    assert.match(matchesSource, /s-maxage=10, stale-while-revalidate=20/u);
+    const source = readPublic('match-data.js');
+    assert.match(source, /visibilitychange/u);
+    assert.match(source, /visibilityState === 'hidden'/u);
+});
+
+test('match details caching is state-aware instead of unconditional no-store', () => {
+    const source = readRepo('api/match-details.js');
+    assert.doesNotMatch(source, /no-store, max-age=0/u);
+    assert.match(source, /s-maxage=3600, stale-while-revalidate=86400/u);
+    assert.match(source, /s-maxage=10, stale-while-revalidate=20/u);
 });
 
 test('player pages load the shared player renderer', () => {
