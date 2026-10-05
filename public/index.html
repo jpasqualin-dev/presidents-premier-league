@@ -489,6 +489,8 @@
         .form-result-loss { background: #e53e3e; }
         .team-form { display: flex; align-items: center; justify-content: flex-end; width: 100%; gap: 8px; }
         .team-form .form-results { width: 128px; min-width: 128px; justify-content: flex-end; }
+        .team-form.overall-player-form { justify-content: center; }
+        .team-form.overall-player-form .form-results { width: auto; min-width: 0; justify-content: flex-start; }
         .next-opponent { display: inline-flex; align-items: center; margin-right: 4px; cursor: pointer; }
         .next-opponent .team-icon { width: 22px; height: 22px; }
 
@@ -1457,7 +1459,7 @@
                     const team = teamStatsObj[teamName];
                     return team ? getOrderedFormResults((team.form || []).filter(result => Number(result.matchday) === latestFormMatchday)) : [];
                 });
-                tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td><div class="team-form">${renderFormResults(playerForm)}</div></td><td class="highlight-col"><strong>${p.PTS}</strong></td>`;
+                tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td><div class="team-form overall-player-form">${renderFormResults(playerForm)}</div></td><td class="highlight-col"><strong>${p.PTS}</strong></td>`;
             }
             primaryTbody.appendChild(tr);
 

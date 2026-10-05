@@ -135,12 +135,20 @@ test('overall Form rows align with division Form and keep highlighted PTS cells'
         });
 
         assert.equal(await playerRow.locator('.team-form').count(), 1);
+        assert.equal(await playerRow.locator('.team-form.overall-player-form').count(), 1);
         assert.equal(await playerRow.locator('.next-opponent').count(), 0);
         assert.equal(await playerRow.locator('td').count(), 4);
+        const formHeaderBox = await page.locator('#standings-table thead tr:nth-child(2) th').nth(2).boundingBox();
+        const playerFormBox = await playerRow.locator('.form-results').boundingBox();
+        assert.ok(Math.abs((formHeaderBox.x + formHeaderBox.width / 2) - (playerFormBox.x + playerFormBox.width / 2)) < 1, `${view.name}: player form rectangles are not centered under the Form heading`);
         await playerRow.click();
         const expandedTeamRow = page.locator('#standings-body .nested-table-row.expanded').first();
         assert.equal(await expandedTeamRow.locator('.team-form').count(), 1);
         assert.equal(await expandedTeamRow.locator('td').count(), 4);
+        const pointsHeaderBox = await page.locator('#standings-table thead tr:nth-child(2) th').last().boundingBox();
+        const pointsValueBox = await playerRow.locator('td.highlight-col').boundingBox();
+        assert.ok(Math.abs(pointsHeaderBox.x - pointsValueBox.x) < 1, `${view.name}: PTS header and values are not aligned`);
+        assert.ok(Math.abs(pointsHeaderBox.width - pointsValueBox.width) < 1, `${view.name}: PTS column width changed`);
 
         assert.equal(await playerRow.locator('td.highlight-col').evaluate(cell => getComputedStyle(cell).color), ptsPlayerColor);
         assert.equal(await expandedTeamRow.locator('td.highlight-col').evaluate(cell => getComputedStyle(cell).color), ptsTeamColor);
