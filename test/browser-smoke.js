@@ -96,6 +96,58 @@ test.after(async () => {
     await new Promise(resolve => server?.close(resolve));
 });
 
+test('overall Form rows align with division Form and keep highlighted PTS cells', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    for (const view of [viewports[2], viewports[1]]) {
+        const context = await browser.newContext({ viewport: view.viewport });
+        await context.addInitScript(theme => localStorage.setItem('ppl-theme', theme), view.theme);
+        const page = await context.newPage();
+        await page.route('**/api/matches**', route => route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(fixtureData())
+        }));
+        await page.goto(`${baseUrl}/index.html`);
+        await page.locator('#standings-body .expandable-row').first().waitFor();
+
+        const playerRow = page.locator('#standings-body .expandable-row').first();
+        const ptsPlayerColor = await playerRow.locator('td.highlight-col').evaluate(cell => getComputedStyle(cell).color);
+        await playerRow.click();
+        const ptsExpandedRow = page.locator('#standings-body .nested-table-row.expanded').first();
+        const ptsTeamColor = await ptsExpandedRow.locator('td.highlight-col').evaluate(cell => getComputedStyle(cell).color);
+        await playerRow.click();
+
+        await page.locator('[data-toggle-group="overall"] .toggle-btn').filter({ hasText: 'Form' }).click();
+        const divisionCard = page.locator('#divisions-container .table-card').first();
+        await divisionCard.locator('.toggle-btn').filter({ hasText: 'Form' }).click();
+
+        const overallHeaders = await page.locator('#standings-table thead tr:nth-child(2) th').evaluateAll(cells =>
+            cells.map(cell => { const { x, width } = cell.getBoundingClientRect(); return { x, width }; })
+        );
+        const divisionHeaders = await divisionCard.locator('thead tr:nth-child(2) th').evaluateAll(cells =>
+            cells.map(cell => { const { x, width } = cell.getBoundingClientRect(); return { x, width }; })
+        );
+        assert.equal(overallHeaders.length, 4);
+        assert.equal(divisionHeaders.length, 4);
+        overallHeaders.forEach((cell, index) => {
+            assert.ok(Math.abs(cell.x - divisionHeaders[index].x) < 1, `${view.name}: Form column ${index + 1} starts at a different position`);
+            assert.ok(Math.abs(cell.width - divisionHeaders[index].width) < 1, `${view.name}: Form column ${index + 1} has a different width`);
+        });
+
+        assert.equal(await playerRow.locator('.team-form').count(), 1);
+        assert.equal(await playerRow.locator('.next-opponent').count(), 0);
+        assert.equal(await playerRow.locator('td').count(), 4);
+        await playerRow.click();
+        const expandedTeamRow = page.locator('#standings-body .nested-table-row.expanded').first();
+        assert.equal(await expandedTeamRow.locator('.team-form').count(), 1);
+        assert.equal(await expandedTeamRow.locator('td').count(), 4);
+
+        assert.equal(await playerRow.locator('td.highlight-col').evaluate(cell => getComputedStyle(cell).color), ptsPlayerColor);
+        assert.equal(await expandedTeamRow.locator('td.highlight-col').evaluate(cell => getComputedStyle(cell).color), ptsTeamColor);
+        await context.close();
+    }
+});
+
 for (const pageName of playerPages) {
     for (const view of viewports) {
         test(`${pageName} loads through the shared player and drawer path (${view.name})`, async t => {

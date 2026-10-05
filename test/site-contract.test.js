@@ -64,6 +64,15 @@ test('full-season match details are limited to the stats page', () => {
     assert.match(readPublic('match-drawer-shared.js'), /\/api\/match-details\?event=/u);
 });
 
+test('overall Form view aligns PTS and form cells across player and team rows', () => {
+    const source = readPublic('index.html');
+    assert.match(source, /<th>Form<\/th><th>PTS<\/th>/u);
+    assert.match(source, /renderFormResults\(playerForm\)\}<\/div><\/td><td class="highlight-col"><strong>\$\{p\.PTS\}/u);
+    assert.match(source, /renderNextOpponent\(t\.team\)\}<\/div><\/td>\s*<td class="highlight-col"><strong>\$\{t\.PTS\}/u);
+    assert.match(source, /overall-form-rank.*overall-form-player.*overall-form-results.*overall-form-points/u);
+    assert.match(source, /classList\.toggle\('form-view', overallMode === 'FORM'\)/u);
+});
+
 test('match data polling uses shared caching and pauses while hidden', () => {
     const matchesSource = readRepo('api/matches.js');
     assert.match(matchesSource, /s-maxage=60, stale-while-revalidate=120/u);

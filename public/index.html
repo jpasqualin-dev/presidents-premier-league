@@ -488,7 +488,7 @@
         .form-result-draw { background: #8a9298; }
         .form-result-loss { background: #e53e3e; }
         .team-form { display: flex; align-items: center; justify-content: flex-end; width: 100%; gap: 8px; }
-        .team-form .form-results { min-width: 128px; justify-content: flex-end; }
+        .team-form .form-results { width: 128px; min-width: 128px; justify-content: flex-end; }
         .next-opponent { display: inline-flex; align-items: center; margin-right: 4px; cursor: pointer; }
         .next-opponent .team-icon { width: 22px; height: 22px; }
 
@@ -511,6 +511,13 @@
         #standings-table, #divisions-container table { table-layout: auto; }
         #standings-table th:nth-child(1), #standings-table td:nth-child(1) { width: 8%; }
         #standings-table th:nth-child(2), #standings-table td:nth-child(2) { width: 38%; white-space: normal; }
+        #standings-table.form-view { table-layout: fixed; }
+        #standings-table.form-view col.overall-form-rank { width: 6%; }
+        #standings-table.form-view col.overall-form-player { width: 36%; }
+        #standings-table.form-view col.overall-form-results { width: 46%; }
+        #standings-table.form-view col.overall-form-points { width: 12%; }
+        #standings-table.form-view th:nth-child(1), #standings-table.form-view td:nth-child(1) { width: 6%; }
+        #standings-table.form-view th:nth-child(2), #standings-table.form-view td:nth-child(2) { width: 36%; }
         #divisions-container table.fixed-cols { table-layout: fixed; }
         #divisions-container table td:nth-child(2) { white-space: normal; }
         #divisions-container col.div-rank { width: 6%; }
@@ -603,6 +610,12 @@
 
             #standings-table th:nth-child(1), #standings-table td:nth-child(1) { width: 10%; }
             #standings-table th:nth-child(2), #standings-table td:nth-child(2) { width: 35%; }
+            #standings-table.form-view col.overall-form-rank { width: 8%; }
+            #standings-table.form-view col.overall-form-player { width: 33%; }
+            #standings-table.form-view col.overall-form-results { width: 48%; }
+            #standings-table.form-view col.overall-form-points { width: 11%; }
+            #standings-table.form-view th:nth-child(1), #standings-table.form-view td:nth-child(1) { width: 8%; }
+            #standings-table.form-view th:nth-child(2), #standings-table.form-view td:nth-child(2) { width: 33%; }
             #divisions-container col.div-rank { width: 8%; }
             #divisions-container col.div-team { width: 33%; }
             #divisions-container col.div-goals { width: 14%; }
@@ -1378,10 +1391,15 @@
         }
 
         const primaryTable = document.getElementById('standings-table');
+        primaryTable.classList.toggle('form-view', overallMode === 'FORM');
+        primaryTable.querySelector('colgroup')?.remove();
+        if (overallMode === 'FORM') {
+            primaryTable.insertAdjacentHTML('afterbegin', '<colgroup><col class="overall-form-rank"><col class="overall-form-player"><col class="overall-form-results"><col class="overall-form-points"></colgroup>');
+        }
         
         let theadHtml = `
             <tr class="title-row">
-                <th colspan="10" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
+                <th colspan="${overallMode === 'FORM' ? 4 : 10}" class="text-left" style="border-bottom: 2px solid #00ff87; padding-bottom: 4px;">
                     <div class="overall-header-container">
                         <h2>PPL Standings</h2>
                         <div class="toggle-switch" data-toggle-group="overall">
@@ -1399,7 +1417,7 @@
         } else if (overallMode === 'PGA') {
             theadHtml += `<tr><th>#</th><th class="text-left">Player</th><th>PTS</th><th>PvP Wins</th><th>PGA</th><th>PTS+PGA</th></tr>`;
         } else {
-            theadHtml += `<tr><th>#</th><th class="text-left">Player</th><th>Form</th></tr>`;
+            theadHtml += `<tr><th>#</th><th class="text-left">Player</th><th>Form</th><th>PTS</th></tr>`;
         }
         primaryTable.querySelector('thead').innerHTML = theadHtml;
 
@@ -1439,7 +1457,7 @@
                     const team = teamStatsObj[teamName];
                     return team ? getOrderedFormResults((team.form || []).filter(result => Number(result.matchday) === latestFormMatchday)) : [];
                 });
-                tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td>${renderFormResults(playerForm)}</td>`;
+                tr.innerHTML = `<td class="fotmob-rank">${index + 1}</td><td class="fotmob-player">${playerCell}</td><td><div class="team-form">${renderFormResults(playerForm)}</div></td><td class="highlight-col"><strong>${p.PTS}</strong></td>`;
             }
             primaryTbody.appendChild(tr);
 
@@ -1483,6 +1501,7 @@
                         <td></td>
                         <td class="text-left">${teamNameCell}</td>
                         <td><div class="team-form">${renderFormResults(getOrderedFormResults(t.form || []).slice(-4))}${renderNextOpponent(t.team)}</div></td>
+                        <td class="highlight-col"><strong>${t.PTS}</strong></td>
                     `;
                 }
                 primaryTbody.appendChild(nestedTr);
