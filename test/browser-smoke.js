@@ -354,9 +354,9 @@ test('upcoming match drawer presents table, recent form, and ranked season stats
     const goalDifferenceRow = page.locator('.upcoming-stat-row').filter({ has: page.locator('.stat-label').filter({ hasText: 'Goal Differential' }) });
     assert.match(await goalDifferenceRow.textContent(), /\+21/);
     assert.match(await goalDifferenceRow.textContent(), /-21/);
-    assert.deepEqual(await goalDifferenceRow.locator('.stat-gd-bar').evaluateAll(elements => elements.map(element => element.getAttribute('style'))), [
-        'left:50%;width:50%',
-        'left:0%;width:50%'
+    assert.deepEqual(await goalDifferenceRow.locator('.stat-bars .stat-bar-home, .stat-bars .stat-bar-away').evaluateAll(elements => elements.map(element => element.getAttribute('style'))), [
+        'width:95%',
+        'width:5%'
     ]);
     const formRow = page.locator('.match-form-column').nth(0).locator('.match-form-result').first();
     assert.equal(await formRow.evaluate(element => element.tagName), 'BUTTON');

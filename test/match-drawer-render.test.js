@@ -118,11 +118,27 @@ test('upcoming match renders date, two-team form, table rows, and ranked season 
     assert.match(html, /Yellow Cards/);
     assert.match(html, /Red Cards/);
     assert.match(html, /#\d+/);
-    assert.match(html, /stat-bars-diverging/);
+    assert.doesNotMatch(html, /stat-bars-diverging|stat-gd-bar/);
     assert.match(html, /\+21 \(#\d+\)/);
     assert.match(html, /-21 \(#\d+\)/);
-    assert.match(html, /class="stat-gd-bar stat-gd-bar-home" style="left:50%;width:50%"/);
-    assert.match(html, /class="stat-gd-bar stat-gd-bar-away" style="left:0%;width:50%"/);
+    assert.match(html, /class="stat-bars" aria-hidden="true"><span class="stat-bar-home" style="width:95%"><\/span><span class="stat-bar-away" style="width:5%"/);
+});
+
+test('equal league goal differentials produce an even head-to-head split', () => {
+    const render = createRenderer();
+    const match = {
+        id: 'upcoming',
+        status: 'SCHEDULED',
+        utcDate: '2026-10-18T12:00:00Z',
+        homeTeam: { id: 'home', name: 'Home United' },
+        awayTeam: { id: 'away', name: 'Away City' },
+        score: { fullTime: { home: null, away: null } }
+    };
+    const html = render(match, [match]);
+    const goalDifferenceRow = [...html.matchAll(/<div class="stat-row upcoming-stat-row">([\s\S]*?)<\/div>/g)]
+        .find(([, row]) => row.includes('Goal Differential'))?.[0] || '';
+
+    assert.equal((goalDifferenceRow.match(/width:50%/g) || []).length, 2);
 });
 
 test('live and completed matches retain their existing detail cards', () => {

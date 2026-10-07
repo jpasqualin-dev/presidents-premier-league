@@ -303,20 +303,22 @@
         return value < 0 ? `-${formatMetric(Math.abs(value))}` : `+${formatMetric(value)}`;
     }
 
-    function renderStatBar(homeValue, awayValue, category) {
+    function renderStatBar(homeValue, awayValue, category, allStats) {
+        let homeWidth;
         if (category === 'goalDifference') {
-            const maxAbsolute = Math.max(Math.abs(homeValue || 0), Math.abs(awayValue || 0));
-            const renderTeamBar = (value, side) => {
-                const width = maxAbsolute ? Math.abs(value) / maxAbsolute * 50 : 0;
-                const left = value < 0 ? 50 - width : 50;
-                return `<span class="stat-gd-bar stat-gd-bar-${side}" style="left:${left}%;width:${width}%"></span>`;
-            };
-            return `<span class="stat-bars stat-bars-diverging" aria-hidden="true"><span class="stat-gd-zero"></span>${renderTeamBar(homeValue || 0, 'home')}${renderTeamBar(awayValue || 0, 'away')}</span>`;
+            const differences = allStats.map(item => item.GD).filter(Number.isFinite);
+            const lowest = Math.min(...differences), highest = Math.max(...differences);
+            if (!differences.length || lowest === highest) homeWidth = 50;
+            else {
+                const strength = value => Math.max(5, Math.min(95, 5 + 90 * (value - lowest) / (highest - lowest)));
+                const homeStrength = strength(homeValue), awayStrength = strength(awayValue);
+                homeWidth = homeStrength / (homeStrength + awayStrength) * 100;
+            }
+        } else {
+            const total = homeValue + awayValue;
+            if (!total) return '<span class="stat-bars stat-bars-neutral" aria-hidden="true"></span>';
+            homeWidth = homeValue / total * 100;
         }
-
-        const total = homeValue + awayValue;
-        if (!total) return '<span class="stat-bars stat-bars-neutral" aria-hidden="true"></span>';
-        const homeWidth = homeValue / total * 100;
         return `<span class="stat-bars" aria-hidden="true"><span class="stat-bar-home" style="width:${homeWidth}%"></span><span class="stat-bar-away" style="width:${100 - homeWidth}%"></span></span>`;
     }
 
@@ -345,7 +347,7 @@
             const formatValue = value => key === 'goalDifference' ? formatSignedMetric(value) : formatMetric(value, decimals);
             const homeDisplay = Number.isFinite(values.home) ? `${formatValue(values.home)}${rankLabel(homeStats, values.home)}` : '—';
             const awayDisplay = Number.isFinite(values.away) ? `${formatValue(values.away)}${rankLabel(awayStats, values.away)}` : '—';
-            return `<div class="stat-row upcoming-stat-row"><span class="stat-value">${escapeHtml(homeDisplay)}</span><span class="stat-label">${escapeHtml(label)}</span><span class="stat-value">${escapeHtml(awayDisplay)}</span>${renderStatBar(values.home || 0, values.away || 0, key)}</div>`;
+            return `<div class="stat-row upcoming-stat-row"><span class="stat-value">${escapeHtml(homeDisplay)}</span><span class="stat-label">${escapeHtml(label)}</span><span class="stat-value">${escapeHtml(awayDisplay)}</span>${renderStatBar(values.home || 0, values.away || 0, key, allStats)}</div>`;
         }).join('');
         return `<section class="match-detail-section upcoming-card upcoming-stats-card"><h3>Stats</h3>${rows}</section>`;
     }
