@@ -93,3 +93,33 @@ test('team form keeps the full schedule and highlights the latest played match',
     assert.match(output, /Most recently played match/);
     assert.ok(output.indexOf('Opponent 4') < output.indexOf('Opponent 5'));
 });
+
+test('team stats capitalize the heading and rank fewer goals conceded higher', () => {
+    const drawer = loadTeamDrawer();
+    const teams = ['Team A', 'Team B', 'Team C'];
+    const matches = [
+        { status: 'FINISHED', homeTeam: { name: 'Team A' }, awayTeam: { name: 'Team B' }, score: { fullTime: { home: 2, away: 5 } } },
+        { status: 'FINISHED', homeTeam: { name: 'Team B' }, awayTeam: { name: 'Team C' }, score: { fullTime: { home: 3, away: 2 } } },
+        { status: 'FINISHED', homeTeam: { name: 'Team C' }, awayTeam: { name: 'Team A' }, score: { fullTime: { home: 1, away: 10 } } }
+    ];
+    const stats = drawer.buildStats(matches, teams, () => 'Test');
+    const output = drawer.render('Team B', {
+        stats,
+        matches,
+        getLogoByName: () => '',
+        getShortTeamName: name => name,
+        getOwnerOfTeam: () => 'Test'
+    });
+    const teamAOutput = drawer.render('Team A', {
+        stats,
+        matches,
+        getLogoByName: () => '',
+        getShortTeamName: name => name,
+        getOwnerOfTeam: () => 'Test'
+    });
+
+    assert.match(output, /<h2 class="team-drawer-card-title">Team Stats<\/h2>/);
+    assert.match(output, /Goals<\/span><strong>8<\/strong>/);
+    assert.match(output, /Goals Conceded<\/span><strong>4<\/strong>[\s\S]*?aria-label="Goals Conceded rank 1 of 20"/);
+    assert.match(teamAOutput, /Goals Conceded<\/span><strong>6<\/strong>[\s\S]*?aria-label="Goals Conceded rank 2 of 20"/);
+});

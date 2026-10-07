@@ -384,6 +384,44 @@ test('upcoming match drawer presents table, recent form, and ranked season stats
     await context.close();
 });
 
+test('upcoming drawer back navigation ignores a late previous-match response', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const page = await context.newPage();
+    await page.route('**/api/matches**', route => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(upcomingDrawerData())
+    }));
+    await page.goto(`${baseUrl}/hef.html`);
+    await page.locator('body.player-page-ready').waitFor();
+    await page.evaluate(() => window.openMatchDrawer('upcoming-drawer-match'));
+    await page.locator('.upcoming-stats-card').waitFor();
+    await page.evaluate(() => {
+        const fetchMatch = window.fetchSharedMatchById;
+        window.fetchSharedMatchById = async matchId => {
+            if (matchId === 'arsenal-history-6') {
+                await new Promise(resolve => { window.releaseDelayedMatchDetails = resolve; });
+            }
+            return fetchMatch(matchId);
+        };
+    });
+
+    await page.locator('.match-form-column').nth(0).locator('.match-form-result').first().click();
+    await page.locator('.match-drawer-back').waitFor();
+    await page.locator('#match-detail-content').getByText('Loading match details...').waitFor();
+    assert.deepEqual(await page.evaluate(() => window.DrawerRouter.current()), { type: 'match', id: 'arsenal-history-6' });
+
+    await page.locator('.match-drawer-back').click();
+    await page.locator('.upcoming-stats-card').waitFor();
+    assert.deepEqual(await page.evaluate(() => window.DrawerRouter.current()), { type: 'match', id: 'upcoming-drawer-match' });
+    await page.evaluate(() => window.releaseDelayedMatchDetails());
+    await page.waitForTimeout(50);
+    assert.equal(await page.locator('.upcoming-stats-card').count(), 1);
+    assert.equal(await page.locator('#match-detail-content .match-status').count(), 0);
+    await context.close();
+});
+
 test('table switches between points and scoped match form with working fixture links', async t => {
     if (browserError) return t.skip('Chromium runtime unavailable');
     const context = await browser.newContext();

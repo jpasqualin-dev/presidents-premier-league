@@ -3,6 +3,7 @@
     let lastDrawerTrigger = null;
     let lastDrawerMatchId = null;
     let lastDrawerFromWeekly = false;
+    let drawerRenderId = 0;
 
     function getDrawerFocusableElements() {
         const overlay = document.getElementById('match-drawer-overlay');
@@ -414,6 +415,7 @@
         }
 
         const overlay = document.getElementById('match-drawer-overlay'), drawer = overlay.querySelector('.match-drawer'), content = document.getElementById('match-detail-content');
+        const renderId = ++drawerRenderId;
         window.resetSharedMatchDrawerHeader();
         const header = overlay.querySelector('.match-drawer-header');
         const backButtonMarkup = window.DrawerRouter?.canGoBack()
@@ -425,10 +427,15 @@
         focusDrawer();
         try {
             const { match, matches } = await window.fetchSharedMatchById(matchId);
+            if (renderId !== drawerRenderId) return;
             content.innerHTML = window.renderSharedMatchDetail(match, matches);
             window.bindSharedMatchRows(content);
         }
-        catch (error) { console.error('Error fetching match details:', error); content.innerHTML = '<p class="empty-detail">Unable to load match details.</p>'; }
+        catch (error) {
+            if (renderId !== drawerRenderId) return;
+            console.error('Error fetching match details:', error);
+            content.innerHTML = '<p class="empty-detail">Unable to load match details.</p>';
+        }
     };
 
     window.closeSharedMatchDrawer = function (event) {
@@ -437,6 +444,7 @@
         window.DrawerRouter?.closeAll();
         const overlay = document.getElementById('match-drawer-overlay'); overlay.classList.remove('is-open'); overlay.setAttribute('aria-hidden', 'true'); document.body.classList.remove('drawer-open');
         window.resetSharedMatchDrawerHeader();
+        drawerRenderId += 1;
         const weeklyTrigger = lastDrawerFromWeekly && lastDrawerMatchId
             ? document.querySelector(`.weekly-form-match[data-match-id="${CSS.escape(lastDrawerMatchId)}"]`)
             : null;
