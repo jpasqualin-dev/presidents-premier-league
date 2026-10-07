@@ -28,6 +28,7 @@
             style.textContent = style.textContent.replace(/height:100vh;height:100dvh;/g, '');
             style.textContent += '.match-drawer-overlay{height:auto}.match-drawer{height:100%}.match-drawer{background:var(--bg-color,#f4f6f8)}.match-drawer-header,.match-hero,.match-detail-section{background:var(--card-bg,#fff)}.match-drawer-header,.match-detail-section{border-color:var(--border-color,#dfe5eb)}.match-drawer-title,.match-score,.match-scorer,.match-detail-section h3,.lineup-team h4{color:var(--text-main,#1a1a1a)}.match-drawer-close,.match-drawer-back{background:var(--border-color,#dfe5eb);color:var(--text-main,#1a1a1a)}';
             style.textContent += `.match-upcoming-scoreline{margin:8px 0 18px}.match-upcoming-date{display:grid;justify-items:center;gap:2px;text-align:center}.match-upcoming-weekday{color:var(--text-muted);font-size:.8rem;font-weight:600}.match-upcoming-month-day{color:var(--text-main);font-size:1rem;font-weight:700}.match-upcoming-kickoff{color:var(--text-main);font-size:1.35rem;font-weight:800;line-height:1.1;white-space:nowrap}.upcoming-table-scroll{overflow-x:auto}.upcoming-table{width:100%;min-width:440px;border-collapse:collapse;font-size:.76rem;text-align:center}.upcoming-table th,.upcoming-table td{padding:8px 5px;border-bottom:1px solid var(--border-color);white-space:nowrap}.upcoming-table th{color:var(--text-muted);font-size:.68rem;font-weight:700}.upcoming-table-team{display:flex;align-items:center;gap:7px;text-align:left;font-weight:600}.upcoming-table-team img{width:26px;height:26px;object-fit:contain}.match-form-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.match-form-column{min-width:0}.match-form-column h4{margin:0 0 10px;color:var(--text-main);font-size:.78rem;text-align:center}.match-form-results{display:grid;gap:9px}.match-form-result{display:grid;grid-template-columns:minmax(20px,1fr) auto minmax(20px,1fr);align-items:center;gap:5px}.match-form-crest{display:flex;align-items:center;justify-content:center;min-width:0}.match-form-crest img{width:25px;height:25px;object-fit:contain}.match-form-score{min-width:55px;padding:5px 4px;border-radius:6px;color:#fff;font-size:.76rem;font-weight:800;text-align:center;white-space:nowrap}.match-form-score-win{background:#00a667}.match-form-score-draw{background:#8a9298}.match-form-score-loss{background:#e53e3e}.match-form-no-crest{display:block;width:25px;height:25px}.match-form-empty{margin:0;font-size:.72rem;text-align:center}.upcoming-stat-row{grid-template-columns:minmax(74px,1fr) minmax(44px,2fr) minmax(74px,1fr)}.upcoming-stat-row .stat-value{font-size:.7rem;white-space:nowrap}.upcoming-stat-row .stat-label{font-size:.72rem}.stat-bars-neutral{background:var(--border-color)}.stat-bars-diverging{position:relative;overflow:hidden;background:transparent}.stat-gd-zero{position:absolute;top:0;bottom:0;left:calc(50% - .5px);width:1px;background:var(--border-color)}.stat-gd-bar{position:absolute;display:block;height:3px}.stat-gd-bar-home{top:1px;background:#3b82f6}.stat-gd-bar-away{bottom:1px;background:#ef4444}`;
+            style.textContent += `.upcoming-table{table-layout:fixed}.upcoming-table-position{width:6%}.upcoming-table-team-column{width:34%}.upcoming-table-played{width:7%}.upcoming-table-result{width:6%}.upcoming-table-goals{width:14%}.upcoming-table-difference{width:8%}.upcoming-table-points{width:13%}.match-form-result{width:100%;padding:0;border:0;background:transparent;color:inherit;cursor:pointer;font:inherit}.match-form-result:focus-visible{outline:2px solid var(--text-main);outline-offset:2px;border-radius:6px}.stat-bars-diverging{display:block}@media(max-width:600px){.upcoming-table-scroll{overflow-x:hidden}.upcoming-table{min-width:0;font-size:.58rem}.upcoming-table th,.upcoming-table td{padding:6px 2px;font-size:.58rem}.upcoming-table th{font-size:.54rem;letter-spacing:-.02em}.upcoming-table-team{gap:3px;white-space:normal}.upcoming-table-team img{width:18px;height:18px;flex:0 0 18px}.upcoming-table-team span{min-width:0;line-height:1.05;overflow-wrap:anywhere;white-space:normal}}`;
             document.head.appendChild(style);
         }
     }
@@ -245,11 +246,11 @@
         const rows = selected.map(teamStats => {
             const team = teamStats.team;
             const goals = `${teamStats.GF}-${teamStats.GA}`;
-            const difference = teamStats.GD > 0 ? `+${teamStats.GD}` : String(teamStats.GD);
+            const difference = formatSignedMetric(teamStats.GD);
             return `<tr><td>${positions.get(teamStats) || '-'}</td><td class="upcoming-table-team">${team.crest ? `<img src="${escapeHtml(team.crest)}" alt="">` : ''}<span>${escapeHtml(team.longName)}</span></td><td>${teamStats.PL}</td><td>${teamStats.W}</td><td>${teamStats.D}</td><td>${teamStats.L}</td><td>${goals}</td><td>${difference}</td><td>${teamStats.PTS}</td></tr>`;
         }).join('');
 
-        return `<section class="match-detail-section upcoming-card upcoming-table-card"><h3>Table</h3><div class="upcoming-table-scroll"><table class="upcoming-table"><thead><tr><th aria-label="Position">#</th><th>Team</th><th>PL</th><th>W</th><th>D</th><th>L</th><th>+/-</th><th>GD</th><th>PTS</th></tr></thead><tbody>${rows || '<tr><td colspan="9" class="empty-detail">Table data is unavailable.</td></tr>'}</tbody></table></div></section>`;
+        return `<section class="match-detail-section upcoming-card upcoming-table-card"><h3>Table</h3><div class="upcoming-table-scroll"><table class="upcoming-table"><colgroup><col class="upcoming-table-position"><col class="upcoming-table-team-column"><col class="upcoming-table-played"><col class="upcoming-table-result"><col class="upcoming-table-result"><col class="upcoming-table-result"><col class="upcoming-table-goals"><col class="upcoming-table-difference"><col class="upcoming-table-points"></colgroup><thead><tr><th aria-label="Position">#</th><th>Team</th><th>PL</th><th>W</th><th>D</th><th>L</th><th>+/-</th><th>GD</th><th>PTS</th></tr></thead><tbody>${rows || '<tr><td colspan="9" class="empty-detail">Table data is unavailable.</td></tr>'}</tbody></table></div></section>`;
     }
 
     function getMatchResult(match, team) {
@@ -269,7 +270,7 @@
     function renderFormMatch(match, team) {
         const result = getMatchResult(match, team);
         const home = match.homeTeam, away = match.awayTeam;
-        return `<div class="match-form-result ${result}" aria-label="${escapeHtml(home.name)} ${match.score.fullTime.home}, ${escapeHtml(away.name)} ${match.score.fullTime.away}"><span class="match-form-crest">${formCrest(home)}</span><span class="match-form-score match-form-score-${result}">${match.score.fullTime.home} - ${match.score.fullTime.away}</span><span class="match-form-crest">${formCrest(away)}</span></div>`;
+        return `<button type="button" class="match-form-result ${result}" data-match-id="${escapeHtml(match.id)}" aria-label="View ${escapeHtml(home.name)} ${match.score.fullTime.home}, ${escapeHtml(away.name)} ${match.score.fullTime.away} match details"><span class="match-form-crest">${formCrest(home)}</span><span class="match-form-score match-form-score-${result}">${match.score.fullTime.home} - ${match.score.fullTime.away}</span><span class="match-form-crest">${formCrest(away)}</span></button>`;
     }
 
     function renderTeamFormColumn(team, matches, beforeDate) {
@@ -296,6 +297,10 @@
         return Number.isFinite(value)
             ? new Intl.NumberFormat(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(value)
             : '—';
+    }
+
+    function formatSignedMetric(value) {
+        return value < 0 ? `-${formatMetric(Math.abs(value))}` : `+${formatMetric(value)}`;
     }
 
     function renderStatBar(homeValue, awayValue, category) {
@@ -337,8 +342,9 @@
         const rows = definitions.map(([label, key, , , decimals]) => {
             const values = valuesByKey.get(key), ranks = ranksByKey.get(key);
             const rankLabel = (team, value) => Number.isFinite(value) ? ` (#${ranks.get(team)})` : '';
-            const homeDisplay = Number.isFinite(values.home) ? `${formatMetric(values.home, decimals)}${rankLabel(homeStats, values.home)}` : '—';
-            const awayDisplay = Number.isFinite(values.away) ? `${formatMetric(values.away, decimals)}${rankLabel(awayStats, values.away)}` : '—';
+            const formatValue = value => key === 'goalDifference' ? formatSignedMetric(value) : formatMetric(value, decimals);
+            const homeDisplay = Number.isFinite(values.home) ? `${formatValue(values.home)}${rankLabel(homeStats, values.home)}` : '—';
+            const awayDisplay = Number.isFinite(values.away) ? `${formatValue(values.away)}${rankLabel(awayStats, values.away)}` : '—';
             return `<div class="stat-row upcoming-stat-row"><span class="stat-value">${escapeHtml(homeDisplay)}</span><span class="stat-label">${escapeHtml(label)}</span><span class="stat-value">${escapeHtml(awayDisplay)}</span>${renderStatBar(values.home || 0, values.away || 0, key)}</div>`;
         }).join('');
         return `<section class="match-detail-section upcoming-card upcoming-stats-card"><h3>Stats</h3>${rows}</section>`;
@@ -350,7 +356,7 @@
         const monthDay = date.toLocaleDateString([], { month: 'long', day: 'numeric' });
         const kickoff = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
         const allStats = getSeasonTeamStats(matches);
-        const hero = `<section class="match-hero"><div class="match-scoreline match-upcoming-scoreline">${renderTeam(match.homeTeam)}<div class="match-upcoming-date"><span class="match-upcoming-weekday">${escapeHtml(weekday)}</span><span class="match-upcoming-month-day">${escapeHtml(monthDay)}</span><span class="match-upcoming-kickoff">${escapeHtml(kickoff)}</span></div>${renderTeam(match.awayTeam)}</div><div class="match-venue">${escapeHtml(match.venue || 'Venue unavailable')}</div></section>`;
+        const hero = `<section class="match-hero"><div class="match-scoreline match-upcoming-scoreline">${renderTeam(match.homeTeam)}<div class="match-upcoming-date"><span class="match-upcoming-month-day">${escapeHtml(monthDay)}</span><span class="match-upcoming-weekday">${escapeHtml(weekday)}</span><span class="match-upcoming-kickoff">${escapeHtml(kickoff)}</span></div>${renderTeam(match.awayTeam)}</div><div class="match-venue">${escapeHtml(match.venue || 'Venue unavailable')}</div></section>`;
         return `${hero}${renderTableCard(match, allStats)}${renderFormCard(match, matches, date)}${renderSeasonStatsCard(match, allStats)}`;
     }
 
@@ -415,6 +421,7 @@
         try {
             const { match, matches } = await window.fetchSharedMatchById(matchId);
             content.innerHTML = window.renderSharedMatchDetail(match, matches);
+            window.bindSharedMatchRows(content);
         }
         catch (error) { console.error('Error fetching match details:', error); content.innerHTML = '<p class="empty-detail">Unable to load match details.</p>'; }
     };

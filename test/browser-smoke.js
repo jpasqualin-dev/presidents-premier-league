@@ -72,7 +72,7 @@ function upcomingDrawerData() {
             utcDate: `2026-10-${String(day + 6).padStart(2, '0')}T12:00:00Z`,
             homeTeam: brentford,
             awayTeam: chelsea,
-            score: { fullTime: { home: 0, away: day } },
+            score: { fullTime: { home: day, away: 0 } },
             teamCards: { home: { yellow: 0, red: 0 }, away: { yellow: day % 2, red: day === 6 ? 1 : 0 } }
         });
     }
@@ -346,10 +346,25 @@ test('upcoming match drawer presents table, recent form, and ranked season stats
     assert.equal(await page.locator('.match-form-column').nth(0).locator('.match-form-result').count(), 5);
     assert.equal(await page.locator('.match-form-column').nth(1).locator('.match-form-result').count(), 5);
     assert.match(await page.locator('.match-form-column').nth(0).locator('.match-form-result').first().textContent(), /6 - 0/);
-    assert.match(await page.locator('.match-form-column').nth(1).locator('.match-form-result').first().textContent(), /0 - 6/);
+    assert.match(await page.locator('.match-form-column').nth(1).locator('.match-form-result').first().textContent(), /6 - 0/);
     assert.equal(await page.locator('.upcoming-stat-row').count(), 6);
     assert.equal(await page.locator('.match-status, .match-scorers, .timeline, .lineups').count(), 0);
     assert.equal(await page.locator('.match-form-columns').evaluate(element => getComputedStyle(element).display), 'grid');
+    assert.equal(await page.locator('.upcoming-table-scroll').evaluate(element => element.scrollWidth <= element.clientWidth), true);
+    const goalDifferenceRow = page.locator('.upcoming-stat-row').filter({ has: page.locator('.stat-label').filter({ hasText: 'Goal Differential' }) });
+    assert.match(await goalDifferenceRow.textContent(), /\+21/);
+    assert.match(await goalDifferenceRow.textContent(), /-21/);
+    assert.deepEqual(await goalDifferenceRow.locator('.stat-gd-bar').evaluateAll(elements => elements.map(element => element.getAttribute('style'))), [
+        'left:50%;width:50%',
+        'left:0%;width:50%'
+    ]);
+    const formRow = page.locator('.match-form-column').nth(0).locator('.match-form-result').first();
+    assert.equal(await formRow.evaluate(element => element.tagName), 'BUTTON');
+    await formRow.click();
+    await page.locator('.match-drawer-back').waitFor();
+    await page.locator('#match-detail-content .match-status').filter({ hasText: 'Full time' }).waitFor();
+    await page.locator('.match-drawer-back').click();
+    await page.locator('.upcoming-stats-card').waitFor();
     assert.equal(diagnostics.pageErrors.length, 0);
     await context.close();
 });

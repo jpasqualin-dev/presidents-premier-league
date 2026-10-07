@@ -70,8 +70,8 @@ test('upcoming match renders date, two-team form, table rows, and ranked season 
             `2026-10-${String(day + 6).padStart(2, '0')}T12:00:00Z`,
             awayOpponent,
             away,
-            0,
             day,
+            0,
             { home: { yellow: 0, red: 0 }, away: { yellow: day % 2, red: day === 6 ? 1 : 0 } }
         ));
     }
@@ -90,6 +90,7 @@ test('upcoming match renders date, two-team form, table rows, and ranked season 
     assert.match(html, /match-upcoming-weekday/);
     assert.match(html, /match-upcoming-month-day/);
     assert.match(html, /match-upcoming-kickoff/);
+    assert.ok(html.indexOf('match-upcoming-month-day') < html.indexOf('match-upcoming-weekday'));
     assert.match(html, /League Ground/);
     assert.doesNotMatch(html, /match-meta|match-status|match-scorers|No goals|Match Events|Lineups/);
     assert.equal((html.match(/class="match-detail-section upcoming-card/g) || []).length, 3);
@@ -101,10 +102,13 @@ test('upcoming match renders date, two-team form, table rows, and ranked season 
     const formHtml = html.match(/<section class="match-detail-section upcoming-card upcoming-form-card">([\s\S]*?)<\/section>/)?.[1] || '';
     assert.equal((formHtml.match(/class="match-form-result /g) || []).length, 10);
     assert.ok(formHtml.indexOf('6 - 0') < formHtml.indexOf('2 - 0'));
-    assert.ok(formHtml.indexOf('0 - 6') < formHtml.indexOf('0 - 2'));
+    assert.ok(formHtml.indexOf('6 - 0') < formHtml.lastIndexOf('2 - 0'));
     assert.match(formHtml, /match-form-score-win/);
+    assert.match(formHtml, /match-form-score-loss/);
     assert.match(formHtml, /class="match-form-crest"><img src="\/opponent-home.png"/);
     assert.match(formHtml, /class="match-form-crest"><img src="\/home.png"/);
+    assert.match(formHtml, /class="match-form-crest"><img src="\/opponent-away.png"/);
+    assert.match(formHtml, /class="match-form-crest"><img src="\/away.png"/);
 
     assert.equal((html.match(/class="stat-row upcoming-stat-row"/g) || []).length, 6);
     assert.match(html, /Pts per match/);
@@ -115,6 +119,10 @@ test('upcoming match renders date, two-team form, table rows, and ranked season 
     assert.match(html, /Red Cards/);
     assert.match(html, /#\d+/);
     assert.match(html, /stat-bars-diverging/);
+    assert.match(html, /\+21 \(#\d+\)/);
+    assert.match(html, /-21 \(#\d+\)/);
+    assert.match(html, /class="stat-gd-bar stat-gd-bar-home" style="left:50%;width:50%"/);
+    assert.match(html, /class="stat-gd-bar stat-gd-bar-away" style="left:0%;width:50%"/);
 });
 
 test('live and completed matches retain their existing detail cards', () => {
