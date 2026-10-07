@@ -342,6 +342,21 @@ test('upcoming match drawer presents table, recent form, and ranked season stats
 
     assert.equal(await page.locator('.upcoming-card').count(), 3);
     assert.equal(await page.locator('.upcoming-table tbody tr').count(), 2);
+    assert.equal(await page.locator('.upcoming-table').evaluate(element => element.classList.contains('overall-standings-table')), true);
+    assert.equal(await page.locator('.upcoming-table .fotmob-rank').count(), 2);
+    assert.equal(await page.locator('.upcoming-table .team-inline').count(), 2);
+    assert.equal(await page.locator('.upcoming-table-owner').count(), 2);
+    assert.deepEqual(await page.locator('.upcoming-table').evaluate(table => ({
+        bodyFontSize: getComputedStyle(table.tBodies[0].rows[0].cells[0]).fontSize,
+        headerFontSize: getComputedStyle(table.tHead.rows[0].cells[0]).fontSize,
+        headerWeight: getComputedStyle(table.tHead.rows[0].cells[0]).fontWeight,
+        headerTextTransform: getComputedStyle(table.tHead.rows[0].cells[0]).textTransform
+    })), {
+        bodyFontSize: '12.8px',
+        headerFontSize: '12.8px',
+        headerWeight: '500',
+        headerTextTransform: 'uppercase'
+    });
     assert.equal(await page.locator('.match-form-column').count(), 2);
     assert.equal(await page.locator('.match-form-column').nth(0).locator('.match-form-result').count(), 5);
     assert.equal(await page.locator('.match-form-column').nth(1).locator('.match-form-result').count(), 5);
