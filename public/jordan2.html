@@ -380,7 +380,7 @@
 
         body.dark-mode .table-card { border-color: #3d3d3d; }
 
-        .prototype-fixtures { display: none; }
+        .prototype-fixtures { display: block; }
 
         @media (hover: hover) {
             .site-menu a:hover,
@@ -444,7 +444,7 @@
                 <button class="pill active" id="tab-teams" type="button" role="tab" aria-selected="true" aria-controls="panel-teams" tabindex="0">Teams</button>
                 <button class="pill" id="tab-draft" type="button" role="tab" aria-selected="false" aria-controls="panel-draft" tabindex="-1">Draft</button>
                 <button class="pill" id="tab-h2h" type="button" role="tab" aria-selected="false" aria-controls="panel-h2h" tabindex="-1">H2H</button>
-                <button class="pill" id="tab-totw" type="button" role="tab" aria-selected="false" aria-controls="panel-totw" tabindex="-1">TOTW</button>
+                <button class="pill" id="tab-matches" type="button" role="tab" aria-selected="false" aria-controls="panel-matches" tabindex="-1">Matches</button>
             </div>
         </div>
 
@@ -501,12 +501,10 @@
                     </div>
                 </section>
             </section>
-            <section class="prototype-panel" id="panel-totw" role="tabpanel" aria-labelledby="tab-totw" tabindex="0" hidden>
-                <h2>TOTW</h2>
-                <p>Team of the week details will be added to this section.</p>
+            <section class="prototype-panel" id="panel-matches" role="tabpanel" aria-labelledby="tab-matches" tabindex="0" hidden>
+                <div class="prototype-fixtures" id="fixtures-container"></div>
             </section>
         </main>
-        <div class="prototype-fixtures" id="fixtures-container"></div>
     </div>
 
     <script src="theme.js"></script>
@@ -619,7 +617,11 @@
             ];
             destinations.forEach(({ card, target }) => {
                 target.replaceChildren();
-                if (card) target.append(card);
+                if (!card) return;
+                const summaryCard = card.cloneNode(true);
+                summaryCard.removeAttribute('id');
+                target.append(summaryCard);
+                window.bindSharedMatchRows(summaryCard);
             });
         };
 

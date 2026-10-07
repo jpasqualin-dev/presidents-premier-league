@@ -535,7 +535,7 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     await page.goto(`${baseUrl}/jordan2.html?player=Wes`);
     assert.equal(await page.locator('.header-container h1').textContent(), 'Wes');
     assert.equal(await page.title(), 'Wes | Presidents Premier League');
-    assert.deepEqual(await page.locator('[role="tab"]').allTextContents(), ['Teams', 'Draft', 'H2H', 'TOTW']);
+    assert.deepEqual(await page.locator('[role="tab"]').allTextContents(), ['Teams', 'Draft', 'H2H', 'Matches']);
     assert.equal(await page.locator('#tab-teams').getAttribute('aria-selected'), 'true');
     assert.equal(await page.locator('.profile-card .profile-info h1').textContent(), 'Wes');
     assert.deepEqual(await page.locator('.profile-card').evaluate(card => {
@@ -582,6 +582,10 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.equal(await page.locator('#panel-draft .prototype-card').count(), 0);
     assert.equal(await page.locator('#draft-title').textContent(), 'Draft: Wes');
     assert.equal(await page.locator('.draft-table-shell').evaluate(element => getComputedStyle(element).marginTop), '0px');
+    await page.locator('#tab-matches').click();
+    assert.equal(await page.locator('#panel-matches').isVisible(), true);
+    assert.equal(await page.locator('#panel-matches .mw-card').count(), 1);
+    assert.equal(await page.locator('#panel-matches .fixture-item').count(), 2);
     assert.deepEqual(diagnostics.consoleErrors, []);
     assert.deepEqual(diagnostics.pageErrors, []);
     assert.deepEqual(diagnostics.failedRequests, []);
