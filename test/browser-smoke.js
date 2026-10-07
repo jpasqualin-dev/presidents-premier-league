@@ -64,7 +64,7 @@ function upcomingDrawerData() {
             homeTeam: arsenal,
             awayTeam: everton,
             score: { fullTime: { home: day, away: 0 } },
-            teamCards: { home: { yellow: day % 2, red: 0 }, away: { yellow: 0, red: 0 } }
+            teamCards: { home: { yellow: 1, red: day === 1 ? 1 : 0 }, away: { yellow: 0, red: 0 } }
         });
         matches.push({
             id: `chelsea-history-${day}`,
@@ -73,7 +73,7 @@ function upcomingDrawerData() {
             homeTeam: brentford,
             awayTeam: chelsea,
             score: { fullTime: { home: day, away: 0 } },
-            teamCards: { home: { yellow: 0, red: 0 }, away: { yellow: day % 2, red: day === 6 ? 1 : 0 } }
+            teamCards: { home: { yellow: 0, red: 0 }, away: { yellow: 0, red: 0 } }
         });
     }
 
@@ -373,6 +373,13 @@ test('upcoming match drawer presents table, recent form, and ranked season stats
         'width:95%',
         'width:5%'
     ]);
+    for (const category of ['Yellow Cards', 'Red Cards']) {
+        const row = page.locator('.upcoming-stat-row').filter({ has: page.locator('.stat-label').filter({ hasText: category }) });
+        const ranks = await row.locator('.stat-value').evaluateAll(elements => elements.map(element => Number(element.textContent.match(/#(\d+)/)?.[1])));
+        const widths = await row.locator('.stat-bar-home, .stat-bar-away').evaluateAll(elements => elements.map(element => Number.parseFloat(element.style.width)));
+        assert.ok(ranks[0] > ranks[1], `${category}: home team should have the worse rank in the fixture`);
+        assert.ok(widths[0] < widths[1], `${category}: worse rank should get the smaller bar share`);
+    }
     const formRow = page.locator('.match-form-column').nth(0).locator('.match-form-result').first();
     assert.equal(await formRow.evaluate(element => element.tagName), 'BUTTON');
     await formRow.click();

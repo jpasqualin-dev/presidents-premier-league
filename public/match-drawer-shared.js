@@ -307,7 +307,7 @@
         return value < 0 ? `-${formatMetric(Math.abs(value))}` : `+${formatMetric(value)}`;
     }
 
-    function renderStatBar(homeValue, awayValue, category, allStats) {
+    function renderStatBar(homeValue, awayValue, category, allStats, ranks, homeStats, awayStats) {
         let homeWidth;
         if (category === 'goalDifference') {
             const differences = allStats.map(item => item.GD).filter(Number.isFinite);
@@ -318,6 +318,10 @@
                 const homeStrength = strength(homeValue), awayStrength = strength(awayValue);
                 homeWidth = homeStrength / (homeStrength + awayStrength) * 100;
             }
+        } else if (category === 'yellowCards' || category === 'redCards') {
+            const strength = team => Math.max(5, 100 - ((ranks.get(team) || allStats.length) - 1) * 5);
+            const homeStrength = strength(homeStats), awayStrength = strength(awayStats);
+            homeWidth = homeStrength / (homeStrength + awayStrength) * 100;
         } else {
             const total = homeValue + awayValue;
             if (!total) return '<span class="stat-bars stat-bars-neutral" aria-hidden="true"></span>';
@@ -351,7 +355,7 @@
             const formatValue = value => key === 'goalDifference' ? formatSignedMetric(value) : formatMetric(value, decimals);
             const homeDisplay = Number.isFinite(values.home) ? `${formatValue(values.home)}${rankLabel(homeStats, values.home)}` : '—';
             const awayDisplay = Number.isFinite(values.away) ? `${formatValue(values.away)}${rankLabel(awayStats, values.away)}` : '—';
-            return `<div class="stat-row upcoming-stat-row"><span class="stat-value">${escapeHtml(homeDisplay)}</span><span class="stat-label">${escapeHtml(label)}</span><span class="stat-value">${escapeHtml(awayDisplay)}</span>${renderStatBar(values.home || 0, values.away || 0, key, allStats)}</div>`;
+            return `<div class="stat-row upcoming-stat-row"><span class="stat-value">${escapeHtml(homeDisplay)}</span><span class="stat-label">${escapeHtml(label)}</span><span class="stat-value">${escapeHtml(awayDisplay)}</span>${renderStatBar(values.home || 0, values.away || 0, key, allStats, ranks, homeStats, awayStats)}</div>`;
         }).join('');
         return `<section class="match-detail-section upcoming-card upcoming-stats-card"><h3>Stats</h3>${rows}</section>`;
     }

@@ -63,7 +63,7 @@ test('upcoming match renders date, two-team form, table rows, and ranked season 
             homeOpponent,
             day,
             0,
-            { home: { yellow: day % 2, red: 0 }, away: { yellow: 0, red: 0 } }
+            { home: { yellow: 1, red: day === 1 ? 1 : 0 }, away: { yellow: 0, red: 0 } }
         ));
         previousMatches.push(finishedMatch(
             `away-${day}`,
@@ -72,7 +72,7 @@ test('upcoming match renders date, two-team form, table rows, and ranked season 
             away,
             day,
             0,
-            { home: { yellow: 0, red: 0 }, away: { yellow: day % 2, red: day === 6 ? 1 : 0 } }
+            { home: { yellow: 0, red: 0 }, away: { yellow: 0, red: 0 } }
         ));
     }
 
@@ -122,6 +122,14 @@ test('upcoming match renders date, two-team form, table rows, and ranked season 
     assert.match(html, /\+21 \(#\d+\)/);
     assert.match(html, /-21 \(#\d+\)/);
     assert.match(html, /class="stat-bars" aria-hidden="true"><span class="stat-bar-home" style="width:95%"><\/span><span class="stat-bar-away" style="width:5%"/);
+    const cardRows = [...html.matchAll(/<div class="stat-row upcoming-stat-row">([\s\S]*?)<\/div>/g)].map(([, row]) => row);
+    ['Yellow Cards', 'Red Cards'].forEach(label => {
+        const row = cardRows.find(item => item.includes(label));
+        assert.match(row, /#4/);
+        assert.match(row, /#1/);
+        assert.match(row, /class="stat-bar-home" style="width:45\.94594594594595%"/);
+        assert.match(row, /class="stat-bar-away" style="width:54\.05405405405405%"/);
+    });
 });
 
 test('equal league goal differentials produce an even head-to-head split', () => {
