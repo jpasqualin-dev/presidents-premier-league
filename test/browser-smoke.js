@@ -357,6 +357,13 @@ test('upcoming match drawer presents table, recent form, and ranked season stats
         headerWeight: '500',
         headerTextTransform: 'uppercase'
     });
+    const teamIcons = page.locator('.match-upcoming-scoreline .match-team img');
+    await page.locator('.match-upcoming-scoreline .match-team-name').first().evaluate(element => {
+        element.textContent = 'Brighton & Hove Albion';
+        element.style.width = '68px';
+    });
+    const iconTops = await teamIcons.evaluateAll(elements => elements.map(element => element.getBoundingClientRect().top));
+    assert.ok(Math.abs(iconTops[0] - iconTops[1]) < 1, 'team crests should stay vertically aligned when a team name wraps');
     assert.equal(await page.locator('.match-form-column').count(), 2);
     assert.equal(await page.locator('.match-form-column').nth(0).locator('.match-form-result').count(), 5);
     assert.equal(await page.locator('.match-form-column').nth(1).locator('.match-form-result').count(), 5);
@@ -385,6 +392,12 @@ test('upcoming match drawer presents table, recent form, and ranked season stats
     await formRow.click();
     await page.locator('.match-drawer-back').waitFor();
     await page.locator('#match-detail-content .match-status').filter({ hasText: 'Full time' }).waitFor();
+    await page.locator('.match-scoreline .match-team-name').first().evaluate(element => {
+        element.textContent = 'Brighton & Hove Albion';
+        element.style.width = '68px';
+    });
+    const completedTeamIconTops = await page.locator('.match-scoreline .match-team img').evaluateAll(elements => elements.map(element => element.getBoundingClientRect().top));
+    assert.ok(Math.abs(completedTeamIconTops[0] - completedTeamIconTops[1]) < 1, 'completed-match team crests should stay vertically aligned when a team name wraps');
     await page.locator('.match-drawer-back').click();
     await page.locator('.upcoming-stats-card').waitFor();
     assert.equal(diagnostics.pageErrors.length, 0);
