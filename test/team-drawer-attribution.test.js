@@ -123,3 +123,26 @@ test('team stats capitalize the heading and rank fewer goals conceded higher', (
     assert.match(output, /Goals Conceded<\/span><strong>4<\/strong>[\s\S]*?aria-label="Goals Conceded rank 1 of 20"/);
     assert.match(teamAOutput, /Goals Conceded<\/span><strong>6<\/strong>[\s\S]*?aria-label="Goals Conceded rank 2 of 20"/);
 });
+
+test('Goals Conceded bar is fullest for first place and smallest for twentieth', () => {
+    const drawer = loadTeamDrawer();
+    const allStats = Object.fromEntries(Array.from({ length: 20 }, (_, index) => {
+        const team = `Team ${index + 1}`;
+        return [team, {
+            team, owner: 'Test', PL: 1, W: 0, D: 0, L: 1,
+            GF: 0, GA: index, GD: -index, PTS: 0, cleanSheets: 0,
+            yellowCards: 0, redCards: 0
+        }];
+    }));
+    const stats = { allStats, homeStats: allStats, awayStats: allStats };
+    const render = teamName => drawer.render(teamName, {
+        stats,
+        matches: [],
+        getLogoByName: () => '',
+        getShortTeamName: name => name,
+        getOwnerOfTeam: () => 'Test'
+    });
+
+    assert.match(render('Team 1'), /Goals Conceded<\/span><strong>0<\/strong><div class="team-drawer-bar" aria-label="Goals Conceded rank 1 of 20"><div class="team-drawer-bar-fill" style="width:100%"/);
+    assert.match(render('Team 20'), /Goals Conceded<\/span><strong>19<\/strong><div class="team-drawer-bar" aria-label="Goals Conceded rank 20 of 20"><div class="team-drawer-bar-fill" style="width:5%"/);
+});

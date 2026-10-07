@@ -136,7 +136,9 @@
             const valueText = field === 'GD' && value > 0 ? `+${value}` : value;
             const fieldRank = statRank(field);
             const lowerIsBetter = field === 'GA' || field === 'yellowCards' || field === 'redCards';
-            const percentage = lowerIsBetter ? Math.min(100, fieldRank * 5) : Math.max(5, 100 - (fieldRank - 1) * 5);
+            const percentage = field === 'GA' || !lowerIsBetter
+                ? Math.max(5, 100 - (fieldRank - 1) * 5)
+                : Math.min(100, fieldRank * 5);
             return `<div class="team-drawer-stat"><span>${label}</span><strong>${valueText}</strong><div class="team-drawer-bar" aria-label="${label} rank ${fieldRank} of 20"><div class="team-drawer-bar-fill${colorClass ? ` ${colorClass}` : ''}" style="width:${percentage}%"></div></div><span class="team-drawer-bar-rank">Rank: ${fieldRank}</span></div>`;
         };
         const matches = (options.matches || []).filter(match => matchesTeam(match, team.team)).sort((a, b) => new Date(a.utcDate) - new Date(b.utcDate));

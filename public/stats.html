@@ -394,7 +394,7 @@
         const pgaTitles = new Set(["PvP wins", "PGA", "PTS + PGA"]);
         const perMatchTitles = new Set(["PTS per match", "Goals per match", "Goals conceded per match"]);
         const pplTitleOrder = [
-            "Golden Boot", "Golden Gloves (Clean Sheets)", "Goal difference", "Assists", "Wins + Draws",
+            "Golden Boot", "Golden Gloves (Clean Sheets)", "Goals Conceded", "Goal difference", "Assists", "Wins + Draws",
             "Comeback Wins (Down at Half)", "Comeback Draws (Down at Half)", "Comeback Wins+Draws (Down at Half)",
             "Failed to Score"
             , "Yellow Cards", "Red Cards", "Penalties Conceded"
@@ -753,6 +753,13 @@
                 playerVal: p => p.goldenGloves, teamVal: t => t.goldenGloves, teamRaw: t => t.goldenGloves,
                 aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.goldenGloves, 0),
                 pillClass: "pill-blue", sortDir: 1, allTeams: true
+            },
+            {
+                title: "Goals Conceded",
+                players: [...players].sort((a,b) => a.GA - b.GA || b.PTS - a.PTS),
+                playerVal: p => p.GA, teamVal: t => t.GA, teamRaw: t => t.GA,
+                aggregateVal: teamStatsObj => Object.values(teamStatsObj).reduce((total, team) => total + team.GA, 0),
+                pillClass: "pill-red", sortDir: -1, allTeams: true, allTeamsSortDir: -1
             },
             {
                 title: "Assists",

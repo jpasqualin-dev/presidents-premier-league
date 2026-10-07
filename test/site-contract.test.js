@@ -64,6 +64,12 @@ test('full-season match details are limited to the stats page', () => {
     assert.match(readPublic('match-drawer-shared.js'), /\/api\/match-details\?event=/u);
 });
 
+test('Goals Conceded stat card follows Golden Gloves and ranks the fewest first', () => {
+    const source = readPublic('stats.html');
+    assert.match(source, /const pplTitleOrder = \[\s*"Golden Boot", "Golden Gloves \(Clean Sheets\)", "Goals Conceded", "Goal difference"/u);
+    assert.match(source, /title: "Goals Conceded",\s*players: \[\.\.\.players\]\.sort\(\(a,b\) => a\.GA - b\.GA \|\| b\.PTS - a\.PTS\),\s*playerVal: p => p\.GA, teamVal: t => t\.GA, teamRaw: t => t\.GA,\s*aggregateVal: teamStatsObj => Object\.values\(teamStatsObj\)\.reduce\(\(total, team\) => total \+ team\.GA, 0\),\s*pillClass: "pill-red", sortDir: -1, allTeams: true, allTeamsSortDir: -1/u);
+});
+
 test('overall Form view aligns PTS and form cells across player and team rows', () => {
     const source = readPublic('index.html');
     assert.match(source, /<th>Form<\/th><th>PTS<\/th>/u);
