@@ -49,6 +49,46 @@ function upcomingFixtureData() {
     };
 }
 
+function upcomingDrawerData() {
+    const arsenal = { id: '359', name: 'Arsenal' };
+    const everton = { id: '368', name: 'Everton' };
+    const chelsea = { id: '363', name: 'Chelsea' };
+    const brentford = { id: '337', name: 'Brentford' };
+    const matches = [];
+
+    for (let day = 1; day <= 6; day += 1) {
+        matches.push({
+            id: `arsenal-history-${day}`,
+            status: 'FINISHED',
+            utcDate: `2026-10-${String(day).padStart(2, '0')}T12:00:00Z`,
+            homeTeam: arsenal,
+            awayTeam: everton,
+            score: { fullTime: { home: day, away: 0 } },
+            teamCards: { home: { yellow: day % 2, red: 0 }, away: { yellow: 0, red: 0 } }
+        });
+        matches.push({
+            id: `chelsea-history-${day}`,
+            status: 'FINISHED',
+            utcDate: `2026-10-${String(day + 6).padStart(2, '0')}T12:00:00Z`,
+            homeTeam: brentford,
+            awayTeam: chelsea,
+            score: { fullTime: { home: 0, away: day } },
+            teamCards: { home: { yellow: 0, red: 0 }, away: { yellow: day % 2, red: day === 6 ? 1 : 0 } }
+        });
+    }
+
+    matches.push({
+        id: 'upcoming-drawer-match',
+        status: 'SCHEDULED',
+        utcDate: '2026-10-18T12:00:00Z',
+        homeTeam: arsenal,
+        awayTeam: chelsea,
+        score: { fullTime: { home: null, away: null } },
+        venue: 'League Ground'
+    });
+    return { matches };
+}
+
 function diagnosticState(page) {
     const consoleErrors = [], pageErrors = [], failedRequests = [];
     page.on('console', message => {
@@ -281,6 +321,35 @@ test('browser handles upcoming matches and incomplete match details', async t =>
     assert.equal(await page.locator('.fixture-item').getAttribute('data-match-id'), 'upcoming-match-1');
     await page.evaluate(() => window.openMatchDrawer('missing-match'));
     await page.locator('#match-detail-content').getByText('Unable to load match details.').waitFor();
+    assert.equal(diagnostics.pageErrors.length, 0);
+    await context.close();
+});
+
+test('upcoming match drawer presents table, recent form, and ranked season stats', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const page = await context.newPage();
+    const diagnostics = diagnosticState(page);
+    await page.route('**/api/matches**', route => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(upcomingDrawerData())
+    }));
+    await page.goto(`${baseUrl}/hef.html`);
+    await page.locator('body.player-page-ready').waitFor();
+    await page.evaluate(() => window.openMatchDrawer('upcoming-drawer-match'));
+    await page.locator('.upcoming-stats-card').waitFor();
+
+    assert.equal(await page.locator('.upcoming-card').count(), 3);
+    assert.equal(await page.locator('.upcoming-table tbody tr').count(), 2);
+    assert.equal(await page.locator('.match-form-column').count(), 2);
+    assert.equal(await page.locator('.match-form-column').nth(0).locator('.match-form-result').count(), 5);
+    assert.equal(await page.locator('.match-form-column').nth(1).locator('.match-form-result').count(), 5);
+    assert.match(await page.locator('.match-form-column').nth(0).locator('.match-form-result').first().textContent(), /6 - 0/);
+    assert.match(await page.locator('.match-form-column').nth(1).locator('.match-form-result').first().textContent(), /0 - 6/);
+    assert.equal(await page.locator('.upcoming-stat-row').count(), 6);
+    assert.equal(await page.locator('.match-status, .match-scorers, .timeline, .lineups').count(), 0);
+    assert.equal(await page.locator('.match-form-columns').evaluate(element => getComputedStyle(element).display), 'grid');
     assert.equal(diagnostics.pageErrors.length, 0);
     await context.close();
 });

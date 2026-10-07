@@ -27,6 +27,7 @@
             style.textContent = `.match-drawer-overlay{position:fixed;inset:0;z-index:200;height:100vh;height:100dvh;display:flex;justify-content:flex-end;background:rgba(15,23,42,.48);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .25s ease,visibility 0s linear .25s}.match-drawer-overlay.is-open{opacity:1;visibility:visible;pointer-events:auto;transition-delay:0s}.match-drawer{width:min(100%,560px);height:100vh;height:100dvh;overflow-y:auto;background:var(--bg-color);box-shadow:-10px 0 35px rgba(0,0,0,.2);transform:translateX(100%);transition:transform .3s ease}.match-drawer-overlay.is-open .match-drawer{transform:translateX(0)}.match-drawer-header{position:sticky;top:0;z-index:1;display:flex;justify-content:center;align-items:center;min-height:50px;padding:8px 58px;background:var(--card-bg);border-bottom:1px solid var(--border-color)}.match-drawer-title{font-size:.9rem;font-weight:700;color:var(--text-muted);text-align:center}.match-drawer-close{position:absolute;right:18px;width:34px;height:34px;border:0;border-radius:50%;background:var(--border-color);color:var(--text-main);font-size:1.3rem;line-height:1;cursor:pointer}.match-detail-content{padding:18px}.match-hero,.match-detail-section{margin-bottom:14px;padding:18px;background:var(--card-bg);border:1px solid var(--border-color);border-radius:12px}.match-meta{color:var(--text-muted);font-size:.82rem;text-align:center}.match-venue{margin-top:5px;color:var(--text-muted);font-size:.78rem;text-align:center}.match-scoreline{display:grid;grid-template-columns:1fr 100px 1fr;align-items:center;gap:10px;margin:18px 0}.match-team{display:grid;justify-items:center;gap:6px;text-align:center;font-weight:700}.match-team img{width:48px;height:48px;object-fit:contain}.match-team-owner{color:var(--text-muted);font-size:.72rem;font-weight:500}.match-score{font-size:1.8rem;font-weight:800;text-align:center;color:var(--text-main)}.match-status{display:block;margin-top:2px;color:var(--text-muted);font-size:.72rem;font-weight:600;text-align:center}.match-scorers{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;padding-top:14px;border-top:1px dashed var(--border-color)}.match-scorer-column{display:flex;flex-direction:column;gap:3px;color:var(--text-muted);font-size:.78rem;line-height:1.25}.match-scorer-column.away{text-align:right}.match-scorer-empty,.empty-detail{color:var(--text-muted);opacity:.75}.match-detail-section h3{margin-bottom:16px;color:var(--text-main);font-size:.95rem;text-align:center}.stat-row{display:grid;grid-template-columns:54px 1fr 54px;align-items:center;gap:10px;margin:13px 0;font-size:.78rem}.stat-value{font-weight:700;color:var(--text-main);text-align:center}.stat-value.stat-leader{justify-self:center;padding:3px 8px;border-radius:999px;color:#fff}.stat-value.stat-leader-home{background:#3b82f6}.stat-value.stat-leader-away{background:#ef4444}.stat-label{grid-column:1/-1;order:-1;text-align:center;color:var(--text-muted)}.stat-bars{display:flex;height:8px;overflow:hidden;grid-column:2;grid-row:2;border-radius:99px;background:var(--border-color)}.stat-bar-home,.stat-bar-away{display:block;height:8px}.stat-bar-home{background:#3b82f6}.stat-bar-away{background:#ef4444}.timeline{display:grid;gap:14px;padding:4px 0}.timeline-event{display:flex;align-items:center;min-height:42px;width:100%;color:var(--text-main)}.timeline-event.home{justify-content:flex-start}.timeline-event.away{justify-content:flex-end}.timeline-event.home .event-copy{order:2;padding-left:10px;text-align:left}.timeline-event.away .event-copy{order:1;padding-right:10px;text-align:right}.event-minute{display:flex;align-items:center;justify-content:center;min-width:34px;height:34px;border-radius:50%;background:var(--border-color);color:var(--text-main);font-size:.7rem;font-weight:700}.timeline-event.home .event-minute{order:1}.timeline-event.away .event-minute{order:3}.event-copy{max-width:70%;font-size:.82rem;line-height:1.25}.event-main{display:flex;align-items:center;gap:6px;font-weight:600}.event-icon{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex:0 0 20px;border-radius:50%;background:var(--border-color);font-size:.72rem}.event-icon.goal{background:transparent}.event-icon.yellow,.event-icon.red{width:12px;height:17px;border-radius:2px}.event-icon.yellow{background:#facc15}.event-icon.red{background:#ef4444}.event-assist{margin-top:3px;color:var(--text-muted);font-size:.72rem}.event-sub-on{color:#16a37a}.event-sub-off{color:#d05a62}.timeline-period{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;min-height:30px;color:var(--text-main);font-size:.78rem;font-weight:800;text-align:center}.timeline-period>span:first-child,.timeline-period>span:last-child{height:1px;background:var(--border-color)}.timeline-period-label{padding:0 4px;background:var(--card-bg)}.lineups{display:grid;grid-template-columns:1fr 1fr;gap:16px}.lineup-team h4{margin-bottom:8px;color:var(--text-main);font-size:.82rem}.formation{margin-bottom:12px;color:var(--text-muted);font-size:.75rem}.lineup-group+ .lineup-group{margin-top:14px}.lineup-group h5{margin:0 0 5px;color:var(--text-muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.04em}.lineup-team ol{margin:0;padding-left:20px;color:var(--text-muted);font-size:.78rem;line-height:1.8}.lineup-position{color:var(--text-main);font-size:.68rem}body.drawer-open{overflow:hidden}@media(max-width:600px){.match-drawer-overlay{background:transparent}.match-drawer{width:100%}.match-detail-content{padding:12px}}`;
             style.textContent = style.textContent.replace(/height:100vh;height:100dvh;/g, '');
             style.textContent += '.match-drawer-overlay{height:auto}.match-drawer{height:100%}.match-drawer{background:var(--bg-color,#f4f6f8)}.match-drawer-header,.match-hero,.match-detail-section{background:var(--card-bg,#fff)}.match-drawer-header,.match-detail-section{border-color:var(--border-color,#dfe5eb)}.match-drawer-title,.match-score,.match-scorer,.match-detail-section h3,.lineup-team h4{color:var(--text-main,#1a1a1a)}.match-drawer-close,.match-drawer-back{background:var(--border-color,#dfe5eb);color:var(--text-main,#1a1a1a)}';
+            style.textContent += `.match-upcoming-scoreline{margin:8px 0 18px}.match-upcoming-date{display:grid;justify-items:center;gap:2px;text-align:center}.match-upcoming-weekday{color:var(--text-muted);font-size:.8rem;font-weight:600}.match-upcoming-month-day{color:var(--text-main);font-size:1rem;font-weight:700}.match-upcoming-kickoff{color:var(--text-main);font-size:1.35rem;font-weight:800;line-height:1.1;white-space:nowrap}.upcoming-table-scroll{overflow-x:auto}.upcoming-table{width:100%;min-width:440px;border-collapse:collapse;font-size:.76rem;text-align:center}.upcoming-table th,.upcoming-table td{padding:8px 5px;border-bottom:1px solid var(--border-color);white-space:nowrap}.upcoming-table th{color:var(--text-muted);font-size:.68rem;font-weight:700}.upcoming-table-team{display:flex;align-items:center;gap:7px;text-align:left;font-weight:600}.upcoming-table-team img{width:26px;height:26px;object-fit:contain}.match-form-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.match-form-column{min-width:0}.match-form-column h4{margin:0 0 10px;color:var(--text-main);font-size:.78rem;text-align:center}.match-form-results{display:grid;gap:9px}.match-form-result{display:grid;grid-template-columns:minmax(20px,1fr) auto minmax(20px,1fr);align-items:center;gap:5px}.match-form-crest{display:flex;align-items:center;justify-content:center;min-width:0}.match-form-crest img{width:25px;height:25px;object-fit:contain}.match-form-score{min-width:55px;padding:5px 4px;border-radius:6px;color:#fff;font-size:.76rem;font-weight:800;text-align:center;white-space:nowrap}.match-form-score-win{background:#00a667}.match-form-score-draw{background:#8a9298}.match-form-score-loss{background:#e53e3e}.match-form-no-crest{display:block;width:25px;height:25px}.match-form-empty{margin:0;font-size:.72rem;text-align:center}.upcoming-stat-row{grid-template-columns:minmax(74px,1fr) minmax(44px,2fr) minmax(74px,1fr)}.upcoming-stat-row .stat-value{font-size:.7rem;white-space:nowrap}.upcoming-stat-row .stat-label{font-size:.72rem}.stat-bars-neutral{background:var(--border-color)}.stat-bars-diverging{position:relative;overflow:hidden;background:transparent}.stat-gd-zero{position:absolute;top:0;bottom:0;left:calc(50% - .5px);width:1px;background:var(--border-color)}.stat-gd-bar{position:absolute;display:block;height:3px}.stat-gd-bar-home{top:1px;background:#3b82f6}.stat-gd-bar-away{bottom:1px;background:#ef4444}`;
             document.head.appendChild(style);
         }
     }
@@ -144,12 +145,224 @@
         return `<div class="match-scorers"><div class="match-scorer-column">${renderTeam(match.homeTeam.id || match.homeTeam.providerId)}</div><div class="match-scorer-column away">${renderTeam(match.awayTeam.id || match.awayTeam.providerId)}</div></div>`;
     }
 
-    window.renderSharedMatchDetail = function (match) {
+    function getSeasonTeamStats(matches) {
+        const teams = window.TeamNames?.teams || [];
+        const statsById = new Map(teams.map(team => [String(team.id), {
+            team,
+            PL: 0,
+            W: 0,
+            D: 0,
+            L: 0,
+            GF: 0,
+            GA: 0,
+            GD: 0,
+            PTS: 0,
+            yellowCards: 0,
+            redCards: 0
+        }]));
+        const statsByName = new Map(teams.flatMap(team => [
+            team.longName,
+            team.shortName,
+            ...(team.aliases || [])
+        ].filter(Boolean).map(name => [String(name).trim().toLowerCase(), statsById.get(String(team.id))])));
+        const resolveStats = team => {
+            const id = String(team?.id || team?.providerId || '');
+            const canonical = window.TeamNames?.resolve?.(team?.name, id);
+            return statsById.get(String(canonical?.id || id)) || statsByName.get(String(team?.name || '').trim().toLowerCase());
+        };
+
+        (matches || []).forEach(match => {
+            const homeScore = match.score?.fullTime?.home, awayScore = match.score?.fullTime?.away;
+            if (match.status !== 'FINISHED' || !Number.isFinite(homeScore) || !Number.isFinite(awayScore)) return;
+            const home = resolveStats(match.homeTeam), away = resolveStats(match.awayTeam);
+            const sideStats = { home, away };
+            const scores = { home: homeScore, away: awayScore };
+            const events = Array.isArray(match.events) ? match.events : [];
+
+            ['home', 'away'].forEach(side => {
+                const teamStats = sideStats[side], opponentSide = side === 'home' ? 'away' : 'home';
+                if (!teamStats) return;
+                const goalsFor = scores[side], goalsAgainst = scores[opponentSide];
+                teamStats.PL += 1;
+                teamStats.GF += goalsFor;
+                teamStats.GA += goalsAgainst;
+                if (goalsFor > goalsAgainst) { teamStats.W += 1; teamStats.PTS += 3; }
+                else if (goalsFor === goalsAgainst) { teamStats.D += 1; teamStats.PTS += 1; }
+                else teamStats.L += 1;
+
+                const cardCounts = match.teamCards?.[side] || {};
+                const providerId = String(match[`${side}Team`]?.id || match[`${side}Team`]?.providerId || '');
+                const cardEvents = events.filter(event => String(event.teamProviderId || '') === providerId);
+                teamStats.yellowCards += Math.max(
+                    Number(cardCounts.yellow) || 0,
+                    cardEvents.filter(event => event.yellowCard).length
+                );
+                teamStats.redCards += Math.max(
+                    Number(cardCounts.red) || 0,
+                    cardEvents.filter(event => event.redCard).length
+                );
+            });
+        });
+
+        statsById.forEach(teamStats => { teamStats.GD = teamStats.GF - teamStats.GA; });
+        return [...statsById.values()];
+    }
+
+    function findTeamStats(team, allStats) {
+        const id = String(team?.id || team?.providerId || '');
+        const canonical = window.TeamNames?.resolve?.(team?.name, id);
+        return allStats.find(item => String(item.team.id) === String(canonical?.id || id))
+            || allStats.find(item => [item.team.longName, item.team.shortName, ...(item.team.aliases || [])]
+                .some(name => String(name).trim().toLowerCase() === String(team?.name || '').trim().toLowerCase()));
+    }
+
+    function isSameTeam(left, right) {
+        const leftId = String(left?.id || left?.providerId || ''), rightId = String(right?.id || right?.providerId || '');
+        if (leftId && rightId) return leftId === rightId;
+        return String(left?.name || '').trim().toLowerCase() === String(right?.name || '').trim().toLowerCase();
+    }
+
+    function rankTeams(allStats, getValue, higherIsBetter) {
+        const ranked = allStats
+            .map(item => ({ item, value: getValue(item) }))
+            .filter(entry => Number.isFinite(entry.value))
+            .sort((left, right) => (higherIsBetter ? right.value - left.value : left.value - right.value)
+                || left.item.team.longName.localeCompare(right.item.team.longName));
+        const ranks = new Map();
+        ranked.forEach((entry, index) => {
+            const previous = ranked[index - 1];
+            ranks.set(entry.item, previous && entry.value === previous.value ? ranks.get(previous.item) : index + 1);
+        });
+        return ranks;
+    }
+
+    function renderTableCard(match, allStats) {
+        const rankedTeams = [...allStats].sort((left, right) => right.PTS - left.PTS || right.GD - left.GD || right.GF - left.GF || left.team.longName.localeCompare(right.team.longName));
+        const positions = new Map(rankedTeams.map((team, index) => [team, index + 1]));
+        const selected = [findTeamStats(match.homeTeam, allStats), findTeamStats(match.awayTeam, allStats)]
+            .filter(Boolean)
+            .sort((left, right) => (positions.get(left) || Infinity) - (positions.get(right) || Infinity));
+        const rows = selected.map(teamStats => {
+            const team = teamStats.team;
+            const goals = `${teamStats.GF}-${teamStats.GA}`;
+            const difference = teamStats.GD > 0 ? `+${teamStats.GD}` : String(teamStats.GD);
+            return `<tr><td>${positions.get(teamStats) || '-'}</td><td class="upcoming-table-team">${team.crest ? `<img src="${escapeHtml(team.crest)}" alt="">` : ''}<span>${escapeHtml(team.longName)}</span></td><td>${teamStats.PL}</td><td>${teamStats.W}</td><td>${teamStats.D}</td><td>${teamStats.L}</td><td>${goals}</td><td>${difference}</td><td>${teamStats.PTS}</td></tr>`;
+        }).join('');
+
+        return `<section class="match-detail-section upcoming-card upcoming-table-card"><h3>Table</h3><div class="upcoming-table-scroll"><table class="upcoming-table"><thead><tr><th aria-label="Position">#</th><th>Team</th><th>PL</th><th>W</th><th>D</th><th>L</th><th>+/-</th><th>GD</th><th>PTS</th></tr></thead><tbody>${rows || '<tr><td colspan="9" class="empty-detail">Table data is unavailable.</td></tr>'}</tbody></table></div></section>`;
+    }
+
+    function getMatchResult(match, team) {
+        const homeScore = match.score.fullTime.home, awayScore = match.score.fullTime.away;
+        const isHome = isSameTeam(match.homeTeam, team);
+        const teamScore = isHome ? homeScore : awayScore, opponentScore = isHome ? awayScore : homeScore;
+        return teamScore > opponentScore ? 'win' : teamScore === opponentScore ? 'draw' : 'loss';
+    }
+
+    function formCrest(team) {
+        const crest = window.TeamNames?.crest?.(team.name, team.id || team.providerId) || team.crest;
+        return crest
+            ? `<img src="${escapeHtml(crest)}" alt="${escapeHtml(team.name)}" title="${escapeHtml(team.name)}">`
+            : '<span class="match-form-no-crest" aria-hidden="true"></span>';
+    }
+
+    function renderFormMatch(match, team) {
+        const result = getMatchResult(match, team);
+        const home = match.homeTeam, away = match.awayTeam;
+        return `<div class="match-form-result ${result}" aria-label="${escapeHtml(home.name)} ${match.score.fullTime.home}, ${escapeHtml(away.name)} ${match.score.fullTime.away}"><span class="match-form-crest">${formCrest(home)}</span><span class="match-form-score match-form-score-${result}">${match.score.fullTime.home} - ${match.score.fullTime.away}</span><span class="match-form-crest">${formCrest(away)}</span></div>`;
+    }
+
+    function renderTeamFormColumn(team, matches, beforeDate) {
+        const recentMatches = matches
+            .filter(match => match.status === 'FINISHED'
+                && new Date(match.utcDate) < beforeDate
+                && Number.isFinite(match.score?.fullTime?.home)
+                && Number.isFinite(match.score?.fullTime?.away)
+                && (isSameTeam(match.homeTeam, team) || isSameTeam(match.awayTeam, team)))
+            .sort((left, right) => new Date(right.utcDate) - new Date(left.utcDate))
+            .slice(0, 5);
+        const title = escapeHtml(window.TeamNames?.shortName?.(team.name, team.id || team.providerId) || team.name);
+        const rows = recentMatches.length
+            ? recentMatches.map(match => renderFormMatch(match, team)).join('')
+            : '<p class="empty-detail match-form-empty">No previous results.</p>';
+        return `<div class="match-form-column"><h4>${title}</h4><div class="match-form-results">${rows}</div></div>`;
+    }
+
+    function renderFormCard(match, matches, beforeDate) {
+        return `<section class="match-detail-section upcoming-card upcoming-form-card"><h3>Team form</h3><div class="match-form-columns">${renderTeamFormColumn(match.homeTeam, matches, beforeDate)}${renderTeamFormColumn(match.awayTeam, matches, beforeDate)}</div></section>`;
+    }
+
+    function formatMetric(value, decimals = 0) {
+        return Number.isFinite(value)
+            ? new Intl.NumberFormat(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(value)
+            : '—';
+    }
+
+    function renderStatBar(homeValue, awayValue, category) {
+        if (category === 'goalDifference') {
+            const maxAbsolute = Math.max(Math.abs(homeValue || 0), Math.abs(awayValue || 0));
+            const renderTeamBar = (value, side) => {
+                const width = maxAbsolute ? Math.abs(value) / maxAbsolute * 50 : 0;
+                const left = value < 0 ? 50 - width : 50;
+                return `<span class="stat-gd-bar stat-gd-bar-${side}" style="left:${left}%;width:${width}%"></span>`;
+            };
+            return `<span class="stat-bars stat-bars-diverging" aria-hidden="true"><span class="stat-gd-zero"></span>${renderTeamBar(homeValue || 0, 'home')}${renderTeamBar(awayValue || 0, 'away')}</span>`;
+        }
+
+        const total = homeValue + awayValue;
+        if (!total) return '<span class="stat-bars stat-bars-neutral" aria-hidden="true"></span>';
+        const homeWidth = homeValue / total * 100;
+        return `<span class="stat-bars" aria-hidden="true"><span class="stat-bar-home" style="width:${homeWidth}%"></span><span class="stat-bar-away" style="width:${100 - homeWidth}%"></span></span>`;
+    }
+
+    function renderSeasonStatsCard(match, allStats) {
+        const homeStats = findTeamStats(match.homeTeam, allStats), awayStats = findTeamStats(match.awayTeam, allStats);
+        if (!homeStats || !awayStats) return '<section class="match-detail-section upcoming-card"><h3>Stats</h3><p class="empty-detail">Season stats are unavailable.</p></section>';
+        const definitions = [
+            ['Pts per match', 'pointsPerMatch', item => item.PL ? item.PTS / item.PL : null, true, 2],
+            ['Goals per match', 'goalsPerMatch', item => item.PL ? item.GF / item.PL : null, true, 2],
+            ['Goals conceded per match', 'goalsConcededPerMatch', item => item.PL ? item.GA / item.PL : null, false, 2],
+            ['Goal Differential', 'goalDifference', item => item.GD, true, 0],
+            ['Yellow Cards', 'yellowCards', item => item.yellowCards, false, 0],
+            ['Red Cards', 'redCards', item => item.redCards, false, 0]
+        ];
+        const valuesByKey = new Map(definitions.map(([, key, getValue]) => [key, {
+            home: getValue(homeStats),
+            away: getValue(awayStats)
+        }]));
+        const ranksByKey = new Map(definitions.map(([, key, getValue, higherIsBetter]) => [
+            key,
+            rankTeams(allStats, getValue, higherIsBetter)
+        ]));
+        const rows = definitions.map(([label, key, , , decimals]) => {
+            const values = valuesByKey.get(key), ranks = ranksByKey.get(key);
+            const rankLabel = (team, value) => Number.isFinite(value) ? ` (#${ranks.get(team)})` : '';
+            const homeDisplay = Number.isFinite(values.home) ? `${formatMetric(values.home, decimals)}${rankLabel(homeStats, values.home)}` : '—';
+            const awayDisplay = Number.isFinite(values.away) ? `${formatMetric(values.away, decimals)}${rankLabel(awayStats, values.away)}` : '—';
+            return `<div class="stat-row upcoming-stat-row"><span class="stat-value">${escapeHtml(homeDisplay)}</span><span class="stat-label">${escapeHtml(label)}</span><span class="stat-value">${escapeHtml(awayDisplay)}</span>${renderStatBar(values.home || 0, values.away || 0, key)}</div>`;
+        }).join('');
+        return `<section class="match-detail-section upcoming-card upcoming-stats-card"><h3>Stats</h3>${rows}</section>`;
+    }
+
+    function renderUpcomingMatchDetail(match, matches, renderTeam) {
+        const date = new Date(match.utcDate);
+        const weekday = date.toLocaleDateString([], { weekday: 'long' });
+        const monthDay = date.toLocaleDateString([], { month: 'long', day: 'numeric' });
+        const kickoff = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+        const allStats = getSeasonTeamStats(matches);
+        const hero = `<section class="match-hero"><div class="match-scoreline match-upcoming-scoreline">${renderTeam(match.homeTeam)}<div class="match-upcoming-date"><span class="match-upcoming-weekday">${escapeHtml(weekday)}</span><span class="match-upcoming-month-day">${escapeHtml(monthDay)}</span><span class="match-upcoming-kickoff">${escapeHtml(kickoff)}</span></div>${renderTeam(match.awayTeam)}</div><div class="match-venue">${escapeHtml(match.venue || 'Venue unavailable')}</div></section>`;
+        return `${hero}${renderTableCard(match, allStats)}${renderFormCard(match, matches, date)}${renderSeasonStatsCard(match, allStats)}`;
+    }
+
+    window.renderSharedMatchDetail = function (match, matches = []) {
         const home = match.homeTeam, away = match.awayTeam, score = match.score?.fullTime?.home == null ? 'vs' : `${match.score.fullTime.home} - ${match.score.fullTime.away}`;
         const status = match.status === 'FINISHED' ? 'Full time' : match.status === 'IN_PLAY' ? `${match.minute || 'Live'}'` : match.status === 'PAUSED' ? 'Half time' : 'Upcoming';
         const renderTeam = team => typeof window.openTeamDrawerFromMatch === 'function'
             ? `<div class="match-team match-team-link" role="button" tabindex="0" aria-label="View ${escapeHtml(team.name)} details" onclick="openTeamDrawerFromMatch('${escapeHtml(team.name)}')" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openTeamDrawerFromMatch('${escapeHtml(team.name)}'); }"><span>${escapeHtml(team.name)}</span>${team.crest ? `<img src="${escapeHtml(team.crest)}" alt="">` : ''}<span class="match-team-owner">${escapeHtml(getOwner(team.name))}</span></div>`
             : `<div class="match-team"><span>${escapeHtml(team.name)}</span>${team.crest ? `<img src="${escapeHtml(team.crest)}" alt="">` : ''}<span class="match-team-owner">${escapeHtml(getOwner(team.name))}</span></div>`;
+        if (!['FINISHED', 'IN_PLAY', 'PAUSED'].includes(match.status)) {
+            return renderUpcomingMatchDetail(match, matches, renderTeam);
+        }
         return `<section class="match-hero"><div class="match-meta">${escapeHtml(formatDate(match.utcDate))}</div><div class="match-scoreline">${renderTeam(home)}<div class="match-score">${escapeHtml(score)}<span class="match-status">${escapeHtml(status)}</span></div>${renderTeam(away)}</div><div class="match-venue">${escapeHtml(match.venue || 'Venue unavailable')}</div>${renderScorers(match)}</section><section class="match-detail-section"><h3>Match Stats</h3>${renderStats(match)}</section><section class="match-detail-section"><h3>Match Events</h3>${renderEvents(match)}</section><section class="match-detail-section"><h3>Lineups</h3>${renderLineups(match)}</section>`;
     };
 
@@ -169,7 +382,7 @@
                 }
             } catch (error) { console.warn('Optional ESPN match details unavailable:', error); }
         }
-        return match;
+        return { match, matches: data.matches || [] };
     };
 
     window.openSharedMatchDrawer = async function (matchId, options = {}) {
@@ -199,7 +412,10 @@
         document.getElementById('match-drawer-title').textContent = 'Match details';
         drawer.scrollTop = 0; overlay.classList.add('is-open'); overlay.setAttribute('aria-hidden', 'false'); document.body.classList.add('drawer-open'); content.innerHTML = '<p class="empty-detail">Loading match details...</p>';
         focusDrawer();
-        try { content.innerHTML = window.renderSharedMatchDetail(await window.fetchSharedMatchById(matchId)); }
+        try {
+            const { match, matches } = await window.fetchSharedMatchById(matchId);
+            content.innerHTML = window.renderSharedMatchDetail(match, matches);
+        }
         catch (error) { console.error('Error fetching match details:', error); content.innerHTML = '<p class="empty-detail">Unable to load match details.</p>'; }
     };
 

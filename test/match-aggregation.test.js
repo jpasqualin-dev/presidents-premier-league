@@ -15,12 +15,13 @@ const baseMatch = {
     score: { fullTime: { home: 2, away: 1 }, halfTime: { home: 1, away: 0 } },
     scorers: [{ athleteName: 'Existing scorer' }],
     events: [{ eventType: 'Yellow Card' }],
+    teamCards: { home: { yellow: 1, red: 0 }, away: { yellow: 0, red: 0 } },
     teamStats: [{ teamProviderId: 'home', name: 'possessionPct', value: 55 }]
 };
 
 test('completed match wins over live data without losing populated details', () => {
     const [match] = mergeMatches([
-        { ...baseMatch, status: 'FINISHED', score: { fullTime: { home: 3, away: 1 }, halfTime: { home: 1, away: 0 } } },
+        { ...baseMatch, status: 'FINISHED', score: { fullTime: { home: 3, away: 1 }, halfTime: { home: 1, away: 0 } }, teamCards: { home: { yellow: 2, red: 1 }, away: { yellow: 0, red: 0 } } },
         { ...baseMatch, status: 'IN_PLAY', score: { fullTime: { home: 2, away: 1 }, halfTime: { home: 1, away: 0 } }, scorers: [], events: [], teamStats: [] }
     ]);
 
@@ -29,6 +30,7 @@ test('completed match wins over live data without losing populated details', () 
     assert.equal(match.scorers.length, 1);
     assert.equal(match.events.length, 1);
     assert.equal(match.teamStats.length, 1);
+    assert.deepEqual(match.teamCards, { home: { yellow: 2, red: 1 }, away: { yellow: 0, red: 0 } });
 });
 
 test('deduplicates provider records and preserves zero scores', () => {
@@ -43,12 +45,17 @@ test('deduplicates provider records and preserves zero scores', () => {
             competitors: [
                 { homeAway: 'home', team: { id: 'home', displayName: 'Home' }, score: 0 },
                 { homeAway: 'away', team: { id: 'away', displayName: 'Away' }, score: 0 }
+            ],
+            details: [
+                { team: { id: 'home' }, yellowCard: true },
+                { team: { id: 'away' }, redCard: true }
             ]
         }]
     });
     assert.equal(match.status, 'FINISHED');
     assert.equal(match.score.fullTime.home, 0);
     assert.equal(match.score.fullTime.away, 0);
+    assert.deepEqual(match.teamCards, { home: { yellow: 1, red: 0 }, away: { yellow: 0, red: 1 } });
 });
 
 test('normalizes approved long team names from ESPN and Neon records', () => {
@@ -70,10 +77,12 @@ test('normalizes approved long team names from ESPN and Neon records', () => {
         provider: 'espn', provider_event_id: '4', kickoff_at: '2026-09-19T12:00:00Z',
         status_state: 'post', status_completed: true, home_provider_id: '349', home_name: 'Bournemouth',
         away_provider_id: '367', away_name: 'Tottenham', home_score: 0, away_score: 0,
+        home_yellow_cards: '2', home_red_cards: '1', away_yellow_cards: '0', away_red_cards: '0',
         scorers: [], events: [], team_stats: []
     });
     assert.equal(neonMatch.homeTeam.name, 'AFC Bournemouth');
     assert.equal(neonMatch.awayTeam.name, 'Tottenham Hotspur');
+    assert.deepEqual(neonMatch.teamCards, { home: { yellow: 2, red: 1 }, away: { yellow: 0, red: 0 } });
 });
 
 test('repairs the Brentford-Chelsea result when ESPN no longer serves the event', () => {

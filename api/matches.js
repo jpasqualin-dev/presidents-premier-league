@@ -131,11 +131,24 @@ async function readHistoricalMatches(sql, includeDetails = false) {
                 JOIN teams stats_team ON stats_team.id = mts.team_id
                 WHERE mts.match_id = m.id
             ), '[]'::json) ELSE '[]'::json END AS team_stats
+            , card_counts.home_yellow_cards
+            , card_counts.home_red_cards
+            , card_counts.away_yellow_cards
+            , card_counts.away_red_cards
         FROM matches m
         JOIN teams home ON home.id = m.home_team_id
         JOIN teams away ON away.id = m.away_team_id
+        LEFT JOIN LATERAL (
+            SELECT
+                COUNT(*) FILTER (WHERE me.team_id = m.home_team_id AND me.yellow_card) AS home_yellow_cards,
+                COUNT(*) FILTER (WHERE me.team_id = m.home_team_id AND me.red_card) AS home_red_cards,
+                COUNT(*) FILTER (WHERE me.team_id = m.away_team_id AND me.yellow_card) AS away_yellow_cards,
+                COUNT(*) FILTER (WHERE me.team_id = m.away_team_id AND me.red_card) AS away_red_cards
+            FROM match_events me
+            WHERE me.match_id = m.id
+        ) card_counts ON TRUE
         WHERE m.season = '2026'
-        GROUP BY m.id, home.id, away.id
+        GROUP BY m.id, home.id, away.id, card_counts.home_yellow_cards, card_counts.home_red_cards, card_counts.away_yellow_cards, card_counts.away_red_cards
         ORDER BY m.kickoff_at ASC`;
 
     return rows.map(normalizeNeonMatch);
