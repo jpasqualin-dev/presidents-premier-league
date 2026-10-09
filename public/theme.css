@@ -190,10 +190,6 @@ body.dark-mode .close-icon {
     }
 }
 
-body.dark-mode img[src$="/367.png"] {
-    filter: drop-shadow(1px 0 0 #ffffff) drop-shadow(-1px 0 0 #ffffff) drop-shadow(0 1px 0 #ffffff) drop-shadow(0 -1px 0 #ffffff);
-}
-
 .header-container .theme-toggle {
     align-self: stretch;
 }
