@@ -840,6 +840,7 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.equal(await page.locator('#last-week-card .fixture-item').count(), 2);
     assert.equal(await page.locator('#highest-scoring-week').textContent(), '3 PTS (Week 5)');
     assert.equal(await page.locator('#lowest-scoring-week').textContent(), '3 PTS (Week 5)');
+    assert.deepEqual(await page.locator('.scoring-label').allTextContents(), ['Highest Scoring Week(s)', 'Lowest Scoring Week(s)', 'Average Weekly Score']);
     assert.equal(await page.locator('#average-weekly-score').textContent(), '3.0 PTS (Rank 2)');
     assert.equal(await page.locator('#total-pts').textContent(), '3');
     assert.equal(await page.locator('#player-rank').textContent(), 'Rank 2');
@@ -854,6 +855,13 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.equal(await page.locator('#panel-h2h .table-column-head').count(), 0);
     assert.equal(await page.locator('.h2h-card').evaluate(element => getComputedStyle(element).borderRadius), '16px');
     assert.equal(await page.locator('#h2h-title').textContent(), 'Head to Head');
+    assert.deepEqual(await page.locator('.h2h-table tbody tr:first-child td, .scoring-table tbody tr:first-child td').evaluateAll(cells => cells.map(cell => ({ left: getComputedStyle(cell).paddingLeft, right: getComputedStyle(cell).paddingRight }))), [
+        { left: '10px', right: '10px' },
+        { left: '10px', right: '10px' },
+        { left: '10px', right: '10px' },
+        { left: '10px', right: '10px' },
+        { left: '10px', right: '10px' }
+    ]);
     const h2hTitleRows = await page.locator('.h2h-table, .scoring-table').evaluateAll(tables => tables.map(table => {
         const titleCell = table.querySelector('.title-row th');
         const style = getComputedStyle(titleCell);
