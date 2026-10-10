@@ -129,6 +129,9 @@ test('upcoming match renders date, two-team form, table rows, and ranked season 
         assert.match(row, /class="stat-bar-home" style="width:45\.94594594594595%"/);
         assert.match(row, /class="stat-bar-away" style="width:54\.05405405405405%"/);
     });
+    assert.match(cardRows.find(row => row.includes('Yellow Cards')), /<span class="stat-value">6 \(#4\)<\/span>[\s\S]*?<span class="stat-value stat-leader stat-leader-away">0 \(#1\)<\/span>/);
+    assert.match(cardRows.find(row => row.includes('Red Cards')), /<span class="stat-value stat-leader stat-leader-away">0 \(#1\)<\/span>/);
+    assert.match(cardRows.find(row => row.includes('Pts per match')), /<span class="stat-value stat-leader stat-leader-home">/);
 });
 
 test('equal league goal differentials produce an even head-to-head split', () => {
@@ -146,6 +149,7 @@ test('equal league goal differentials produce an even head-to-head split', () =>
         .find(([, row]) => row.includes('Goal Differential'))?.[0] || '';
 
     assert.equal((goalDifferenceRow.match(/width:50%/g) || []).length, 2);
+    assert.doesNotMatch(goalDifferenceRow, /stat-leader/);
 });
 
 test('live and completed matches retain their existing detail cards', () => {

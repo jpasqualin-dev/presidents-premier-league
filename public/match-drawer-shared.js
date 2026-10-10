@@ -352,13 +352,17 @@
             key,
             rankTeams(allStats, getValue, higherIsBetter)
         ]));
-        const rows = definitions.map(([label, key, , , decimals]) => {
+        const rows = definitions.map(([label, key, , higherIsBetter, decimals]) => {
             const values = valuesByKey.get(key), ranks = ranksByKey.get(key);
             const rankLabel = (team, value) => Number.isFinite(value) ? ` (#${ranks.get(team)})` : '';
             const formatValue = value => key === 'goalDifference' ? formatSignedMetric(value) : formatMetric(value, decimals);
             const homeDisplay = Number.isFinite(values.home) ? `${formatValue(values.home)}${rankLabel(homeStats, values.home)}` : '—';
             const awayDisplay = Number.isFinite(values.away) ? `${formatValue(values.away)}${rankLabel(awayStats, values.away)}` : '—';
-            return `<div class="stat-row upcoming-stat-row"><span class="stat-value">${escapeHtml(homeDisplay)}</span><span class="stat-label">${escapeHtml(label)}</span><span class="stat-value">${escapeHtml(awayDisplay)}</span>${renderStatBar(values.home || 0, values.away || 0, key, allStats, ranks, homeStats, awayStats)}</div>`;
+            const hasWinner = Number.isFinite(values.home) && Number.isFinite(values.away) && values.home !== values.away;
+            const homeIsBetter = hasWinner && (higherIsBetter ? values.home > values.away : values.home < values.away);
+            const awayIsBetter = hasWinner && (higherIsBetter ? values.away > values.home : values.away < values.home);
+            const valueClass = (isBetter, side) => isBetter ? ` stat-leader stat-leader-${side}` : '';
+            return `<div class="stat-row upcoming-stat-row"><span class="stat-value${valueClass(homeIsBetter, 'home')}">${escapeHtml(homeDisplay)}</span><span class="stat-label">${escapeHtml(label)}</span><span class="stat-value${valueClass(awayIsBetter, 'away')}">${escapeHtml(awayDisplay)}</span>${renderStatBar(values.home || 0, values.away || 0, key, allStats, ranks, homeStats, awayStats)}</div>`;
         }).join('');
         return `<section class="match-detail-section upcoming-card upcoming-stats-card"><h3>Stats</h3>${rows}</section>`;
     }
