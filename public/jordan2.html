@@ -640,7 +640,9 @@
                 const pointsText = `<span class="profile-card-team-points-label">PTS</span><span class="profile-card-team-points-value">${pointsValue}</span>`;
                 if (pointsBadge.innerHTML !== pointsText) pointsBadge.innerHTML = pointsText;
             });
-            document.getElementById('player-rank').textContent = `Rank ${getPlayerRank(matches)}`;
+            const rankText = `Rank ${getPlayerRank(matches)}`;
+            const rankLabel = document.getElementById('player-rank');
+            if (rankLabel.textContent !== rankText) rankLabel.textContent = rankText;
         };
 
         const getWeeklyScores = (teams, matches) => {

@@ -842,6 +842,8 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.equal(await page.locator('#lowest-scoring-week').textContent(), '3 PTS (Week 5)');
     assert.equal(await page.locator('#average-weekly-score').textContent(), '3.0 PTS (Rank 2)');
     assert.equal(await page.locator('#total-pts').textContent(), '3');
+    assert.equal(await page.locator('#player-rank').textContent(), 'Rank 2');
+    assert.equal(await page.locator('#player-rank').evaluate(element => getComputedStyle(element).fontSize), await page.locator('.points-badge .label').first().evaluate(element => getComputedStyle(element).fontSize));
     assert.equal(await page.locator('#head-to-head-details').isVisible(), false);
     await page.locator('#tab-h2h').click();
     assert.equal(await page.locator('#tab-h2h').getAttribute('aria-selected'), 'true');
