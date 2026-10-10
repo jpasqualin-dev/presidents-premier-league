@@ -161,6 +161,34 @@ test.after(async () => {
     await new Promise(resolve => server?.close(resolve));
 });
 
+test('stats page renders available totals when scorer data does not reconcile', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    const diagnostics = diagnosticState(page);
+    await page.route('**/api/matches**', route => {
+        const includeDetails = new URL(route.request().url()).searchParams.get('details') === '1';
+        const data = includeDetails ? detailedFixtureData() : fixtureData();
+        if (includeDetails) {
+            data.dataQuality.scoringComplete = false;
+            data.matches[0].scorers.pop();
+        }
+        return route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(data)
+        });
+    });
+
+    await page.goto(`${baseUrl}/stats.html`);
+    await page.locator('#season-awards-container [role="alert"]')
+        .filter({ hasText: 'Scorer totals do not reconcile' }).waitFor();
+    assert.equal(await page.locator('#individual-stats-container .individual-stat-card').count(), 3);
+    assert.equal(await page.locator('#season-awards-container').getByText('Unable to load season awards.').count(), 0);
+    assert.deepEqual(diagnostics.pageErrors, []);
+    await context.close();
+});
+
 test('overall Form rows align with division Form and keep highlighted PTS cells', async t => {
     if (browserError) return t.skip('Chromium runtime unavailable');
     for (const view of [viewports[2], viewports[1]]) {

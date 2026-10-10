@@ -124,13 +124,20 @@
         const freshnessNotice = dataFreshness
             ? `<section class="team-drawer-card"><p class="empty-detail" role="status">${escape(dataFreshness)}</p></section>`
             : '';
+        const dataWarnings = [];
+        if (playerStatsStatus?.historicalAvailable === false) dataWarnings.push('Historical match data is unavailable; these totals may cover only recent matches.');
+        else if (playerStatsStatus?.detailsComplete === false) dataWarnings.push('Some match details are unavailable; these totals may be incomplete.');
+        if (playerStatsStatus?.scoringComplete === false) dataWarnings.push('Scorer totals do not reconcile with finished-match scores; player totals may be incomplete.');
+        const qualityNotice = dataWarnings.length
+            ? `<section class="team-drawer-card"><p class="empty-detail" role="alert">${dataWarnings.map(escape).join(' ')}</p></section>`
+            : '';
         const players = buildPlayerStats(matches, teamName);
         const configs = [
             { title: 'Goal involvements', value: player => player.goals + player.assists },
             { title: 'Goals', value: player => player.goals },
             { title: 'Assists', value: player => player.assists }
         ];
-            return freshnessNotice + configs.map(config => {
+            return freshnessNotice + qualityNotice + configs.map(config => {
             const rankedPlayers = players
                 .filter(player => config.value(player) > 0)
                 .sort((a, b) => config.value(b) - config.value(a) || a.name.localeCompare(b.name));

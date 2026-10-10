@@ -1183,6 +1183,23 @@
             });
 
             renderSeasonAwards(playerStats, teamStats, goalScorers);
+            const quality = data.dataQuality;
+            const dataWarnings = [];
+            if (quality?.historicalAvailable === false) {
+                dataWarnings.push('Historical match data is unavailable; these totals may cover only recent matches.');
+            } else if (quality?.detailsComplete === false) {
+                dataWarnings.push('Some match details are unavailable; these totals may be incomplete.');
+            }
+            if (quality?.scoringComplete === false) {
+                dataWarnings.push('Scorer totals do not reconcile with finished-match scores; player totals may be incomplete.');
+            }
+            if (dataWarnings.length) {
+                const warning = document.createElement('div');
+                warning.className = 'loading-state';
+                warning.setAttribute('role', 'alert');
+                warning.textContent = dataWarnings.join(' ');
+                document.getElementById('season-awards-container').prepend(warning);
+            }
 
         } catch (error) {
             console.error("Error fetching match data:", error);

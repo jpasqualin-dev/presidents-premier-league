@@ -119,8 +119,10 @@ test('match response quality distinguishes complete details from summary or miss
     });
     assert.equal(buildDataQuality(false, true, [detailedMatch], [detailedMatch], true).detailsComplete, false);
     assert.equal(buildDataQuality(true, false, [], [detailedMatch], true).detailsComplete, false);
-    assert.equal(buildDataQuality(true, true, [detailedMatch], [{
+    const scoringMismatch = buildDataQuality(true, true, [detailedMatch], [{
         ...detailedMatch,
         score: { fullTime: { home: 2, away: 1 } }
-    }], true).detailsComplete, false);
+    }], true);
+    assert.equal(scoringMismatch.detailsComplete, true);
+    assert.equal(scoringMismatch.scoringComplete, false);
 });

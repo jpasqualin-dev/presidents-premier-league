@@ -23,22 +23,15 @@
     const normalizeData = data => window.TeamNames
         ? { ...data, matches: (data?.matches || []).map(window.TeamNames.normalizeMatch) }
         : data;
-    const hasCompleteDetails = data => data?.dataQuality?.detailLevel === 'full'
-        && data.dataQuality.detailsComplete === true
-        && data.dataQuality.scoringComplete === true
-        && data.dataQuality.historicalAvailable === true
+    const hasDetailedMatchShape = data => data?.dataQuality?.detailLevel === 'full'
         && Array.isArray(data.matches)
         && data.matches.length > 0
         && data.matches.every(match => Array.isArray(match.scorers)
             && Array.isArray(match.events)
             && Array.isArray(match.teamStats)
             && match.teamCards
-            && typeof match.teamCards === 'object'
-            && (match.status !== 'FINISHED'
-                || Number.isFinite(match.score?.fullTime?.home)
-                    && Number.isFinite(match.score?.fullTime?.away)
-                    && match.scorers.length === match.score.fullTime.home + match.score.fullTime.away));
-    const isUsableData = (data, includeDetails) => !includeDetails || hasCompleteDetails(data);
+            && typeof match.teamCards === 'object');
+    const isUsableData = (data, includeDetails) => !includeDetails || hasDetailedMatchShape(data);
 
     const cacheKeys = includeDetails => ({
         data: includeDetails ? `${config.cacheKey}_details` : config.cacheKey,

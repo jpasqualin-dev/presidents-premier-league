@@ -58,23 +58,14 @@
 
         detailedMatchesPromise ||= window.getMatchData({ includeDetails: true })
             .then(data => {
-                if (data?.dataQuality?.historicalAvailable !== true) {
-                    throw new Error('Season history is unavailable, so full-season stats cannot be verified.');
-                }
                 if (data?.dataQuality?.detailLevel !== 'full'
-                    || data.dataQuality.detailsComplete !== true
-                    || data.dataQuality.scoringComplete !== true
                     || !Array.isArray(data.matches)
                     || data.matches.length === 0
                     || !data.matches.every(match => Array.isArray(match.scorers)
                         && Array.isArray(match.events)
                         && Array.isArray(match.teamStats)
                         && match.teamCards
-                        && typeof match.teamCards === 'object'
-                        && (match.status !== 'FINISHED'
-                            || Number.isFinite(match.score?.fullTime?.home)
-                                && Number.isFinite(match.score?.fullTime?.away)
-                                && match.scorers.length === match.score.fullTime.home + match.score.fullTime.away))) {
+                        && typeof match.teamCards === 'object')) {
                     throw new Error('Detailed season match data is incomplete.');
                 }
                 detailedMatches = data.matches;

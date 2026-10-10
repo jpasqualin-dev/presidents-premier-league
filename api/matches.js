@@ -66,7 +66,6 @@ function buildDataQuality(includeDetails, historicalAvailable, historicalMatches
         includeDetails
         && historicalAvailable
         && historicalMatches.length > 0
-        && scoringComplete
         && matches.every(match => Array.isArray(match.scorers)
             && Array.isArray(match.events)
             && Array.isArray(match.teamStats)
