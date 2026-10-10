@@ -851,11 +851,9 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.equal(await page.locator('#panel-teams').isVisible(), false);
     assert.equal(await page.locator('.h2h-card').isVisible(), true);
     assert.equal(await page.locator('.scoring-card').isVisible(), true);
-    assert.deepEqual(await page.locator('.h2h-column-head span').allTextContents(), ['Opponent', 'W-D-L', 'PTS']);
-    assert.deepEqual(await page.locator('.scoring-column-head span').allTextContents(), ['Measure', 'Value']);
+    assert.equal(await page.locator('#panel-h2h .table-column-head').count(), 0);
     assert.equal(await page.locator('.h2h-card').evaluate(element => getComputedStyle(element).borderRadius), '16px');
     assert.equal(await page.locator('.h2h-table-title').evaluate(element => getComputedStyle(element).borderBottomWidth), '2px');
-    assert.equal(await page.locator('.h2h-column-head').evaluate(element => getComputedStyle(element).textTransform), 'uppercase');
     assert.equal(await page.locator('.head-to-head-row').count(), 4);
     assert.equal(await page.locator('#head-to-head-details').isVisible(), true);
     await page.locator('#tab-h2h').press('ArrowLeft');

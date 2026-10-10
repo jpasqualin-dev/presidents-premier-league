@@ -281,15 +281,10 @@
         .scoring-table-title { margin: 0; padding: 0 0 4px; border-bottom: 2px solid #00ff87; }
         .h2h-table-title h2,
         .scoring-table-title h2 { margin: 0; border: 0; padding: 0; color: var(--title-color); font-size: 1.4rem; }
-        .table-column-head,
         .head-to-head-row,
         .scoring-row { display: grid; align-items: center; gap: 8px; padding: 10px 8px; border-bottom: 1px solid #eaeaea; }
-        .table-column-head { color: #666; font-size: 0.8rem; font-weight: 500; text-transform: uppercase; border-bottom: 2px solid #eaeaea; }
-        .h2h-column-head,
         .head-to-head-row { grid-template-columns: minmax(0, 1fr) 5.5ch 5ch; }
-        .h2h-column-head span:first-child,
         .head-to-head-row span:first-child { text-align: left; }
-        .h2h-column-head span:not(:first-child) { text-align: center; }
         .head-to-head-row { font-size: 0.875rem; font-weight: 600; }
         .head-to-head-row:last-child,
         .scoring-row:last-child { border-bottom: 0; }
@@ -297,7 +292,6 @@
         .head-to-head-points { min-width: 0; text-align: right; }
         .h2h-card .head-to-head-details { display: grid; gap: 0; }
         .scoring-card { margin-top: 14px; }
-        .scoring-column-head,
         .scoring-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
         .scoring-row { font-size: 0.875rem; font-weight: 600; }
         .scoring-label { color: var(--text-muted); }
@@ -431,10 +425,8 @@
         body.dark-mode .prototype-card,
         body.dark-mode .mw-card { border-color: #3d3d3d; }
 
-        body.dark-mode .table-column-head,
         body.dark-mode .head-to-head-row,
         body.dark-mode .scoring-row { border-color: #3d3d3d; }
-        body.dark-mode .table-column-head { color: #bdbdbd; }
 
         body.dark-mode .my-team,
         body.dark-mode .opponent-line,
@@ -529,12 +521,10 @@
             <section class="prototype-panel" id="panel-h2h" role="tabpanel" aria-labelledby="tab-h2h" tabindex="0" hidden>
                 <section class="table-wrapper table-card h2h-card" aria-labelledby="h2h-title">
                     <div class="overall-header-container h2h-table-title"><h2 id="h2h-title">H2H</h2></div>
-                    <div class="table-column-head h2h-column-head" aria-hidden="true"><span>Opponent</span><span>W-D-L</span><span>PTS</span></div>
                     <div class="head-to-head-details" id="head-to-head-details"></div>
                 </section>
                 <section class="table-wrapper table-card scoring-card" aria-labelledby="scoring-title">
                     <div class="overall-header-container scoring-table-title"><h2 id="scoring-title">Scoring</h2></div>
-                    <div class="table-column-head scoring-column-head" aria-hidden="true"><span>Measure</span><span>Value</span></div>
                     <div class="scoring-rows">
                         <div class="scoring-row"><span class="scoring-label">Highest Scoring Week</span><span class="scoring-value" id="highest-scoring-week">--</span></div>
                         <div class="scoring-row"><span class="scoring-label">Lowest Scoring Week(s)</span><span class="scoring-value" id="lowest-scoring-week">--</span></div>
