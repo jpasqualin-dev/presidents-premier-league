@@ -858,6 +858,8 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
         const style = getComputedStyle(titleCell);
         return {
             fontSize: getComputedStyle(titleCell.querySelector('h2')).fontSize,
+            marginBottom: getComputedStyle(titleCell.querySelector('h2')).marginBottom,
+            headingPaddingBottom: getComputedStyle(titleCell.querySelector('h2')).paddingBottom,
             paddingTop: style.paddingTop,
             paddingBottom: style.paddingBottom,
             borderBottomWidth: style.borderBottomWidth,
@@ -866,6 +868,7 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
         };
     }));
     assert.ok(h2hTitleRows.every(row => parseFloat(row.fontSize) <= 18));
+    assert.ok(h2hTitleRows.every(row => row.marginBottom === '0px' && row.headingPaddingBottom === '0px'));
     assert.ok(h2hTitleRows.every(row => row.paddingTop === '10px' && row.paddingBottom === '4px'));
     assert.ok(h2hTitleRows.every(row => row.borderBottomWidth === '2px' && row.borderBottomColor === 'rgb(0, 255, 135)' && row.widthDifference <= 1), JSON.stringify(h2hTitleRows));
     assert.equal(await page.locator('.head-to-head-row').count(), 4);
@@ -891,6 +894,8 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
         const style = getComputedStyle(titleCell);
         return {
             fontSize: getComputedStyle(titleCell.querySelector('h2')).fontSize,
+            marginBottom: getComputedStyle(titleCell.querySelector('h2')).marginBottom,
+            headingPaddingBottom: getComputedStyle(titleCell.querySelector('h2')).paddingBottom,
             paddingTop: style.paddingTop,
             paddingBottom: style.paddingBottom,
             borderBottomColor: style.borderBottomColor,
@@ -898,6 +903,7 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
         };
     }));
     assert.ok(draftTitleRows.every(row => parseFloat(row.fontSize) <= 18));
+    assert.ok(draftTitleRows.every(row => row.marginBottom === '0px' && row.headingPaddingBottom === '0px'));
     assert.ok(draftTitleRows.every(row => row.paddingTop === '10px' && row.paddingBottom === '4px'));
     assert.ok(draftTitleRows.every(row => row.borderBottomColor === 'rgb(0, 255, 135)' && row.widthDifference <= 1));
     assert.equal(await page.locator('#full-draft-table-body tr').count(), 20);
