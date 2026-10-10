@@ -860,10 +860,27 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.equal(await page.locator('#panel-draft .prototype-card').count(), 0);
     assert.equal(await page.locator('#draft-title').textContent(), 'Draft: Wes');
     assert.equal(await page.locator('.draft-table-shell').evaluate(element => getComputedStyle(element).marginTop), '0px');
+    assert.equal(await page.locator('#full-draft-title').textContent(), 'Draft');
+    assert.equal(await page.locator('#full-draft-table-body tr').count(), 20);
+    assert.deepEqual(await page.locator('#full-draft-table-body tr').evaluateAll(rows => [rows[0], rows[1], rows[4], rows[5], rows[19]].map(row => row.textContent)), [
+        '1HefArsenal1',
+        '1JordanManchester City2',
+        '1JameyChelsea5',
+        '2JameyTottenham Hotspur6',
+        '4HefHull City20'
+    ]);
+    const draftHeaderStyles = await page.locator('.draft-table-shell th[scope="col"], .full-draft-table-shell th[scope="col"]').evaluateAll(headers => headers.map(header => {
+        const style = getComputedStyle(header);
+        return { background: style.backgroundColor, color: style.color, fontSize: style.fontSize, fontWeight: style.fontWeight, textTransform: style.textTransform };
+    }));
+    assert.ok(draftHeaderStyles.every(style => JSON.stringify(style) === JSON.stringify(draftHeaderStyles[0])));
+    assert.equal(draftHeaderStyles[0].textTransform, 'uppercase');
     await page.locator('#tab-matches').click();
     assert.equal(await page.locator('#panel-matches').isVisible(), true);
     assert.equal(await page.locator('#panel-matches .mw-card').count(), 1);
     assert.equal(await page.locator('#panel-matches .fixture-item').count(), 2);
+    assert.equal(await page.locator('.pills-nav-container').evaluate(element => getComputedStyle(element).position), 'sticky');
+    assert.ok(await page.locator('#current-matchweek').evaluate(card => Math.abs(card.getBoundingClientRect().top - document.querySelector('.pills-nav-container').getBoundingClientRect().bottom) <= 1));
     assert.deepEqual(diagnostics.consoleErrors, []);
     assert.deepEqual(diagnostics.pageErrors, []);
     assert.deepEqual(diagnostics.failedRequests, []);

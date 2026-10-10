@@ -367,7 +367,7 @@
         .draft-table .title-row th {
             padding-bottom: 4px;
             text-align: left;
-            border-bottom: 1px solid #00ff87;
+            border-bottom: 2px solid #00ff87;
         }
 
         .draft-table .overall-header-container { margin: 0 10px; }
@@ -375,8 +375,15 @@
         .draft-table th:nth-child(2),
         .draft-table td:nth-child(2) { text-align: left; }
 
+        .draft-table .text-left { text-align: left; }
+
+        .full-draft-table-shell { margin-top: 16px; }
+        .full-draft-table th:nth-child(3),
+        .full-draft-table td:nth-child(3) { text-align: left; white-space: normal; }
+
         body.dark-mode .draft-table th,
         body.dark-mode .draft-table td { border-color: #3d3d3d; }
+        body.dark-mode .draft-table th { color: #bdbdbd; }
 
         body.dark-mode .table-card { border-color: #3d3d3d; }
 
@@ -483,7 +490,18 @@
                         </thead>
                         <tbody id="draft-table-body"></tbody>
                     </table>
-                </section>
+                </div>
+                <div class="table-wrapper table-card full-draft-table-shell" aria-labelledby="full-draft-title">
+                    <table class="draft-table overall-standings-table full-draft-table">
+                        <thead>
+                            <tr class="title-row">
+                                <th colspan="4"><div class="overall-header-container"><h2 id="full-draft-title" class="plain-table-title">Draft</h2></div></th>
+                            </tr>
+                            <tr><th scope="col">Round</th><th scope="col">Manager</th><th scope="col">Team</th><th scope="col">Overall Pick</th></tr>
+                        </thead>
+                        <tbody id="full-draft-table-body"></tbody>
+                    </table>
+                </div>
             </section>
             <section class="prototype-panel" id="panel-h2h" role="tabpanel" aria-labelledby="tab-h2h" tabindex="0" hidden>
                 <section class="prototype-card h2h-card" aria-labelledby="h2h-title">
@@ -535,6 +553,10 @@
         window.playerTeams = PplLeagueConfig.draftData[playerName] || [];
         window.playerTeamLogos = TeamNames.logoMap();
         document.getElementById('draft-table-body').innerHTML = window.playerTeams.map((team, index) => `<tr><td>${index + 1}</td><td>${team}</td><td>${PplLeagueConfig.draftPicks[team] || '--'}</td></tr>`).join('');
+        document.getElementById('full-draft-table-body').innerHTML = Object.entries(PplLeagueConfig.draftPicks)
+            .sort(([, leftPick], [, rightPick]) => leftPick - rightPick)
+            .map(([team, pick]) => `<tr><td>${Math.ceil(pick / playerNames.length)}</td><td>${PplLeagueConfig.ownersByTeam[team] || '--'}</td><td>${team}</td><td>${pick}</td></tr>`)
+            .join('');
         document.querySelector('.pills-nav-container').setAttribute('aria-label', `${playerName} page sections`);
         document.querySelectorAll('[data-player]').forEach(link => {
             if (link.dataset.player === playerName) link.setAttribute('aria-current', 'page');
@@ -623,6 +645,24 @@
                 target.append(summaryCard);
                 window.bindSharedMatchRows(summaryCard);
             });
+            if (document.getElementById('tab-matches').getAttribute('aria-selected') === 'true') {
+                requestAnimationFrame(scrollToLatestFinishedMatchweek);
+            }
+        };
+
+        const scrollToLatestFinishedMatchweek = () => {
+            const cards = [...document.querySelectorAll('#fixtures-container > .mw-card')];
+            const finishedMatchweeks = cards.map(card => Number(card.querySelector('.mw-title')?.textContent.match(/Matchweek\s+(\d+)/)?.[1]))
+                .filter(matchweek => Number.isFinite(matchweek) && window.playerMatches?.some(match => match.matchday === matchweek && match.status === 'FINISHED'));
+            if (!finishedMatchweeks.length) return;
+            const latestMatchweek = Math.max(...finishedMatchweeks);
+            const card = cards.find(matchweekCard => Number(matchweekCard.querySelector('.mw-title')?.textContent.match(/Matchweek\s+(\d+)/)?.[1]) === latestMatchweek);
+            if (!card) return;
+            const pillMenu = document.querySelector('.pills-nav-container');
+            const stickyPillTop = parseFloat(getComputedStyle(pillMenu).top) || 0;
+            const targetTop = stickyPillTop + pillMenu.getBoundingClientRect().height;
+            const targetY = card.getBoundingClientRect().top + window.scrollY - targetTop;
+            window.scrollTo({ top: Math.max(0, targetY), behavior: 'auto' });
         };
 
         DataManager.subscribe(data => {
@@ -651,6 +691,7 @@
                 panel.hidden = !isActive;
                 panel.classList.toggle('active', isActive);
             });
+            if (tab.id === 'tab-matches') requestAnimationFrame(scrollToLatestFinishedMatchweek);
         }
 
         tabs.forEach((tab, index) => {
