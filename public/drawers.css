@@ -38,11 +38,11 @@
 .match-detail-section { padding: 9px; }
 .match-meta { color: var(--text-muted); font-size: 0.82rem; text-align: center; }
 .match-venue { margin-top: 5px; color: var(--text-muted); font-size: 0.78rem; text-align: center; }
-.match-scoreline { display: grid; grid-template-columns: 1fr 100px 1fr; align-items: center; gap: 10px; margin: 18px 0; }
+.match-scoreline { display: grid; grid-template-columns: 1fr 100px 1fr; align-items: center; gap: 10px; margin: 9px 0; }
 .match-team { display: grid; justify-items: center; gap: 6px; text-align: center; font-weight: 700; }
 .match-team-link { cursor: pointer; }
 .match-team-link:focus-visible { outline: 2px solid var(--text-main); outline-offset: 4px; border-radius: 6px; }
-.match-scoreline .match-team-name { display: flex; height: 3.3em; align-items: flex-end; justify-content: center; line-height: 1.1; overflow: hidden; }
+.match-scoreline .match-team-name { display: flex; height: 3.3em; align-items: center; justify-content: center; line-height: 1.1; overflow: hidden; }
 .match-team img { width: 60px; height: 60px; object-fit: contain; }
 .match-team-owner { color: var(--text-muted); font-size: 0.72rem; font-weight: 500; }
 .match-score { font-size: 1.8rem; font-weight: 800; text-align: center; color: var(--text-main); }
@@ -53,7 +53,7 @@
 .match-scorer { display: block; }
 .match-scorer-empty, .empty-detail { color: var(--text-muted); opacity: 0.75; }
 .match-detail-section h3 { margin-top: 0; margin-bottom: 16px; color: var(--title-color); font-size: 0.95rem; text-align: center; }
-.match-upcoming-scoreline { margin: 8px 0 18px; }
+.match-upcoming-scoreline { margin: 4px 0 18px; }
 .match-upcoming-date { display: grid; justify-items: center; gap: 2px; text-align: center; }
 .match-upcoming-scoreline .match-upcoming-date { grid-template-rows: 3.3em 60px 0.72rem; align-items: center; gap: 6px; }
 .match-upcoming-weekday { color: var(--text-muted); font-size: 0.8rem; font-weight: 600; }

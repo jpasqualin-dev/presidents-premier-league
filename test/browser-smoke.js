@@ -398,6 +398,10 @@ test('upcoming match drawer presents table, recent form, and ranked season stats
     await page.evaluate(() => window.openMatchDrawer('upcoming-drawer-match'));
     await page.locator('.upcoming-stats-card').waitFor();
 
+    assert.deepEqual(await page.locator('.match-upcoming-scoreline').evaluate(element => ({
+        marginTop: getComputedStyle(element).marginTop,
+        teamNameAlignment: getComputedStyle(element.querySelector('.match-team-name')).alignItems
+    })), { marginTop: '4px', teamNameAlignment: 'center' });
     assert.equal(await page.locator('.upcoming-card').count(), 3);
     assert.equal(await page.locator('.upcoming-table tbody tr').count(), 2);
     assert.equal(await page.locator('.upcoming-table').evaluate(element => element.classList.contains('overall-standings-table')), true);
@@ -453,6 +457,10 @@ test('upcoming match drawer presents table, recent form, and ranked season stats
     await formRow.click();
     await page.locator('.match-drawer-back').waitFor();
     await page.locator('#match-detail-content .match-status').filter({ hasText: 'Full time' }).waitFor();
+    assert.deepEqual(await page.locator('.match-scoreline:not(.match-upcoming-scoreline)').evaluate(element => ({
+        marginTop: getComputedStyle(element).marginTop,
+        teamNameAlignment: getComputedStyle(element.querySelector('.match-team-name')).alignItems
+    })), { marginTop: '9px', teamNameAlignment: 'center' });
     await page.locator('.match-scoreline .match-team-name').first().evaluate(element => {
         element.textContent = 'Brighton & Hove Albion';
         element.style.width = '68px';
