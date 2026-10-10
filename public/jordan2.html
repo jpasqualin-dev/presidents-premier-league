@@ -379,6 +379,9 @@
 
         .draft-table .text-left { text-align: left; }
 
+        .draft-team-cell { display: inline-flex; align-items: center; gap: 8px; min-width: 0; text-align: left; white-space: normal; }
+        .draft-team-icon { width: 22px; height: 22px; flex: 0 0 auto; object-fit: contain; }
+
         @media (hover: hover) {
             .draft-table tbody tr:hover { background-color: #f8f9fa; }
         }
@@ -576,11 +579,21 @@
         draftTitle.textContent = `Draft: ${playerName}`;
         window.playerTeams = PplLeagueConfig.draftData[playerName] || [];
         window.playerTeamLogos = TeamNames.logoMap();
-        document.getElementById('draft-table-body').innerHTML = window.playerTeams.map((team, index) => `<tr><td>${index + 1}</td><td>${team}</td><td>${PplLeagueConfig.draftPicks[team] || '--'}</td></tr>`).join('');
-        document.getElementById('full-draft-table-body').innerHTML = Object.entries(PplLeagueConfig.draftPicks)
-            .sort(([, leftPick], [, rightPick]) => leftPick - rightPick)
-            .map(([team, pick]) => `<tr><td>${Math.ceil(pick / playerNames.length)}</td><td>${PplLeagueConfig.ownersByTeam[team] || '--'}</td><td>${team}</td><td>${pick}</td></tr>`)
-            .join('');
+        const renderDraftTables = () => {
+            const renderTeamCell = (team, shortName = false) => {
+                const crest = TeamNames.crest(team);
+                const displayName = shortName ? TeamNames.shortName(team) : team;
+                return `<span class="draft-team-cell">${crest ? `<img class="draft-team-icon" src="${crest}" alt="" aria-hidden="true">` : ''}<span>${displayName}</span></span>`;
+            };
+            document.getElementById('draft-table-body').innerHTML = window.playerTeams
+                .map((team, index) => `<tr><td>${index + 1}</td><td>${renderTeamCell(team)}</td><td>${PplLeagueConfig.draftPicks[team] || '--'}</td></tr>`)
+                .join('');
+            document.getElementById('full-draft-table-body').innerHTML = Object.entries(PplLeagueConfig.draftPicks)
+                .sort(([, leftPick], [, rightPick]) => leftPick - rightPick)
+                .map(([team, pick]) => `<tr><td>${Math.ceil(pick / playerNames.length)}</td><td>${PplLeagueConfig.ownersByTeam[team] || '--'}</td><td>${renderTeamCell(team, true)}</td><td>${pick}</td></tr>`)
+                .join('');
+        };
+        TeamNames.ready.then(renderDraftTables);
         document.querySelector('.pills-nav-container').setAttribute('aria-label', `${playerName} page sections`);
         document.querySelectorAll('[data-player]').forEach(link => {
             if (link.dataset.player === playerName) link.setAttribute('aria-current', 'page');

@@ -881,6 +881,9 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.equal(await page.locator('#panel-draft .prototype-card').count(), 0);
     assert.equal(await page.locator('#draft-title').textContent(), 'Draft: Wes');
     assert.equal(await page.locator('.draft-table-shell').evaluate(element => getComputedStyle(element).marginTop), '0px');
+    await page.locator('#draft-table-body .draft-team-icon').first().waitFor();
+    assert.equal(await page.locator('#draft-table-body .draft-team-icon').count(), 4);
+    assert.equal(await page.locator('#draft-table-body tr').first().locator('.draft-team-cell').textContent(), 'Liverpool');
     assert.equal(await page.locator('#full-draft-title').textContent(), 'Draft');
     const draftTitleRows = await page.locator('.draft-table-shell, .full-draft-table-shell').evaluateAll(wrappers => wrappers.map(wrapper => {
         const table = wrapper.querySelector('table');
@@ -898,12 +901,13 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.ok(draftTitleRows.every(row => row.paddingTop === '10px' && row.paddingBottom === '4px'));
     assert.ok(draftTitleRows.every(row => row.borderBottomColor === 'rgb(0, 255, 135)' && row.widthDifference <= 1));
     assert.equal(await page.locator('#full-draft-table-body tr').count(), 20);
+    assert.equal(await page.locator('#full-draft-table-body .draft-team-icon').count(), 20);
     assert.deepEqual(await page.locator('#full-draft-table-body tr').evaluateAll(rows => [rows[0], rows[1], rows[4], rows[5], rows[19]].map(row => row.textContent)), [
         '1HefArsenal1',
-        '1JordanManchester City2',
+        '1JordanMan City2',
         '1JameyChelsea5',
-        '2JameyTottenham Hotspur6',
-        '4HefHull City20'
+        '2JameySpurs6',
+        '4HefHull20'
     ]);
     const draftHeaderStyles = await page.locator('.draft-table-shell th[scope="col"], .full-draft-table-shell th[scope="col"]').evaluateAll(headers => headers.map(header => {
         const style = getComputedStyle(header);
