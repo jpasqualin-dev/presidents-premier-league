@@ -124,6 +124,60 @@ test('team stats capitalize the heading and rank fewer goals conceded higher', (
     assert.match(teamAOutput, /Goals Conceded<\/span><strong>6<\/strong>[\s\S]*?aria-label="Goals Conceded rank 2 of 20"/);
 });
 
+test('team drawer table follows Team Form and shows up to two places around the selected team', () => {
+    const drawer = loadTeamDrawer();
+    const teams = Array.from({ length: 6 }, (_, index) => {
+        const team = `Team ${index + 1}`;
+        return [team, {
+            team, owner: `Owner ${index + 1}`, PL: 10, W: 8 - index, D: 2, L: index,
+            GF: 20 - index, GA: 5 + index, GD: 15 - index, PTS: 26 - index * 3,
+            cleanSheets: 2, yellowCards: 0, redCards: 0
+        }];
+    });
+    const allStats = Object.fromEntries(teams);
+    const output = drawer.render('Team 3', {
+        stats: { allStats, homeStats: allStats, awayStats: allStats },
+        matches: [],
+        getLogoByName: () => '',
+        getShortTeamName: name => name,
+        getOwnerOfTeam: () => 'Test'
+    });
+
+    assert.ok(output.indexOf('Team Form') < output.indexOf('Table'));
+    assert.ok(output.indexOf('Table') < output.indexOf('Team Stats'));
+    const tableRows = output.match(/<h2 class="team-drawer-card-title">Table<\/h2>[\s\S]*?<tbody>([\s\S]*?)<\/tbody>/)[1];
+    assert.deepEqual([...tableRows.matchAll(/class="fotmob-rank">(\d+)<\/td>/g)].map(match => Number(match[1])), [1, 2, 3, 4, 5]);
+    assert.match(tableRows, /class="team-drawer-table-selected" aria-current="true"><td class="fotmob-rank">3<\/td>/);
+    assert.match(tableRows, /Team 1/);
+    assert.match(tableRows, /Team 5/);
+    assert.doesNotMatch(tableRows, /Team 6/);
+});
+
+test('team drawer table clips rows at both ends of the standings', () => {
+    const drawer = loadTeamDrawer();
+    const names = ['Team A', 'Team B', 'Team C', 'Team D'];
+    const allStats = Object.fromEntries(names.map((team, index) => [team, {
+        team, owner: 'Test', PL: 1, W: 1, D: 0, L: 0, GF: 2, GA: 0,
+        GD: 2, PTS: 12 - index, cleanSheets: 1, yellowCards: 0, redCards: 0
+    }]));
+    const render = teamName => drawer.render(teamName, {
+        stats: { allStats, homeStats: allStats, awayStats: allStats },
+        matches: [],
+        getLogoByName: () => '',
+        getShortTeamName: name => name,
+        getOwnerOfTeam: () => 'Test'
+    });
+    const topRows = render('Team A').match(/<h2 class="team-drawer-card-title">Table<\/h2>[\s\S]*?<tbody>([\s\S]*?)<\/tbody>/)[1];
+    const bottomRows = render('Team D').match(/<h2 class="team-drawer-card-title">Table<\/h2>[\s\S]*?<tbody>([\s\S]*?)<\/tbody>/)[1];
+
+    assert.deepEqual([...topRows.matchAll(/class="fotmob-rank">(\d+)<\/td>/g)].map(match => Number(match[1])), [1, 2, 3]);
+    assert.match(topRows, /Team C/);
+    assert.doesNotMatch(topRows, /Team D/);
+    assert.deepEqual([...bottomRows.matchAll(/class="fotmob-rank">(\d+)<\/td>/g)].map(match => Number(match[1])), [2, 3, 4]);
+    assert.match(bottomRows, /Team B/);
+    assert.doesNotMatch(bottomRows, /Team A/);
+});
+
 test('Goals Conceded bar is fullest for first place and smallest for twentieth', () => {
     const drawer = loadTeamDrawer();
     const allStats = Object.fromEntries(Array.from({ length: 20 }, (_, index) => {

@@ -110,6 +110,21 @@
         }).join('');
     }
 
+    function renderTableCard(teams, selectedTeam, options) {
+        const selectedIndex = teams.findIndex(item => item.team === selectedTeam.team);
+        const start = Math.max(0, selectedIndex - 2);
+        const end = Math.min(teams.length, selectedIndex + 3);
+        const rows = teams.slice(start, end).map((item, index) => {
+            const isSelected = item.team === selectedTeam.team;
+            const teamName = options.getShortTeamName(item.team) || item.team;
+            const logo = options.getLogoByName?.(item.team) || '';
+            const owner = item.owner || options.getOwnerOfTeam?.(item.team) || 'Unassigned';
+            const difference = item.GD > 0 ? `+${item.GD}` : item.GD;
+            return `<tr${isSelected ? ' class="team-drawer-table-selected" aria-current="true"' : ''}><td class="fotmob-rank">${start + index + 1}</td><td class="text-left"><div class="team-inline">${logo ? `<img src="${escape(logo)}" class="team-icon" alt="">` : ''}<div class="upcoming-table-identity"><div class="table-team-name">${escape(teamName)}</div><div class="upcoming-table-owner">${escape(owner)}</div></div></div></td><td>${item.PL}</td><td>${item.W}</td><td>${item.D}</td><td>${item.L}</td><td>${item.GF}-${item.GA}</td><td>${difference}</td><td><strong>${item.PTS}</strong></td></tr>`;
+        }).join('');
+        return `<section class="team-drawer-card team-drawer-table-card"><h2 class="team-drawer-card-title">Table</h2><div class="upcoming-table-scroll"><table class="overall-standings-table upcoming-table"><colgroup><col class="rank"><col class="team"><col class="stat"><col class="stat"><col class="stat"><col class="stat"><col class="goals"><col class="gd"><col class="points"></colgroup><thead><tr><th>#</th><th class="text-left">Team</th><th>PL</th><th>W</th><th>D</th><th>L</th><th>+/-</th><th>GD</th><th>PTS</th></tr></thead><tbody>${rows || '<tr><td colspan="9" class="empty-detail">Table data is unavailable.</td></tr>'}</tbody></table></div></section>`;
+    }
+
     window.toggleTeamDrawerPlayerCard = function (titleElement) {
         const card = titleElement.closest('.team-drawer-player-card');
         if (!card) return;
@@ -124,7 +139,7 @@
         if (!team) return '<section class="team-drawer-card"><p class="empty-detail">Team details are unavailable.</p></section>';
         const shortName = options.getShortTeamName(team.team);
         const logo = options.getLogoByName(team.team);
-        const teams = Object.values(allStats).sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
+        const teams = Object.values(allStats).sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF || a.team.localeCompare(b.team));
         const rank = teams.findIndex(item => item.team === team.team) + 1;
         const formatRecord = value => `${value.W}-${value.D}-${value.L}`;
         const statRank = field => {
@@ -161,7 +176,7 @@
         const draftPickValue = window.TeamNames?.resolve?.(team.team)?.draftPick ?? rank;
         const draftDiff = draftPickValue - rank;
         const draftDiffText = `${draftDiff >= 0 ? '+' : ''}${draftDiff}`;
-        return `<section class="team-drawer-card"><div class="team-drawer-summary"><div class="team-drawer-identity">${logo ? `<img class="team-drawer-crest" src="${escape(logo)}" alt="${escape(team.team)} crest">` : ''}<div class="team-drawer-owner">${escape(team.owner || 'Unassigned')}</div></div><div class="team-drawer-records"><div class="team-drawer-record team-drawer-rank-pick"><span><span class="team-drawer-record-label">Overall rank</span><strong>${rank}</strong></span><span><span class="team-drawer-record-label">Draft pick</span><strong>${draftPickValue} <span class="team-drawer-draft-diff">(${draftDiffText})</span></strong></span></div><div class="team-drawer-record"><span>Overall record</span><strong>${formatRecord(team)}</strong></div><div class="team-drawer-record"><span>Home record</span><strong>${formatRecord(options.stats.homeStats?.[team.team] || team)}</strong></div><div class="team-drawer-record"><span>Away record</span><strong>${formatRecord(options.stats.awayStats?.[team.team] || team)}</strong></div></div></div></section><section class="team-drawer-card"><h2 class="team-drawer-card-title">Team Form</h2>${form ? `<div class="team-form-grid">${form}</div>` : '<p class="empty-detail">No matches available</p>'}</section><section class="team-drawer-card"><h2 class="team-drawer-card-title">Team Stats</h2>${statRow('Goals', 'GF')}${statRow('Goals Conceded', 'GA')}${statRow('Goal differential', 'GD')}${statRow('Clean sheets', 'cleanSheets')}${statRow('Yellow cards', 'yellowCards', 'yellow')}${statRow('Red cards', 'redCards', 'red')}</section>${renderPlayerStatCards(options.matches, team.team)}`;
+        return `<section class="team-drawer-card"><div class="team-drawer-summary"><div class="team-drawer-identity">${logo ? `<img class="team-drawer-crest" src="${escape(logo)}" alt="${escape(team.team)} crest">` : ''}<div class="team-drawer-owner">${escape(team.owner || 'Unassigned')}</div></div><div class="team-drawer-records"><div class="team-drawer-record team-drawer-rank-pick"><span><span class="team-drawer-record-label">Overall rank</span><strong>${rank}</strong></span><span><span class="team-drawer-record-label">Draft pick</span><strong>${draftPickValue} <span class="team-drawer-draft-diff">(${draftDiffText})</span></strong></span></div><div class="team-drawer-record"><span>Overall record</span><strong>${formatRecord(team)}</strong></div><div class="team-drawer-record"><span>Home record</span><strong>${formatRecord(options.stats.homeStats?.[team.team] || team)}</strong></div><div class="team-drawer-record"><span>Away record</span><strong>${formatRecord(options.stats.awayStats?.[team.team] || team)}</strong></div></div></div></section><section class="team-drawer-card"><h2 class="team-drawer-card-title">Team Form</h2>${form ? `<div class="team-form-grid">${form}</div>` : '<p class="empty-detail">No matches available</p>'}</section>${renderTableCard(teams, team, options)}<section class="team-drawer-card"><h2 class="team-drawer-card-title">Team Stats</h2>${statRow('Goals', 'GF')}${statRow('Goals Conceded', 'GA')}${statRow('Goal differential', 'GD')}${statRow('Clean sheets', 'cleanSheets')}${statRow('Yellow cards', 'yellowCards', 'yellow')}${statRow('Red cards', 'redCards', 'red')}</section>${renderPlayerStatCards(options.matches, team.team)}`;
     }
 
     function resetFormScroll(content) {
