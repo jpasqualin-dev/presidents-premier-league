@@ -277,25 +277,16 @@
 
         .h2h-card,
         .scoring-card { margin-bottom: 14px; }
-        .h2h-table-title,
-        .scoring-table-title { margin: 0; padding: 0 0 4px; border-bottom: 2px solid #00ff87; }
-        .h2h-table-title h2,
-        .scoring-table-title h2 { margin: 0; border: 0; padding: 0; color: var(--title-color); font-size: 1.4rem; }
-        .head-to-head-row,
-        .scoring-row { display: grid; align-items: center; gap: 8px; padding: 10px 8px; border-bottom: 1px solid #eaeaea; }
-        .head-to-head-row { grid-template-columns: minmax(0, 1fr) 5.5ch 5ch; }
-        .head-to-head-row span:first-child { text-align: left; }
-        .head-to-head-row { font-size: 0.875rem; font-weight: 600; }
-        .head-to-head-row:last-child,
-        .scoring-row:last-child { border-bottom: 0; }
-        .head-to-head-record { min-width: 0; text-align: center; color: var(--text-muted); }
-        .head-to-head-points { min-width: 0; text-align: right; }
-        .h2h-card .head-to-head-details { display: grid; gap: 0; }
         .scoring-card { margin-top: 14px; }
-        .scoring-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
-        .scoring-row { font-size: 0.875rem; font-weight: 600; }
+        .h2h-card .head-to-head-details { display: table-row-group; }
+        .h2h-table td:first-child,
+        .scoring-table td:first-child { text-align: left; }
+        .h2h-table td:nth-child(2) { min-width: 5.5ch; text-align: center; color: var(--text-muted); }
+        .h2h-table td:nth-child(3),
+        .scoring-table td:nth-child(2) { text-align: right; }
+        .h2h-table td:nth-child(3) { font-weight: 600; }
         .scoring-label { color: var(--text-muted); }
-        .scoring-value { color: var(--text-main); text-align: right; }
+        .scoring-value { color: var(--text-main); }
 
         .player-week-section { margin-top: 14px; }
         .player-week-title { margin: 0 0 8px; color: var(--title-color); font-size: 1.05rem; }
@@ -388,6 +379,10 @@
 
         .draft-table .text-left { text-align: left; }
 
+        @media (hover: hover) {
+            .draft-table tbody tr:hover { background-color: #f8f9fa; }
+        }
+
         .full-draft-table-shell { margin-top: 16px; }
         .full-draft-table th:nth-child(3),
         .full-draft-table td:nth-child(3) { text-align: left; white-space: normal; }
@@ -395,6 +390,7 @@
         body.dark-mode .draft-table th,
         body.dark-mode .draft-table td { border-color: #3d3d3d; }
         body.dark-mode .draft-table th { color: #bdbdbd; }
+        body.dark-mode .draft-table .title-row th { border-bottom-color: #00ff87; }
 
         body.dark-mode .table-card { border-color: #3d3d3d; }
 
@@ -414,6 +410,11 @@
             .pills-nav-container { gap: 4px; }
             .pill { padding-right: 6px; padding-left: 6px; font-size: 0.78rem; }
             .prototype-panel.profile-panel { padding-top: 0; }
+            .draft-table th,
+            .draft-table td { padding: 10px 4px; font-size: 0.8rem; }
+            .plain-table-title,
+            .overall-header-container h2 { font-size: 1.1rem; }
+            .draft-title { font-size: 1rem; }
         }
 
         body.dark-mode .players-dropdown,
@@ -520,16 +521,28 @@
             </section>
             <section class="prototype-panel" id="panel-h2h" role="tabpanel" aria-labelledby="tab-h2h" tabindex="0" hidden>
                 <section class="table-wrapper table-card h2h-card" aria-labelledby="h2h-title">
-                    <div class="overall-header-container h2h-table-title"><h2 id="h2h-title">H2H</h2></div>
-                    <div class="head-to-head-details" id="head-to-head-details"></div>
+                    <table class="draft-table overall-standings-table h2h-table">
+                        <thead>
+                            <tr class="title-row">
+                                <th colspan="3"><div class="overall-header-container"><h2 id="h2h-title" class="plain-table-title">H2H</h2></div></th>
+                            </tr>
+                        </thead>
+                        <tbody class="head-to-head-details" id="head-to-head-details"></tbody>
+                    </table>
                 </section>
                 <section class="table-wrapper table-card scoring-card" aria-labelledby="scoring-title">
-                    <div class="overall-header-container scoring-table-title"><h2 id="scoring-title">Scoring</h2></div>
-                    <div class="scoring-rows">
-                        <div class="scoring-row"><span class="scoring-label">Highest Scoring Week</span><span class="scoring-value" id="highest-scoring-week">--</span></div>
-                        <div class="scoring-row"><span class="scoring-label">Lowest Scoring Week(s)</span><span class="scoring-value" id="lowest-scoring-week">--</span></div>
-                        <div class="scoring-row"><span class="scoring-label">Average Weekly Score</span><span class="scoring-value" id="average-weekly-score">--</span></div>
-                    </div>
+                    <table class="draft-table overall-standings-table scoring-table">
+                        <thead>
+                            <tr class="title-row">
+                                <th colspan="2"><div class="overall-header-container"><h2 id="scoring-title" class="plain-table-title">Scoring</h2></div></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="scoring-row"><td class="scoring-label">Highest Scoring Week</td><td class="scoring-value" id="highest-scoring-week">--</td></tr>
+                            <tr class="scoring-row"><td class="scoring-label">Lowest Scoring Week(s)</td><td class="scoring-value" id="lowest-scoring-week">--</td></tr>
+                            <tr class="scoring-row"><td class="scoring-label">Average Weekly Score</td><td class="scoring-value" id="average-weekly-score">--</td></tr>
+                        </tbody>
+                    </table>
                 </section>
             </section>
             <section class="prototype-panel" id="panel-matches" role="tabpanel" aria-labelledby="tab-matches" tabindex="0" hidden>

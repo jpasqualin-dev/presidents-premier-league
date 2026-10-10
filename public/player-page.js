@@ -213,7 +213,13 @@
             else if (currentScore === opponentScore) { records[opponent].draws += 1; records[opponent].points += 1; }
             else records[opponent].losses += 1;
         });
-        document.getElementById('head-to-head-details').innerHTML = opponents.map(owner => ({ owner, ...records[owner] })).sort((left, right) => right.points - left.points || left.owner.localeCompare(right.owner)).map(record => `<div class="head-to-head-row"><span>${playerName} vs. ${record.owner}</span><span class="head-to-head-record">${record.wins}-${record.draws}-${record.losses}</span><span class="head-to-head-points">${record.points} PTS</span></div>`).join('');
+        const detailsContainer = document.getElementById('head-to-head-details');
+        detailsContainer.innerHTML = opponents.map(owner => ({ owner, ...records[owner] }))
+            .sort((left, right) => right.points - left.points || left.owner.localeCompare(right.owner))
+            .map(record => detailsContainer.tagName === 'TBODY'
+                ? `<tr class="head-to-head-row"><td>${playerName} vs. ${record.owner}</td><td class="head-to-head-record">${record.wins}-${record.draws}-${record.losses}</td><td class="head-to-head-points">${record.points} PTS</td></tr>`
+                : `<div class="head-to-head-row"><span>${playerName} vs. ${record.owner}</span><span class="head-to-head-record">${record.wins}-${record.draws}-${record.losses}</span><span class="head-to-head-points">${record.points} PTS</span></div>`)
+            .join('');
     }
 
     function toggleProfileCard() {

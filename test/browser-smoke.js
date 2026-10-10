@@ -853,7 +853,21 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.equal(await page.locator('.scoring-card').isVisible(), true);
     assert.equal(await page.locator('#panel-h2h .table-column-head').count(), 0);
     assert.equal(await page.locator('.h2h-card').evaluate(element => getComputedStyle(element).borderRadius), '16px');
-    assert.equal(await page.locator('.h2h-table-title').evaluate(element => getComputedStyle(element).borderBottomWidth), '2px');
+    const h2hTitleRows = await page.locator('.h2h-table, .scoring-table').evaluateAll(tables => tables.map(table => {
+        const titleCell = table.querySelector('.title-row th');
+        const style = getComputedStyle(titleCell);
+        return {
+            fontSize: getComputedStyle(titleCell.querySelector('h2')).fontSize,
+            paddingTop: style.paddingTop,
+            paddingBottom: style.paddingBottom,
+            borderBottomWidth: style.borderBottomWidth,
+            borderBottomColor: style.borderBottomColor,
+            widthDifference: Math.abs(titleCell.getBoundingClientRect().width - table.getBoundingClientRect().width)
+        };
+    }));
+    assert.ok(h2hTitleRows.every(row => parseFloat(row.fontSize) <= 18));
+    assert.ok(h2hTitleRows.every(row => row.paddingTop === '10px' && row.paddingBottom === '4px'));
+    assert.ok(h2hTitleRows.every(row => row.borderBottomWidth === '2px' && row.borderBottomColor === 'rgb(0, 255, 135)' && row.widthDifference <= 1), JSON.stringify(h2hTitleRows));
     assert.equal(await page.locator('.head-to-head-row').count(), 4);
     assert.equal(await page.locator('#head-to-head-details').isVisible(), true);
     await page.locator('#tab-h2h').press('ArrowLeft');
@@ -868,6 +882,21 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.equal(await page.locator('#draft-title').textContent(), 'Draft: Wes');
     assert.equal(await page.locator('.draft-table-shell').evaluate(element => getComputedStyle(element).marginTop), '0px');
     assert.equal(await page.locator('#full-draft-title').textContent(), 'Draft');
+    const draftTitleRows = await page.locator('.draft-table-shell, .full-draft-table-shell').evaluateAll(wrappers => wrappers.map(wrapper => {
+        const table = wrapper.querySelector('table');
+        const titleCell = table.querySelector('.title-row th');
+        const style = getComputedStyle(titleCell);
+        return {
+            fontSize: getComputedStyle(titleCell.querySelector('h2')).fontSize,
+            paddingTop: style.paddingTop,
+            paddingBottom: style.paddingBottom,
+            borderBottomColor: style.borderBottomColor,
+            widthDifference: Math.abs(titleCell.getBoundingClientRect().width - table.getBoundingClientRect().width)
+        };
+    }));
+    assert.ok(draftTitleRows.every(row => parseFloat(row.fontSize) <= 18));
+    assert.ok(draftTitleRows.every(row => row.paddingTop === '10px' && row.paddingBottom === '4px'));
+    assert.ok(draftTitleRows.every(row => row.borderBottomColor === 'rgb(0, 255, 135)' && row.widthDifference <= 1));
     assert.equal(await page.locator('#full-draft-table-body tr').count(), 20);
     assert.deepEqual(await page.locator('#full-draft-table-body tr').evaluateAll(rows => [rows[0], rows[1], rows[4], rows[5], rows[19]].map(row => row.textContent)), [
         '1HefArsenal1',
