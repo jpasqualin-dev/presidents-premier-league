@@ -106,6 +106,19 @@ async function fetchScoringDetails(event, summary = null) {
     return summaryEvents.length ? summaryEvents.map(normalizeSummaryEvent) : event.competitions?.[0]?.details || [];
 }
 
+function canReplaceScorerRecords(summary, details, homeScore, awayScore, homeTeamId, awayTeamId) {
+    if (!summary || !Array.isArray(details)) return false;
+    if (homeScore == null || awayScore == null || String(homeScore).trim() === '' || String(awayScore).trim() === '') return false;
+    const homeGoals = Number(homeScore);
+    const awayGoals = Number(awayScore);
+    if (!Number.isInteger(homeGoals) || homeGoals < 0 || !Number.isInteger(awayGoals) || awayGoals < 0) return false;
+    const expectedGoals = homeGoals + awayGoals;
+    const scorers = details.filter(detail => detail.scoringPlay);
+    const teamIds = new Set([String(homeTeamId), String(awayTeamId)]);
+    return scorers.length === expectedGoals
+        && scorers.every(scorer => scorer.team?.id != null && teamIds.has(String(scorer.team.id)));
+}
+
 async function fetchMatchStatistics(eventId, summary = null) {
     const payload = summary || await fetchMatchSummary(eventId);
     if (!payload) return [];
@@ -183,10 +196,17 @@ async function syncEvent(sql, event) {
     const hasEventPayload = Boolean(summary && (
         summary.keyEvents?.length || summary.plays?.length || event.competitions?.[0]?.details?.length
     ));
+    const hasCompleteScorerPayload = canReplaceScorerRecords(
+        summary,
+        details,
+        home.score,
+        away.score,
+        home.team.id,
+        away.team.id
+    );
     const hasStatsPayload = Boolean(summary?.boxscore?.teams?.length);
 
     if (hasEventPayload) {
-        await sql`DELETE FROM match_scorers WHERE match_id = ${match.id}`;
         await sql`DELETE FROM match_events WHERE match_id = ${match.id}`;
         for (const detail of details) {
             const scorer = detail.athletesInvolved?.[0];
@@ -196,9 +216,14 @@ async function syncEvent(sql, event) {
             INSERT INTO match_events (match_id, team_id, event_type, clock_seconds, clock_display, athlete_provider_id, athlete_name, substitution_player_on, substitution_player_off, score_value, scoring_play, red_card, yellow_card, penalty, own_goal, shootout)
             VALUES (${match.id}, ${team?.id || null}, ${detail.type?.text || 'unknown'}, ${detail.clock?.value == null ? null : Math.floor(Number(detail.clock.value))}, ${detail.clock?.displayValue || null}, ${scorer?.id ? String(scorer.id) : null}, ${scorer?.displayName || null}, ${isSubstitution ? detail.athletesInvolved?.[0]?.displayName || null : null}, ${isSubstitution ? detail.athletesInvolved?.[1]?.displayName || null : null}, ${detail.scoreValue == null ? null : Number(detail.scoreValue)}, ${Boolean(detail.scoringPlay)}, ${Boolean(detail.redCard)}, ${Boolean(detail.yellowCard)}, ${Boolean(detail.penaltyKick)}, ${Boolean(detail.ownGoal)}, ${Boolean(detail.shootout)})`;
         }
+    }
+    if (hasCompleteScorerPayload) {
+        await sql`DELETE FROM match_scorers WHERE match_id = ${match.id}`;
         for (const detail of details.filter(item => item.scoringPlay)) {
             const scorer = detail.athletesInvolved?.[0];
-            const scorerTeam = detail.team?.id === home.team.id ? homeTeam : detail.team?.id === away.team.id ? awayTeam : null;
+            const scorerTeam = String(detail.team?.id) === String(home.team.id) ? homeTeam
+                : String(detail.team?.id) === String(away.team.id) ? awayTeam
+                    : null;
             if (!scorerTeam) continue;
             await sql`
             INSERT INTO match_scorers (match_id, provider_athlete_id, team_id, athlete_name, assist_provider_id, assist_name, minute, own_goal, penalty)
@@ -221,6 +246,20 @@ async function syncEvent(sql, event) {
     return true;
 }
 
+async function findMatchesWithIncompleteScoring(sql) {
+    return sql`
+        SELECT m.provider_event_id, m.kickoff_at
+        FROM matches m
+        LEFT JOIN match_scorers ms ON ms.match_id = m.id
+        WHERE m.provider = 'espn'
+            AND m.season = 2026
+            AND (m.status_completed = TRUE OR m.status_state = 'post')
+            AND m.home_score IS NOT NULL
+            AND m.away_score IS NOT NULL
+        GROUP BY m.id, m.provider_event_id, m.kickoff_at, m.home_score, m.away_score
+        HAVING COUNT(ms.id) <> m.home_score + m.away_score`;
+}
+
 module.exports = async function handler(req, res) {
     if (req.method !== 'GET' && req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed.' });
     if (!process.env.CRON_SECRET) return res.status(500).json({ error: 'CRON_SECRET is not configured.' });
@@ -229,11 +268,33 @@ module.exports = async function handler(req, res) {
 
     try {
         const sql = neon(process.env.DATABASE_URL);
-        const events = await fetchEvents();
+        const recentEvents = await fetchEvents();
+        const incompleteMatches = await findMatchesWithIncompleteScoring(sql);
+        const repairDates = [...new Set(incompleteMatches.map(match =>
+            new Date(match.kickoff_at).toISOString().slice(0, 10).replaceAll('-', '')
+        ))];
+        const missingEventIds = new Set(incompleteMatches.map(match => String(match.provider_event_id)));
+        const repairEvents = repairDates.length ? await fetchEventsForDates(repairDates) : [];
+        const events = dedupeByKey([
+            ...recentEvents,
+            ...repairEvents.filter(event => missingEventIds.has(String(event.id)))
+        ], event => event.id);
         let stored = 0;
         for (const event of events) if (await syncEvent(sql, event)) stored += 1;
+        const remainingIncompleteMatches = await findMatchesWithIncompleteScoring(sql);
         res.setHeader('Cache-Control', 'no-store');
-        return res.status(200).json({ provider: 'espn', dates: dayKeys(), events: events.length, stored, syncedAt: new Date().toISOString() });
+        return res.status(200).json({
+            provider: 'espn',
+            dates: dayKeys(),
+            events: events.length,
+            stored,
+            scorerRepairs: {
+                candidates: incompleteMatches.length,
+                eventsFound: repairEvents.filter(event => missingEventIds.has(String(event.id))).length,
+                remaining: remainingIncompleteMatches.length
+            },
+            syncedAt: new Date().toISOString()
+        });
     } catch (error) {
         console.error('ESPN sync failed:', error);
         return res.status(500).json({ error: 'ESPN synchronization failed.' });
@@ -247,3 +308,4 @@ module.exports.fetchMatchLineups = fetchMatchLineups;
 module.exports.fetchScoringDetails = fetchScoringDetails;
 module.exports.fetchMatchSummary = fetchMatchSummary;
 module.exports.syncEvent = syncEvent;
+module.exports.canReplaceScorerRecords = canReplaceScorerRecords;
