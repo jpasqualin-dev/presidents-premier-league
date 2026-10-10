@@ -504,6 +504,43 @@ test('team drawer table rows open the selected team by click and keyboard', asyn
     await context.close();
 });
 
+test('nested drawers keep the page scroll position and open at the drawer top', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const page = await context.newPage();
+    await page.route('**/api/matches**', route => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(fixtureData())
+    }));
+    await page.route('**/api/match-details**', route => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ scorers: [], events: [], teamStats: [], substitutions: [] })
+    }));
+    await page.goto(`${baseUrl}/hef.html`);
+    await page.locator('body.player-page-ready').waitFor();
+    await page.evaluate(() => window.openTeamDrawerFromMatch('Crystal Palace'));
+    await page.locator('.team-drawer-table-card tbody tr').first().waitFor();
+    await page.evaluate(() => { document.querySelector('.match-drawer').scrollTop = 400; });
+    assert.ok(await page.locator('.match-drawer').evaluate(element => element.scrollTop > 0));
+    const pageScrollBeforeMatch = await page.evaluate(() => window.scrollY);
+
+    await page.evaluate(() => window.openMatchDrawer('smoke-match-2'));
+    await page.locator('#match-detail-content .match-status').filter({ hasText: 'Full time' }).waitFor();
+    assert.equal(await page.locator('.match-drawer').evaluate(element => element.scrollTop), 0);
+    assert.equal(await page.evaluate(() => window.scrollY), pageScrollBeforeMatch);
+
+    await page.evaluate(() => {
+        document.querySelector('.match-drawer').scrollTop = 350;
+        document.querySelector('.match-team-link').click();
+    });
+    await page.locator('#match-drawer-title').filter({ hasText: 'Manchester City' }).waitFor();
+    assert.equal(await page.locator('.match-drawer').evaluate(element => element.scrollTop), 0);
+    assert.equal(await page.evaluate(() => window.scrollY), pageScrollBeforeMatch);
+    await context.close();
+});
+
 test('team drawer loads detailed scorer and card data on demand', async t => {
     if (browserError) return t.skip('Chromium runtime unavailable');
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });

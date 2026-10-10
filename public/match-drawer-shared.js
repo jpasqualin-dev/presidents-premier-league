@@ -13,7 +13,7 @@
 
     function focusDrawer() {
         const closeButton = document.querySelector('#match-drawer-overlay .match-drawer-close');
-        closeButton?.focus();
+        closeButton?.focus({ preventScroll: true });
     }
 
     window.setSharedMatchDrawerTrigger = trigger => { lastDrawerTrigger = trigger; };

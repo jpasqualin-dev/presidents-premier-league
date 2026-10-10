@@ -234,6 +234,8 @@
 
     function openFromMatch(teamName, options) {
         const displayTeamName = getLongTeamName(teamName);
+        const drawer = document.querySelector('.match-drawer');
+        if (!options.skipRouter && drawer) drawer.scrollTop = 0;
         if (window.DrawerRouter && !options.skipRouter) {
             return window.DrawerRouter.open({
                 type: 'team',
@@ -256,7 +258,7 @@
             content.innerHTML = render(displayTeamName, options);
             resetFormScroll(content);
         }
-        header?.querySelector('.match-drawer-close')?.focus();
+        header?.querySelector('.match-drawer-close')?.focus({ preventScroll: true });
     }
 
     function getShortTeamNameForDrawer(teamName, options) {
