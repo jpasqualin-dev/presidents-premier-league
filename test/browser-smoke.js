@@ -364,6 +364,9 @@ test('upcoming match drawer presents table, recent form, and ranked season stats
     });
     const iconTops = await teamIcons.evaluateAll(elements => elements.map(element => element.getBoundingClientRect().top));
     assert.ok(Math.abs(iconTops[0] - iconTops[1]) < 1, 'team crests should stay vertically aligned when a team name wraps');
+    const kickoffBounds = await page.locator('.match-upcoming-kickoff').boundingBox();
+    const homeCrestBounds = await teamIcons.first().boundingBox();
+    assert.ok(kickoffBounds && homeCrestBounds && Math.abs(kickoffBounds.y + kickoffBounds.height / 2 - homeCrestBounds.y - homeCrestBounds.height / 2) < 1, 'kickoff time should be vertically aligned with the team crests');
     assert.equal(await page.locator('.match-form-column').count(), 2);
     assert.equal(await page.locator('.match-form-column').nth(0).locator('.match-form-result').count(), 5);
     assert.equal(await page.locator('.match-form-column').nth(1).locator('.match-form-result').count(), 5);

@@ -55,9 +55,10 @@
 .match-detail-section h3 { margin-top: 0; margin-bottom: 16px; color: var(--title-color); font-size: 0.95rem; text-align: center; }
 .match-upcoming-scoreline { margin: 8px 0 18px; }
 .match-upcoming-date { display: grid; justify-items: center; gap: 2px; text-align: center; }
+.match-upcoming-scoreline .match-upcoming-date { grid-template-rows: 3.3em 60px 0.72rem; align-items: center; gap: 6px; }
 .match-upcoming-weekday { color: var(--text-muted); font-size: 0.8rem; font-weight: 600; }
 .match-upcoming-month-day { color: var(--text-main); font-size: 0.8rem; font-weight: 700; }
-.match-upcoming-kickoff { color: var(--text-main); font-size: 1.2rem; font-weight: 800; line-height: 1.1; white-space: nowrap; }
+.match-upcoming-kickoff { grid-row: 2; color: var(--text-main); font-size: 1.2rem; font-weight: 800; line-height: 1.1; white-space: nowrap; }
 .upcoming-table-scroll { overflow-x: auto; }
 .upcoming-table.overall-standings-table { width: 100%; min-width: 0; table-layout: auto; background: var(--surface-bg); font-size: 0.9rem; white-space: nowrap; }
 .upcoming-table.overall-standings-table col.rank { width: 6%; }
