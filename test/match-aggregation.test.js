@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { normalizeEspnEvent, normalizeNeonMatch } = require('../lib/match-contract');
 const { dedupeByKey, mergeMatches } = require('../lib/match-aggregation');
-const { applyMatchCorrections } = require('../api/matches');
+const { applyMatchCorrections, buildDataQuality } = require('../api/matches');
 
 const baseMatch = {
     id: 'espn:1',
@@ -95,4 +95,32 @@ test('repairs the Brentford-Chelsea result when ESPN no longer serves the event'
 
     assert.equal(match.status, 'FINISHED');
     assert.deepEqual(match.score.fullTime, { home: 3, away: 0 });
+});
+
+test('match response quality distinguishes complete details from summary or missing history', () => {
+    const detailedMatch = {
+        ...baseMatch,
+        status: 'FINISHED',
+        score: { fullTime: { home: 0, away: 0 } },
+        scorers: [],
+        events: [],
+        teamStats: [],
+        teamCards: { home: { yellow: 0, red: 0 }, away: { yellow: 0, red: 0 } }
+    };
+
+    assert.deepEqual(buildDataQuality(true, true, [detailedMatch], [detailedMatch], true), {
+        detailLevel: 'full',
+        detailsComplete: true,
+        scoringComplete: true,
+        historicalAvailable: true,
+        historicalMatchCount: 1,
+        totalMatchCount: 1,
+        liveAvailable: true
+    });
+    assert.equal(buildDataQuality(false, true, [detailedMatch], [detailedMatch], true).detailsComplete, false);
+    assert.equal(buildDataQuality(true, false, [], [detailedMatch], true).detailsComplete, false);
+    assert.equal(buildDataQuality(true, true, [detailedMatch], [{
+        ...detailedMatch,
+        score: { fullTime: { home: 2, away: 1 } }
+    }], true).detailsComplete, false);
 });

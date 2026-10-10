@@ -35,6 +35,31 @@ function fixtureData() {
     };
 }
 
+function detailedFixtureData() {
+    const data = fixtureData();
+    data.matches.forEach(match => {
+        match.events = [];
+        match.teamStats = [];
+        match.teamCards = { home: { yellow: 0, red: 0 }, away: { yellow: 0, red: 0 } };
+        match.scorers = [
+            { teamProviderId: match.homeTeam.id, athleteName: `${match.homeTeam.name} scorer 1`, ownGoal: false },
+            { teamProviderId: match.homeTeam.id, athleteName: `${match.homeTeam.name} scorer 2`, ownGoal: false },
+            { teamProviderId: match.awayTeam.id, athleteName: `${match.awayTeam.name} scorer`, ownGoal: false }
+        ];
+    });
+    data.generatedAt = '2026-10-10T00:00:00Z';
+    data.dataQuality = {
+        detailLevel: 'full',
+        detailsComplete: true,
+        scoringComplete: true,
+        historicalAvailable: true,
+        historicalMatchCount: data.matches.length,
+        totalMatchCount: data.matches.length,
+        liveAvailable: true
+    };
+    return data;
+}
+
 function upcomingFixtureData() {
     return {
         matches: [{
@@ -204,11 +229,16 @@ for (const pageName of playerPages) {
         await context.addInitScript(theme => localStorage.setItem('ppl-theme', theme), view.theme);
         const page = await context.newPage();
         const diagnostics = diagnosticState(page);
-        await page.route('**/api/matches**', route => route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify(fixtureData())
-        }));
+        await page.route('**/api/matches**', route => {
+            const data = new URL(route.request().url()).searchParams.get('details') === '1'
+                ? detailedFixtureData()
+                : fixtureData();
+            return route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify(data)
+            });
+        });
         await page.goto(`${baseUrl}/${pageName}`);
         await page.locator('body.player-page-ready').waitFor();
         assert.equal(await page.evaluate(() => window.SharedPlayerPage), true, `${pageName}: shared player renderer did not initialize`);
@@ -445,7 +475,7 @@ test('team drawer loads detailed scorer and card data on demand', async t => {
     let detailedRequestSeen = false;
     await page.route('**/api/matches**', route => {
         const includeDetails = new URL(route.request().url()).searchParams.get('details') === '1';
-        const data = fixtureData();
+        const data = includeDetails ? detailedFixtureData() : fixtureData();
         if (includeDetails) {
             detailedRequestSeen = true;
             const cityMatch = data.matches.find(match => match.homeTeam.name === 'Manchester City');
@@ -460,6 +490,16 @@ test('team drawer loads detailed scorer and card data on demand', async t => {
                 athleteName: 'Manchester City Striker',
                 assistProviderId: 'city-assister',
                 assistName: 'Manchester City Assister',
+                ownGoal: false
+            }, {
+                teamProviderId: cityMatch.homeTeam.id,
+                athleteProviderId: 'city-second',
+                athleteName: 'Manchester City Second Scorer',
+                ownGoal: false
+            }, {
+                teamProviderId: cityMatch.awayTeam.id,
+                athleteProviderId: 'chelsea-scorer',
+                athleteName: 'Chelsea Scorer',
                 ownGoal: false
             }];
         }
@@ -478,7 +518,74 @@ test('team drawer loads detailed scorer and card data on demand', async t => {
     assert.equal(await statsCard.locator('.team-drawer-stat').filter({ hasText: 'Yellow cards' }).locator('strong').textContent(), '2');
     assert.equal(await statsCard.locator('.team-drawer-stat').filter({ hasText: 'Red cards' }).locator('strong').textContent(), '1');
     assert.equal(await page.locator('.team-drawer-player-stat').filter({ hasText: 'Manchester City Striker' }).first().locator('strong').textContent(), '1');
+    await page.locator('.team-drawer-data-warning').filter({ hasText: /Match smoke-match-2: yellow cards show 2 in totals versus 1 events/ }).waitFor();
     assert.equal(detailedRequestSeen, true);
+    await context.close();
+});
+
+test('team drawer rejects basic stale cache for player stats and reports the failure', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await context.addInitScript(data => {
+        localStorage.setItem('pl_match_data_v2', JSON.stringify(data));
+        localStorage.setItem('pl_match_data_time', String(Date.now() - 60 * 1000));
+    }, fixtureData());
+    const page = await context.newPage();
+    await page.route('**/api/matches**', route => route.fulfill({
+        status: 503,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'test outage' })
+    }));
+    await page.goto(`${baseUrl}/hef.html`);
+    await page.locator('body.player-page-ready').waitFor();
+    await page.evaluate(() => window.openTeamDrawerFromMatch('Manchester City'));
+
+    await page.locator('.team-drawer-card').filter({ hasText: 'Unable to load player stats: HTTP error! status: 503' }).waitFor();
+    assert.equal(await page.locator('.team-drawer-player-card').count(), 0);
+    await context.close();
+});
+
+test('team drawer labels stale but complete detailed stats with their data timestamp', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const detailed = detailedFixtureData();
+    const cityMatch = detailed.matches.find(match => match.homeTeam.name === 'Manchester City');
+    cityMatch.scorers = [{
+        teamProviderId: cityMatch.homeTeam.id,
+        athleteProviderId: 'cached-city-player',
+        athleteName: 'Cached City Player',
+        ownGoal: false
+    }, {
+        teamProviderId: cityMatch.homeTeam.id,
+        athleteProviderId: 'cached-city-second',
+        athleteName: 'Cached City Second Scorer',
+        ownGoal: false
+    }, {
+        teamProviderId: cityMatch.awayTeam.id,
+        athleteProviderId: 'cached-chelsea-scorer',
+        athleteName: 'Cached Chelsea Scorer',
+        ownGoal: false
+    }];
+    await context.addInitScript(({ summary, full }) => {
+        const staleTime = Date.now() - 60 * 1000;
+        localStorage.setItem('pl_match_data_v2', JSON.stringify(summary));
+        localStorage.setItem('pl_match_data_time', String(staleTime));
+        localStorage.setItem('pl_match_data_v2_details', JSON.stringify(full));
+        localStorage.setItem('pl_match_data_time_details', String(staleTime));
+    }, { summary: fixtureData(), full: detailed });
+    const page = await context.newPage();
+    await page.route('**/api/matches**', route => route.fulfill({
+        status: 503,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'test outage' })
+    }));
+    await page.goto(`${baseUrl}/hef.html`);
+    await page.locator('body.player-page-ready').waitFor();
+    await page.evaluate(() => window.openTeamDrawerFromMatch('Manchester City'));
+
+    await page.locator('.team-drawer-player-stat').filter({ hasText: 'Cached City Player' }).first().waitFor();
+    const drawerText = (await page.locator('.team-drawer-card').allTextContents()).join(' ');
+    assert.match(drawerText, /Showing cached stats generated.*cached copy last synced/);
     await context.close();
 });
 

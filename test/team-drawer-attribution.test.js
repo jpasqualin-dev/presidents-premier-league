@@ -125,8 +125,10 @@ test('team stats capitalize the heading and rank fewer goals conceded higher', (
 });
 
 test('team card totals use normalized card counts and avoid double-counting card events', () => {
-    const stats = loadTeamDrawer().buildStats([{
+    const drawer = loadTeamDrawer();
+    const match = {
         status: 'FINISHED',
+        id: 'city-chelsea',
         homeTeam: { id: 'city', name: 'Manchester City' },
         awayTeam: { id: 'chelsea', name: 'Chelsea' },
         score: { fullTime: { home: 2, away: 1 } },
@@ -139,11 +141,25 @@ test('team card totals use normalized card counts and avoid double-counting card
             { teamProviderId: 'city', redCard: true },
             { teamProviderId: 'chelsea', yellowCard: true }
         ]
-    }], ['Manchester City', 'Chelsea'], () => 'Test');
+    };
+    const stats = drawer.buildStats([match], ['Manchester City', 'Chelsea'], () => 'Test', { auditCardEvents: true });
 
     assert.equal(stats.allStats['Manchester City'].yellowCards, 2);
     assert.equal(stats.allStats['Manchester City'].redCards, 1);
     assert.equal(stats.allStats.Chelsea.yellowCards, 1);
+    assert.deepEqual(Array.from(stats.cardMismatches, item => [item.team, item.cardType, item.normalizedCount, item.eventCount]), [
+        ['Manchester City', 'yellow', 2, 1],
+        ['Chelsea', 'yellow', 0, 1]
+    ]);
+    const html = drawer.render('Manchester City', {
+        stats,
+        matches: [match],
+        getLogoByName: () => '',
+        getShortTeamName: name => name,
+        getOwnerOfTeam: () => 'Test'
+    });
+    assert.match(html, /role="alert">Card totals differ from match events in 1 instance/);
+    assert.match(html, /Match city-chelsea: yellow cards show 2 in totals versus 1 events/);
 });
 
 test('team drawer table follows Team Form and shows up to two places around the selected team', () => {

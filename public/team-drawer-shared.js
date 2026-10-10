@@ -26,9 +26,10 @@
         return left.includes(right) || right.includes(left);
     }
 
-    function buildStats(matches, teamNames, getOwnerOfTeam) {
+    function buildStats(matches, teamNames, getOwnerOfTeam, { auditCardEvents = false } = {}) {
         const create = team => ({ team, owner: getOwnerOfTeam(team), PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0, cleanSheets: 0, yellowCards: 0, redCards: 0 });
         const allStats = {}, homeStats = {}, awayStats = {};
+        const cardMismatches = [];
         teamNames.forEach(team => {
             allStats[team] = create(team);
             homeStats[team] = create(team);
@@ -44,6 +45,25 @@
             else stat.L += 1;
             stat.GD = stat.GF - stat.GA;
         };
+        const addCardStats = (teamKey, side, match) => {
+            const cardCounts = match.teamCards?.[side] || {};
+            const providerId = String(match[`${side}Team`].id || match[`${side}Team`].providerId || '');
+            const cardEvents = (match.events || []).filter(event => String(event.teamProviderId || '') === providerId);
+            [['yellow', 'yellowCard'], ['red', 'redCard']].forEach(([cardType, eventType]) => {
+                const normalizedCount = Number(cardCounts[cardType]) || 0;
+                const eventCount = cardEvents.filter(event => event[eventType]).length;
+                if (auditCardEvents && normalizedCount !== eventCount) {
+                    cardMismatches.push({
+                        matchId: String(match.id || 'unknown'),
+                        team: allStats[teamKey].team,
+                        cardType,
+                        normalizedCount,
+                        eventCount
+                    });
+                }
+                allStats[teamKey][`${cardType}Cards`] += Math.max(normalizedCount, eventCount);
+            });
+        };
         (matches || []).forEach(match => {
             if (!isPlayed(match) || match.score?.fullTime?.home == null || match.score?.fullTime?.away == null) return;
             const homeKey = findKey(match.homeTeam.name);
@@ -54,36 +74,16 @@
                 apply(allStats[homeKey], homeScore, awayScore);
                 apply(homeStats[homeKey], homeScore, awayScore);
                 if (awayScore === 0) allStats[homeKey].cleanSheets += 1;
-                const cardCounts = match.teamCards?.home || {};
-                const homeProviderId = String(match.homeTeam.id || match.homeTeam.providerId || '');
-                const cardEvents = (match.events || []).filter(event => String(event.teamProviderId || '') === homeProviderId);
-                allStats[homeKey].yellowCards += Math.max(
-                    Number(cardCounts.yellow) || 0,
-                    cardEvents.filter(event => event.yellowCard).length
-                );
-                allStats[homeKey].redCards += Math.max(
-                    Number(cardCounts.red) || 0,
-                    cardEvents.filter(event => event.redCard).length
-                );
+                addCardStats(homeKey, 'home', match);
             }
             if (awayKey) {
                 apply(allStats[awayKey], awayScore, homeScore);
                 apply(awayStats[awayKey], awayScore, homeScore);
                 if (homeScore === 0) allStats[awayKey].cleanSheets += 1;
-                const cardCounts = match.teamCards?.away || {};
-                const awayProviderId = String(match.awayTeam.id || match.awayTeam.providerId || '');
-                const cardEvents = (match.events || []).filter(event => String(event.teamProviderId || '') === awayProviderId);
-                allStats[awayKey].yellowCards += Math.max(
-                    Number(cardCounts.yellow) || 0,
-                    cardEvents.filter(event => event.yellowCard).length
-                );
-                allStats[awayKey].redCards += Math.max(
-                    Number(cardCounts.red) || 0,
-                    cardEvents.filter(event => event.redCard).length
-                );
+                addCardStats(awayKey, 'away', match);
             }
         });
-        return { allStats, homeStats, awayStats };
+        return { allStats, homeStats, awayStats, cardMismatches };
     }
 
     function buildPlayerStats(matches, teamName) {
@@ -116,13 +116,21 @@
                 : `Unable to load player stats: ${playerStatsStatus.error}`;
             return `<section class="team-drawer-card"><h2 class="team-drawer-card-title">Player Stats</h2><p class="empty-detail">${escape(message)}</p></section>`;
         }
+        const generatedAt = playerStatsStatus?.generatedAt ? new Date(playerStatsStatus.generatedAt) : null;
+        const lastLoadedAt = playerStatsStatus?.lastSuccessfulSync ? new Date(playerStatsStatus.lastSuccessfulSync) : null;
+        const dataFreshness = generatedAt && Number.isFinite(generatedAt.getTime())
+            ? `${playerStatsStatus.stale ? 'Showing cached stats generated' : 'Stats generated'} ${generatedAt.toLocaleString()}${playerStatsStatus.stale ? `; cached copy last synced ${lastLoadedAt?.toLocaleString() || 'at an unknown time'}` : ''}.`
+            : playerStatsStatus?.stale ? 'Showing previously cached detailed stats.' : '';
+        const freshnessNotice = dataFreshness
+            ? `<section class="team-drawer-card"><p class="empty-detail" role="status">${escape(dataFreshness)}</p></section>`
+            : '';
         const players = buildPlayerStats(matches, teamName);
         const configs = [
             { title: 'Goal involvements', value: player => player.goals + player.assists },
             { title: 'Goals', value: player => player.goals },
             { title: 'Assists', value: player => player.assists }
         ];
-            return configs.map(config => {
+            return freshnessNotice + configs.map(config => {
             const rankedPlayers = players
                 .filter(player => config.value(player) > 0)
                 .sort((a, b) => config.value(b) - config.value(a) || a.name.localeCompare(b.name));
@@ -198,7 +206,11 @@
         const draftPickValue = window.TeamNames?.resolve?.(team.team)?.draftPick ?? rank;
         const draftDiff = draftPickValue - rank;
         const draftDiffText = `${draftDiff >= 0 ? '+' : ''}${draftDiff}`;
-        return `<section class="team-drawer-card"><div class="team-drawer-summary"><div class="team-drawer-identity">${logo ? `<img class="team-drawer-crest" src="${escape(logo)}" alt="${escape(team.team)} crest">` : ''}<div class="team-drawer-owner">${escape(team.owner || 'Unassigned')}</div></div><div class="team-drawer-records"><div class="team-drawer-record team-drawer-rank-pick"><span><span class="team-drawer-record-label">Overall rank</span><strong>${rank}</strong></span><span><span class="team-drawer-record-label">Draft pick</span><strong>${draftPickValue} <span class="team-drawer-draft-diff">(${draftDiffText})</span></strong></span></div><div class="team-drawer-record"><span>Overall record</span><strong>${formatRecord(team)}</strong></div><div class="team-drawer-record"><span>Home record</span><strong>${formatRecord(options.stats.homeStats?.[team.team] || team)}</strong></div><div class="team-drawer-record"><span>Away record</span><strong>${formatRecord(options.stats.awayStats?.[team.team] || team)}</strong></div></div></div></section><section class="team-drawer-card"><h2 class="team-drawer-card-title">Team Form</h2>${form ? `<div class="team-form-grid">${form}</div>` : '<p class="empty-detail">No matches available</p>'}</section>${renderTableCard(teams, team, options)}<section class="team-drawer-card"><h2 class="team-drawer-card-title">Team Stats</h2>${statRow('Goals', 'GF')}${statRow('Goals Conceded', 'GA')}${statRow('Goal differential', 'GD')}${statRow('Clean sheets', 'cleanSheets')}${statRow('Yellow cards', 'yellowCards', 'yellow')}${statRow('Red cards', 'redCards', 'red')}</section>${renderPlayerStatCards(options.matches, team.team, options.playerStatsStatus)}`;
+        const cardMismatches = (options.stats.cardMismatches || []).filter(item => item.team === team.team);
+        const cardWarning = cardMismatches.length
+            ? `<p class="empty-detail team-drawer-data-warning" role="alert">Card totals differ from match events in ${cardMismatches.length} instance${cardMismatches.length === 1 ? '' : 's'}. Displayed totals use the higher count per match. ${cardMismatches.map(item => `Match ${escape(item.matchId)}: ${escape(item.cardType)} cards show ${item.normalizedCount} in totals versus ${item.eventCount} events.`).join(' ')}</p>`
+            : '';
+        return `<section class="team-drawer-card"><div class="team-drawer-summary"><div class="team-drawer-identity">${logo ? `<img class="team-drawer-crest" src="${escape(logo)}" alt="${escape(team.team)} crest">` : ''}<div class="team-drawer-owner">${escape(team.owner || 'Unassigned')}</div></div><div class="team-drawer-records"><div class="team-drawer-record team-drawer-rank-pick"><span><span class="team-drawer-record-label">Overall rank</span><strong>${rank}</strong></span><span><span class="team-drawer-record-label">Draft pick</span><strong>${draftPickValue} <span class="team-drawer-draft-diff">(${draftDiffText})</span></strong></span></div><div class="team-drawer-record"><span>Overall record</span><strong>${formatRecord(team)}</strong></div><div class="team-drawer-record"><span>Home record</span><strong>${formatRecord(options.stats.homeStats?.[team.team] || team)}</strong></div><div class="team-drawer-record"><span>Away record</span><strong>${formatRecord(options.stats.awayStats?.[team.team] || team)}</strong></div></div></div></section><section class="team-drawer-card"><h2 class="team-drawer-card-title">Team Form</h2>${form ? `<div class="team-form-grid">${form}</div>` : '<p class="empty-detail">No matches available</p>'}</section>${renderTableCard(teams, team, options)}<section class="team-drawer-card"><h2 class="team-drawer-card-title">Team Stats</h2>${cardWarning}${statRow('Goals', 'GF')}${statRow('Goals Conceded', 'GA')}${statRow('Goal differential', 'GD')}${statRow('Clean sheets', 'cleanSheets')}${statRow('Yellow cards', 'yellowCards', 'yellow')}${statRow('Red cards', 'redCards', 'red')}</section>${renderPlayerStatCards(options.matches, team.team, options.playerStatsStatus)}`;
     }
 
     function resetFormScroll(content) {

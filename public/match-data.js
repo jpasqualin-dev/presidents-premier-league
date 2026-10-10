@@ -17,11 +17,28 @@
     let memoryIncludesDetails = false;
     let pendingRequest = null;
     let pollTimer = null;
-    let status = { stale: false, lastSuccessfulSync: 0 };
+    let status = { stale: false, lastSuccessfulSync: 0, detailLevel: 'summary' };
+    let detailedStatus = { stale: false, lastSuccessfulSync: 0, detailLevel: 'full' };
 
     const normalizeData = data => window.TeamNames
         ? { ...data, matches: (data?.matches || []).map(window.TeamNames.normalizeMatch) }
         : data;
+    const hasCompleteDetails = data => data?.dataQuality?.detailLevel === 'full'
+        && data.dataQuality.detailsComplete === true
+        && data.dataQuality.scoringComplete === true
+        && data.dataQuality.historicalAvailable === true
+        && Array.isArray(data.matches)
+        && data.matches.length > 0
+        && data.matches.every(match => Array.isArray(match.scorers)
+            && Array.isArray(match.events)
+            && Array.isArray(match.teamStats)
+            && match.teamCards
+            && typeof match.teamCards === 'object'
+            && (match.status !== 'FINISHED'
+                || Number.isFinite(match.score?.fullTime?.home)
+                    && Number.isFinite(match.score?.fullTime?.away)
+                    && match.scorers.length === match.score.fullTime.home + match.score.fullTime.away));
+    const isUsableData = (data, includeDetails) => !includeDetails || hasCompleteDetails(data);
 
     const cacheKeys = includeDetails => ({
         data: includeDetails ? `${config.cacheKey}_details` : config.cacheKey,
@@ -58,23 +75,41 @@
     };
 
     const readStaleCache = (includeDetails = false) => {
-        for (const cacheType of includeDetails ? [true, false] : [false]) {
-            const cached = readCache(cacheType);
-            if (cached) return cached;
-            try {
-                const keys = cacheKeys(cacheType), data = localStorage.getItem(keys.data), time = Number(localStorage.getItem(keys.time));
-                if (data && time && Date.now() - time <= config.staleMaxAge) return { data: normalizeData(JSON.parse(data)), time };
-            } catch (error) {
-                console.warn('Unable to read stale match data cache:', error);
+        const cached = readCache(includeDetails);
+        if (cached && isUsableData(cached.data, includeDetails)) return cached;
+        try {
+            const keys = cacheKeys(includeDetails);
+            const data = localStorage.getItem(keys.data);
+            const time = Number(localStorage.getItem(keys.time));
+            if (data && time && Date.now() - time <= config.staleMaxAge) {
+                const normalizedData = normalizeData(JSON.parse(data));
+                if (isUsableData(normalizedData, includeDetails)) return { data: normalizedData, time };
             }
+        } catch (error) {
+            console.warn('Unable to read stale match data cache:', error);
         }
         return null;
     };
 
-    const updateStatus = nextStatus => {
-        status = nextStatus;
-        window.dispatchEvent(new CustomEvent('match-data-status', { detail: status }));
+    const updateStatus = (nextStatus, includeDetails = false) => {
+        const next = { ...nextStatus, includeDetails };
+        if (includeDetails) detailedStatus = next;
+        else status = next;
+        window.dispatchEvent(new CustomEvent('match-data-status', { detail: next }));
     };
+
+    const updateDataStatus = (data, time, includeDetails, stale = false) => updateStatus({
+        stale,
+        lastSuccessfulSync: time,
+        generatedAt: data?.generatedAt || null,
+        detailLevel: data?.dataQuality?.detailLevel || (includeDetails ? 'unknown' : 'summary'),
+        detailsComplete: data?.dataQuality?.detailsComplete === true,
+        scoringComplete: data?.dataQuality?.scoringComplete === true,
+        historicalAvailable: data?.dataQuality?.historicalAvailable === true,
+        historicalMatchCount: data?.dataQuality?.historicalMatchCount || 0,
+        totalMatchCount: data?.matches?.length || 0,
+        sources: data?.sources || null
+    }, includeDetails);
 
     const wait = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
 
@@ -101,10 +136,11 @@
     async function getMatchData({ force = false, includeDetails = false } = {}) {
         if (window.TeamNames?.ready) await window.TeamNames.ready;
         const cached = force ? null : getFreshCache(includeDetails);
-        if (cached) {
+        if (cached && isUsableData(cached.data, includeDetails)) {
             memoryData = cached.data;
             memoryTime = cached.time;
             memoryIncludesDetails = includeDetails;
+            updateDataStatus(cached.data, cached.time, includeDetails);
             return cached.data;
         }
         if (pendingRequest?.includeDetails === includeDetails) return pendingRequest.promise;
@@ -112,10 +148,11 @@
         const promise = (async () => {
             const requestStarted = Date.now();
             const refreshedCache = force ? null : getFreshCache(includeDetails);
-            if (refreshedCache) {
+            if (refreshedCache && isUsableData(refreshedCache.data, includeDetails)) {
                 memoryData = refreshedCache.data;
                 memoryTime = refreshedCache.time;
                 memoryIncludesDetails = includeDetails;
+                updateDataStatus(refreshedCache.data, refreshedCache.time, includeDetails);
                 return refreshedCache.data;
             }
 
@@ -131,10 +168,11 @@
                 }
                 if (ownsLock) break;
                 const availableCache = readCache(includeDetails);
-                if (availableCache && availableCache.time > requestStarted) {
+                if (availableCache && availableCache.time > requestStarted && isUsableData(availableCache.data, includeDetails)) {
                     memoryData = availableCache.data;
                     memoryTime = availableCache.time;
                     memoryIncludesDetails = includeDetails;
+                    updateDataStatus(availableCache.data, availableCache.time, includeDetails);
                     return availableCache.data;
                 }
                 if (Date.now() - lockStarted >= config.lockDuration) throw new Error('Timed out waiting for match data refresh.');
@@ -145,11 +183,14 @@
                 const response = await fetch(`/api/matches${includeDetails ? '?details=1' : ''}`);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = normalizeData(await response.json());
+                if (!isUsableData(data, includeDetails)) {
+                    throw new Error('Detailed match data is incomplete or unavailable.');
+                }
                 const time = Date.now();
                 const keys = cacheKeys(includeDetails);
                 localStorage.setItem(keys.data, JSON.stringify(data));
                 localStorage.setItem(keys.time, time.toString());
-                updateStatus({ stale: false, lastSuccessfulSync: time });
+                updateDataStatus(data, time, includeDetails);
                 publish(data, time, includeDetails);
                 return data;
             } catch (error) {
@@ -158,7 +199,7 @@
                 memoryData = stale.data;
                 memoryTime = stale.time;
                 memoryIncludesDetails = includeDetails;
-                updateStatus({ stale: true, lastSuccessfulSync: stale.time });
+                updateDataStatus(stale.data, stale.time, includeDetails, true);
                 notifySubscribers(stale.data);
                 return stale.data;
             } finally {
@@ -185,7 +226,7 @@
         return () => subscribers.delete(listener);
     }
 
-    function getStatus() { return status; }
+    function getStatus({ includeDetails = false } = {}) { return includeDetails ? detailedStatus : status; }
 
     if (typeof document !== 'undefined') {
         document.addEventListener('visibilitychange', () => {
@@ -225,6 +266,7 @@
         memoryData = normalizeData(update.data);
         memoryTime = update.time;
         memoryIncludesDetails = Boolean(update.includeDetails);
+        updateDataStatus(memoryData, memoryTime, memoryIncludesDetails);
         notifySubscribers(memoryData);
     }
 

@@ -52,6 +52,38 @@ function applyMatchCorrections(matches) {
     });
 }
 
+function buildDataQuality(includeDetails, historicalAvailable, historicalMatches, matches, liveAvailable) {
+    const scoringComplete = matches.length > 0 && matches.every(match => {
+        if (match.status !== 'FINISHED') return true;
+        const homeGoals = match.score?.fullTime?.home;
+        const awayGoals = match.score?.fullTime?.away;
+        return Number.isFinite(homeGoals)
+            && Number.isFinite(awayGoals)
+            && Array.isArray(match.scorers)
+            && match.scorers.length === homeGoals + awayGoals;
+    });
+    const detailsComplete = Boolean(
+        includeDetails
+        && historicalAvailable
+        && historicalMatches.length > 0
+        && scoringComplete
+        && matches.every(match => Array.isArray(match.scorers)
+            && Array.isArray(match.events)
+            && Array.isArray(match.teamStats)
+            && match.teamCards
+            && typeof match.teamCards === 'object')
+    );
+    return {
+        detailLevel: includeDetails ? 'full' : 'summary',
+        detailsComplete,
+        scoringComplete,
+        historicalAvailable,
+        historicalMatchCount: historicalMatches.length,
+        totalMatchCount: matches.length,
+        liveAvailable
+    };
+}
+
 async function fetchRecentEspnMatches() {
     const payloads = await Promise.all(espnDateKeys().map(async date => {
         const response = await fetch(`${ESPN_ENDPOINT}?dates=${date}&limit=1000`);
@@ -176,6 +208,13 @@ module.exports = async function handler(req, res) {
 
         const mergedMatches = mergeMatches(applyMatchCorrections([...historicalMatches, ...liveMatches]));
         const hasLiveMatch = mergedMatches.some(match => ['IN_PLAY', 'PAUSED'].includes(match.status));
+        const dataQuality = buildDataQuality(
+            includeDetails,
+            historyResult.status === 'fulfilled',
+            historicalMatches,
+            mergedMatches,
+            liveAvailable
+        );
         res.setHeader('Cache-Control', hasLiveMatch
             ? 'public, s-maxage=10, stale-while-revalidate=20'
             : 'public, s-maxage=60, stale-while-revalidate=120');
@@ -183,7 +222,8 @@ module.exports = async function handler(req, res) {
             matches: mergedMatches,
             sources: { historical: historyResult.status === 'fulfilled' ? 'neon' : null, live: liveAvailable ? 'espn' : null },
             liveAvailable,
-            generatedAt: new Date().toISOString()
+            generatedAt: new Date().toISOString(),
+            dataQuality
         });
     } catch (error) {
         console.error('Normalized match read failed:', error);
@@ -192,3 +232,4 @@ module.exports = async function handler(req, res) {
 };
 
 module.exports.applyMatchCorrections = applyMatchCorrections;
+module.exports.buildDataQuality = buildDataQuality;

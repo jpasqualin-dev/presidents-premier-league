@@ -4,6 +4,7 @@
     let detailedMatches = null;
     let detailedMatchesPromise = null;
     let detailedMatchesError = null;
+    let detailedMatchesStatus = null;
     const { draftData, getOwnerOfTeam } = window.PplLeagueConfig;
 
     function getLogoByName(teamName) {
@@ -18,10 +19,10 @@
         return window.TeamNames ? window.TeamNames.shortName(teamName) : String(teamName);
     }
 
-    function renderTeamDrawer(teamName, matches, playerStatsStatus, skipRouter = false) {
+    function renderTeamDrawer(teamName, matches, playerStatsStatus, skipRouter = false, auditCardEvents = false) {
         const overlay = document.getElementById('match-drawer-overlay');
         const openedFromMatch = overlay?.classList.contains('is-open');
-        const stats = TeamDrawerShared.buildStats(matches, Object.values(draftData).flat(), getOwnerOfTeam);
+        const stats = TeamDrawerShared.buildStats(matches, Object.values(draftData).flat(), getOwnerOfTeam, { auditCardEvents });
         TeamDrawerShared.openFromMatch(teamName, {
             stats,
             matches,
@@ -46,20 +47,49 @@
         teamDrawerTeamName = teamName;
         if (!detailedMatches && !detailedMatchesPromise) detailedMatchesError = null;
         const matches = detailedMatches || window.matchDrawerMatches || window.playerMatches || [];
-        renderTeamDrawer(teamName, matches, detailedMatches ? null : detailedMatchesError ? { error: detailedMatchesError.message } : { loading: true });
+        renderTeamDrawer(
+            teamName,
+            matches,
+            detailedMatches ? detailedMatchesStatus : detailedMatchesError ? { error: detailedMatchesError.message } : { loading: true },
+            false,
+            Boolean(detailedMatches)
+        );
         if (detailedMatches) return;
 
         detailedMatchesPromise ||= window.getMatchData({ includeDetails: true })
             .then(data => {
-                if (!Array.isArray(data?.matches)) throw new Error('Detailed match data is unavailable.');
+                if (data?.dataQuality?.historicalAvailable !== true) {
+                    throw new Error('Season history is unavailable, so full-season stats cannot be verified.');
+                }
+                if (data?.dataQuality?.detailLevel !== 'full'
+                    || data.dataQuality.detailsComplete !== true
+                    || data.dataQuality.scoringComplete !== true
+                    || !Array.isArray(data.matches)
+                    || data.matches.length === 0
+                    || !data.matches.every(match => Array.isArray(match.scorers)
+                        && Array.isArray(match.events)
+                        && Array.isArray(match.teamStats)
+                        && match.teamCards
+                        && typeof match.teamCards === 'object'
+                        && (match.status !== 'FINISHED'
+                            || Number.isFinite(match.score?.fullTime?.home)
+                                && Number.isFinite(match.score?.fullTime?.away)
+                                && match.scorers.length === match.score.fullTime.home + match.score.fullTime.away))) {
+                    throw new Error('Detailed season match data is incomplete.');
+                }
                 detailedMatches = data.matches;
                 window.matchDrawerMatches = detailedMatches;
                 detailedMatchesError = null;
+                detailedMatchesStatus = window.DataManager.getStatus({ includeDetails: true });
                 return detailedMatches;
             })
             .catch(error => {
                 console.error('Unable to load detailed team drawer stats:', error);
-                detailedMatchesError = error;
+                const summaryStatus = window.DataManager.getStatus();
+                const staleNote = summaryStatus.stale
+                    ? ` Summary data was last synced ${summaryStatus.lastSuccessfulSync ? new Date(summaryStatus.lastSuccessfulSync).toLocaleString() : 'at an unknown time'}.`
+                    : '';
+                detailedMatchesError = new Error(`${error.message}${staleNote}`);
                 return null;
             })
             .finally(() => { detailedMatchesPromise = null; });
@@ -69,8 +99,9 @@
             renderTeamDrawer(
                 teamName,
                 fullMatches || matches,
-                fullMatches ? null : { error: detailedMatchesError?.message || 'Detailed match data is unavailable.' },
-                true
+                fullMatches ? detailedMatchesStatus : { error: detailedMatchesError?.message || 'Detailed match data is unavailable.' },
+                true,
+                Boolean(fullMatches)
             );
         });
     };
