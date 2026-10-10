@@ -822,6 +822,7 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     }), { scrollY: 0, topGap: 0 });
     assert.equal(await page.locator('.profile-card-team').count(), 4);
     assert.equal(await page.locator('.profile-card-top-row').evaluate(element => getComputedStyle(element).flexDirection), 'column');
+    await page.waitForFunction(() => document.querySelectorAll('.profile-card-team-points-label').length === 4);
     assert.deepEqual(await page.locator('.profile-card-team-points-label').allTextContents(), ['PTS', 'PTS', 'PTS', 'PTS']);
     assert.deepEqual(await page.locator('.profile-card-team-points-value').allTextContents(), ['3', '0', '0', '0']);
     assert.equal(await page.locator('.profile-card-team-points').first().evaluate(element => getComputedStyle(element).backgroundColor), 'rgb(0, 255, 135)');
@@ -848,6 +849,12 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.equal(await page.locator('#panel-teams').isVisible(), false);
     assert.equal(await page.locator('.h2h-card').isVisible(), true);
     assert.equal(await page.locator('.scoring-card').isVisible(), true);
+    assert.deepEqual(await page.locator('.h2h-column-head span').allTextContents(), ['Opponent', 'W-D-L', 'PTS']);
+    assert.deepEqual(await page.locator('.scoring-column-head span').allTextContents(), ['Measure', 'Value']);
+    assert.equal(await page.locator('.h2h-card').evaluate(element => getComputedStyle(element).borderRadius), '16px');
+    assert.equal(await page.locator('.h2h-table-title').evaluate(element => getComputedStyle(element).borderBottomWidth), '2px');
+    assert.equal(await page.locator('.h2h-column-head').evaluate(element => getComputedStyle(element).textTransform), 'uppercase');
+    assert.equal(await page.locator('.head-to-head-row').count(), 4);
     assert.equal(await page.locator('#head-to-head-details').isVisible(), true);
     await page.locator('#tab-h2h').press('ArrowLeft');
     assert.equal(await page.locator('#tab-draft').getAttribute('aria-selected'), 'true');

@@ -275,14 +275,31 @@
             border-top: 0;
         }
 
-        .h2h-card .head-to-head-details {
-            display: grid;
-            gap: 10px;
-        }
-
+        .h2h-card,
+        .scoring-card { margin-bottom: 14px; }
+        .h2h-table-title,
+        .scoring-table-title { margin: 0; padding: 0 0 4px; border-bottom: 2px solid #00ff87; }
+        .h2h-table-title h2,
+        .scoring-table-title h2 { margin: 0; border: 0; padding: 0; color: var(--title-color); font-size: 1.4rem; }
+        .table-column-head,
+        .head-to-head-row,
+        .scoring-row { display: grid; align-items: center; gap: 8px; padding: 10px 8px; border-bottom: 1px solid #eaeaea; }
+        .table-column-head { color: #666; font-size: 0.8rem; font-weight: 500; text-transform: uppercase; border-bottom: 2px solid #eaeaea; }
+        .h2h-column-head,
+        .head-to-head-row { grid-template-columns: minmax(0, 1fr) 5.5ch 5ch; }
+        .h2h-column-head span:first-child,
+        .head-to-head-row span:first-child { text-align: left; }
+        .h2h-column-head span:not(:first-child) { text-align: center; }
+        .head-to-head-row { font-size: 0.875rem; font-weight: 600; }
+        .head-to-head-row:last-child,
+        .scoring-row:last-child { border-bottom: 0; }
+        .head-to-head-record { min-width: 0; text-align: center; color: var(--text-muted); }
+        .head-to-head-points { min-width: 0; text-align: right; }
+        .h2h-card .head-to-head-details { display: grid; gap: 0; }
         .scoring-card { margin-top: 14px; }
-        .scoring-rows { display: grid; gap: 10px; }
-        .scoring-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; font-size: 0.825rem; font-weight: 600; line-height: 1.2; }
+        .scoring-column-head,
+        .scoring-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+        .scoring-row { font-size: 0.875rem; font-weight: 600; }
         .scoring-label { color: var(--text-muted); }
         .scoring-value { color: var(--text-main); text-align: right; }
 
@@ -414,6 +431,11 @@
         body.dark-mode .prototype-card,
         body.dark-mode .mw-card { border-color: #3d3d3d; }
 
+        body.dark-mode .table-column-head,
+        body.dark-mode .head-to-head-row,
+        body.dark-mode .scoring-row { border-color: #3d3d3d; }
+        body.dark-mode .table-column-head { color: #bdbdbd; }
+
         body.dark-mode .my-team,
         body.dark-mode .opponent-line,
         body.dark-mode .fixture-item { color: #f1f1f1; border-color: #3d3d3d; }
@@ -462,6 +484,7 @@
                     <div class="points-badge">
                         <span class="label">Total Pts</span>
                         <span class="value" id="total-pts">--</span>
+                        <span class="label" id="player-rank">Rank --</span>
                     </div>
                 </div>
                 <section class="prototype-card achievement-card" aria-labelledby="achievements-title">
@@ -504,14 +527,14 @@
                 </div>
             </section>
             <section class="prototype-panel" id="panel-h2h" role="tabpanel" aria-labelledby="tab-h2h" tabindex="0" hidden>
-                <section class="prototype-card h2h-card" aria-labelledby="h2h-title">
-                    <h2 id="h2h-title">H2H</h2>
-                    <div class="head-to-head-details" id="head-to-head-details">
-                        <div class="achievement-row"><span id="head-to-head-label">Jordan Head to Head</span></div>
-                    </div>
+                <section class="table-wrapper table-card h2h-card" aria-labelledby="h2h-title">
+                    <div class="overall-header-container h2h-table-title"><h2 id="h2h-title">H2H</h2></div>
+                    <div class="table-column-head h2h-column-head" aria-hidden="true"><span>Opponent</span><span>W-D-L</span><span>PTS</span></div>
+                    <div class="head-to-head-details" id="head-to-head-details"></div>
                 </section>
-                <section class="prototype-card scoring-card" aria-labelledby="scoring-title">
-                    <h2 id="scoring-title">Scoring</h2>
+                <section class="table-wrapper table-card scoring-card" aria-labelledby="scoring-title">
+                    <div class="overall-header-container scoring-table-title"><h2 id="scoring-title">Scoring</h2></div>
+                    <div class="table-column-head scoring-column-head" aria-hidden="true"><span>Measure</span><span>Value</span></div>
                     <div class="scoring-rows">
                         <div class="scoring-row"><span class="scoring-label">Highest Scoring Week</span><span class="scoring-value" id="highest-scoring-week">--</span></div>
                         <div class="scoring-row"><span class="scoring-label">Lowest Scoring Week(s)</span><span class="scoring-value" id="lowest-scoring-week">--</span></div>
@@ -542,13 +565,11 @@
         const playerName = playerNames.find(name => name.toLowerCase() === requestedPlayer?.toLowerCase()) || 'Jordan';
         const playerTitle = document.getElementById('page-title');
         const profilePlayerName = document.querySelector('.profile-info h1');
-        const headToHeadLabel = document.getElementById('head-to-head-label');
         const draftTitle = document.getElementById('draft-title');
 
         document.title = `${playerName} | Presidents Premier League`;
         playerTitle.textContent = playerName;
         profilePlayerName.textContent = playerName;
-        headToHeadLabel.textContent = `${playerName} Head to Head`;
         draftTitle.textContent = `Draft: ${playerName}`;
         window.playerTeams = PplLeagueConfig.draftData[playerName] || [];
         window.playerTeamLogos = TeamNames.logoMap();
@@ -563,6 +584,38 @@
         });
 
         let latestMatches = [];
+        const getPlayerRank = matches => {
+            const standings = Object.fromEntries(playerNames.map(owner => [owner, { points: 0, goalsFor: 0, goalsAgainst: 0 }]));
+            (matches || []).forEach(match => {
+                if (match.status !== 'FINISHED') return;
+                const homeScore = match.score.fullTime.home;
+                const awayScore = match.score.fullTime.away;
+                if (!Number.isFinite(homeScore) || !Number.isFinite(awayScore)) return;
+                const homeTeam = Object.entries(PplLeagueConfig.draftData).flatMap(([owner, teams]) => teams.map(team => ({ owner, team })))
+                    .find(({ team }) => match.homeTeam.name.toLowerCase().includes(team.toLowerCase()));
+                const awayTeam = Object.entries(PplLeagueConfig.draftData).flatMap(([owner, teams]) => teams.map(team => ({ owner, team })))
+                    .find(({ team }) => match.awayTeam.name.toLowerCase().includes(team.toLowerCase()));
+                if (homeTeam) {
+                    const stats = standings[homeTeam.owner];
+                    stats.points += homeScore > awayScore ? 3 : homeScore === awayScore ? 1 : 0;
+                    stats.goalsFor += homeScore;
+                    stats.goalsAgainst += awayScore;
+                }
+                if (awayTeam) {
+                    const stats = standings[awayTeam.owner];
+                    stats.points += awayScore > homeScore ? 3 : awayScore === homeScore ? 1 : 0;
+                    stats.goalsFor += awayScore;
+                    stats.goalsAgainst += homeScore;
+                }
+            });
+            const rankedPlayers = Object.entries(standings).sort(([, statsA], [, statsB]) =>
+                statsB.points - statsA.points
+                || (statsB.goalsFor - statsB.goalsAgainst) - (statsA.goalsFor - statsA.goalsAgainst)
+                || statsB.goalsFor - statsA.goalsFor
+            );
+            return rankedPlayers.findIndex(([owner]) => owner === playerName) + 1;
+        };
+
         const renderTeamPoints = matches => {
             const teamPoints = Object.fromEntries(window.playerTeams.map(team => [team, 0]));
             (matches || []).forEach(match => {
@@ -587,6 +640,7 @@
                 const pointsText = `<span class="profile-card-team-points-label">PTS</span><span class="profile-card-team-points-value">${pointsValue}</span>`;
                 if (pointsBadge.innerHTML !== pointsText) pointsBadge.innerHTML = pointsText;
             });
+            document.getElementById('player-rank').textContent = `Rank ${getPlayerRank(matches)}`;
         };
 
         const getWeeklyScores = (teams, matches) => {
