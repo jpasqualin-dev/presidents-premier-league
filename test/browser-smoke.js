@@ -438,6 +438,50 @@ test('team drawer table rows open the selected team by click and keyboard', asyn
     await context.close();
 });
 
+test('team drawer loads detailed scorer and card data on demand', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const page = await context.newPage();
+    let detailedRequestSeen = false;
+    await page.route('**/api/matches**', route => {
+        const includeDetails = new URL(route.request().url()).searchParams.get('details') === '1';
+        const data = fixtureData();
+        if (includeDetails) {
+            detailedRequestSeen = true;
+            const cityMatch = data.matches.find(match => match.homeTeam.name === 'Manchester City');
+            cityMatch.teamCards = { home: { yellow: 2, red: 1 }, away: { yellow: 0, red: 0 } };
+            cityMatch.events = [
+                { teamProviderId: cityMatch.homeTeam.id, yellowCard: true },
+                { teamProviderId: cityMatch.homeTeam.id, redCard: true }
+            ];
+            cityMatch.scorers = [{
+                teamProviderId: cityMatch.homeTeam.id,
+                athleteProviderId: 'city-striker',
+                athleteName: 'Manchester City Striker',
+                assistProviderId: 'city-assister',
+                assistName: 'Manchester City Assister',
+                ownGoal: false
+            }];
+        }
+        return route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(data)
+        });
+    });
+    await page.goto(`${baseUrl}/hef.html`);
+    await page.locator('body.player-page-ready').waitFor();
+    await page.evaluate(() => window.openTeamDrawerFromMatch('Manchester City'));
+    await page.locator('.team-drawer-player-stat').filter({ hasText: 'Manchester City Striker' }).first().waitFor();
+
+    const statsCard = page.locator('.team-drawer-card').filter({ hasText: 'Yellow cards' });
+    assert.equal(await statsCard.locator('.team-drawer-stat').filter({ hasText: 'Yellow cards' }).locator('strong').textContent(), '2');
+    assert.equal(await statsCard.locator('.team-drawer-stat').filter({ hasText: 'Red cards' }).locator('strong').textContent(), '1');
+    assert.equal(await page.locator('.team-drawer-player-stat').filter({ hasText: 'Manchester City Striker' }).first().locator('strong').textContent(), '1');
+    assert.equal(detailedRequestSeen, true);
+    await context.close();
+});
+
 test('upcoming drawer back navigation ignores a late previous-match response', async t => {
     if (browserError) return t.skip('Chromium runtime unavailable');
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });

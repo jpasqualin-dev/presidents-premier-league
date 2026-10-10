@@ -124,6 +124,28 @@ test('team stats capitalize the heading and rank fewer goals conceded higher', (
     assert.match(teamAOutput, /Goals Conceded<\/span><strong>6<\/strong>[\s\S]*?aria-label="Goals Conceded rank 2 of 20"/);
 });
 
+test('team card totals use normalized card counts and avoid double-counting card events', () => {
+    const stats = loadTeamDrawer().buildStats([{
+        status: 'FINISHED',
+        homeTeam: { id: 'city', name: 'Manchester City' },
+        awayTeam: { id: 'chelsea', name: 'Chelsea' },
+        score: { fullTime: { home: 2, away: 1 } },
+        teamCards: {
+            home: { yellow: 2, red: 1 },
+            away: { yellow: 0, red: 0 }
+        },
+        events: [
+            { teamProviderId: 'city', yellowCard: true },
+            { teamProviderId: 'city', redCard: true },
+            { teamProviderId: 'chelsea', yellowCard: true }
+        ]
+    }], ['Manchester City', 'Chelsea'], () => 'Test');
+
+    assert.equal(stats.allStats['Manchester City'].yellowCards, 2);
+    assert.equal(stats.allStats['Manchester City'].redCards, 1);
+    assert.equal(stats.allStats.Chelsea.yellowCards, 1);
+});
+
 test('team drawer table follows Team Form and shows up to two places around the selected team', () => {
     const drawer = loadTeamDrawer();
     const teams = Array.from({ length: 6 }, (_, index) => {

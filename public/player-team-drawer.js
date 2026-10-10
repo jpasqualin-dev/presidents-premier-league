@@ -1,6 +1,9 @@
 (function () {
     let teamDrawerTeamName = '';
     let teamDrawerOpen = false;
+    let detailedMatches = null;
+    let detailedMatchesPromise = null;
+    let detailedMatchesError = null;
     const { draftData, getOwnerOfTeam } = window.PplLeagueConfig;
 
     function getLogoByName(teamName) {
@@ -15,18 +18,18 @@
         return window.TeamNames ? window.TeamNames.shortName(teamName) : String(teamName);
     }
 
-    window.openTeamDrawerFromMatch = function (teamName) {
+    function renderTeamDrawer(teamName, matches, playerStatsStatus, skipRouter = false) {
         const overlay = document.getElementById('match-drawer-overlay');
         const openedFromMatch = overlay?.classList.contains('is-open');
-        const matches = window.matchDrawerMatches || window.playerMatches || [];
-        teamDrawerOpen = true;
-        teamDrawerTeamName = teamName;
+        const stats = TeamDrawerShared.buildStats(matches, Object.values(draftData).flat(), getOwnerOfTeam);
         TeamDrawerShared.openFromMatch(teamName, {
-            stats: TeamDrawerShared.buildStats(matches, Object.values(draftData).flat(), getOwnerOfTeam),
+            stats,
             matches,
+            playerStatsStatus,
             getLogoByName,
             getShortTeamName,
             getOwnerOfTeam,
+            skipRouter,
             openMatch: true,
             showBackButton: openedFromMatch
         });
@@ -36,6 +39,40 @@
             document.body.classList.add('drawer-open');
             overlay?.querySelector('.match-drawer-back')?.remove();
         }
+    }
+
+    window.openTeamDrawerFromMatch = function (teamName) {
+        teamDrawerOpen = true;
+        teamDrawerTeamName = teamName;
+        if (!detailedMatches && !detailedMatchesPromise) detailedMatchesError = null;
+        const matches = detailedMatches || window.matchDrawerMatches || window.playerMatches || [];
+        renderTeamDrawer(teamName, matches, detailedMatches ? null : detailedMatchesError ? { error: detailedMatchesError.message } : { loading: true });
+        if (detailedMatches) return;
+
+        detailedMatchesPromise ||= window.getMatchData({ includeDetails: true })
+            .then(data => {
+                if (!Array.isArray(data?.matches)) throw new Error('Detailed match data is unavailable.');
+                detailedMatches = data.matches;
+                window.matchDrawerMatches = detailedMatches;
+                detailedMatchesError = null;
+                return detailedMatches;
+            })
+            .catch(error => {
+                console.error('Unable to load detailed team drawer stats:', error);
+                detailedMatchesError = error;
+                return null;
+            })
+            .finally(() => { detailedMatchesPromise = null; });
+
+        detailedMatchesPromise.then(fullMatches => {
+            if (!teamDrawerOpen || teamDrawerTeamName.toLowerCase() !== String(teamName).toLowerCase()) return;
+            renderTeamDrawer(
+                teamName,
+                fullMatches || matches,
+                fullMatches ? null : { error: detailedMatchesError?.message || 'Detailed match data is unavailable.' },
+                true
+            );
+        });
     };
 
     window.openMatchDrawer = function (matchId) {

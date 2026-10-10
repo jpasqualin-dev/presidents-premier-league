@@ -54,19 +54,34 @@
                 apply(allStats[homeKey], homeScore, awayScore);
                 apply(homeStats[homeKey], homeScore, awayScore);
                 if (awayScore === 0) allStats[homeKey].cleanSheets += 1;
+                const cardCounts = match.teamCards?.home || {};
+                const homeProviderId = String(match.homeTeam.id || match.homeTeam.providerId || '');
+                const cardEvents = (match.events || []).filter(event => String(event.teamProviderId || '') === homeProviderId);
+                allStats[homeKey].yellowCards += Math.max(
+                    Number(cardCounts.yellow) || 0,
+                    cardEvents.filter(event => event.yellowCard).length
+                );
+                allStats[homeKey].redCards += Math.max(
+                    Number(cardCounts.red) || 0,
+                    cardEvents.filter(event => event.redCard).length
+                );
             }
             if (awayKey) {
                 apply(allStats[awayKey], awayScore, homeScore);
                 apply(awayStats[awayKey], awayScore, homeScore);
                 if (homeScore === 0) allStats[awayKey].cleanSheets += 1;
+                const cardCounts = match.teamCards?.away || {};
+                const awayProviderId = String(match.awayTeam.id || match.awayTeam.providerId || '');
+                const cardEvents = (match.events || []).filter(event => String(event.teamProviderId || '') === awayProviderId);
+                allStats[awayKey].yellowCards += Math.max(
+                    Number(cardCounts.yellow) || 0,
+                    cardEvents.filter(event => event.yellowCard).length
+                );
+                allStats[awayKey].redCards += Math.max(
+                    Number(cardCounts.red) || 0,
+                    cardEvents.filter(event => event.redCard).length
+                );
             }
-            (match.events || []).forEach(event => {
-                const eventTeamId = String(event.teamProviderId || '');
-                const teamKey = eventTeamId === String(match.homeTeam.id || match.homeTeam.providerId) ? homeKey : eventTeamId === String(match.awayTeam.id || match.awayTeam.providerId) ? awayKey : null;
-                if (!teamKey) return;
-                if (event.yellowCard) allStats[teamKey].yellowCards += 1;
-                if (event.redCard) allStats[teamKey].redCards += 1;
-            });
         });
         return { allStats, homeStats, awayStats };
     }
@@ -94,7 +109,13 @@
         return Object.values(players);
     }
 
-    function renderPlayerStatCards(matches, teamName) {
+    function renderPlayerStatCards(matches, teamName, playerStatsStatus) {
+        if (playerStatsStatus?.loading || playerStatsStatus?.error) {
+            const message = playerStatsStatus.loading
+                ? 'Loading player stats…'
+                : `Unable to load player stats: ${playerStatsStatus.error}`;
+            return `<section class="team-drawer-card"><h2 class="team-drawer-card-title">Player Stats</h2><p class="empty-detail">${escape(message)}</p></section>`;
+        }
         const players = buildPlayerStats(matches, teamName);
         const configs = [
             { title: 'Goal involvements', value: player => player.goals + player.assists },
@@ -177,7 +198,7 @@
         const draftPickValue = window.TeamNames?.resolve?.(team.team)?.draftPick ?? rank;
         const draftDiff = draftPickValue - rank;
         const draftDiffText = `${draftDiff >= 0 ? '+' : ''}${draftDiff}`;
-        return `<section class="team-drawer-card"><div class="team-drawer-summary"><div class="team-drawer-identity">${logo ? `<img class="team-drawer-crest" src="${escape(logo)}" alt="${escape(team.team)} crest">` : ''}<div class="team-drawer-owner">${escape(team.owner || 'Unassigned')}</div></div><div class="team-drawer-records"><div class="team-drawer-record team-drawer-rank-pick"><span><span class="team-drawer-record-label">Overall rank</span><strong>${rank}</strong></span><span><span class="team-drawer-record-label">Draft pick</span><strong>${draftPickValue} <span class="team-drawer-draft-diff">(${draftDiffText})</span></strong></span></div><div class="team-drawer-record"><span>Overall record</span><strong>${formatRecord(team)}</strong></div><div class="team-drawer-record"><span>Home record</span><strong>${formatRecord(options.stats.homeStats?.[team.team] || team)}</strong></div><div class="team-drawer-record"><span>Away record</span><strong>${formatRecord(options.stats.awayStats?.[team.team] || team)}</strong></div></div></div></section><section class="team-drawer-card"><h2 class="team-drawer-card-title">Team Form</h2>${form ? `<div class="team-form-grid">${form}</div>` : '<p class="empty-detail">No matches available</p>'}</section>${renderTableCard(teams, team, options)}<section class="team-drawer-card"><h2 class="team-drawer-card-title">Team Stats</h2>${statRow('Goals', 'GF')}${statRow('Goals Conceded', 'GA')}${statRow('Goal differential', 'GD')}${statRow('Clean sheets', 'cleanSheets')}${statRow('Yellow cards', 'yellowCards', 'yellow')}${statRow('Red cards', 'redCards', 'red')}</section>${renderPlayerStatCards(options.matches, team.team)}`;
+        return `<section class="team-drawer-card"><div class="team-drawer-summary"><div class="team-drawer-identity">${logo ? `<img class="team-drawer-crest" src="${escape(logo)}" alt="${escape(team.team)} crest">` : ''}<div class="team-drawer-owner">${escape(team.owner || 'Unassigned')}</div></div><div class="team-drawer-records"><div class="team-drawer-record team-drawer-rank-pick"><span><span class="team-drawer-record-label">Overall rank</span><strong>${rank}</strong></span><span><span class="team-drawer-record-label">Draft pick</span><strong>${draftPickValue} <span class="team-drawer-draft-diff">(${draftDiffText})</span></strong></span></div><div class="team-drawer-record"><span>Overall record</span><strong>${formatRecord(team)}</strong></div><div class="team-drawer-record"><span>Home record</span><strong>${formatRecord(options.stats.homeStats?.[team.team] || team)}</strong></div><div class="team-drawer-record"><span>Away record</span><strong>${formatRecord(options.stats.awayStats?.[team.team] || team)}</strong></div></div></div></section><section class="team-drawer-card"><h2 class="team-drawer-card-title">Team Form</h2>${form ? `<div class="team-form-grid">${form}</div>` : '<p class="empty-detail">No matches available</p>'}</section>${renderTableCard(teams, team, options)}<section class="team-drawer-card"><h2 class="team-drawer-card-title">Team Stats</h2>${statRow('Goals', 'GF')}${statRow('Goals Conceded', 'GA')}${statRow('Goal differential', 'GD')}${statRow('Clean sheets', 'cleanSheets')}${statRow('Yellow cards', 'yellowCards', 'yellow')}${statRow('Red cards', 'redCards', 'red')}</section>${renderPlayerStatCards(options.matches, team.team, options.playerStatsStatus)}`;
     }
 
     function resetFormScroll(content) {
