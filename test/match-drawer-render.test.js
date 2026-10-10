@@ -91,7 +91,7 @@ test('upcoming match renders date, two-team form, table rows, and ranked season 
     assert.match(html, /match-upcoming-month-day/);
     assert.match(html, /match-upcoming-kickoff/);
     assert.ok(html.indexOf('match-upcoming-weekday') < html.indexOf('match-upcoming-kickoff'));
-    assert.ok(html.indexOf('match-upcoming-kickoff') < html.indexOf('match-upcoming-month-day'));
+    assert.ok(html.indexOf('match-upcoming-month-day') < html.indexOf('match-upcoming-kickoff'));
     assert.match(html, /League Ground/);
     assert.doesNotMatch(html, /match-meta|match-status|match-scorers|No goals|Match Events|Lineups/);
     assert.equal((html.match(/class="match-detail-section upcoming-card/g) || []).length, 3);

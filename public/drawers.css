@@ -42,7 +42,7 @@
 .match-team-link { cursor: pointer; }
 .match-team-link:focus-visible { outline: 2px solid var(--text-main); outline-offset: 4px; border-radius: 6px; }
 .match-scoreline .match-team-name { display: flex; height: 3.3em; align-items: flex-end; justify-content: center; line-height: 1.1; overflow: hidden; }
-.match-team img { width: 48px; height: 48px; object-fit: contain; }
+.match-team img { width: 60px; height: 60px; object-fit: contain; }
 .match-team-owner { color: var(--text-muted); font-size: 0.72rem; font-weight: 500; }
 .match-score { font-size: 1.8rem; font-weight: 800; text-align: center; color: var(--text-main); }
 .match-drawer .match-status { width: auto; display: block; margin-top: 2px; color: var(--text-muted); font-size: 0.72rem; font-weight: 600; text-align: center; }
@@ -56,7 +56,7 @@
 .match-upcoming-date { display: grid; justify-items: center; gap: 2px; text-align: center; }
 .match-upcoming-weekday { color: var(--text-muted); font-size: 0.8rem; font-weight: 600; }
 .match-upcoming-month-day { color: var(--text-main); font-size: 0.8rem; font-weight: 700; }
-.match-upcoming-kickoff { color: var(--text-main); font-size: 1.35rem; font-weight: 800; line-height: 1.1; white-space: nowrap; }
+.match-upcoming-kickoff { color: var(--text-main); font-size: 1.2rem; font-weight: 800; line-height: 1.1; white-space: nowrap; }
 .upcoming-table-scroll { overflow-x: auto; }
 .upcoming-table.overall-standings-table { width: 100%; min-width: 0; table-layout: auto; background: var(--surface-bg); font-size: 0.9rem; white-space: nowrap; }
 .upcoming-table.overall-standings-table col.rank { width: 6%; }
