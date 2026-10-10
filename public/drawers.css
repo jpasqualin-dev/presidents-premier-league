@@ -78,6 +78,8 @@
 .upcoming-table-owner { color: #888; font-size: 0.7rem; }
 .team-drawer-table-card .team-drawer-table-selected { background: color-mix(in srgb, #00a667 9%, var(--surface-bg)); }
 body.dark-mode .team-drawer-table-card .team-drawer-table-selected { background: color-mix(in srgb, #00ff87 10%, var(--surface-bg)); }
+.team-drawer-table-card tbody tr[role="button"] { cursor: pointer; }
+.team-drawer-table-card tbody tr[role="button"]:focus-visible { outline: 2px solid var(--text-main); outline-offset: -2px; }
 body.dark-mode .upcoming-table .table-team-name { color: #f1f1f1; }
 .match-form-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .match-form-column { min-width: 0; }

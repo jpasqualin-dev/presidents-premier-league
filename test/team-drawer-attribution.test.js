@@ -147,7 +147,10 @@ test('team drawer table follows Team Form and shows up to two places around the 
     assert.ok(output.indexOf('Table') < output.indexOf('Team Stats'));
     const tableRows = output.match(/<h2 class="team-drawer-card-title">Table<\/h2>[\s\S]*?<tbody>([\s\S]*?)<\/tbody>/)[1];
     assert.deepEqual([...tableRows.matchAll(/class="fotmob-rank">(\d+)<\/td>/g)].map(match => Number(match[1])), [1, 2, 3, 4, 5]);
-    assert.match(tableRows, /class="team-drawer-table-selected" aria-current="true"><td class="fotmob-rank">3<\/td>/);
+    assert.match(tableRows, /class="team-drawer-table-selected" aria-current="true"[^>]*><td class="fotmob-rank">3<\/td>/);
+    assert.equal((tableRows.match(/role="button" tabindex="0"/g) || []).length, 5);
+    assert.match(tableRows, /aria-label="View Team 2 details" onclick="event\.stopPropagation\(\); openTeamDrawerFromMatch\(&quot;Team 2&quot;\)"/);
+    assert.match(tableRows, /onkeydown="if \(event\.key === 'Enter' \|\| event\.key === ' '\)/);
     assert.match(tableRows, /Team 1/);
     assert.match(tableRows, /Team 5/);
     assert.doesNotMatch(tableRows, /Team 6/);

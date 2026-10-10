@@ -407,6 +407,37 @@ test('upcoming match drawer presents table, recent form, and ranked season stats
     await context.close();
 });
 
+test('team drawer table rows open the selected team by click and keyboard', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const page = await context.newPage();
+    await page.route('**/api/matches**', route => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(fixtureData())
+    }));
+    await page.goto(`${baseUrl}/hef.html`);
+    await page.locator('body.player-page-ready').waitFor();
+    await page.evaluate(() => window.openTeamDrawerFromMatch('Crystal Palace'));
+
+    const tableRows = page.locator('.team-drawer-table-card tbody tr[role="button"]');
+    await tableRows.first().waitFor();
+    const clickedRow = page.locator('.team-drawer-table-card tbody tr[role="button"]:not(.team-drawer-table-selected)').first();
+    const clickedTeam = (await clickedRow.getAttribute('aria-label')).replace(/^View | details$/g, '');
+    await clickedRow.click();
+    const normalizedClickedTeam = await page.evaluate(team => window.TeamNames?.longName(team) || team, clickedTeam);
+    assert.deepEqual(await page.evaluate(() => window.DrawerRouter.current()), { type: 'team', teamName: normalizedClickedTeam });
+    await page.locator('#match-drawer-title').filter({ hasText: clickedTeam }).waitFor();
+
+    const keyboardRow = page.locator('.team-drawer-table-card tbody tr[role="button"]:not(.team-drawer-table-selected)').first();
+    const keyboardTeam = (await keyboardRow.getAttribute('aria-label')).replace(/^View | details$/g, '');
+    await keyboardRow.focus();
+    await keyboardRow.press('Space');
+    assert.deepEqual(await page.evaluate(() => window.DrawerRouter.current()), { type: 'team', teamName: keyboardTeam });
+    await page.locator('#match-drawer-title').filter({ hasText: keyboardTeam }).waitFor();
+    await context.close();
+});
+
 test('upcoming drawer back navigation ignores a late previous-match response', async t => {
     if (browserError) return t.skip('Chromium runtime unavailable');
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
