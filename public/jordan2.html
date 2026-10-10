@@ -279,9 +279,12 @@
         .scoring-card { margin-bottom: 14px; }
         .scoring-card { margin-top: 14px; }
         .h2h-card .head-to-head-details { display: table-row-group; }
-        .h2h-table td:first-child,
+        .h2h-table .head-to-head-row { border-bottom: 1px solid #eaeaea; }
+        .h2h-table .head-to-head-row:last-child { border-bottom: 0; }
+        .h2h-table .head-to-head-row td { padding: 10px; border-bottom: 0; }
+        .h2h-table .head-to-head-row td:first-child,
         .scoring-table td:first-child { text-align: left; }
-        .h2h-table td:nth-child(2) { min-width: 5.5ch; text-align: center; color: var(--text-muted); }
+        .h2h-table .head-to-head-row td:nth-child(2) { min-width: 5.5ch; text-align: right; color: var(--text-muted); }
         .h2h-table td:nth-child(3),
         .scoring-table td:nth-child(2) { text-align: right; }
         .h2h-table td:nth-child(3) { font-weight: 600; }
@@ -534,7 +537,7 @@
                     <table class="draft-table overall-standings-table h2h-table">
                         <thead>
                             <tr class="title-row">
-                                <th colspan="3"><div class="overall-header-container"><h2 id="h2h-title" class="plain-table-title">H2H</h2></div></th>
+                                <th colspan="3"><div class="overall-header-container"><h2 id="h2h-title" class="plain-table-title">Head to Head</h2></div></th>
                             </tr>
                         </thead>
                         <tbody class="head-to-head-details" id="head-to-head-details"></tbody>

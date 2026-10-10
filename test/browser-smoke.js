@@ -853,6 +853,7 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.equal(await page.locator('.scoring-card').isVisible(), true);
     assert.equal(await page.locator('#panel-h2h .table-column-head').count(), 0);
     assert.equal(await page.locator('.h2h-card').evaluate(element => getComputedStyle(element).borderRadius), '16px');
+    assert.equal(await page.locator('#h2h-title').textContent(), 'Head to Head');
     const h2hTitleRows = await page.locator('.h2h-table, .scoring-table').evaluateAll(tables => tables.map(table => {
         const titleCell = table.querySelector('.title-row th');
         const style = getComputedStyle(titleCell);
@@ -872,6 +873,25 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
     assert.ok(h2hTitleRows.every(row => row.paddingTop === '10px' && row.paddingBottom === '4px'));
     assert.ok(h2hTitleRows.every(row => row.borderBottomWidth === '2px' && row.borderBottomColor === 'rgb(0, 255, 135)' && row.widthDifference <= 1), JSON.stringify(h2hTitleRows));
     assert.equal(await page.locator('.head-to-head-row').count(), 4);
+    const headToHeadRowLayout = await page.locator('.head-to-head-row').first().evaluate(row => {
+        const cells = [...row.cells];
+        const rowStyle = getComputedStyle(row);
+        return {
+            recordAlignment: getComputedStyle(cells[1]).textAlign,
+            pointsAlignment: getComputedStyle(cells[2]).textAlign,
+            leftPadding: getComputedStyle(cells[0]).paddingLeft,
+            rightPadding: getComputedStyle(cells[2]).paddingRight,
+            rowBorder: rowStyle.borderBottomWidth,
+            cellBorders: cells.map(cell => getComputedStyle(cell).borderBottomWidth),
+            widthDifference: Math.abs(row.getBoundingClientRect().width - row.closest('table').getBoundingClientRect().width)
+        };
+    });
+    assert.equal(headToHeadRowLayout.recordAlignment, 'right');
+    assert.equal(headToHeadRowLayout.pointsAlignment, 'right');
+    assert.equal(headToHeadRowLayout.leftPadding, headToHeadRowLayout.rightPadding);
+    assert.equal(headToHeadRowLayout.rowBorder, '1px');
+    assert.deepEqual(headToHeadRowLayout.cellBorders, ['0px', '0px', '0px']);
+    assert.ok(headToHeadRowLayout.widthDifference <= 1);
     assert.equal(await page.locator('#head-to-head-details').isVisible(), true);
     await page.locator('#tab-h2h').press('ArrowLeft');
     assert.equal(await page.locator('#tab-draft').getAttribute('aria-selected'), 'true');
