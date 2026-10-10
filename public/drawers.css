@@ -35,6 +35,7 @@
 .match-detail-content { padding: 18px; }
 .match-detail-content .team-drawer-card-title { margin-top: 0; margin-bottom: 16px; border-bottom: 2px solid #00ff87; padding-bottom: 8px; }
 .match-hero, .match-detail-section { margin-bottom: 14px; padding: 18px; background: var(--card-bg, #fff); border: 1px solid var(--border-color, #dfe5eb); border-radius: 12px; }
+.match-detail-section { padding: 9px; }
 .match-meta { color: var(--text-muted); font-size: 0.82rem; text-align: center; }
 .match-venue { margin-top: 5px; color: var(--text-muted); font-size: 0.78rem; text-align: center; }
 .match-scoreline { display: grid; grid-template-columns: 1fr 100px 1fr; align-items: center; gap: 10px; margin: 18px 0; }
@@ -51,7 +52,7 @@
 .match-scorer-column.away { text-align: right; }
 .match-scorer { display: block; }
 .match-scorer-empty, .empty-detail { color: var(--text-muted); opacity: 0.75; }
-.match-detail-section h3 { margin-bottom: 16px; color: var(--title-color); font-size: 0.95rem; text-align: center; }
+.match-detail-section h3 { margin-top: 0; margin-bottom: 16px; color: var(--title-color); font-size: 0.95rem; text-align: center; }
 .match-upcoming-scoreline { margin: 8px 0 18px; }
 .match-upcoming-date { display: grid; justify-items: center; gap: 2px; text-align: center; }
 .match-upcoming-weekday { color: var(--text-muted); font-size: 0.8rem; font-weight: 600; }

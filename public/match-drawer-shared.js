@@ -33,6 +33,7 @@
             style.textContent += `.upcoming-table.overall-standings-table{width:100%;min-width:0;table-layout:auto;background:var(--surface-bg);font-size:.9rem;white-space:nowrap}.upcoming-table.overall-standings-table col.rank{width:6%}.upcoming-table.overall-standings-table col.team{width:38%}.upcoming-table.overall-standings-table col.stat{width:7%}.upcoming-table.overall-standings-table col.goals{width:10%}.upcoming-table.overall-standings-table col.gd{width:8%}.upcoming-table.overall-standings-table col.points{width:10%}.upcoming-table th,.upcoming-table td{padding:12px 6px;text-align:center;border-bottom:1px solid #eaeaea}.upcoming-table th{background-color:var(--surface-bg);color:#666;font-size:.8rem;font-weight:500;text-transform:uppercase;border-bottom:2px solid #eaeaea}.upcoming-table .text-left{text-align:left!important}.upcoming-table .fotmob-rank{width:25px;color:var(--text-main);font-weight:600}.upcoming-table .team-inline{display:inline-flex;align-items:center;gap:8px}.upcoming-table .team-icon{width:18px;height:18px;object-fit:contain;vertical-align:middle}.upcoming-table-identity{line-height:1.2}.upcoming-table .table-team-name{color:#1a1a1a;font-weight:600}.upcoming-table-owner{color:#888;font-size:.7rem}body.dark-mode .upcoming-table .table-team-name{color:#f1f1f1}@media(max-width:600px){.upcoming-table th,.upcoming-table td{padding:6px 2px;font-size:.8rem}.upcoming-table .team-inline{gap:4px;white-space:normal}.upcoming-table .team-icon{width:18px;height:18px;flex:0 0 18px}.upcoming-table-identity{min-width:0;overflow-wrap:anywhere}.upcoming-table-owner{font-size:.62rem}}`;
             style.textContent += `.upcoming-table .team-inline{gap:8px}.upcoming-table-owner{font-size:.7rem}.upcoming-table th{border-bottom:1px solid #eaeaea}`;
             style.textContent += `.match-scoreline .match-team-name{display:flex;height:3.3em;align-items:flex-end;justify-content:center;line-height:1.1;overflow:hidden}`;
+            style.textContent += `.match-detail-section{padding:9px}.match-detail-section h3{margin-top:0}`;
             document.head.appendChild(style);
         }
     }
@@ -363,11 +364,10 @@
 
     function renderUpcomingMatchDetail(match, matches, renderTeam) {
         const date = new Date(match.utcDate);
-        const weekday = date.toLocaleDateString([], { weekday: 'long' });
-        const monthDay = date.toLocaleDateString([], { month: 'long', day: 'numeric' });
+        const matchDate = date.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
         const kickoff = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
         const allStats = getSeasonTeamStats(matches);
-        const hero = `<section class="match-hero"><div class="match-scoreline match-upcoming-scoreline">${renderTeam(match.homeTeam)}<div class="match-upcoming-date"><span class="match-upcoming-weekday">${escapeHtml(weekday)}</span><span class="match-upcoming-month-day">${escapeHtml(monthDay)}</span><span class="match-upcoming-kickoff">${escapeHtml(kickoff)}</span></div>${renderTeam(match.awayTeam)}</div><div class="match-venue">${escapeHtml(match.venue || 'Venue unavailable')}</div></section>`;
+        const hero = `<section class="match-hero"><div class="match-meta match-upcoming-meta">${escapeHtml(matchDate)}</div><div class="match-scoreline match-upcoming-scoreline">${renderTeam(match.homeTeam)}<div class="match-upcoming-date"><span class="match-upcoming-kickoff">${escapeHtml(kickoff)}</span></div>${renderTeam(match.awayTeam)}</div><div class="match-venue">${escapeHtml(match.venue || 'Venue unavailable')}</div></section>`;
         return `${hero}${renderTableCard(match, allStats)}${renderFormCard(match, matches, date)}${renderSeasonStatsCard(match, allStats)}`;
     }
 
