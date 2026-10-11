@@ -278,8 +278,10 @@ test('scoring card groups tied weeks without repeating the Week label', async t 
     await page.goto(`${baseUrl}/player.html?player=Wes`);
     await page.locator('body.player-page-ready').waitFor();
     await page.locator('#tab-h2h').click();
-    assert.equal(await page.locator('#highest-scoring-week').textContent(), '3 PTS (Week 4, 6)');
-    assert.equal(await page.locator('#lowest-scoring-week').textContent(), '0 PTS (Week 5, 7)');
+    assert.equal(await page.locator('#highest-scoring-week').textContent(), '3 PTS');
+    assert.equal(await page.locator('#highest-scoring-week-detail').textContent(), '(Week 4, 6)');
+    assert.equal(await page.locator('#lowest-scoring-week').textContent(), '0 PTS');
+    assert.equal(await page.locator('#lowest-scoring-week-detail').textContent(), '(Week 5, 7)');
     await context.close();
 });
 
@@ -1028,10 +1030,15 @@ test('shared player page renders its shared shell and switches local tabs', asyn
     assert.equal(await page.locator('#last-week-card .mw-card').count(), 1);
     assert.equal(await page.locator('#last-week-card .mw-points').textContent(), '+3 PTS');
     assert.equal(await page.locator('#last-week-card .fixture-item').count(), 1);
-    assert.equal(await page.locator('#highest-scoring-week').textContent(), '3 PTS (Week 5)');
-    assert.equal(await page.locator('#lowest-scoring-week').textContent(), '3 PTS (Week 5)');
-    assert.deepEqual(await page.locator('.scoring-label').allTextContents(), ['Highest Scoring Week(s)', 'Lowest Scoring Week(s)', 'Average Weekly Score']);
-    assert.equal(await page.locator('#average-weekly-score').textContent(), '3.0 PTS (Rank 2)');
+    assert.equal(await page.locator('#highest-scoring-week').textContent(), '3 PTS');
+    assert.equal(await page.locator('#highest-scoring-week-detail').textContent(), '(Week 5)');
+    assert.equal(await page.locator('#lowest-scoring-week').textContent(), '3 PTS');
+    assert.equal(await page.locator('#lowest-scoring-week-detail').textContent(), '(Week 5)');
+    assert.deepEqual(await page.locator('.scoring-label').allTextContents(), ['Average Weekly Score', 'Highest Scoring Week(s)', 'Lowest Scoring Week(s)']);
+    assert.equal(await page.locator('#average-weekly-score').textContent(), '3.0 PTS');
+    assert.equal(await page.locator('#average-weekly-rank').textContent(), '(Rank 2)');
+    assert.deepEqual(await page.locator('.scoring-row').evaluateAll(rows => rows.map(row => row.cells.length)), [3, 3, 3]);
+    assert.equal(await page.locator('#average-weekly-score').evaluate(element => getComputedStyle(element).textAlign), 'right');
     assert.equal(await page.locator('#total-pts').textContent(), '3');
     assert.equal(await page.locator('#player-rank').textContent(), 'Rank 2');
     assert.equal(await page.locator('#player-rank').evaluate(element => getComputedStyle(element).fontSize), await page.locator('.points-badge .label').first().evaluate(element => getComputedStyle(element).fontSize));
@@ -1051,6 +1058,7 @@ test('shared player page renders its shared shell and switches local tabs', asyn
         { left: '10px', right: '10px' },
         { left: '10px', right: '10px' },
         { left: '10px', right: '10px' },
+        { left: '20px', right: '10px' },
         { left: '20px', right: '10px' },
         { left: '20px', right: '10px' }
     ]);

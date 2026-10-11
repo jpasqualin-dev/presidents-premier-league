@@ -288,7 +288,8 @@
         .scoring-table td:first-child { text-align: left; }
         .h2h-table .head-to-head-row td:nth-child(2) { min-width: 4ch; color: var(--text-muted); text-align: center; }
         .h2h-table .head-to-head-row td:nth-child(3) { min-width: 5.5ch; color: var(--text-muted); }
-        .scoring-table td:nth-child(2) { text-align: right; }
+        .scoring-table .scoring-points { text-align: right; white-space: nowrap; }
+        .scoring-table .scoring-detail { text-align: left; color: var(--text-muted); white-space: nowrap; }
         .h2h-table td:nth-child(4) { font-weight: 600; }
         .h2h-table .head-to-head-total td { border-top: 2px solid var(--accent-green); font-weight: 700; }
         .scoring-label { color: var(--text-muted); }
@@ -391,6 +392,8 @@
         .draft-table td:nth-child(2) { text-align: left; }
 
         .draft-table .text-left { text-align: left; }
+
+        .scoring-table td.scoring-points { text-align: right; }
 
         .draft-team-cell { display: inline-flex; align-items: center; gap: 8px; min-width: 0; text-align: left; white-space: normal; }
         .draft-team-icon { width: 22px; height: 22px; flex: 0 0 auto; object-fit: contain; }
@@ -532,13 +535,13 @@
                     <table class="draft-table overall-standings-table scoring-table">
                         <thead>
                             <tr class="title-row">
-                                <th colspan="2"><div class="overall-header-container"><h2 id="scoring-title" class="plain-table-title">Scoring</h2></div></th>
+                                <th colspan="3"><div class="overall-header-container"><h2 id="scoring-title" class="plain-table-title">Scoring</h2></div></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="scoring-row"><td class="scoring-label">Highest Scoring Week(s)</td><td class="scoring-value" id="highest-scoring-week">--</td></tr>
-                            <tr class="scoring-row"><td class="scoring-label">Lowest Scoring Week(s)</td><td class="scoring-value" id="lowest-scoring-week">--</td></tr>
-                            <tr class="scoring-row"><td class="scoring-label">Average Weekly Score</td><td class="scoring-value" id="average-weekly-score">--</td></tr>
+                            <tr class="scoring-row"><td class="scoring-label">Average Weekly Score</td><td class="scoring-value scoring-points" id="average-weekly-score">--</td><td class="scoring-detail" id="average-weekly-rank">--</td></tr>
+                            <tr class="scoring-row"><td class="scoring-label">Highest Scoring Week(s)</td><td class="scoring-value scoring-points" id="highest-scoring-week">--</td><td class="scoring-detail" id="highest-scoring-week-detail">--</td></tr>
+                            <tr class="scoring-row"><td class="scoring-label">Lowest Scoring Week(s)</td><td class="scoring-value scoring-points" id="lowest-scoring-week">--</td><td class="scoring-detail" id="lowest-scoring-week-detail">--</td></tr>
                         </tbody>
                     </table>
                 </section>
@@ -676,7 +679,7 @@
         const renderScoring = matches => {
             const scores = getWeeklyScores(window.playerTeams, matches);
             if (!scores.length) {
-                ['highest-scoring-week', 'lowest-scoring-week', 'average-weekly-score'].forEach(id => { document.getElementById(id).textContent = '--'; });
+                ['highest-scoring-week', 'highest-scoring-week-detail', 'lowest-scoring-week', 'lowest-scoring-week-detail', 'average-weekly-score', 'average-weekly-rank'].forEach(id => { document.getElementById(id).textContent = '--'; });
                 return;
             }
             const highest = Math.max(...scores.map(item => item.score));
@@ -691,9 +694,12 @@
                 return playerScores.length ? playerScores.reduce((total, item) => total + item.score, 0) / playerScores.length : 0;
             });
             const rank = 1 + playerAverages.filter(playerAverage => playerAverage > average).length;
-            document.getElementById('highest-scoring-week').textContent = `${highest} PTS (${formatWeeks(highest)})`;
-            document.getElementById('lowest-scoring-week').textContent = `${lowest} PTS (${formatWeeks(lowest)})`;
-            document.getElementById('average-weekly-score').textContent = `${average.toFixed(1)} PTS (Rank ${rank})`;
+            document.getElementById('highest-scoring-week').textContent = `${highest} PTS`;
+            document.getElementById('highest-scoring-week-detail').textContent = `(${formatWeeks(highest)})`;
+            document.getElementById('lowest-scoring-week').textContent = `${lowest} PTS`;
+            document.getElementById('lowest-scoring-week-detail').textContent = `(${formatWeeks(lowest)})`;
+            document.getElementById('average-weekly-score').textContent = `${average.toFixed(1)} PTS`;
+            document.getElementById('average-weekly-rank').textContent = `(Rank ${rank})`;
         };
 
         const syncWeekCards = () => {
