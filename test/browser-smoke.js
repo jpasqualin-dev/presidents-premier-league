@@ -970,7 +970,7 @@ test('shared player page renders its shared shell and switches local tabs', asyn
             widthDifference: Math.abs(row.getBoundingClientRect().width - row.closest('table').getBoundingClientRect().width)
         };
     });
-    assert.deepEqual(headToHeadRowLayout.cellAlignments, ['center', 'center', 'center', 'center']);
+    assert.deepEqual(headToHeadRowLayout.cellAlignments, ['left', 'center', 'center', 'center']);
     assert.equal(headToHeadRowLayout.leftPadding, headToHeadRowLayout.rightPadding);
     assert.equal(headToHeadRowLayout.rowBorder, '1px');
     assert.deepEqual(headToHeadRowLayout.cellBorders, ['0px', '0px', '0px', '0px']);
