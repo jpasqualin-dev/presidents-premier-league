@@ -950,7 +950,7 @@ test('shared player page renders its shared shell and switches local tabs', asyn
     await page.goto(`${baseUrl}/player.html?player=Wes`);
     assert.equal(await page.locator('.header-container h1').textContent(), 'Wes');
     assert.equal(await page.title(), 'Wes | Presidents Premier League');
-    assert.deepEqual(await page.locator('[role="tab"]').allTextContents(), ['Teams', 'Draft', 'H2H', 'Matches']);
+    assert.deepEqual(await page.locator('[role="tab"]').allTextContents(), ['Teams', 'H2H', 'Matches', 'Draft']);
     assert.equal(await page.locator('#tab-teams').getAttribute('aria-selected'), 'true');
     assert.equal(await page.locator('.profile-card .profile-info h1').textContent(), 'Wes');
     assert.deepEqual(await page.locator('.profile-card').evaluate(card => {
@@ -994,12 +994,12 @@ test('shared player page renders its shared shell and switches local tabs', asyn
     assert.equal(await page.locator('.h2h-card').evaluate(element => getComputedStyle(element).borderRadius), '16px');
     assert.equal(await page.locator('#h2h-title').textContent(), 'Head to Head');
     assert.deepEqual(await page.locator('.h2h-table tbody tr:first-child td, .scoring-table tbody tr:first-child td').evaluateAll(cells => cells.map(cell => ({ left: getComputedStyle(cell).paddingLeft, right: getComputedStyle(cell).paddingRight }))), [
-        { left: '10px', right: '10px' },
-        { left: '10px', right: '10px' },
-        { left: '10px', right: '10px' },
-        { left: '10px', right: '10px' },
-        { left: '10px', right: '10px' },
-        { left: '10px', right: '10px' }
+        { left: '20px', right: '10px' },
+        { left: '20px', right: '10px' },
+        { left: '20px', right: '10px' },
+        { left: '20px', right: '10px' },
+        { left: '20px', right: '10px' },
+        { left: '20px', right: '10px' }
     ]);
     const h2hTitleRows = await page.locator('.h2h-table, .scoring-table').evaluateAll(tables => tables.map(table => {
         const titleCell = table.querySelector('.title-row th');
@@ -1041,12 +1041,19 @@ test('shared player page renders its shared shell and switches local tabs', asyn
         };
     });
     assert.deepEqual(headToHeadRowLayout.cellAlignments, ['left', 'center', 'center', 'center']);
-    assert.equal(headToHeadRowLayout.leftPadding, headToHeadRowLayout.rightPadding);
+    assert.equal(headToHeadRowLayout.leftPadding, '20px');
+    assert.equal(headToHeadRowLayout.rightPadding, '10px');
     assert.equal(headToHeadRowLayout.rowBorder, '1px');
     assert.deepEqual(headToHeadRowLayout.cellBorders, ['0px', '0px', '0px', '0px']);
     assert.ok(headToHeadRowLayout.widthDifference <= 1);
     assert.equal(await page.locator('#head-to-head-details').isVisible(), true);
     await page.locator('#tab-h2h').press('ArrowLeft');
+    assert.equal(await page.locator('#tab-teams').getAttribute('aria-selected'), 'true');
+    await page.locator('#tab-teams').press('ArrowRight');
+    assert.equal(await page.locator('#tab-h2h').getAttribute('aria-selected'), 'true');
+    await page.locator('#tab-h2h').press('ArrowRight');
+    assert.equal(await page.locator('#tab-matches').getAttribute('aria-selected'), 'true');
+    await page.locator('#tab-matches').press('ArrowRight');
     assert.equal(await page.locator('#tab-draft').getAttribute('aria-selected'), 'true');
     assert.deepEqual(await page.locator('#draft-table-body tr').allTextContents(), [
         '1Liverpool3',
