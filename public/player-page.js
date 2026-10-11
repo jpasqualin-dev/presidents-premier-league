@@ -212,7 +212,7 @@
             const awayScore = match.score.fullTime.away;
             if (homeScore === null || awayScore === null) return;
             if (homeOwner === playerName && awayOwner === playerName) {
-                selfRecord.played += 1;
+                selfRecord.played += 2;
                 if (homeScore === awayScore) {
                     selfRecord.draws += 2;
                     selfRecord.points += 2;
@@ -235,7 +235,7 @@
         const detailsContainer = document.getElementById('head-to-head-details');
         const opponentRecords = opponents.map(owner => ({ owner, ...records[owner] }))
             .sort((left, right) => right.points - left.points || left.owner.localeCompare(right.owner));
-        const selfMatchRow = selfRecord.played ? [{ owner: playerName, ...selfRecord, isSelfMatch: true }] : [];
+        const selfMatchRow = [{ owner: playerName, ...selfRecord, isSelfMatch: true }];
         const total = [...opponentRecords, ...selfMatchRow].reduce((sum, record) => ({
             played: sum.played + record.played,
             wins: sum.wins + record.wins,
@@ -247,8 +247,8 @@
         detailsContainer.innerHTML = rows.map(record => {
             const versus = record.isTotal ? `${playerName} vs. All` : `${playerName} vs. ${record.owner}`;
             return detailsContainer.tagName === 'TBODY'
-                ? `<tr class="head-to-head-row${record.isTotal ? ' head-to-head-total' : ''}"><td>${versus}</td><td>${record.played}</td><td class="head-to-head-record">${record.wins}-${record.draws}-${record.losses}</td><td class="head-to-head-points">${record.points}</td></tr>`
-                : `<div class="head-to-head-row${record.isTotal ? ' head-to-head-total' : ''}"><span>${versus}</span><span>${record.played}</span><span class="head-to-head-record">${record.wins}-${record.draws}-${record.losses}</span><span class="head-to-head-points">${record.points}</span></div>`;
+                ? `<tr class="head-to-head-row${record.isTotal ? ' head-to-head-total' : ''}${record.isSelfMatch ? ' head-to-head-self' : ''}"><td>${versus}</td><td>${record.played}</td><td class="head-to-head-record">${record.wins}-${record.draws}-${record.losses}</td><td class="head-to-head-points">${record.points}</td></tr>`
+                : `<div class="head-to-head-row${record.isTotal ? ' head-to-head-total' : ''}${record.isSelfMatch ? ' head-to-head-self' : ''}"><span>${versus}</span><span>${record.played}</span><span class="head-to-head-record">${record.wins}-${record.draws}-${record.losses}</span><span class="head-to-head-points">${record.points}</span></div>`;
         })
             .join('');
     }

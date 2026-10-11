@@ -280,8 +280,8 @@ test('head-to-head includes self-owned fixtures in its row and aggregate', async
         ['Wes vs. Jamey', '1', '0-0-1', '0'],
         ['Wes vs. Jordan', '0', '0-0-0', '0'],
         ['Wes vs. Nate', '0', '0-0-0', '0'],
-        ['Wes vs. Wes', '1', '1-0-1', '3'],
-        ['Wes vs. All', '2', '1-0-2', '3']
+        ['Wes vs. Wes', '2', '1-0-1', '3'],
+        ['Wes vs. All', '3', '1-0-2', '3']
     ]);
     await context.close();
 });
@@ -370,6 +370,7 @@ for (const pageName of playerPages) {
         const expectedPlayer = pageName.replace('.html', '').replace(/^./u, letter => letter.toUpperCase());
         assert.equal(new URL(page.url()).searchParams.get('player'), expectedPlayer, `${pageName}: named route did not select the matching prototype player`);
         assert.equal(await page.locator('.profile-info h1').textContent(), expectedPlayer, `${pageName}: profile identity is incorrect`);
+        assert.deepEqual(await page.locator('.head-to-head-self td').allTextContents(), [`${expectedPlayer} vs. ${expectedPlayer}`, '0', '0-0-0', '0'], `${pageName}: self-match H2H row is missing or mislabeled`);
         assert.deepEqual(await page.locator('.site-menu > a').allTextContents(), ['Home', 'Table', 'Fixtures', 'Stats'], `${pageName}: shared primary navigation is incorrect`);
         assert.deepEqual(await page.locator('.players-dropdown a').allTextContents(), ['Hef', 'Jamey', 'Jordan', 'Nate', 'Wes'], `${pageName}: shared player navigation is incorrect`);
         assert.equal(await page.locator('.players-menu summary').evaluate(summary => getComputedStyle(summary, '::after').content), '"▾"', `${pageName}: shared player-menu caret is inconsistent`);
@@ -1018,12 +1019,13 @@ test('shared player page renders its shared shell and switches local tabs', asyn
     assert.ok(h2hTitleRows.every(row => row.marginBottom === '0px' && row.headingPaddingBottom === '0px'));
     assert.ok(h2hTitleRows.every(row => row.paddingTop === '10px' && row.paddingBottom === '4px'));
     assert.ok(h2hTitleRows.every(row => row.borderBottomWidth === '2px' && row.borderBottomColor === 'rgb(0, 255, 135)' && row.widthDifference <= 1), JSON.stringify(h2hTitleRows));
-    assert.equal(await page.locator('.head-to-head-row').count(), 5);
+    assert.equal(await page.locator('.head-to-head-row').count(), 6);
     assert.deepEqual(await page.locator('.head-to-head-row').evaluateAll(rows => rows.map(row => [...row.cells].map(cell => cell.textContent.trim()))), [
         ['Wes vs. Nate', '1', '1-0-0', '3'],
         ['Wes vs. Hef', '0', '0-0-0', '0'],
         ['Wes vs. Jamey', '0', '0-0-0', '0'],
         ['Wes vs. Jordan', '0', '0-0-0', '0'],
+        ['Wes vs. Wes', '0', '0-0-0', '0'],
         ['Wes vs. All', '1', '1-0-0', '3']
     ]);
     const headToHeadRowLayout = await page.locator('.head-to-head-row').first().evaluate(row => {
