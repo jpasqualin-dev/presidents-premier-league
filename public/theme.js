@@ -23,9 +23,36 @@
         else document.head.append(statusBarStyle);
     };
 
+    const renderSiteMenu = siteMenu => {
+        const pages = [
+            { name: 'Home', href: 'index.html' },
+            { name: 'Table', href: 'table.html' },
+            { name: 'Fixtures', href: 'fixtures.html' },
+            { name: 'Stats', href: 'stats.html' }
+        ];
+        const players = [
+            { name: 'Hef', href: 'hef.html' },
+            { name: 'Jamey', href: 'jamey.html' },
+            { name: 'Jordan', href: 'jordan.html' },
+            { name: 'Nate', href: 'nate.html' },
+            { name: 'Wes', href: 'wes.html' }
+        ];
+        const pageName = window.location.pathname.split('/').pop() || 'index.html';
+        const requestedPlayer = new URLSearchParams(window.location.search).get('player');
+        const currentPlayer = players.find(player => player.name.toLowerCase() === requestedPlayer?.toLowerCase())
+            || players.find(player => player.href === pageName)
+            || (pageName === 'jordan2.html' ? players.find(player => player.name === 'Jordan') : null);
+
+        siteMenu.innerHTML = `${pages.map(page => {
+            const current = !currentPlayer && page.href === pageName;
+            return `<a href="${page.href}"${current ? ' class="active" aria-current="page"' : ''}>${page.name}</a>`;
+        }).join('')}<details class="players-menu"><summary${currentPlayer ? ' class="active"' : ''}>Players</summary><div class="players-dropdown">${players.map(player => `<a href="${player.href}" data-player="${player.name}"${currentPlayer?.name === player.name ? ' aria-current="page"' : ''}>${player.name}</a>`).join('')}</div></details>`;
+    };
+
     const applyNavigationTemplate = () => {
         const siteMenu = document.querySelector('.site-menu');
         if (!siteMenu) return;
+        renderSiteMenu(siteMenu);
 
         const navigationWrapper = siteMenu.closest('.sticky-nav-wrapper');
         if (navigationWrapper) navigationWrapper.before(siteMenu);
@@ -64,6 +91,8 @@
             .site-menu::before { content: ""; position: absolute; z-index: -1; top: -8px; bottom: 0; left: 50%; width: 100vw; transform: translateX(-50%); background: var(--sticky-bg); pointer-events: none; }
             .site-menu > * { position: relative; z-index: 1; }
             .site-menu a, .players-menu summary { color: var(--brand-color); }
+            .players-menu summary::-webkit-details-marker { display: none; }
+            .players-menu summary::after { content: "▾"; margin-left: 6px; font-size: 0.7rem; }
             .players-menu[open] summary { background: var(--nav-hover-bg); border-color: var(--nav-hover-border); }
             .site-menu a.active::after, .players-menu summary.active::before { right: 8px; left: 8px; background: var(--brand-color); }
             body.wide-page .site-menu { margin: 0 16px; }

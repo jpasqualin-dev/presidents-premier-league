@@ -66,8 +66,6 @@
             flex: 1 1 0;
         }
 
-        .players-menu summary::-webkit-details-marker { display: none; }
-        .players-menu summary::after { content: "v"; margin-left: 6px; font-size: 0.7rem; }
         .players-menu[open] summary { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.24); }
 
         .players-dropdown {
@@ -455,22 +453,7 @@
         </div>
 
         <div class="sticky-nav-wrapper">
-            <nav class="site-menu" aria-label="Primary navigation">
-                <a href="index.html">Home</a>
-                <a href="table.html">Table</a>
-                <a href="fixtures.html">Fixtures</a>
-                <a href="stats.html">Stats</a>
-                <details class="players-menu">
-                    <summary class="active">Players</summary>
-                    <div class="players-dropdown">
-                        <a href="jordan2.html?player=Hef" data-player="Hef">Hef</a>
-                        <a href="jordan2.html?player=Jamey" data-player="Jamey">Jamey</a>
-                        <a href="jordan2.html?player=Jordan" data-player="Jordan">Jordan</a>
-                        <a href="jordan2.html?player=Nate" data-player="Nate">Nate</a>
-                        <a href="jordan2.html?player=Wes" data-player="Wes">Wes</a>
-                    </div>
-                </details>
-            </nav>
+            <nav class="site-menu" aria-label="Primary navigation"></nav>
 
             <div class="pills-nav-container" role="tablist" aria-label="Jordan page sections">
                 <button class="pill active" id="tab-teams" type="button" role="tab" aria-selected="true" aria-controls="panel-teams" tabindex="0">Teams</button>

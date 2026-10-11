@@ -162,6 +162,33 @@ test.after(async () => {
     await new Promise(resolve => server?.close(resolve));
 });
 
+test('shared navigation renders consistent links and the correct active page', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    const cases = [
+        ['index.html', 'Home'],
+        ['table.html', 'Table'],
+        ['fixtures.html', 'Fixtures'],
+        ['stats.html', 'Stats'],
+        ['jordan2.html', 'Jordan']
+    ];
+
+    for (const [pathname, currentPage] of cases) {
+        await page.goto(`${baseUrl}/${pathname}`);
+        await page.locator('.site-menu a').first().waitFor();
+        assert.deepEqual(await page.locator('.site-menu > a').allTextContents(), ['Home', 'Table', 'Fixtures', 'Stats']);
+        assert.deepEqual(await page.locator('.players-dropdown a').allTextContents(), ['Hef', 'Jamey', 'Jordan', 'Nate', 'Wes']);
+        if (['Hef', 'Jamey', 'Jordan', 'Nate', 'Wes'].includes(currentPage)) {
+            assert.equal(await page.locator('.players-dropdown a[aria-current="page"]').getAttribute('data-player'), currentPage);
+        } else {
+            assert.equal(await page.locator('.site-menu a[aria-current="page"]').textContent(), currentPage);
+        }
+    }
+
+    await context.close();
+});
+
 test('stats page renders available totals when scorer data does not reconcile', async t => {
     if (browserError) return t.skip('Chromium runtime unavailable');
     const context = await browser.newContext();
@@ -274,6 +301,10 @@ for (const pageName of playerPages) {
         const expectedPlayer = pageName.replace('.html', '').replace(/^./u, letter => letter.toUpperCase());
         assert.equal(new URL(page.url()).searchParams.get('player'), expectedPlayer, `${pageName}: named route did not select the matching prototype player`);
         assert.equal(await page.locator('.profile-info h1').textContent(), expectedPlayer, `${pageName}: profile identity is incorrect`);
+        assert.deepEqual(await page.locator('.site-menu > a').allTextContents(), ['Home', 'Table', 'Fixtures', 'Stats'], `${pageName}: shared primary navigation is incorrect`);
+        assert.deepEqual(await page.locator('.players-dropdown a').allTextContents(), ['Hef', 'Jamey', 'Jordan', 'Nate', 'Wes'], `${pageName}: shared player navigation is incorrect`);
+        assert.equal(await page.locator('.players-menu summary').evaluate(summary => getComputedStyle(summary, '::after').content), '"▾"', `${pageName}: shared player-menu caret is inconsistent`);
+        assert.equal(await page.locator('.players-dropdown a[aria-current="page"]').getAttribute('data-player'), expectedPlayer, `${pageName}: selected player is not marked in shared navigation`);
         assert.deepEqual(await page.locator('.profile-card-team-name').allTextContents(), await page.evaluate(name => PplLeagueConfig.draftData[name], expectedPlayer), `${pageName}: profile teams do not match configured ownership`);
         const fixtureManagerChecks = await page.evaluate(() => [...document.querySelectorAll('#fixtures-container .fixture-item')].map(fixture => {
             const match = window.playerMatches.find(candidate => String(candidate.id) === fixture.dataset.matchId);
