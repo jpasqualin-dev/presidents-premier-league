@@ -133,7 +133,8 @@ function startStaticServer() {
             response.end('Not found');
             return;
         }
-        response.writeHead(200, { 'Content-Type': filePath.endsWith('.js') ? 'text/javascript' : 'text/html' });
+        const contentType = filePath.endsWith('.css') ? 'text/css' : filePath.endsWith('.js') ? 'text/javascript' : 'text/html';
+        response.writeHead(200, { 'Content-Type': contentType });
         fs.createReadStream(filePath).pipe(response);
     });
     return new Promise(resolve => server.listen(0, '127.0.0.1', () => resolve(server)));
@@ -287,6 +288,14 @@ for (const pageName of playerPages) {
         assert.ok(fixtureManagerChecks.length > 0, `${pageName}: no player fixtures rendered`);
         assert.ok(fixtureManagerChecks.every(({ expected, actual }) => expected === actual), `${pageName}: fixture manager attribution does not match ownership`);
         assert.equal(await page.locator('.profile-card-team').count(), 4, `${pageName}: profile does not render all configured team controls`);
+        if (view.viewport.width >= 768) {
+            await page.locator('#tab-draft').click();
+            const draftRow = page.locator('#draft-table-body tr').first();
+            await draftRow.waitFor();
+            await draftRow.hover();
+            const hoverBackground = await draftRow.evaluate(row => getComputedStyle(row).backgroundColor);
+            assert.equal(hoverBackground, view.theme === 'dark' ? 'rgb(42, 42, 42)' : 'rgb(248, 249, 250)', `${pageName}: draft row hover does not use the shared theme color`);
+        }
         await page.locator('#tab-matches').click();
         const weekHeader = page.locator('#panel-matches .mw-header[role="button"]');
         await weekHeader.focus();

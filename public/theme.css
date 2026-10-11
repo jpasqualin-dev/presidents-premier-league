@@ -334,7 +334,7 @@ body.dark-mode .mw-header {
 }
 
 @media (hover: hover) {
-    body.dark-mode tr:hover,
+    tr:hover,
     body.dark-mode .today-match-row:hover,
     body.dark-mode .fixture-row:hover,
     body.dark-mode .stat-player-row:hover,
