@@ -203,7 +203,7 @@
 
     function renderHeadToHead(matches) {
         const opponents = Object.keys(draftData).filter(owner => owner !== playerName);
-        const records = Object.fromEntries(opponents.map(owner => [owner, { wins: 0, draws: 0, losses: 0, points: 0 }]));
+        const records = Object.fromEntries(opponents.map(owner => [owner, { played: 0, wins: 0, draws: 0, losses: 0, points: 0 }]));
         matches.filter(match => match.status === 'FINISHED').forEach(match => {
             const homeOwner = getOwnerOfTeam(match.homeTeam.name);
             const awayOwner = getOwnerOfTeam(match.awayTeam.name);
@@ -212,6 +212,7 @@
             if (homeScore === null || awayScore === null) return;
             const opponent = homeOwner === playerName ? awayOwner : awayOwner === playerName ? homeOwner : null;
             if (!records[opponent]) return;
+            records[opponent].played += 1;
             const currentScore = homeOwner === playerName ? homeScore : awayScore;
             const opponentScore = homeOwner === playerName ? awayScore : homeScore;
             if (currentScore > opponentScore) { records[opponent].wins += 1; records[opponent].points += 3; }
@@ -219,11 +220,22 @@
             else records[opponent].losses += 1;
         });
         const detailsContainer = document.getElementById('head-to-head-details');
-        detailsContainer.innerHTML = opponents.map(owner => ({ owner, ...records[owner] }))
-            .sort((left, right) => right.points - left.points || left.owner.localeCompare(right.owner))
-            .map(record => detailsContainer.tagName === 'TBODY'
-                ? `<tr class="head-to-head-row"><td>${playerName} vs. ${record.owner}</td><td class="head-to-head-record">${record.wins}-${record.draws}-${record.losses}</td><td class="head-to-head-points">${record.points} PTS</td></tr>`
-                : `<div class="head-to-head-row"><span>${playerName} vs. ${record.owner}</span><span class="head-to-head-record">${record.wins}-${record.draws}-${record.losses}</span><span class="head-to-head-points">${record.points} PTS</span></div>`)
+        const opponentRecords = opponents.map(owner => ({ owner, ...records[owner] }))
+            .sort((left, right) => right.points - left.points || left.owner.localeCompare(right.owner));
+        const total = opponentRecords.reduce((sum, record) => ({
+            played: sum.played + record.played,
+            wins: sum.wins + record.wins,
+            draws: sum.draws + record.draws,
+            losses: sum.losses + record.losses,
+            points: sum.points + record.points
+        }), { played: 0, wins: 0, draws: 0, losses: 0, points: 0 });
+        const rows = [...opponentRecords, { owner: 'All', ...total, isTotal: true }];
+        detailsContainer.innerHTML = rows.map(record => {
+            const versus = `${playerName} vs. ${record.owner}`;
+            return detailsContainer.tagName === 'TBODY'
+                ? `<tr class="head-to-head-row${record.isTotal ? ' head-to-head-total' : ''}"><td>${versus}</td><td>${record.played}</td><td class="head-to-head-record">${record.wins}-${record.draws}-${record.losses}</td><td class="head-to-head-points">${record.points}</td></tr>`
+                : `<div class="head-to-head-row${record.isTotal ? ' head-to-head-total' : ''}"><span>${versus}</span><span>${record.played}</span><span class="head-to-head-record">${record.wins}-${record.draws}-${record.losses}</span><span class="head-to-head-points">${record.points}</span></div>`;
+        })
             .join('');
     }
 

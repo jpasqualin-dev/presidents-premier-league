@@ -194,7 +194,7 @@
         .head-to-head-divider { border-top: 1px solid #ffffff; margin: 0; }
         .head-to-head-details { display: none; gap: 10px; padding: 0; font-size: 0.825rem; }
         .profile-card[aria-expanded="true"] .head-to-head-details { display: grid; }
-        .head-to-head-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px; align-items: center; padding: 0 0 0 16px; font-size: inherit; font-weight: 600; line-height: 1.2; }
+        .head-to-head-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 12px; align-items: center; padding: 0 0 0 16px; font-size: inherit; font-weight: 600; line-height: 1.2; }
         .head-to-head-record { min-width: 5.5ch; text-align: center; color: #4a5568; }
         .head-to-head-points { min-width: 5ch; text-align: right; }
 
@@ -278,16 +278,18 @@
         .scoring-card { margin-bottom: 14px; }
         .scoring-card { margin-top: 14px; }
         .h2h-card .head-to-head-details { display: table-row-group; }
-        .h2h-table .head-to-head-row { border-bottom: 1px solid #eaeaea; }
+        .h2h-table .head-to-head-row { display: table-row; border-bottom: 1px solid #eaeaea; }
         .h2h-table .head-to-head-row:last-child { border-bottom: 0; }
         .h2h-table .head-to-head-row td { padding: 10px; border-bottom: 0; }
         .scoring-table tbody td { padding-right: 10px; padding-left: 10px; }
         .h2h-table .head-to-head-row td:first-child,
         .scoring-table td:first-child { text-align: left; }
-        .h2h-table .head-to-head-row td:nth-child(2) { min-width: 5.5ch; text-align: right; color: var(--text-muted); }
-        .h2h-table td:nth-child(3),
+        .h2h-table .head-to-head-row td:nth-child(2) { min-width: 4ch; text-align: right; color: var(--text-muted); }
+        .h2h-table .head-to-head-row td:nth-child(3) { min-width: 5.5ch; text-align: right; color: var(--text-muted); }
+        .h2h-table td:nth-child(4),
         .scoring-table td:nth-child(2) { text-align: right; }
-        .h2h-table td:nth-child(3) { font-weight: 600; }
+        .h2h-table td:nth-child(4) { font-weight: 600; }
+        .h2h-table .head-to-head-total td { border-top: 2px solid var(--accent-green); font-weight: 700; }
         .scoring-label { color: var(--text-muted); }
         .scoring-value { color: var(--text-main); }
 
@@ -518,8 +520,9 @@
                     <table class="draft-table overall-standings-table h2h-table">
                         <thead>
                             <tr class="title-row">
-                                <th colspan="3"><div class="overall-header-container"><h2 id="h2h-title" class="plain-table-title">Head to Head</h2></div></th>
+                                <th colspan="4"><div class="overall-header-container"><h2 id="h2h-title" class="plain-table-title">Head to Head</h2></div></th>
                             </tr>
+                            <tr class="table-column-head"><th scope="col">Versus</th><th scope="col">Played</th><th scope="col">Record</th><th scope="col">PTS</th></tr>
                         </thead>
                         <tbody class="head-to-head-details" id="head-to-head-details"></tbody>
                     </table>

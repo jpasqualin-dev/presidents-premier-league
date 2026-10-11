@@ -177,7 +177,7 @@ test('shared navigation renders consistent links and the correct active page', a
     for (const [pathname, currentPage] of cases) {
         await page.goto(`${baseUrl}/${pathname}`);
         await page.locator('.site-menu a').first().waitFor();
-        assert.deepEqual(await page.locator('.site-menu > a').allTextContents(), ['Home', 'Table', 'Fixtures', 'Stats']);
+        assert.deepEqual(await page.locator('.site-menu > a').allTextContents(), ['Home', 'Table', 'Fixtures', 'Stats', 'Players']);
         assert.deepEqual(await page.locator('.players-dropdown a').allTextContents(), ['Hef', 'Jamey', 'Jordan', 'Nate', 'Wes']);
         assert.deepEqual(await page.locator('.players-dropdown a').evaluateAll(links => links.map(link => link.getAttribute('href'))), ['player.html?player=Hef', 'player.html?player=Jamey', 'player.html?player=Jordan', 'player.html?player=Nate', 'player.html?player=Wes']);
         if (['Hef', 'Jamey', 'Jordan', 'Nate', 'Wes'].includes(currentPage)) {
@@ -212,7 +212,7 @@ test('stats page renders available totals when scorer data does not reconcile', 
     await page.goto(`${baseUrl}/stats.html`);
     await page.locator('#season-awards-container [role="alert"]')
         .filter({ hasText: 'Scorer totals do not reconcile' }).waitFor();
-    assert.equal(await page.locator('#individual-stats-container .individual-stat-card').count(), 3);
+    assert.equal(await page.locator('#individual-stats-container .individual-stat-card').count(), 4);
     assert.equal(await page.locator('#season-awards-container').getByText('Unable to load season awards.').count(), 0);
     assert.deepEqual(diagnostics.pageErrors, []);
     await context.close();
@@ -920,10 +920,12 @@ test('shared player page renders its shared shell and switches local tabs', asyn
     assert.equal(await page.locator('#panel-teams').isVisible(), false);
     assert.equal(await page.locator('.h2h-card').isVisible(), true);
     assert.equal(await page.locator('.scoring-card').isVisible(), true);
-    assert.equal(await page.locator('#panel-h2h .table-column-head').count(), 0);
+    assert.equal(await page.locator('#panel-h2h .table-column-head').count(), 1);
+    assert.deepEqual(await page.locator('#panel-h2h .table-column-head th').allTextContents(), ['Versus', 'Played', 'Record', 'PTS']);
     assert.equal(await page.locator('.h2h-card').evaluate(element => getComputedStyle(element).borderRadius), '16px');
     assert.equal(await page.locator('#h2h-title').textContent(), 'Head to Head');
     assert.deepEqual(await page.locator('.h2h-table tbody tr:first-child td, .scoring-table tbody tr:first-child td').evaluateAll(cells => cells.map(cell => ({ left: getComputedStyle(cell).paddingLeft, right: getComputedStyle(cell).paddingRight }))), [
+        { left: '10px', right: '10px' },
         { left: '10px', right: '10px' },
         { left: '10px', right: '10px' },
         { left: '10px', right: '10px' },
@@ -948,25 +950,34 @@ test('shared player page renders its shared shell and switches local tabs', asyn
     assert.ok(h2hTitleRows.every(row => row.marginBottom === '0px' && row.headingPaddingBottom === '0px'));
     assert.ok(h2hTitleRows.every(row => row.paddingTop === '10px' && row.paddingBottom === '4px'));
     assert.ok(h2hTitleRows.every(row => row.borderBottomWidth === '2px' && row.borderBottomColor === 'rgb(0, 255, 135)' && row.widthDifference <= 1), JSON.stringify(h2hTitleRows));
-    assert.equal(await page.locator('.head-to-head-row').count(), 4);
+    assert.equal(await page.locator('.head-to-head-row').count(), 5);
+    assert.deepEqual(await page.locator('.head-to-head-row').evaluateAll(rows => rows.map(row => [...row.cells].map(cell => cell.textContent.trim()))), [
+        ['Wes vs. Nate', '1', '1-0-0', '3'],
+        ['Wes vs. Hef', '0', '0-0-0', '0'],
+        ['Wes vs. Jamey', '0', '0-0-0', '0'],
+        ['Wes vs. Jordan', '0', '0-0-0', '0'],
+        ['Wes vs. All', '1', '1-0-0', '3']
+    ]);
     const headToHeadRowLayout = await page.locator('.head-to-head-row').first().evaluate(row => {
         const cells = [...row.cells];
         const rowStyle = getComputedStyle(row);
         return {
-            recordAlignment: getComputedStyle(cells[1]).textAlign,
-            pointsAlignment: getComputedStyle(cells[2]).textAlign,
+            playedAlignment: getComputedStyle(cells[1]).textAlign,
+            recordAlignment: getComputedStyle(cells[2]).textAlign,
+            pointsAlignment: getComputedStyle(cells[3]).textAlign,
             leftPadding: getComputedStyle(cells[0]).paddingLeft,
-            rightPadding: getComputedStyle(cells[2]).paddingRight,
+            rightPadding: getComputedStyle(cells[3]).paddingRight,
             rowBorder: rowStyle.borderBottomWidth,
             cellBorders: cells.map(cell => getComputedStyle(cell).borderBottomWidth),
             widthDifference: Math.abs(row.getBoundingClientRect().width - row.closest('table').getBoundingClientRect().width)
         };
     });
+    assert.equal(headToHeadRowLayout.playedAlignment, 'right');
     assert.equal(headToHeadRowLayout.recordAlignment, 'right');
     assert.equal(headToHeadRowLayout.pointsAlignment, 'right');
     assert.equal(headToHeadRowLayout.leftPadding, headToHeadRowLayout.rightPadding);
     assert.equal(headToHeadRowLayout.rowBorder, '1px');
-    assert.deepEqual(headToHeadRowLayout.cellBorders, ['0px', '0px', '0px']);
+    assert.deepEqual(headToHeadRowLayout.cellBorders, ['0px', '0px', '0px', '0px']);
     assert.ok(headToHeadRowLayout.widthDifference <= 1);
     assert.equal(await page.locator('#head-to-head-details').isVisible(), true);
     await page.locator('#tab-h2h').press('ArrowLeft');
