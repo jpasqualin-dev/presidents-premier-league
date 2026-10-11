@@ -962,9 +962,7 @@ test('shared player page renders its shared shell and switches local tabs', asyn
         const cells = [...row.cells];
         const rowStyle = getComputedStyle(row);
         return {
-            playedAlignment: getComputedStyle(cells[1]).textAlign,
-            recordAlignment: getComputedStyle(cells[2]).textAlign,
-            pointsAlignment: getComputedStyle(cells[3]).textAlign,
+            cellAlignments: cells.map(cell => getComputedStyle(cell).textAlign),
             leftPadding: getComputedStyle(cells[0]).paddingLeft,
             rightPadding: getComputedStyle(cells[3]).paddingRight,
             rowBorder: rowStyle.borderBottomWidth,
@@ -972,9 +970,7 @@ test('shared player page renders its shared shell and switches local tabs', asyn
             widthDifference: Math.abs(row.getBoundingClientRect().width - row.closest('table').getBoundingClientRect().width)
         };
     });
-    assert.equal(headToHeadRowLayout.playedAlignment, 'right');
-    assert.equal(headToHeadRowLayout.recordAlignment, 'right');
-    assert.equal(headToHeadRowLayout.pointsAlignment, 'right');
+    assert.deepEqual(headToHeadRowLayout.cellAlignments, ['center', 'center', 'center', 'center']);
     assert.equal(headToHeadRowLayout.leftPadding, headToHeadRowLayout.rightPadding);
     assert.equal(headToHeadRowLayout.rowBorder, '1px');
     assert.deepEqual(headToHeadRowLayout.cellBorders, ['0px', '0px', '0px', '0px']);
