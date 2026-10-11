@@ -218,6 +218,38 @@ test('stats page renders available totals when scorer data does not reconcile', 
     await context.close();
 });
 
+test('scoring card groups tied weeks without repeating the Week label', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    const matches = [
+        ['week-4-high', 4, 'Liverpool', 'Arsenal', 2, 1],
+        ['week-5-low', 5, 'Chelsea', 'Newcastle United', 2, 0],
+        ['week-6-high', 6, 'Sunderland', 'Tottenham Hotspur', 1, 0],
+        ['week-7-low', 7, 'Aston Villa', 'Coventry City', 2, 0]
+    ].map(([id, matchday, home, away, homeScore, awayScore]) => ({
+        id,
+        matchday,
+        status: 'FINISHED',
+        utcDate: `2026-09-${String(20 + matchday).padStart(2, '0')}T12:00:00Z`,
+        homeTeam: { id: `${id}-home`, name: home },
+        awayTeam: { id: `${id}-away`, name: away },
+        score: { fullTime: { home: homeScore, away: awayScore } },
+        scorers: []
+    }));
+    await page.route('**/api/matches**', route => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ matches })
+    }));
+    await page.goto(`${baseUrl}/player.html?player=Wes`);
+    await page.locator('body.player-page-ready').waitFor();
+    await page.locator('#tab-h2h').click();
+    assert.equal(await page.locator('#highest-scoring-week').textContent(), '3 PTS (Week 4, 6)');
+    assert.equal(await page.locator('#lowest-scoring-week').textContent(), '0 PTS (Week 5, 7)');
+    await context.close();
+});
+
 test('overall Form rows align with division Form and keep highlighted PTS cells', async t => {
     if (browserError) return t.skip('Chromium runtime unavailable');
     for (const view of [viewports[2], viewports[1]]) {

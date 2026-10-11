@@ -679,7 +679,10 @@
             }
             const highest = Math.max(...scores.map(item => item.score));
             const lowest = Math.min(...scores.map(item => item.score));
-            const formatWeeks = score => scores.filter(item => item.score === score).map(item => `Week ${item.week}`).join(', ');
+            const formatWeeks = score => {
+                const weeks = scores.filter(item => item.score === score).map(item => item.week);
+                return weeks.length > 1 ? `Week ${weeks.join(', ')}` : `Week ${weeks[0]}`;
+            };
             const average = scores.reduce((total, item) => total + item.score, 0) / scores.length;
             const playerAverages = Object.values(PplLeagueConfig.draftData).map(teams => {
                 const playerScores = getWeeklyScores(teams, matches);
