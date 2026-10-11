@@ -177,14 +177,47 @@ test('shared navigation renders consistent links and the correct active page', a
     for (const [pathname, currentPage] of cases) {
         await page.goto(`${baseUrl}/${pathname}`);
         await page.locator('.site-menu a').first().waitFor();
-        assert.deepEqual(await page.locator('.site-menu > a').allTextContents(), ['Home', 'Table', 'Fixtures', 'Stats', 'Players']);
+        assert.deepEqual(await page.locator('.site-menu > a').allTextContents(), ['Home', 'Table', 'Fixtures', 'Stats']);
         assert.deepEqual(await page.locator('.players-dropdown a').allTextContents(), ['Hef', 'Jamey', 'Jordan', 'Nate', 'Wes']);
-        assert.deepEqual(await page.locator('.players-dropdown a').evaluateAll(links => links.map(link => link.getAttribute('href'))), ['player.html?player=Hef', 'player.html?player=Jamey', 'player.html?player=Jordan', 'player.html?player=Nate', 'player.html?player=Wes']);
+        const tabQuery = pathname === 'player.html' ? '&tab=teams' : '';
+        assert.deepEqual(await page.locator('.players-dropdown a').evaluateAll(links => links.map(link => link.getAttribute('href'))), ['Hef', 'Jamey', 'Jordan', 'Nate', 'Wes'].map(player => `player.html?player=${player}${tabQuery}`));
         if (['Hef', 'Jamey', 'Jordan', 'Nate', 'Wes'].includes(currentPage)) {
             assert.equal(await page.locator('.players-dropdown a[aria-current="page"]').getAttribute('data-player'), currentPage);
         } else {
             assert.equal(await page.locator('.site-menu a[aria-current="page"]').textContent(), currentPage);
         }
+    }
+
+    await context.close();
+});
+
+test('player menu preserves the current tab and external entry opens Teams', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.route('**/api/matches**', route => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(fixtureData())
+    }));
+
+    await page.goto(`${baseUrl}/index.html`);
+    await page.locator('.players-menu summary').click();
+    await page.locator('.players-dropdown a[data-player="Hef"]').click();
+    await page.locator('body.player-page-ready').waitFor();
+    assert.equal(new URL(page.url()).searchParams.has('tab'), false);
+    assert.equal(await page.locator('#tab-teams').getAttribute('aria-selected'), 'true');
+
+    for (const [tabId, owner] of [['h2h', 'Jordan'], ['matches', 'Nate'], ['draft', 'Wes']]) {
+        await page.locator(`#tab-${tabId}`).click();
+        await page.locator('.players-menu summary').click();
+        const playerLink = page.locator(`.players-dropdown a[data-player="${owner}"]`);
+        assert.equal(await playerLink.getAttribute('href'), `player.html?player=${owner}&tab=${tabId}`);
+        await playerLink.click();
+        await page.waitForFunction(([player, tab]) =>
+            document.body.classList.contains('player-page-ready')
+            && new URLSearchParams(location.search).get('player') === player
+            && document.querySelector(`#tab-${tab}`)?.getAttribute('aria-selected') === 'true', [owner, tabId]);
     }
 
     await context.close();

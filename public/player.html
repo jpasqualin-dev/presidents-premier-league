@@ -759,6 +759,11 @@
                 panel.hidden = !isActive;
                 panel.classList.toggle('active', isActive);
             });
+            document.querySelectorAll('.players-dropdown a[data-player]').forEach(link => {
+                const destination = new URL(link.href);
+                destination.searchParams.set('tab', tab.id.replace(/^tab-/u, ''));
+                link.href = `${destination.pathname.split('/').pop()}${destination.search}`;
+            });
             if (tab.id === 'tab-matches') requestAnimationFrame(scrollToLatestFinishedMatchweek);
         }
 
@@ -778,6 +783,8 @@
                 activateTab(tabs[nextIndex]);
             });
         });
+        const requestedTab = new URLSearchParams(window.location.search).get('tab')?.toLowerCase();
+        activateTab(tabs.find(tab => tab.id === `tab-${requestedTab}`) || tabs[0]);
 
     </script>
 </body>

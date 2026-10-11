@@ -38,14 +38,19 @@
             { name: 'Wes' }
         ];
         const pageName = window.location.pathname.split('/').pop() || 'index.html';
-        const requestedPlayer = new URLSearchParams(window.location.search).get('player');
+        const query = new URLSearchParams(window.location.search);
+        const requestedPlayer = query.get('player');
+        const requestedTab = query.get('tab');
+        const playerTab = pageName === 'player.html' && ['teams', 'h2h', 'matches', 'draft'].includes(requestedTab)
+            ? requestedTab
+            : pageName === 'player.html' ? 'teams' : '';
         const currentPlayer = players.find(player => player.name.toLowerCase() === requestedPlayer?.toLowerCase())
             || (pageName === 'player.html' ? players.find(player => player.name === 'Jordan') : null);
 
         siteMenu.innerHTML = `${pages.map(page => {
             const current = !currentPlayer && page.href === pageName;
             return `<a href="${page.href}"${current ? ' class="active" aria-current="page"' : ''}>${page.name}</a>`;
-        }).join('')}<details class="players-menu"><summary${currentPlayer ? ' class="active"' : ''}>Players</summary><div class="players-dropdown">${players.map(player => `<a href="player.html?player=${player.name}" data-player="${player.name}"${currentPlayer?.name === player.name ? ' aria-current="page"' : ''}>${player.name}</a>`).join('')}</div></details>`;
+        }).join('')}<details class="players-menu"><summary${currentPlayer ? ' class="active"' : ''}>Players</summary><div class="players-dropdown">${players.map(player => `<a href="player.html?player=${player.name}${playerTab ? `&amp;tab=${playerTab}` : ''}" data-player="${player.name}"${currentPlayer?.name === player.name ? ' aria-current="page"' : ''}>${player.name}</a>`).join('')}</div></details>`;
     };
 
     const applyNavigationTemplate = () => {
