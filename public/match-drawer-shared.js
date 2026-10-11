@@ -458,7 +458,7 @@
         const weeklyTrigger = lastDrawerFromWeekly && lastDrawerMatchId
             ? document.querySelector(`.weekly-form-match[data-match-id="${CSS.escape(lastDrawerMatchId)}"]`)
             : null;
-        const weeklyOpener = document.querySelector('.mw-header[role="button"]');
+        const weeklyOpener = [...document.querySelectorAll('.mw-header[role="button"]')].find(opener => opener.getClientRects().length > 0);
         if (closingWeeklyDrawer && weeklyOpener) weeklyOpener.focus();
         else if (weeklyTrigger) weeklyTrigger.focus();
         else if (lastDrawerTrigger && typeof lastDrawerTrigger.focus === 'function' && lastDrawerTrigger.isConnected) lastDrawerTrigger.focus();

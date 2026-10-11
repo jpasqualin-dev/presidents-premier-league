@@ -1,8 +1,11 @@
 (() => {
     window.SharedPlayerPage = true;
     let shouldPositionInitialCard = true;
-    const playerName = document.querySelector('.profile-info h1')?.textContent.trim() || '';
     const { draftData, getOwnerOfTeam } = PplLeagueConfig;
+    const requestedPlayer = new URLSearchParams(window.location.search).get('player');
+    const playerName = Object.keys(draftData).find(owner => owner.toLowerCase() === requestedPlayer?.toLowerCase())
+        || document.querySelector('.profile-info h1')?.textContent.trim()
+        || '';
     const teamLogos = TeamNames.logoMap();
     const cleanName = name => TeamNames.shortName(name);
 
