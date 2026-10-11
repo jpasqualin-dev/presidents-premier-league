@@ -250,6 +250,42 @@ test('scoring card groups tied weeks without repeating the Week label', async t 
     await context.close();
 });
 
+test('head-to-head includes self-owned fixtures in its row and aggregate', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    const matches = [
+        ['self-match', 5, 'Liverpool', 'Newcastle United', 2, 1],
+        ['opponent-match', 6, 'Liverpool', 'Chelsea', 1, 2]
+    ].map(([id, matchday, home, away, homeScore, awayScore]) => ({
+        id,
+        matchday,
+        status: 'FINISHED',
+        utcDate: `2026-10-${String(matchday + 1).padStart(2, '0')}T12:00:00Z`,
+        homeTeam: { id: `${id}-home`, name: home },
+        awayTeam: { id: `${id}-away`, name: away },
+        score: { fullTime: { home: homeScore, away: awayScore } },
+        scorers: []
+    }));
+    await page.route('**/api/matches**', route => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ matches })
+    }));
+    await page.goto(`${baseUrl}/player.html?player=Wes`);
+    await page.locator('body.player-page-ready').waitFor();
+    await page.locator('#tab-h2h').click();
+    assert.deepEqual(await page.locator('.head-to-head-row').evaluateAll(rows => rows.map(row => [...row.cells].map(cell => cell.textContent.trim()))), [
+        ['Wes vs. Hef', '0', '0-0-0', '0'],
+        ['Wes vs. Jamey', '1', '0-0-1', '0'],
+        ['Wes vs. Jordan', '0', '0-0-0', '0'],
+        ['Wes vs. Nate', '0', '0-0-0', '0'],
+        ['Wes vs. Wes', '1', '1-0-1', '3'],
+        ['Wes vs. All', '2', '1-0-2', '3']
+    ]);
+    await context.close();
+});
+
 test('overall Form rows align with division Form and keep highlighted PTS cells', async t => {
     if (browserError) return t.skip('Chromium runtime unavailable');
     for (const view of [viewports[2], viewports[1]]) {
