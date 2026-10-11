@@ -546,6 +546,16 @@ test('team drawer table rows open the selected team by click and keyboard', asyn
 
     const tableRows = page.locator('.team-drawer-table-card tbody tr[role="button"]');
     await tableRows.first().waitFor();
+    const selectedRow = page.locator('.team-drawer-table-card .team-drawer-table-selected');
+    const assertGreenSelectedRow = async theme => {
+        const background = await selectedRow.evaluate(row => getComputedStyle(row).backgroundColor);
+        const channels = background.match(/[\d.]+/gu)?.map(Number) || [];
+        const [red, green, blue] = channels.slice(-3);
+        assert.ok(green > red && green > blue, `${theme}: selected team row should have a green background, received ${background}`);
+    };
+    await assertGreenSelectedRow('light theme');
+    await page.evaluate(() => document.querySelector('.theme-toggle').click());
+    await assertGreenSelectedRow('dark theme');
     const clickedRow = page.locator('.team-drawer-table-card tbody tr[role="button"]:not(.team-drawer-table-selected)').first();
     const clickedTeam = (await clickedRow.getAttribute('aria-label')).replace(/^View | details$/g, '');
     await clickedRow.click();
