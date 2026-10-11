@@ -1048,12 +1048,28 @@ test('shared player page renders its shared shell and switches local tabs', asyn
     assert.equal(await page.locator('#h2h-title').textContent(), 'Head to Head');
     assert.deepEqual(await page.locator('.h2h-table tbody tr:first-child td, .scoring-table tbody tr:first-child td').evaluateAll(cells => cells.map(cell => ({ left: getComputedStyle(cell).paddingLeft, right: getComputedStyle(cell).paddingRight }))), [
         { left: '20px', right: '10px' },
-        { left: '20px', right: '10px' },
-        { left: '20px', right: '10px' },
-        { left: '20px', right: '10px' },
+        { left: '10px', right: '10px' },
+        { left: '10px', right: '10px' },
+        { left: '10px', right: '10px' },
         { left: '20px', right: '10px' },
         { left: '20px', right: '10px' }
     ]);
+    for (const width of [390, 1280]) {
+        await page.setViewportSize({ width, height: 844 });
+        const columnCenterDeltas = await page.locator('.h2h-table').evaluate(table => {
+            const headerCells = [...table.querySelectorAll('.table-column-head th')];
+            const dataCells = [...table.querySelector('.head-to-head-row').cells];
+            const textCenter = cell => {
+                const range = document.createRange();
+                range.selectNodeContents(cell);
+                const rect = range.getBoundingClientRect();
+                return rect.left + rect.width / 2;
+            };
+            return headerCells.slice(1).map((cell, index) => Math.abs(textCenter(cell) - textCenter(dataCells[index + 1])));
+        });
+        assert.ok(columnCenterDeltas.every(delta => delta <= 1), `${width}px H2H column center deltas: ${columnCenterDeltas}`);
+    }
+    await page.setViewportSize({ width: 390, height: 844 });
     const h2hTitleRows = await page.locator('.h2h-table, .scoring-table').evaluateAll(tables => tables.map(table => {
         const titleCell = table.querySelector('.title-row th');
         const style = getComputedStyle(titleCell);
