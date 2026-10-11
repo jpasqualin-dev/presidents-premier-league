@@ -121,7 +121,11 @@
         document.getElementById('total-pts').textContent = totalPoints;
         updateAchievements(matchweeks, matches);
         if (shouldPositionInitialCard) {
-            setTimeout(positionCurrentMatchweek, 100);
+            setTimeout(() => {
+                const matchesTabIsActive = document.getElementById('tab-matches')?.getAttribute('aria-selected') === 'true';
+                if (matchesTabIsActive) revealPlayerPage();
+                else positionCurrentMatchweek();
+            }, 100);
             shouldPositionInitialCard = false;
         }
     }

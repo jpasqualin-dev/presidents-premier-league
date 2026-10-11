@@ -493,6 +493,26 @@ test('browser handles empty match data without rendering a broken page', async t
     await context.close();
 });
 
+test('direct Matches entry aligns the latest completed week below the pill menu', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const page = await context.newPage();
+    await page.route('**/api/matches**', route => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(fixtureData())
+    }));
+
+    await page.goto(`${baseUrl}/player.html?player=Wes&tab=matches`);
+    await page.locator('body.player-page-ready').waitFor();
+    assert.equal(await page.locator('#tab-matches').getAttribute('aria-selected'), 'true');
+    assert.ok(await page.locator('#current-matchweek').evaluate(card => {
+        const pills = document.querySelector('.pills-nav-container').getBoundingClientRect();
+        return Math.abs(card.getBoundingClientRect().top - pills.bottom) <= 1;
+    }));
+    await context.close();
+});
+
 test('browser surfaces match API failures without an unhandled page error', async t => {
     if (browserError) return t.skip('Chromium runtime unavailable');
     const context = await browser.newContext();
