@@ -319,6 +319,8 @@ for (const pageName of playerPages) {
         }));
         assert.ok(fixtureManagerChecks.length > 0, `${pageName}: no player fixtures rendered`);
         assert.ok(fixtureManagerChecks.every(({ expected, actual }) => expected === actual), `${pageName}: fixture manager attribution does not match ownership`);
+        assert.ok(await page.locator('#fixtures-container .fixture-item .my-team .team-icon').count() > 0, `${pageName}: Matches feed does not show the player's team crest`);
+        assert.ok(await page.locator('#last-week-card .fixture-item .my-team .team-icon').count() > 0, `${pageName}: Teams tab matchweek card does not show the player's team crest`);
         assert.equal(await page.locator('.profile-card-team').count(), 4, `${pageName}: profile does not render all configured team controls`);
         if (view.viewport.width >= 768) {
             await page.locator('#tab-draft').click();
