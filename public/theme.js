@@ -31,22 +31,21 @@
             { name: 'Stats', href: 'stats.html' }
         ];
         const players = [
-            { name: 'Hef', href: 'hef.html' },
-            { name: 'Jamey', href: 'jamey.html' },
-            { name: 'Jordan', href: 'jordan.html' },
-            { name: 'Nate', href: 'nate.html' },
-            { name: 'Wes', href: 'wes.html' }
+            { name: 'Hef' },
+            { name: 'Jamey' },
+            { name: 'Jordan' },
+            { name: 'Nate' },
+            { name: 'Wes' }
         ];
         const pageName = window.location.pathname.split('/').pop() || 'index.html';
         const requestedPlayer = new URLSearchParams(window.location.search).get('player');
         const currentPlayer = players.find(player => player.name.toLowerCase() === requestedPlayer?.toLowerCase())
-            || players.find(player => player.href === pageName)
-            || (pageName === 'jordan2.html' ? players.find(player => player.name === 'Jordan') : null);
+            || (pageName === 'player.html' ? players.find(player => player.name === 'Jordan') : null);
 
         siteMenu.innerHTML = `${pages.map(page => {
             const current = !currentPlayer && page.href === pageName;
             return `<a href="${page.href}"${current ? ' class="active" aria-current="page"' : ''}>${page.name}</a>`;
-        }).join('')}<details class="players-menu"><summary${currentPlayer ? ' class="active"' : ''}>Players</summary><div class="players-dropdown">${players.map(player => `<a href="${player.href}" data-player="${player.name}"${currentPlayer?.name === player.name ? ' aria-current="page"' : ''}>${player.name}</a>`).join('')}</div></details>`;
+        }).join('')}<details class="players-menu"><summary${currentPlayer ? ' class="active"' : ''}>Players</summary><div class="players-dropdown">${players.map(player => `<a href="player.html?player=${player.name}" data-player="${player.name}"${currentPlayer?.name === player.name ? ' aria-current="page"' : ''}>${player.name}</a>`).join('')}</div></details>`;
     };
 
     const applyNavigationTemplate = () => {

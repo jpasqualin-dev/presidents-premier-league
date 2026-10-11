@@ -171,7 +171,7 @@ test('shared navigation renders consistent links and the correct active page', a
         ['table.html', 'Table'],
         ['fixtures.html', 'Fixtures'],
         ['stats.html', 'Stats'],
-        ['jordan2.html', 'Jordan']
+        ['player.html', 'Jordan']
     ];
 
     for (const [pathname, currentPage] of cases) {
@@ -179,6 +179,7 @@ test('shared navigation renders consistent links and the correct active page', a
         await page.locator('.site-menu a').first().waitFor();
         assert.deepEqual(await page.locator('.site-menu > a').allTextContents(), ['Home', 'Table', 'Fixtures', 'Stats']);
         assert.deepEqual(await page.locator('.players-dropdown a').allTextContents(), ['Hef', 'Jamey', 'Jordan', 'Nate', 'Wes']);
+        assert.deepEqual(await page.locator('.players-dropdown a').evaluateAll(links => links.map(link => link.getAttribute('href'))), ['player.html?player=Hef', 'player.html?player=Jamey', 'player.html?player=Jordan', 'player.html?player=Nate', 'player.html?player=Wes']);
         if (['Hef', 'Jamey', 'Jordan', 'Nate', 'Wes'].includes(currentPage)) {
             assert.equal(await page.locator('.players-dropdown a[aria-current="page"]').getAttribute('data-player'), currentPage);
         } else {
@@ -855,7 +856,7 @@ test('table switches between points and scoped match form with working fixture l
     await context.close();
 });
 
-test('Jordan prototype renders its shared shell and switches local tabs', async t => {
+test('shared player page renders its shared shell and switches local tabs', async t => {
     if (browserError) return t.skip('Chromium runtime unavailable');
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const page = await context.newPage();
@@ -865,7 +866,7 @@ test('Jordan prototype renders its shared shell and switches local tabs', async 
         contentType: 'application/json',
         body: JSON.stringify(fixtureData())
     }));
-    await page.goto(`${baseUrl}/jordan2.html?player=Wes`);
+    await page.goto(`${baseUrl}/player.html?player=Wes`);
     assert.equal(await page.locator('.header-container h1').textContent(), 'Wes');
     assert.equal(await page.title(), 'Wes | Presidents Premier League');
     assert.deepEqual(await page.locator('[role="tab"]').allTextContents(), ['Teams', 'Draft', 'H2H', 'Matches']);

@@ -10,7 +10,7 @@
     const playerName = playerByPage[pageName];
     if (!playerName) return;
 
-    const destination = new URL('jordan2.html', window.location.href);
+    const destination = new URL('player.html', window.location.href);
     destination.searchParams.set('player', playerName);
     window.location.replace(destination.href);
 })();
