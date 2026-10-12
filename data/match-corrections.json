@@ -4,6 +4,38 @@
     "providerEventId": "401879275",
     "status": "FINISHED",
     "homeScore": 3,
-    "awayScore": 0
+    "awayScore": 0,
+    "scorers": [
+      {
+        "teamProviderId": "337",
+        "athleteProviderId": "307657",
+        "athleteName": "Jaidon Anthony",
+        "assistProviderId": "376683",
+        "assistName": "Jannik Schuster",
+        "minute": "61'",
+        "ownGoal": false,
+        "penalty": false
+      },
+      {
+        "teamProviderId": "337",
+        "athleteProviderId": "301894",
+        "athleteName": "Igor Thiago",
+        "assistProviderId": null,
+        "assistName": null,
+        "minute": "83'",
+        "ownGoal": false,
+        "penalty": false
+      },
+      {
+        "teamProviderId": "337",
+        "athleteProviderId": "231049",
+        "athleteName": "Fábio Carvalho",
+        "assistProviderId": null,
+        "assistName": null,
+        "minute": "90'+4'",
+        "ownGoal": false,
+        "penalty": false
+      }
+    ]
   }
 ]

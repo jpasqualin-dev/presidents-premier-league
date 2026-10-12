@@ -26,6 +26,7 @@ function applyMatchCorrections(matches) {
         return {
             ...match,
             status: correction.status,
+            ...(correction.scorers ? { scorers: correction.scorers } : {}),
             score: {
                 ...(match.score || {}),
                 fullTime: {

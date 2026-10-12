@@ -85,16 +85,27 @@ test('normalizes approved long team names from ESPN and Neon records', () => {
     assert.deepEqual(neonMatch.teamCards, { home: { yellow: 2, red: 1 }, away: { yellow: 0, red: 0 } });
 });
 
-test('repairs the Brentford-Chelsea result when ESPN no longer serves the event', () => {
+test('repairs the Brentford-Chelsea result and missing scorers when ESPN no longer serves the event', () => {
     const [match] = applyMatchCorrections([{
         provider: 'espn',
         providerEventId: '401879275',
         status: 'SCHEDULED',
+        homeTeam: { id: '337', name: 'Brentford' },
+        awayTeam: { id: '363', name: 'Chelsea' },
+        scorers: [],
         score: { fullTime: { home: 0, away: 0 } }
     }]);
 
     assert.equal(match.status, 'FINISHED');
     assert.deepEqual(match.score.fullTime, { home: 3, away: 0 });
+    assert.deepEqual(match.scorers.map(scorer => scorer.athleteName), [
+        'Jaidon Anthony',
+        'Igor Thiago',
+        'Fábio Carvalho'
+    ]);
+    assert.equal(match.scorers.filter(scorer => scorer.teamProviderId === match.homeTeam.id).length, match.score.fullTime.home);
+    assert.equal(match.scorers.filter(scorer => scorer.teamProviderId === match.awayTeam.id).length, match.score.fullTime.away);
+    assert.equal(buildDataQuality(false, true, [], [match], true).scoringComplete, true);
 });
 
 test('match response quality distinguishes complete details from summary or missing history', () => {
