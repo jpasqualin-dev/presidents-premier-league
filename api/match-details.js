@@ -1,4 +1,5 @@
 const { fetchMatchSummary, fetchScoringDetails, fetchMatchStatistics, fetchMatchLineups } = require('./sync-espn');
+const { assistStatus } = require('../lib/match-contract');
 
 function toClientEvent(detail) {
     const athlete = detail.athletesInvolved?.[0];
@@ -29,6 +30,12 @@ function toClientScorer(detail) {
         athleteName: scorer?.displayName || 'Unknown scorer',
         assistProviderId: assist?.id ? String(assist.id) : null,
         assistName: assist?.displayName || null,
+        assistStatus: assistStatus({
+            athletesInvolved: detail.athletesInvolved,
+            ownGoal: Boolean(detail.ownGoal),
+            penaltyKick: Boolean(detail.penaltyKick),
+            type: detail.type
+        }),
         minute: detail.clock?.displayValue || null,
         ownGoal: Boolean(detail.ownGoal),
         penalty: Boolean(detail.penaltyKick)

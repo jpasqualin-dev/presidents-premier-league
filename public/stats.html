@@ -965,12 +965,17 @@
                                     teamStats[defendingTeamKey].penaltiesConceded += 1;
                                 }
                             }
-                            if (scorer.assistName || scorer.assistProviderId) {
-                                const assistName = scorer.assistName || 'Unknown assister';
-                                const assistKey = scorer.assistProviderId || assistName;
-                                if (!goalScorers[assistKey]) goalScorers[assistKey] = { name: assistName, team: scorerTeam, goals: 0, assists: 0 };
-                                goalScorers[assistKey].assists += 1;
-                            }
+                        }
+
+                        for (const scorer of window.getCreditedAssistEvents(match.scorers)) {
+                            const scorerTeam = scorer.teamProviderId === match.homeTeam.id ? homeTeamName
+                                : scorer.teamProviderId === match.awayTeam.id ? awayTeamName
+                                    : null;
+                            if (!scorerTeam) continue;
+                            const assistName = scorer.assistName || 'Unknown assister';
+                            const assistKey = scorer.assistProviderId || assistName;
+                            if (!goalScorers[assistKey]) goalScorers[assistKey] = { name: assistName, team: scorerTeam, goals: 0, assists: 0 };
+                            goalScorers[assistKey].assists += 1;
                         }
 
                         if (Number.isFinite(halfTimeHomeScore) && Number.isFinite(halfTimeAwayScore)) {
@@ -1065,8 +1070,7 @@
                             }
                         }
 
-                        for (const scorer of window.getIndividualScoringEvents(match.scorers)) {
-                            if (!scorer.assistName && !scorer.assistProviderId) continue;
+                        for (const scorer of window.getCreditedAssistEvents(match.scorers)) {
                             const assistingTeam = scorer.teamProviderId === match.homeTeam.id ? homeTeamKey : scorer.teamProviderId === match.awayTeam.id ? awayTeamKey : null;
                             const assistingPlayer = assistingTeam ? teamStats[assistingTeam]?.owner : null;
                             const isHomeAssist = assistingTeam === homeTeamKey;
@@ -1177,6 +1181,9 @@
             }
             if (quality?.scoringComplete === false) {
                 dataWarnings.push('Scorer totals do not reconcile with finished-match scores; player totals may be incomplete.');
+            }
+            if (quality?.assistComplete === false) {
+                dataWarnings.push(`${quality.unverifiedAssistCount || 'Some'} goal assist details are unverified; player assist totals may be incomplete.`);
             }
             if (dataWarnings.length) {
                 const warning = document.createElement('div');

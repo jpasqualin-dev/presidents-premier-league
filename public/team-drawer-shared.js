@@ -99,11 +99,16 @@
                 const scorerKey = String(scorer.athleteProviderId || scorer.athleteName || 'Unknown scorer');
                 if (!players[scorerKey]) players[scorerKey] = { name: scorer.athleteName || 'Unknown scorer', goals: 0, assists: 0 };
                 players[scorerKey].goals += 1;
-                if (scorer.assistName || scorer.assistProviderId) {
-                    const assistKey = String(scorer.assistProviderId || scorer.assistName);
-                    if (!players[assistKey]) players[assistKey] = { name: scorer.assistName || 'Unknown assister', goals: 0, assists: 0 };
-                    players[assistKey].assists += 1;
-                }
+            });
+            window.getCreditedAssistEvents(match.scorers).forEach(scorer => {
+                const scorerTeamId = String(scorer.teamProviderId || '');
+                const homeTeamId = String(match.homeTeam.id || match.homeTeam.providerId || '');
+                const awayTeamId = String(match.awayTeam.id || match.awayTeam.providerId || '');
+                const scorerTeam = scorerTeamId === homeTeamId ? match.homeTeam.name : scorerTeamId === awayTeamId ? match.awayTeam.name : '';
+                if (!scorerTeam || !sameTeam(scorerTeam, teamName)) return;
+                const assistKey = String(scorer.assistProviderId || scorer.assistName);
+                if (!players[assistKey]) players[assistKey] = { name: scorer.assistName || 'Unknown assister', goals: 0, assists: 0 };
+                players[assistKey].assists += 1;
             });
         });
         return Object.values(players);
@@ -128,6 +133,7 @@
         if (playerStatsStatus?.historicalAvailable === false) dataWarnings.push('Historical match data is unavailable; these totals may cover only recent matches.');
         else if (playerStatsStatus?.detailsComplete === false) dataWarnings.push('Some match details are unavailable; these totals may be incomplete.');
         if (playerStatsStatus?.scoringComplete === false) dataWarnings.push('Scorer totals do not reconcile with finished-match scores; player totals may be incomplete.');
+        if (playerStatsStatus?.assistComplete === false) dataWarnings.push(`${playerStatsStatus.unverifiedAssistCount || 'Some'} goal assist details are unverified; player assist totals may be incomplete.`);
         const qualityNotice = dataWarnings.length
             ? `<section class="team-drawer-card"><p class="empty-detail" role="alert">${dataWarnings.map(escape).join(' ')}</p></section>`
             : '';

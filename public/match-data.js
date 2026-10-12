@@ -98,6 +98,8 @@
         detailLevel: data?.dataQuality?.detailLevel || (includeDetails ? 'unknown' : 'summary'),
         detailsComplete: data?.dataQuality?.detailsComplete === true,
         scoringComplete: data?.dataQuality?.scoringComplete === true,
+        assistComplete: data?.dataQuality?.assistComplete === true,
+        unverifiedAssistCount: data?.dataQuality?.unverifiedAssistCount || 0,
         historicalAvailable: data?.dataQuality?.historicalAvailable === true,
         historicalMatchCount: data?.dataQuality?.historicalMatchCount || 0,
         totalMatchCount: data?.matches?.length || 0,
@@ -274,5 +276,7 @@
 
     window.DataManager = { config, getMatchData, refresh, subscribe, getStatus, start };
     window.getIndividualScoringEvents = scorers => (scorers || []).filter(scorer => scorer?.ownGoal !== true);
+    window.getCreditedAssistEvents = scorers => window.getIndividualScoringEvents(scorers)
+        .filter(scorer => scorer?.assistStatus !== 'unverified' && (scorer?.assistName || scorer?.assistProviderId));
     window.getMatchData = getMatchData;
 })();

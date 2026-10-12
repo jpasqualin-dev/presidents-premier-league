@@ -30,4 +30,6 @@ The site uses Vercel-style API routes under `api/`. `/api/matches` combines the 
 
 Vercel runs `/api/sync-espn` daily. Configure `DATABASE_URL` and `CRON_SECRET` for the deployment environments so the scheduled job can write to Neon and authenticate. Both the site API and scheduled sync use the same UTC date window: the previous seven days plus today and tomorrow. This intentional overlap covers local-date boundaries as well as transiently missed runs. Match scores are stored even if ESPN's optional detail endpoint is unavailable; detail data can be completed on a later sync.
 
+Apply database migrations in order, including `db/009_assist_reconciliation.sql`, before deploying changes that report assist completeness. Finished matches with unresolved assist attribution are retried by the sync job in bounded batches; assist completeness is tracked separately from whether goal totals reconcile.
+
 Check Vercel Cron/Function logs for failed sync responses. A sync response with individual event failures is reported as HTTP 500 and includes the affected ESPN event IDs. To backfill a missed date manually, run `START_DATE=YYYY-MM-DD END_DATE=YYYY-MM-DD node scripts/backfill-espn-neon.js` with `DATABASE_URL` configured. The operation is idempotent and can be run again safely.

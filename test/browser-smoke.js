@@ -42,9 +42,9 @@ function detailedFixtureData() {
         match.teamStats = [];
         match.teamCards = { home: { yellow: 0, red: 0 }, away: { yellow: 0, red: 0 } };
         match.scorers = [
-            { teamProviderId: match.homeTeam.id, athleteName: `${match.homeTeam.name} scorer 1`, ownGoal: false },
-            { teamProviderId: match.homeTeam.id, athleteName: `${match.homeTeam.name} scorer 2`, ownGoal: false },
-            { teamProviderId: match.awayTeam.id, athleteName: `${match.awayTeam.name} scorer`, ownGoal: false }
+            { teamProviderId: match.homeTeam.id, athleteName: `${match.homeTeam.name} scorer 1`, ownGoal: false, assistStatus: 'unassisted' },
+            { teamProviderId: match.homeTeam.id, athleteName: `${match.homeTeam.name} scorer 2`, ownGoal: false, assistStatus: 'unassisted' },
+            { teamProviderId: match.awayTeam.id, athleteName: `${match.awayTeam.name} scorer`, ownGoal: false, assistStatus: 'unassisted' }
         ];
     });
     data.generatedAt = '2026-10-10T00:00:00Z';
@@ -52,6 +52,8 @@ function detailedFixtureData() {
         detailLevel: 'full',
         detailsComplete: true,
         scoringComplete: true,
+        assistComplete: true,
+        unverifiedAssistCount: 0,
         historicalAvailable: true,
         historicalMatchCount: data.matches.length,
         totalMatchCount: data.matches.length,

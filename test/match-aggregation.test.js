@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { normalizeEspnEvent, normalizeNeonMatch } = require('../lib/match-contract');
+const { assistStatus, normalizeEspnEvent, normalizeNeonMatch } = require('../lib/match-contract');
 const { dedupeByKey, mergeMatches } = require('../lib/match-aggregation');
 const { applyMatchCorrections, buildDataQuality } = require('../api/matches');
 
@@ -85,6 +85,14 @@ test('normalizes approved long team names from ESPN and Neon records', () => {
     assert.deepEqual(neonMatch.teamCards, { home: { yellow: 2, red: 1 }, away: { yellow: 0, red: 0 } });
 });
 
+test('normalizes credited and explicitly unassisted goal events', () => {
+    assert.equal(assistStatus({ athletesInvolved: [{ id: 'scorer' }, { id: 'assister' }] }), 'credited');
+    assert.equal(assistStatus({ ownGoal: true, athletesInvolved: [{ id: 'scorer' }] }), 'unassisted');
+    assert.equal(assistStatus({ penaltyKick: true, athletesInvolved: [{ id: 'scorer' }] }), 'unassisted');
+    assert.equal(assistStatus({ type: { text: 'Goal - Free-kick' }, athletesInvolved: [{ id: 'scorer' }] }), 'unassisted');
+    assert.equal(assistStatus({ athletesInvolved: [{ id: 'scorer' }] }), 'unverified');
+});
+
 test('repairs the Brentford-Chelsea result and missing scorers when ESPN no longer serves the event', () => {
     const [match] = applyMatchCorrections([{
         provider: 'espn',
@@ -106,6 +114,7 @@ test('repairs the Brentford-Chelsea result and missing scorers when ESPN no long
     assert.equal(match.scorers.filter(scorer => scorer.teamProviderId === match.homeTeam.id).length, match.score.fullTime.home);
     assert.equal(match.scorers.filter(scorer => scorer.teamProviderId === match.awayTeam.id).length, match.score.fullTime.away);
     assert.equal(buildDataQuality(false, true, [], [match], true).scoringComplete, true);
+    assert.equal(buildDataQuality(true, true, [match], [match], true).assistComplete, true);
 });
 
 test('match response quality distinguishes complete details from summary or missing history', () => {
@@ -123,6 +132,8 @@ test('match response quality distinguishes complete details from summary or miss
         detailLevel: 'full',
         detailsComplete: true,
         scoringComplete: true,
+        assistComplete: true,
+        unverifiedAssistCount: 0,
         historicalAvailable: true,
         historicalMatchCount: 1,
         totalMatchCount: 1,
@@ -136,4 +147,13 @@ test('match response quality distinguishes complete details from summary or miss
     }], true);
     assert.equal(scoringMismatch.detailsComplete, true);
     assert.equal(scoringMismatch.scoringComplete, false);
+
+    const incompleteAssist = buildDataQuality(true, true, [detailedMatch], [{
+        ...detailedMatch,
+        score: { fullTime: { home: 1, away: 0 } },
+        scorers: [{ athleteName: 'Scorer', assistStatus: 'unverified' }]
+    }], true);
+    assert.equal(incompleteAssist.scoringComplete, true);
+    assert.equal(incompleteAssist.assistComplete, false);
+    assert.equal(incompleteAssist.unverifiedAssistCount, 1);
 });

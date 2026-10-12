@@ -1,5 +1,5 @@
 const { neon } = require('@neondatabase/serverless');
-const { getMatchday } = require('../lib/match-contract');
+const { assistStatus: getAssistStatus, getMatchday } = require('../lib/match-contract');
 const { crestForTeam } = require('../lib/team-names');
 const { dedupeByKey } = require('../lib/match-aggregation');
 
@@ -120,6 +120,74 @@ function canReplaceScorerRecords(summary, details, homeScore, awayScore, homeTea
         && scorers.every(scorer => scorer.team?.id != null && teamIds.has(String(scorer.team.id)));
 }
 
+function scorerMinute(value) {
+    if (value == null || value === '') return null;
+    const numeric = Number(value);
+    if (Number.isFinite(numeric)) return numeric > 1000 ? Math.floor(numeric / 60) : Math.floor(numeric);
+    const parsed = Number.parseInt(String(value), 10);
+    return Number.isFinite(parsed) ? parsed : null;
+}
+
+function buildScorerRecords(details, existingRecords, finished, checkedAt = new Date()) {
+    const priorRecords = [...(existingRecords || [])];
+    return details.filter(detail => detail.scoringPlay).map(detail => {
+        const scorer = detail.athletesInvolved?.[0];
+        const teamProviderId = detail.team?.id == null ? null : String(detail.team.id);
+        const athleteProviderId = scorer?.id == null ? null : String(scorer.id);
+        const minute = scorerMinute(detail.clock?.value ?? detail.clock?.displayValue);
+        const sameScorer = record => String(record.team_provider_id) === String(teamProviderId)
+            && ((athleteProviderId && String(record.provider_athlete_id) === athleteProviderId)
+                || (!athleteProviderId && String(record.athlete_name || '').toLowerCase() === String(scorer?.displayName || '').toLowerCase()));
+        const matchingIndexes = priorRecords.map((record, index) => sameScorer(record) ? index : -1).filter(index => index >= 0);
+        const exactMinuteIndex = matchingIndexes.find(index => scorerMinute(priorRecords[index].minute) === minute);
+        const priorIndex = exactMinuteIndex ?? (matchingIndexes.length === 1 ? matchingIndexes[0] : -1);
+        const prior = priorIndex >= 0 ? priorRecords.splice(priorIndex, 1)[0] : null;
+        const assistant = detail.athletesInvolved?.[1];
+        const assistProviderId = assistant?.id == null ? null : String(assistant.id);
+        const assistName = assistant?.displayName || null;
+        const explicitUnassisted = getAssistStatus(detail) === 'unassisted';
+
+        if (assistProviderId || assistName) {
+            return {
+                teamProviderId, athleteProviderId, athleteName: scorer?.displayName || 'Unknown scorer',
+                assistProviderId, assistName, assistStatus: 'credited', assistObservations: 0,
+                assistCheckedAt: checkedAt, minute, ownGoal: Boolean(detail.ownGoal), penalty: Boolean(detail.penaltyKick)
+            };
+        }
+
+        if (explicitUnassisted || prior?.assist_status === 'unassisted') {
+            return {
+                teamProviderId, athleteProviderId, athleteName: scorer?.displayName || 'Unknown scorer',
+                assistProviderId: null, assistName: null, assistStatus: 'unassisted', assistObservations: 0,
+                assistCheckedAt: checkedAt, minute, ownGoal: Boolean(detail.ownGoal), penalty: Boolean(detail.penaltyKick)
+            };
+        }
+
+        if (prior?.assist_status === 'credited' && (prior.assist_provider_id || prior.assist_name)) {
+            return {
+                teamProviderId, athleteProviderId, athleteName: scorer?.displayName || prior.athlete_name || 'Unknown scorer',
+                assistProviderId: prior.assist_provider_id, assistName: prior.assist_name, assistStatus: 'credited',
+                assistObservations: 0, assistCheckedAt: prior.assist_checked_at || checkedAt, minute,
+                ownGoal: Boolean(detail.ownGoal), penalty: Boolean(detail.penaltyKick)
+            };
+        }
+
+        const previousObservations = Number(prior?.assist_observations) || 0;
+        const previousCheckedAt = prior?.assist_checked_at ? new Date(prior.assist_checked_at) : null;
+        const canCountObservation = finished
+            && (!previousCheckedAt || checkedAt.getTime() - previousCheckedAt.getTime() >= 6 * 60 * 60 * 1000);
+        const observations = previousObservations + (canCountObservation || !prior ? 1 : 0);
+        return {
+            teamProviderId, athleteProviderId, athleteName: scorer?.displayName || prior?.athlete_name || 'Unknown scorer',
+            assistProviderId: null, assistName: null,
+            assistStatus: finished && observations >= 3 ? 'unassisted' : 'unverified',
+            assistObservations: observations,
+            assistCheckedAt: canCountObservation || !prior ? checkedAt : previousCheckedAt,
+            minute, ownGoal: Boolean(detail.ownGoal), penalty: Boolean(detail.penaltyKick)
+        };
+    });
+}
+
 async function fetchMatchStatistics(eventId, summary = null) {
     const payload = summary || await fetchMatchSummary(eventId);
     if (!payload) return [];
@@ -231,16 +299,23 @@ async function syncEvent(sql, event) {
         }
     }
     if (hasCompleteScorerPayload) {
+        const existingScorers = await sql`
+            SELECT t.provider_team_id, ms.provider_athlete_id, ms.athlete_name, ms.assist_provider_id,
+                ms.assist_name, ms.assist_status, ms.assist_observations, ms.assist_checked_at, ms.minute
+            FROM match_scorers ms
+            JOIN teams t ON t.id = ms.team_id
+            WHERE ms.match_id = ${match.id}`;
+        const finished = status.state === 'post' || Boolean(status.completed);
+        const scorerRecords = buildScorerRecords(details, existingScorers, finished);
         await sql`DELETE FROM match_scorers WHERE match_id = ${match.id}`;
-        for (const detail of details.filter(item => item.scoringPlay)) {
-            const scorer = detail.athletesInvolved?.[0];
-            const scorerTeam = String(detail.team?.id) === String(home.team.id) ? homeTeam
-                : String(detail.team?.id) === String(away.team.id) ? awayTeam
+        for (const scorer of scorerRecords) {
+            const scorerTeam = scorer.teamProviderId === String(home.team.id) ? homeTeam
+                : scorer.teamProviderId === String(away.team.id) ? awayTeam
                     : null;
             if (!scorerTeam) continue;
             await sql`
-            INSERT INTO match_scorers (match_id, provider_athlete_id, team_id, athlete_name, assist_provider_id, assist_name, minute, own_goal, penalty)
-            VALUES (${match.id}, ${scorer?.id ? String(scorer.id) : null}, ${scorerTeam.id}, ${scorer?.displayName || 'Unknown scorer'}, ${detail.athletesInvolved?.[1]?.id ? String(detail.athletesInvolved[1].id) : null}, ${detail.athletesInvolved?.[1]?.displayName || null}, ${detail.clock?.value == null ? null : Math.floor(Number(detail.clock.value) / 60)}, ${Boolean(detail.ownGoal)}, ${Boolean(detail.penaltyKick)})`;
+            INSERT INTO match_scorers (match_id, provider_athlete_id, team_id, athlete_name, assist_provider_id, assist_name, assist_status, assist_observations, assist_checked_at, minute, own_goal, penalty)
+            VALUES (${match.id}, ${scorer.athleteProviderId}, ${scorerTeam.id}, ${scorer.athleteName}, ${scorer.assistProviderId}, ${scorer.assistName}, ${scorer.assistStatus}, ${scorer.assistObservations}, ${scorer.assistCheckedAt}, ${scorer.minute}, ${scorer.ownGoal}, ${scorer.penalty})`;
         }
     }
     if (hasStatsPayload) {
@@ -259,9 +334,11 @@ async function syncEvent(sql, event) {
     return true;
 }
 
-async function findMatchesWithIncompleteScoring(sql) {
+async function findMatchesNeedingRepair(sql) {
     return sql`
-        SELECT m.provider_event_id, m.kickoff_at
+        SELECT m.provider_event_id, m.kickoff_at,
+            COUNT(ms.id) <> m.home_score + m.away_score AS scorer_pending,
+            COALESCE(BOOL_OR(ms.assist_status = 'unverified'), FALSE) AS assist_pending
         FROM matches m
         LEFT JOIN match_scorers ms ON ms.match_id = m.id
         WHERE m.provider = 'espn'
@@ -270,7 +347,10 @@ async function findMatchesWithIncompleteScoring(sql) {
             AND m.home_score IS NOT NULL
             AND m.away_score IS NOT NULL
         GROUP BY m.id, m.provider_event_id, m.kickoff_at, m.home_score, m.away_score
-        HAVING COUNT(ms.id) <> m.home_score + m.away_score`;
+        HAVING COUNT(ms.id) <> m.home_score + m.away_score
+            OR BOOL_OR(ms.assist_status = 'unverified')
+        ORDER BY m.kickoff_at ASC
+        LIMIT 25`;
 }
 
 module.exports = async function handler(req, res) {
@@ -282,7 +362,7 @@ module.exports = async function handler(req, res) {
     try {
         const sql = neon(process.env.DATABASE_URL);
         const recentEvents = await fetchEvents();
-        const incompleteMatches = await findMatchesWithIncompleteScoring(sql);
+        const incompleteMatches = await findMatchesNeedingRepair(sql);
         const repairDates = [...new Set(incompleteMatches.map(match =>
             new Date(match.kickoff_at).toISOString().slice(0, 10).replaceAll('-', '')
         ))];
@@ -302,7 +382,7 @@ module.exports = async function handler(req, res) {
                 console.error(`Failed to sync ESPN event ${event.id}:`, error);
             }
         }
-        const remainingIncompleteMatches = await findMatchesWithIncompleteScoring(sql);
+        const remainingIncompleteMatches = await findMatchesNeedingRepair(sql);
         res.setHeader('Cache-Control', 'no-store');
         return res.status(failures.length ? 500 : 200).json({
             provider: 'espn',
@@ -311,9 +391,16 @@ module.exports = async function handler(req, res) {
             stored,
             failures,
             scorerRepairs: {
-                candidates: incompleteMatches.length,
-                eventsFound: repairEvents.filter(event => missingEventIds.has(String(event.id))).length,
-                remaining: remainingIncompleteMatches.length
+                candidates: incompleteMatches.filter(match => match.scorer_pending).length,
+                eventsFound: repairEvents.filter(event => missingEventIds.has(String(event.id))
+                    && incompleteMatches.find(match => String(match.provider_event_id) === String(event.id))?.scorer_pending).length,
+                remaining: remainingIncompleteMatches.filter(match => match.scorer_pending).length
+            },
+            assistRepairs: {
+                candidates: incompleteMatches.filter(match => match.assist_pending).length,
+                eventsFound: repairEvents.filter(event => missingEventIds.has(String(event.id))
+                    && incompleteMatches.find(match => String(match.provider_event_id) === String(event.id))?.assist_pending).length,
+                remaining: remainingIncompleteMatches.filter(match => match.assist_pending).length
             },
             syncedAt: new Date().toISOString()
         });
@@ -331,4 +418,6 @@ module.exports.fetchScoringDetails = fetchScoringDetails;
 module.exports.fetchMatchSummary = fetchMatchSummary;
 module.exports.syncEvent = syncEvent;
 module.exports.canReplaceScorerRecords = canReplaceScorerRecords;
+module.exports.buildScorerRecords = buildScorerRecords;
+module.exports.findMatchesNeedingRepair = findMatchesNeedingRepair;
 module.exports.dayKeys = dayKeys;

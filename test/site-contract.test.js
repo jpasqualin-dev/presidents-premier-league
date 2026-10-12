@@ -89,6 +89,13 @@ test('match data polling uses shared caching and pauses while hidden', () => {
     assert.match(source, /visibilityState === 'hidden'/u);
 });
 
+test('team drawer and season stats share credited assist events', () => {
+    const sharedData = readPublic('match-data.js');
+    assert.match(sharedData, /window\.getCreditedAssistEvents/u);
+    assert.match(readPublic('team-drawer-shared.js'), /getCreditedAssistEvents\(match\.scorers\)/u);
+    assert.match(readPublic('stats.html'), /getCreditedAssistEvents\(match\.scorers\)/u);
+});
+
 test('match details caching is state-aware instead of unconditional no-store', () => {
     const source = readRepo('api/match-details.js');
     assert.doesNotMatch(source, /no-store, max-age=0/u);

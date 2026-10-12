@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { canReplaceScorerRecords, dayKeys, syncEvent } = require('../api/sync-espn');
+const { buildScorerRecords, canReplaceScorerRecords, dayKeys, findMatchesNeedingRepair, syncEvent } = require('../api/sync-espn');
 
 function matchEvent() {
     return {
@@ -74,6 +74,67 @@ test('scorer records are replaced only when ESPN detail matches the final score'
     assert.equal(canReplaceScorerRecords({}, [], 0, 0, '337', '363'), true);
 });
 
+test('assist observations distinguish credited, verified unassisted, and unresolved events', () => {
+    const checkedAt = new Date('2026-10-12T12:00:00Z');
+    const goal = {
+        scoringPlay: true,
+        team: { id: '337' },
+        type: { text: 'Goal', type: 'goal' },
+        clock: { value: 3600 },
+        athletesInvolved: [{ id: 'scorer', displayName: 'Scorer' }]
+    };
+    const firstObservation = buildScorerRecords([goal], [], true, checkedAt)[0];
+    assert.equal(firstObservation.assistStatus, 'unverified');
+    assert.equal(firstObservation.assistObservations, 1);
+
+    const secondObservation = buildScorerRecords([goal], [{
+        team_provider_id: '337',
+        provider_athlete_id: 'scorer',
+        athlete_name: 'Scorer',
+        assist_status: 'unverified',
+        assist_observations: 1,
+        assist_checked_at: '2026-10-12T12:00:00Z',
+        minute: 60
+    }], true, new Date('2026-10-12T15:00:00Z'))[0];
+    assert.equal(secondObservation.assistStatus, 'unverified');
+    assert.equal(secondObservation.assistObservations, 1);
+
+    const verifiedUnassisted = buildScorerRecords([goal], [{
+        team_provider_id: '337',
+        provider_athlete_id: 'scorer',
+        athlete_name: 'Scorer',
+        assist_status: 'unverified',
+        assist_observations: 2,
+        assist_checked_at: '2026-10-12T12:00:00Z',
+        minute: 60
+    }], true, new Date('2026-10-12T19:00:00Z'))[0];
+    assert.equal(verifiedUnassisted.assistStatus, 'unassisted');
+
+    const credited = buildScorerRecords([{
+        ...goal,
+        athletesInvolved: [goal.athletesInvolved[0], { id: 'assister', displayName: 'Assister' }]
+    }], [], true, checkedAt)[0];
+    assert.equal(credited.assistStatus, 'credited');
+    assert.equal(credited.assistProviderId, 'assister');
+
+    const retained = buildScorerRecords([goal], [{
+        team_provider_id: '337',
+        provider_athlete_id: 'scorer',
+        athlete_name: 'Scorer',
+        assist_provider_id: 'assister',
+        assist_name: 'Assister',
+        assist_status: 'credited',
+        assist_observations: 0,
+        assist_checked_at: '2026-10-12T12:00:00Z',
+        minute: 60
+    }], true, checkedAt)[0];
+    assert.equal(retained.assistProviderId, 'assister');
+    assert.equal(retained.assistStatus, 'credited');
+
+    const ownGoal = buildScorerRecords([{ ...goal, ownGoal: true }], [], true, checkedAt)[0];
+    assert.equal(ownGoal.assistStatus, 'unassisted');
+});
+
 test('UTC date window retains the prior local date for live and scheduled feeds', () => {
     const dates = dayKeys(new Date('2026-10-12T02:25:00Z'));
     assert.deepEqual(dates, [
@@ -81,6 +142,17 @@ test('UTC date window retains the prior local date for live and scheduled feeds'
         '20261010', '20261011', '20261012', '20261013'
     ]);
     assert.equal(dates.includes('20261010'), true);
+});
+
+test('repair queue includes score mismatches and unresolved assist data in bounded batches', async () => {
+    let query = '';
+    await findMatchesNeedingRepair(async parts => {
+        query = parts.join('?');
+        return [];
+    });
+    assert.match(query, /COUNT\(ms\.id\) <> m\.home_score \+ m\.away_score/u);
+    assert.match(query, /BOOL_OR\(ms\.assist_status = 'unverified'\)/u);
+    assert.match(query, /LIMIT 25/u);
 });
 
 test('sync preserves stored scorers on partial ESPN detail and repairs them when complete', async () => {

@@ -26,7 +26,12 @@ function applyMatchCorrections(matches) {
         return {
             ...match,
             status: correction.status,
-            ...(correction.scorers ? { scorers: correction.scorers } : {}),
+            ...(correction.scorers ? {
+                scorers: correction.scorers.map(scorer => ({
+                    ...scorer,
+                    assistStatus: scorer.assistStatus || (scorer.assistProviderId || scorer.assistName ? 'credited' : 'unassisted')
+                }))
+            } : {}),
             score: {
                 ...(match.score || {}),
                 fullTime: {
@@ -59,10 +64,31 @@ function buildDataQuality(includeDetails, historicalAvailable, historicalMatches
             && match.teamCards
             && typeof match.teamCards === 'object')
     );
+    const unverifiedAssistCount = matches.reduce((total, match) => {
+        if (match.status !== 'FINISHED') return total;
+        const scorers = Array.isArray(match.scorers) ? match.scorers : [];
+        return total + scorers.filter(scorer =>
+            scorer.assistStatus === 'unverified'
+            || (scorer.assistStatus === 'credited' && !scorer.assistProviderId && !scorer.assistName)
+            || (!scorer.assistStatus && !scorer.assistProviderId && !scorer.assistName && !scorer.ownGoal && !scorer.penalty)
+        ).length;
+    }, 0);
+    const assistComplete = Boolean(
+        includeDetails
+        && matches.length > 0
+        && unverifiedAssistCount === 0
+        && matches.every(match => match.status !== 'FINISHED'
+            || (Array.isArray(match.scorers)
+                && Number.isFinite(match.score?.fullTime?.home)
+                && Number.isFinite(match.score?.fullTime?.away)
+                && match.scorers.length === match.score.fullTime.home + match.score.fullTime.away))
+    );
     return {
         detailLevel: includeDetails ? 'full' : 'summary',
         detailsComplete,
         scoringComplete,
+        assistComplete,
+        unverifiedAssistCount,
         historicalAvailable,
         historicalMatchCount: historicalMatches.length,
         totalMatchCount: matches.length,
@@ -112,6 +138,7 @@ async function readHistoricalMatches(sql, includeDetails = false) {
                     'athleteName', ms.athlete_name,
                     'assistProviderId', to_jsonb(ms)->>'assist_provider_id',
                     'assistName', to_jsonb(ms)->>'assist_name',
+                    'assistStatus', to_jsonb(ms)->>'assist_status',
                     'minute', ms.minute,
                     'ownGoal', ms.own_goal,
                     'penalty', ms.penalty

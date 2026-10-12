@@ -7,7 +7,10 @@ const assert = require('node:assert/strict');
 function loadTeamDrawer() {
     const source = fs.readFileSync(path.join(__dirname, '..', 'public', 'team-drawer-shared.js'), 'utf8');
     const window = {
-        getIndividualScoringEvents: scorers => (scorers || []).filter(scorer => scorer?.ownGoal !== true)
+        getIndividualScoringEvents: scorers => (scorers || []).filter(scorer => scorer?.ownGoal !== true),
+        getCreditedAssistEvents: scorers => (scorers || []).filter(scorer => scorer?.ownGoal !== true
+            && scorer?.assistStatus !== 'unverified'
+            && (scorer?.assistName || scorer?.assistProviderId))
     };
     const document = {
         createElement: () => ({ style: {}, id: '' }),
@@ -16,6 +19,27 @@ function loadTeamDrawer() {
     vm.runInNewContext(source, { window, document });
     return window.TeamDrawerShared;
 }
+
+test('team player assists use credited assist events for the scoring team only', () => {
+    const output = renderTeam('Manchester City', {
+        status: 'FINISHED',
+        matchday: 1,
+        utcDate: '2026-10-11T15:30:00Z',
+        homeTeam: { id: '382', name: 'Manchester City' },
+        awayTeam: { id: '364', name: 'Liverpool' },
+        score: { fullTime: { home: 3, away: 1 } },
+        scorers: [
+            { teamProviderId: '382', athleteProviderId: '1', athleteName: 'Rayan Cherki', assistProviderId: '2', assistName: 'Josko Gvardiol', assistStatus: 'credited' },
+            { teamProviderId: '382', athleteProviderId: '3', athleteName: 'Jérémy Doku', assistProviderId: '4', assistName: 'Elliot Anderson', assistStatus: 'credited' },
+            { teamProviderId: '382', athleteProviderId: '7', athleteName: 'Erling Haaland', assistProviderId: '2', assistName: 'Josko Gvardiol', assistStatus: 'credited' },
+            { teamProviderId: '364', athleteProviderId: '5', athleteName: 'Liverpool scorer', assistProviderId: '6', assistName: 'Liverpool assister', assistStatus: 'credited' }
+        ]
+    }, ['Manchester City', 'Liverpool']);
+
+    assert.match(output, /Assists[\s\S]*?Josko Gvardiol[\s\S]*?<strong>2<\/strong>/);
+    assert.match(output, /Assists[\s\S]*?Elliot Anderson[\s\S]*?<strong>1<\/strong>/);
+    assert.doesNotMatch(output.slice(output.indexOf('Assists')), /Liverpool assister/);
+});
 
 function teamStats(teamNames) {
     const stats = {};
