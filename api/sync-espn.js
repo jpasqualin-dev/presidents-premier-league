@@ -6,6 +6,7 @@ const { dedupeByKey } = require('../lib/match-aggregation');
 const ESPN_ENDPOINT = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard';
 const SEASON_START = '2026-08-01';
 const SEASON_END = '2027-06-01';
+const SYNC_LOOKBACK_DAYS = 7;
 const teamOwners = {
     Arsenal: ['Hef', 'Red and Blue Division'], Bournemouth: ['Hef', 'Birds and Beasts Division'], 'Nottingham Forest': ['Hef', 'Field and Forest Division'], 'Hull City': ['Hef', 'Cottage and Country Division'],
     'Manchester City': ['Jordan', 'Red and Blue Division'], Brighton: ['Jordan', 'Birds and Beasts Division'], Brentford: ['Jordan', 'Field and Forest Division'], 'Ipswich Town': ['Jordan', 'Cottage and Country Division'],
@@ -14,11 +15,11 @@ const teamOwners = {
     Chelsea: ['Jamey', 'Red and Blue Division'], Tottenham: ['Jamey', 'Birds and Beasts Division'], 'Crystal Palace': ['Jamey', 'Field and Forest Division'], 'Leeds United': ['Jamey', 'Cottage and Country Division']
 };
 
-function dayKeys() {
-    const today = new Date();
+function dayKeys(now = new Date()) {
+    const today = new Date(now);
     today.setUTCHours(12, 0, 0, 0);
     const dates = [];
-    for (let offset = -1; offset <= 1; offset += 1) {
+    for (let offset = -SYNC_LOOKBACK_DAYS; offset <= 1; offset += 1) {
         const date = new Date(today);
         date.setUTCDate(today.getUTCDate() + offset);
         dates.push(date.toISOString().slice(0, 10).replaceAll('-', ''));
@@ -163,11 +164,23 @@ async function syncEvent(sql, event) {
     const awayOwner = findTeamOwner(away.team.displayName);
     const homeName = findCanonicalTeam(home.team.displayName);
     const awayName = findCanonicalTeam(away.team.displayName);
-    const summary = await fetchMatchSummary(event.id);
-    const [details, matchStatistics] = await Promise.all([
-        fetchScoringDetails(event, summary),
-        fetchMatchStatistics(event.id, summary)
-    ]);
+    let summary = null;
+    let details = competition.details || [];
+    let matchStatistics = [];
+    try {
+        summary = await fetchMatchSummary(event.id);
+        if (summary) {
+            [details, matchStatistics] = await Promise.all([
+                fetchScoringDetails(event, summary),
+                fetchMatchStatistics(event.id, summary)
+            ]);
+        }
+    } catch (error) {
+        console.warn(`ESPN details unavailable while syncing event ${event.id}; storing scoreboard data:`, error.message);
+        summary = null;
+        details = competition.details || [];
+        matchStatistics = [];
+    }
     const [existingMatch] = await sql`
         SELECT id, kickoff_at, matchday
         FROM matches
@@ -280,14 +293,23 @@ module.exports = async function handler(req, res) {
             ...repairEvents.filter(event => missingEventIds.has(String(event.id)))
         ], event => event.id);
         let stored = 0;
-        for (const event of events) if (await syncEvent(sql, event)) stored += 1;
+        const failures = [];
+        for (const event of events) {
+            try {
+                if (await syncEvent(sql, event)) stored += 1;
+            } catch (error) {
+                failures.push({ eventId: String(event.id), message: error.message });
+                console.error(`Failed to sync ESPN event ${event.id}:`, error);
+            }
+        }
         const remainingIncompleteMatches = await findMatchesWithIncompleteScoring(sql);
         res.setHeader('Cache-Control', 'no-store');
-        return res.status(200).json({
+        return res.status(failures.length ? 500 : 200).json({
             provider: 'espn',
             dates: dayKeys(),
             events: events.length,
             stored,
+            failures,
             scorerRepairs: {
                 candidates: incompleteMatches.length,
                 eventsFound: repairEvents.filter(event => missingEventIds.has(String(event.id))).length,
@@ -309,3 +331,4 @@ module.exports.fetchScoringDetails = fetchScoringDetails;
 module.exports.fetchMatchSummary = fetchMatchSummary;
 module.exports.syncEvent = syncEvent;
 module.exports.canReplaceScorerRecords = canReplaceScorerRecords;
+module.exports.dayKeys = dayKeys;

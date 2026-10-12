@@ -1,25 +1,11 @@
 const { neon } = require('@neondatabase/serverless');
 const { normalizeEspnEvent, normalizeNeonMatch } = require('../lib/match-contract');
 const { mergeMatches } = require('../lib/match-aggregation');
-const { fetchScoringDetails } = require('./sync-espn');
+const { fetchScoringDetails, dayKeys } = require('./sync-espn');
 const matchCorrections = require('../data/match-corrections.json');
 
 const ESPN_ENDPOINT = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard';
-const DATE_LOOKBACK = 1;
-const DATE_LOOKAHEAD = 1;
 const RECENT_FINAL_WINDOW_MS = 2 * 60 * 60 * 1000;
-
-function espnDateKeys() {
-    const today = new Date();
-    today.setUTCHours(12, 0, 0, 0);
-    const dates = [];
-    for (let offset = -DATE_LOOKBACK; offset <= DATE_LOOKAHEAD; offset += 1) {
-        const date = new Date(today);
-        date.setUTCDate(today.getUTCDate() + offset);
-        dates.push(date.toISOString().slice(0, 10).replaceAll('-', ''));
-    }
-    return dates;
-}
 
 function shouldFetchDetails(event) {
     const status = event.competitions?.[0]?.status?.type || {};
@@ -84,7 +70,7 @@ function buildDataQuality(includeDetails, historicalAvailable, historicalMatches
 }
 
 async function fetchRecentEspnMatches() {
-    const payloads = await Promise.all(espnDateKeys().map(async date => {
+    const payloads = await Promise.all(dayKeys().map(async date => {
         const response = await fetch(`${ESPN_ENDPOINT}?dates=${date}&limit=1000`);
         if (!response.ok) throw new Error(`ESPN returned HTTP ${response.status} for ${date}`);
         return response.json();

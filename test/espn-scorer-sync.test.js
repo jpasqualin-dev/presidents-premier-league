@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { canReplaceScorerRecords, syncEvent } = require('../api/sync-espn');
+const { canReplaceScorerRecords, dayKeys, syncEvent } = require('../api/sync-espn');
 
 function matchEvent() {
     return {
@@ -30,11 +30,14 @@ function matchSummary(goalCount) {
     };
 }
 
-async function runSyncWithSummary(summary) {
+async function runSyncWithSummary(summary, fetchError = null) {
     const originalFetch = global.fetch;
     const queries = [];
     let teamInsertCount = 0;
-    global.fetch = async () => ({ ok: true, json: async () => summary });
+    global.fetch = async () => {
+        if (fetchError) throw fetchError;
+        return { ok: true, json: async () => summary };
+    };
     const sql = async (parts, ...values) => {
         const text = parts.join('?');
         queries.push({ text, values });
@@ -71,6 +74,15 @@ test('scorer records are replaced only when ESPN detail matches the final score'
     assert.equal(canReplaceScorerRecords({}, [], 0, 0, '337', '363'), true);
 });
 
+test('UTC date window retains the prior local date for live and scheduled feeds', () => {
+    const dates = dayKeys(new Date('2026-10-12T02:25:00Z'));
+    assert.deepEqual(dates, [
+        '20261005', '20261006', '20261007', '20261008', '20261009',
+        '20261010', '20261011', '20261012', '20261013'
+    ]);
+    assert.equal(dates.includes('20261010'), true);
+});
+
 test('sync preserves stored scorers on partial ESPN detail and repairs them when complete', async () => {
     const incompleteQueries = await runSyncWithSummary(matchSummary(2));
     assert.equal(incompleteQueries.some(query => query.includes('DELETE FROM match_scorers')), false);
@@ -78,4 +90,9 @@ test('sync preserves stored scorers on partial ESPN detail and repairs them when
     const completeQueries = await runSyncWithSummary(matchSummary(3));
     assert.equal(completeQueries.some(query => query.includes('DELETE FROM match_scorers')), true);
     assert.equal(completeQueries.filter(query => query.includes('INSERT INTO match_scorers')).length, 3);
+});
+
+test('sync stores scoreboard match data when ESPN match details are unavailable', async () => {
+    const queries = await runSyncWithSummary(null, new Error('ESPN summary request failed'));
+    assert.equal(queries.some(query => query.includes('INSERT INTO matches')), true);
 });
