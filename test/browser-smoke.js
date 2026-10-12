@@ -565,6 +565,45 @@ test('browser handles upcoming matches and incomplete match details', async t =>
     await context.close();
 });
 
+test('front page selects today when its matches are unplayed', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext({ timezoneId: 'UTC' });
+    const page = await context.newPage();
+    await page.clock.setFixedTime(new Date('2026-10-12T12:00:00Z'));
+    await page.route('**/api/matches**', route => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+            matches: [
+                {
+                    id: 'yesterday-played-match',
+                    status: 'FINISHED',
+                    utcDate: '2026-10-11T12:00:00Z',
+                    homeTeam: { id: '1', name: 'Arsenal' },
+                    awayTeam: { id: '2', name: 'Chelsea' },
+                    score: { fullTime: { home: 2, away: 1 } }
+                },
+                {
+                    id: 'today-unplayed-match',
+                    status: 'SCHEDULED',
+                    utcDate: '2026-10-12T18:00:00Z',
+                    homeTeam: { id: '3', name: 'Liverpool' },
+                    awayTeam: { id: '4', name: 'Manchester City' },
+                    score: { fullTime: { home: null, away: null } }
+                }
+            ]
+        })
+    }));
+    await page.goto(`${baseUrl}/index.html`);
+    await page.locator('#today-matches-container .today-match-row').waitFor();
+
+    assert.match(await page.locator('#today-matches-container .today-header-text').textContent(), /Monday, October 12/u);
+    assert.equal(await page.locator('#today-matches-container .today-match-row').count(), 1);
+    assert.match(await page.locator('#today-matches-container .today-match-row').textContent(), /Liverpool/u);
+    assert.doesNotMatch(await page.locator('#today-matches-container').textContent(), /Arsenal/u);
+    await context.close();
+});
+
 test('upcoming match drawer presents table, recent form, and ranked season stats', async t => {
     if (browserError) return t.skip('Chromium runtime unavailable');
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });

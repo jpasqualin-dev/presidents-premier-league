@@ -948,21 +948,25 @@
         if (currentMatchDateIndex === -1 && matchDates.length > 0) {
             const now = new Date();
             const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-            const recentMatchIndex = matchDates.reduce((latestIndex, date, index) => {
-                if (date > Date.now()) return latestIndex;
-                const hasRelevantMatch = allMatchesData.some(match => {
-                    const matchDate = new Date(match.utcDate);
-                    const matchMidnight = new Date(matchDate.getFullYear(), matchDate.getMonth(), matchDate.getDate()).getTime();
-                    return matchMidnight === date && (isCompletedMatch(match) || ['IN_PLAY', 'PAUSED'].includes(match.status));
-                });
-                return hasRelevantMatch ? index : latestIndex;
-            }, -1);
-            if (recentMatchIndex !== -1) {
-                currentMatchDateIndex = recentMatchIndex;
+            const todayMatchIndex = matchDates.indexOf(todayMidnight);
+            if (todayMatchIndex !== -1) {
+                currentMatchDateIndex = todayMatchIndex;
             } else {
-                const foundIdx = matchDates.indexOf(todayMidnight);
-                const nextIdx = matchDates.findIndex(t => t > todayMidnight);
-                currentMatchDateIndex = foundIdx !== -1 ? foundIdx : nextIdx !== -1 ? nextIdx : matchDates.length - 1;
+                const recentMatchIndex = matchDates.reduce((latestIndex, date, index) => {
+                    if (date > Date.now()) return latestIndex;
+                    const hasRelevantMatch = allMatchesData.some(match => {
+                        const matchDate = new Date(match.utcDate);
+                        const matchMidnight = new Date(matchDate.getFullYear(), matchDate.getMonth(), matchDate.getDate()).getTime();
+                        return matchMidnight === date && (isCompletedMatch(match) || ['IN_PLAY', 'PAUSED'].includes(match.status));
+                    });
+                    return hasRelevantMatch ? index : latestIndex;
+                }, -1);
+                if (recentMatchIndex !== -1) {
+                    currentMatchDateIndex = recentMatchIndex;
+                } else {
+                    const nextIdx = matchDates.findIndex(t => t > todayMidnight);
+                    currentMatchDateIndex = nextIdx !== -1 ? nextIdx : matchDates.length - 1;
+                }
             }
         }
         renderWeeklyCard();
