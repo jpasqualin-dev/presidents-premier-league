@@ -342,7 +342,7 @@ async function findMatchesNeedingRepair(sql) {
         FROM matches m
         LEFT JOIN match_scorers ms ON ms.match_id = m.id
         WHERE m.provider = 'espn'
-            AND m.season = 2026
+            AND m.season::text = '2026'
             AND (m.status_completed = TRUE OR m.status_state = 'post')
             AND m.home_score IS NOT NULL
             AND m.away_score IS NOT NULL

@@ -33,6 +33,41 @@ test('completed match wins over live data without losing populated details', () 
     assert.deepEqual(match.teamCards, { home: { yellow: 2, red: 1 }, away: { yellow: 0, red: 0 } });
 });
 
+test('verified historical assists survive a sparse completed live scorer record', () => {
+    const historical = {
+        ...baseMatch,
+        status: 'FINISHED',
+        scorers: [{
+            teamProviderId: '382',
+            athleteProviderId: '298008',
+            athleteName: 'Rayan Cherki',
+            assistProviderId: '299910',
+            assistName: 'Josko Gvardiol',
+            assistStatus: 'credited',
+            minute: "78'"
+        }]
+    };
+    const live = {
+        ...historical,
+        source: 'espn-live',
+        scorers: [{
+            teamProviderId: '382',
+            athleteProviderId: '298008',
+            athleteName: 'Rayan Cherki',
+            assistProviderId: null,
+            assistName: null,
+            assistStatus: 'unverified',
+            minute: "78'"
+        }]
+    };
+
+    const [match] = mergeMatches([historical, live]);
+
+    assert.equal(match.scorers[0].assistName, 'Josko Gvardiol');
+    assert.equal(match.scorers[0].assistStatus, 'credited');
+    assert.equal(match.source, 'espn-live');
+});
+
 test('deduplicates provider records and preserves zero scores', () => {
     const records = dedupeByKey([{ id: '1', value: 'old' }, { id: '1', value: 'new' }], item => item.id);
     assert.deepEqual(records, [{ id: '1', value: 'new' }]);
