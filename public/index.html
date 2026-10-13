@@ -771,6 +771,7 @@
 <script src="match-drawer-shared.js"></script>
 <script src="ppl-weekly-drawer.js"></script>
 <script src="team-drawer-shared.js"></script>
+<script src="player-team-drawer.js"></script>
 <script>
     const { draftData, draftPicks, divisions: divisionData, getOwnerOfTeam } = PplLeagueConfig;
 
@@ -799,17 +800,13 @@
 
     // --- SWIPE / MATCHDAY CARD GLOBALS ---
     let allMatchesData = [];
+    window.allMatchesData = allMatchesData;
     let matchDates = []; 
     let currentMatchDateIndex = -1;
     let matchdayDataLoaded = false;
     let weeklyCardWeeks = [];
     let weeklyCardWeekIndex = -1;
     const weeklyFormExpanded = new Set();
-    let weeklyMatchReturn = false;
-    let matchDrawerMatchId = null;
-    let matchDrawerTeamReturn = false;
-    let teamDrawerOpen = false;
-    let teamDrawerTeamName = null;
     let lastStandingsMatchSignature = '';
 
     function isCompletedMatch(match) {
@@ -932,6 +929,8 @@
 
     function processMatchDates(matches) {
         allMatchesData = matches || [];
+        window.allMatchesData = allMatchesData;
+        window.matchDrawerMatches = allMatchesData;
         matchdayDataLoaded = true;
         const datesMap = new Map();
 
@@ -1226,62 +1225,16 @@
         return String(value ?? '').replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
     }
 
-    window.openTeamDrawerFromMatch = function(teamName) {
-        const overlay = document.getElementById('match-drawer-overlay');
-        const openedFromMatch = overlay?.classList.contains('is-open');
-        teamDrawerOpen = true;
-        matchDrawerTeamReturn = openedFromMatch;
-        teamDrawerTeamName = teamName;
-        TeamDrawerShared.openFromMatch(teamName, {
-            stats: TeamDrawerShared.buildStats(allMatchesData, Object.values(draftData).flat(), getOwnerOfTeam),
-            matches: allMatchesData,
-            getLogoByName,
-            getShortTeamName,
-            getOwnerOfTeam,
-            openMatch: true,
-            showBackButton: openedFromMatch
-        });
-        if (!openedFromMatch) {
-            overlay?.classList.add('is-open');
-            overlay?.setAttribute('aria-hidden', 'false');
-            document.body.classList.add('drawer-open');
-            overlay?.querySelector('.match-drawer-back')?.remove();
-        }
-    };
-
-    window.returnToMatchFromTeamDrawer = function() {
-        teamDrawerOpen = false;
-        matchDrawerTeamReturn = false;
-        document.querySelector('.match-drawer-back')?.remove();
-        openMatchDrawer(matchDrawerMatchId);
-    };
-
-    window.returnToTeamDrawer = function() {
-        if (teamDrawerTeamName) openTeamDrawerFromMatch(teamDrawerTeamName);
-    };
-
     window.openWeeklyMatchDrawer = function(matchId) {
-        weeklyMatchReturn = true;
-        openMatchDrawer(matchId);
+        window.weeklyMatchReturn = true;
+        window.openMatchDrawer(matchId);
     };
-
-    async function openMatchDrawer(matchId) {
-        const openedFromTeamDrawer = teamDrawerOpen;
-        matchDrawerMatchId = matchId;
-        matchDrawerTeamReturn = false;
-        const backButtonMarkup = openedFromTeamDrawer
-            ? '<button class="match-drawer-back" type="button" aria-label="Back to team details" onclick="returnToTeamDrawer()">‹</button>'
-            : weeklyMatchReturn
-                ? '<button class="match-drawer-back" type="button" aria-label="Back to PPL Weekly" onclick="returnToWeeklyDrawer()">‹</button>'
-                : '';
-        return window.openSharedMatchDrawer(matchId, { backButtonMarkup });
-    }
 
     window.returnToWeeklyDrawer = function() {
-        weeklyMatchReturn = false;
+        window.weeklyMatchReturn = false;
         document.querySelector('.match-drawer-back')?.remove();
         PplWeeklyDrawer.render();
-    }
+    };
 
     window.openWeeklyDrawer = function() {
         const week = weeklyCardWeeks[weeklyCardWeekIndex];
@@ -1305,9 +1258,7 @@
 
     function closeMatchDrawer(event) {
         window.closeSharedMatchDrawer(event);
-        weeklyMatchReturn = false;
-        matchDrawerTeamReturn = false;
-        teamDrawerOpen = false;
+        window.weeklyMatchReturn = false;
     }
 
     document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMatchDrawer(); });

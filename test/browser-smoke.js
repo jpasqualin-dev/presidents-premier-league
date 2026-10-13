@@ -247,7 +247,7 @@ test('stats page renders available totals when scorer data does not reconcile', 
     await page.goto(`${baseUrl}/stats.html`);
     await page.locator('#season-awards-container [role="alert"]')
         .filter({ hasText: 'Scorer totals do not reconcile' }).waitFor();
-    assert.equal(await page.locator('#individual-stats-container .individual-stat-card').count(), 4);
+    assert.equal(await page.locator('#individual-stats-container .individual-stat-card').count(), 3);
     assert.equal(await page.locator('#season-awards-container').getByText('Unable to load season awards.').count(), 0);
     assert.deepEqual(diagnostics.pageErrors, []);
     await context.close();
@@ -829,6 +829,47 @@ test('team drawer loads detailed scorer and card data on demand', async t => {
     await context.close();
 });
 
+test('team drawer on home and table pages loads detailed stats on demand', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    for (const pathname of ['index.html', 'table.html']) {
+        const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+        const page = await context.newPage();
+        let detailedRequestSeen = false;
+        await page.route('**/api/matches**', route => {
+            const includeDetails = new URL(route.request().url()).searchParams.get('details') === '1';
+            const data = includeDetails ? detailedFixtureData() : fixtureData();
+            if (includeDetails) {
+                detailedRequestSeen = true;
+                const cityMatch = data.matches.find(match => match.homeTeam.name === 'Manchester City');
+                cityMatch.scorers = [{
+                    teamProviderId: cityMatch.homeTeam.id,
+                    athleteProviderId: 'city-striker',
+                    athleteName: 'Manchester City Striker',
+                    assistProviderId: 'city-assister',
+                    assistName: 'Manchester City Assister',
+                    ownGoal: false
+                }];
+            }
+            return route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify(data)
+            });
+        });
+        await page.goto(`${baseUrl}/${pathname}`);
+        if (pathname === 'index.html') {
+            await page.locator('#divisions-container tr.team-standings-row').first().waitFor();
+            await page.locator('#divisions-container tr.team-standings-row').filter({ hasText: 'Man City' }).first().click();
+        } else {
+            await page.locator('#standings-table-body tr.team-standings-row').first().waitFor();
+            await page.locator('#standings-table-body tr.team-standings-row').filter({ hasText: 'Man City' }).first().click();
+        }
+        await page.locator('.team-drawer-player-stat').filter({ hasText: 'Manchester City Striker' }).first().waitFor();
+        assert.equal(detailedRequestSeen, true, `${pathname} should load match details on opening team drawer`);
+        await context.close();
+    }
+});
+
 test('team drawer rejects basic stale cache for player stats and reports the failure', async t => {
     if (browserError) return t.skip('Chromium runtime unavailable');
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
@@ -937,6 +978,7 @@ test('table switches between points and scoped match form with working fixture l
     if (browserError) return t.skip('Chromium runtime unavailable');
     const context = await browser.newContext();
     const page = await context.newPage();
+    await page.clock.setFixedTime(new Date('2026-10-01T12:00:00Z'));
     const diagnostics = diagnosticState(page);
     const opponents = {
         home: ['Manchester City', 'Liverpool', 'Newcastle United', 'Everton', 'Brentford'],

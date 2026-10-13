@@ -1,6 +1,7 @@
 (function () {
     let teamDrawerTeamName = '';
     let teamDrawerOpen = false;
+    let openedFromMatch = false;
     let detailedMatches = null;
     let detailedMatchesPromise = null;
     let detailedMatchesError = null;
@@ -10,7 +11,7 @@
     function getLogoByName(teamName) {
         const canonicalLogo = window.TeamNames?.crest(teamName);
         if (canonicalLogo) return canonicalLogo;
-        const logos = window.playerTeamLogos || {};
+        const logos = window.playerTeamLogos || window.teamLogos || {};
         const key = Object.keys(logos).find(name => teamName.toLowerCase().includes(name.toLowerCase()) || name.toLowerCase().includes(teamName.toLowerCase()));
         return key ? logos[key] : '';
     }
@@ -21,7 +22,6 @@
 
     function renderTeamDrawer(teamName, matches, playerStatsStatus, skipRouter = false, auditCardEvents = false) {
         const overlay = document.getElementById('match-drawer-overlay');
-        const openedFromMatch = overlay?.classList.contains('is-open');
         const stats = TeamDrawerShared.buildStats(matches, Object.values(draftData).flat(), getOwnerOfTeam, { auditCardEvents });
         TeamDrawerShared.openFromMatch(teamName, {
             stats,
@@ -43,10 +43,12 @@
     }
 
     window.openTeamDrawerFromMatch = function (teamName) {
+        const overlay = document.getElementById('match-drawer-overlay');
+        openedFromMatch = Boolean(overlay?.classList.contains('is-open') && !teamDrawerOpen);
         teamDrawerOpen = true;
         teamDrawerTeamName = teamName;
         if (!detailedMatches && !detailedMatchesPromise) detailedMatchesError = null;
-        const matches = detailedMatches || window.matchDrawerMatches || window.playerMatches || [];
+        const matches = detailedMatches || window.matchDrawerMatches || window.playerMatches || window.allMatchesData || window.cachedMatches || [];
         renderTeamDrawer(
             teamName,
             matches,
@@ -97,14 +99,19 @@
         });
     };
 
+    window.openTeamDrawer = function (teamName) {
+        return window.openTeamDrawerFromMatch(teamName);
+    };
+
     window.openMatchDrawer = function (matchId) {
         const openedFromTeamDrawer = teamDrawerOpen;
         teamDrawerOpen = false;
-        return window.openSharedMatchDrawer(matchId, {
-            backButtonMarkup: openedFromTeamDrawer
-                ? '<button class="match-drawer-back" type="button" aria-label="Back to team details" onclick="returnToTeamDrawer()">‹</button>'
-                : ''
-        });
+        const backButtonMarkup = openedFromTeamDrawer
+            ? '<button class="match-drawer-back" type="button" aria-label="Back to team details" onclick="returnToTeamDrawer()">‹</button>'
+            : (window.weeklyMatchReturn
+                ? '<button class="match-drawer-back" type="button" aria-label="Back to PPL Weekly" onclick="returnToWeeklyDrawer()">‹</button>'
+                : '');
+        return window.openSharedMatchDrawer(matchId, { backButtonMarkup });
     };
 
     window.returnToMatchFromTeamDrawer = function () {
@@ -118,5 +125,6 @@
 
     document.addEventListener('drawer-router-closed', () => {
         teamDrawerOpen = false;
+        window.weeklyMatchReturn = false;
     });
 })();

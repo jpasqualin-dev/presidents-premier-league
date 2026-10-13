@@ -334,16 +334,6 @@
         .pill-purple { background-color: #faf5ff; color: #6b46c1; border: 1px solid #e9d8fd; }
         .pill-gray { background-color: #f7fafc; color: #4a5568; border: 1px solid #e2e8f0; }
 
-        .team-drawer-overlay { position: fixed; inset: 0; z-index: 200; display: flex; justify-content: flex-end; background: rgba(15,23,42,.48); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .25s ease, visibility 0s linear .25s; }
-        .team-drawer-overlay.is-open { opacity: 1; visibility: visible; pointer-events: auto; transition-delay: 0s; }
-        .team-drawer { width: min(100%, 560px); height: 100%; overflow-y: auto; background: var(--bg-color, #f4f6f8); box-shadow: -10px 0 35px rgba(0,0,0,.2); transform: translateX(100%); transition: transform .3s ease; }
-        .team-drawer-overlay.is-open .team-drawer { transform: translateX(0); }
-        .team-drawer-header { position: sticky; top: 0; z-index: 1; display: flex; align-items: center; justify-content: center; min-height: 50px; padding: 8px 58px; background: var(--card-bg, #fff); border-bottom: 1px solid var(--border-color, #dfe5eb); }
-        .team-drawer-title { color: var(--text-main, #1a1a1a); font-size: .95rem; font-weight: 700; text-align: center; }
-        .team-drawer-close { position: absolute; right: 18px; width: 34px; height: 34px; border: 0; border-radius: 50%; background: var(--border-color, #dfe5eb); color: var(--text-main, #1a1a1a); font-size: 1.3rem; line-height: 1; cursor: pointer; }
-        .team-drawer-content { padding: 18px; }
-        body.team-drawer-open { overflow: hidden; }
-
         @media (max-width: 600px) {
             .team-drawer { width: 100%; }
             .team-drawer-content { padding: 12px; }
@@ -392,16 +382,6 @@
 
 </div>
 
-<div class="team-drawer-overlay" id="team-drawer-overlay" aria-hidden="true" onclick="closeTeamDrawer(event)">
-    <aside class="team-drawer" role="dialog" aria-modal="true" aria-labelledby="team-drawer-title" onclick="event.stopPropagation()">
-        <div class="team-drawer-header">
-            <span class="team-drawer-title" id="team-drawer-title">Team details</span>
-            <button class="team-drawer-close" type="button" aria-label="Close team details" onclick="closeTeamDrawer()">&times;</button>
-        </div>
-        <div class="team-drawer-content" id="team-drawer-content"></div>
-    </aside>
-</div>
-
 <script src="theme.js"></script>
 <script src="team-names.js"></script>
 <script src="league-config.js"></script>
@@ -409,6 +389,7 @@
 <script src="drawer-router.js"></script>
 <script src="match-drawer-shared.js"></script>
 <script src="team-drawer-shared.js"></script>
+<script src="player-team-drawer.js"></script>
 <script>
     const { draftData, draftPicks, getOwnerOfTeam } = PplLeagueConfig;
 
@@ -680,68 +661,9 @@
         document.getElementById('content-area').innerHTML = html;
     }
 
-    let activeTeamDrawerName = '';
-
-    window.openTeamDrawer = function(teamName, options = {}) {
-        if (window.DrawerRouter && !options.skipRouter) {
-            return window.DrawerRouter.open({
-                type: 'team',
-                teamName,
-                render: () => window.openTeamDrawer(teamName, { skipRouter: true })
-            });
-        }
-
-        const team = cachedStats?.allStats?.[teamName];
-        if (!team) return;
-
-        activeTeamDrawerName = teamName;
-        const overlay = document.getElementById('team-drawer-overlay');
-        document.getElementById('team-drawer-title').textContent = TeamNames.longName(team.team);
-        document.getElementById('team-drawer-content').innerHTML = TeamDrawerShared.render(team.team, {
-            stats: TeamDrawerShared.buildStats(cachedMatches, Object.values(draftData).flat(), getOwnerOfTeam),
-            matches: cachedMatches,
-            getLogoByName,
-            getShortTeamName,
-            getOwnerOfTeam,
-            openMatch: true
-        });
-        overlay.classList.add('is-open');
-        overlay.setAttribute('aria-hidden', 'false');
-        document.body.classList.add('team-drawer-open');
+    window.openTeamDrawer = function(teamName) {
+        return window.openTeamDrawerFromMatch(teamName);
     };
-
-    window.openMatchDrawer = function(matchId) {
-        return window.openSharedMatchDrawer(matchId, {
-            backButtonMarkup: '<button class="match-drawer-back" type="button" aria-label="Back to team details" onclick="returnToTeamDrawer()">‹</button>'
-        });
-    };
-
-    window.returnToTeamDrawer = function() {
-        const teamName = activeTeamDrawerName;
-        window.closeSharedMatchDrawer();
-        if (teamName) window.openTeamDrawer(teamName);
-    };
-
-    document.addEventListener('drawer-router-closed', () => {
-        const overlay = document.getElementById('team-drawer-overlay');
-        overlay?.classList.remove('is-open');
-        overlay?.setAttribute('aria-hidden', 'true');
-        document.body.classList.remove('team-drawer-open');
-        activeTeamDrawerName = '';
-    });
-
-    window.closeTeamDrawer = function(event) {
-        if (event && event.target.id !== 'team-drawer-overlay') return;
-        window.DrawerRouter?.closeAll();
-        const overlay = document.getElementById('team-drawer-overlay');
-        overlay.classList.remove('is-open');
-        overlay.setAttribute('aria-hidden', 'true');
-        document.body.classList.remove('team-drawer-open');
-    };
-
-    document.addEventListener('keydown', event => {
-        if (event.key === 'Escape') window.closeTeamDrawer();
-    });
 
     function toggleNestedTableTRs(rowEl, targetClass) {
         rowEl.classList.toggle('expanded');
@@ -928,6 +850,7 @@
     // --- State & Rendering ---
     let cachedStats = null;
     let cachedMatches = [];
+    window.cachedMatches = cachedMatches;
     let currentView = 'all';
     let dvpSort = 'rank';
     const standingsModes = { all: 'PTS', home: 'PTS', away: 'PTS' };
@@ -985,6 +908,8 @@
             const data = await getMatchData();
 
             cachedMatches = data.matches || [];
+            window.cachedMatches = cachedMatches;
+            window.matchDrawerMatches = cachedMatches;
             cachedStats = computeStats(data.matches || []);
             renderView();
         } catch (error) {
