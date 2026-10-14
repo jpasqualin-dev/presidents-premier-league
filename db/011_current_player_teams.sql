@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS player_current_teams (
     provider TEXT NOT NULL,
     provider_athlete_id TEXT NOT NULL,
     athlete_name TEXT NOT NULL,
-    team_id BIGINT NOT NULL REFERENCES teams(id),
+    team_id UUID NOT NULL REFERENCES teams(id),
     observed_at TIMESTAMPTZ NOT NULL,
     PRIMARY KEY (provider, provider_athlete_id)
 );
