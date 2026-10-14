@@ -104,11 +104,16 @@ test('assist observations distinguish credited, verified unassisted, and unresol
         provider_athlete_id: 'scorer',
         athlete_name: 'Scorer',
         assist_status: 'unverified',
-        assist_observations: 2,
+        assist_observations: 1,
         assist_checked_at: '2026-10-12T12:00:00Z',
         minute: 60
     }], true, new Date('2026-10-12T19:00:00Z'))[0];
     assert.equal(verifiedUnassisted.assistStatus, 'unassisted');
+
+    const stoppage = buildScorerRecords([{ ...goal, clock: { value: 2820, displayValue: "45'+2'" } }], [], true, checkedAt)[0];
+    assert.equal(stoppage.minute, 45);
+    const early = buildScorerRecords([{ ...goal, clock: { value: 874 } }], [], true, checkedAt)[0];
+    assert.equal(early.minute, 14);
 
     const credited = buildScorerRecords([{
         ...goal,
@@ -152,7 +157,7 @@ test('repair queue includes score mismatches and unresolved assist data in bound
     });
     assert.match(query, /COUNT\(ms\.id\) <> m\.home_score \+ m\.away_score/u);
     assert.match(query, /BOOL_OR\(ms\.assist_status = 'unverified'\)/u);
-    assert.match(query, /LIMIT 25/u);
+    assert.match(query, /LIMIT 50/u);
 });
 
 test('sync preserves stored scorers on partial ESPN detail and repairs them when complete', async () => {

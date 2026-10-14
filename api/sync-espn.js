@@ -120,12 +120,22 @@ function canReplaceScorerRecords(summary, details, homeScore, awayScore, homeTea
         && scorers.every(scorer => scorer.team?.id != null && teamIds.has(String(scorer.team.id)));
 }
 
+const ASSIST_CONFIRMATION_OBSERVATIONS = 2;
+
 function scorerMinute(value) {
     if (value == null || value === '') return null;
     const numeric = Number(value);
-    if (Number.isFinite(numeric)) return numeric > 1000 ? Math.floor(numeric / 60) : Math.floor(numeric);
+    if (Number.isFinite(numeric)) return Math.floor(numeric);
     const parsed = Number.parseInt(String(value), 10);
     return Number.isFinite(parsed) ? parsed : null;
+}
+
+// ESPN clock.value is in seconds; displayValue ("45'+2'") is already minutes.
+function clockMinute(clock) {
+    const display = scorerMinute(clock?.displayValue);
+    if (display != null) return display;
+    const seconds = Number(clock?.value);
+    return Number.isFinite(seconds) ? Math.floor(seconds / 60) : null;
 }
 
 function buildScorerRecords(details, existingRecords, finished, checkedAt = new Date()) {
@@ -134,7 +144,7 @@ function buildScorerRecords(details, existingRecords, finished, checkedAt = new 
         const scorer = detail.athletesInvolved?.[0];
         const teamProviderId = detail.team?.id == null ? null : String(detail.team.id);
         const athleteProviderId = scorer?.id == null ? null : String(scorer.id);
-        const minute = scorerMinute(detail.clock?.value ?? detail.clock?.displayValue);
+        const minute = clockMinute(detail.clock);
         const sameScorer = record => String(record.team_provider_id) === String(teamProviderId)
             && ((athleteProviderId && String(record.provider_athlete_id) === athleteProviderId)
                 || (!athleteProviderId && String(record.athlete_name || '').toLowerCase() === String(scorer?.displayName || '').toLowerCase()));
@@ -180,7 +190,7 @@ function buildScorerRecords(details, existingRecords, finished, checkedAt = new 
         return {
             teamProviderId, athleteProviderId, athleteName: scorer?.displayName || prior?.athlete_name || 'Unknown scorer',
             assistProviderId: null, assistName: null,
-            assistStatus: finished && observations >= 3 ? 'unassisted' : 'unverified',
+            assistStatus: finished && observations >= ASSIST_CONFIRMATION_OBSERVATIONS ? 'unassisted' : 'unverified',
             assistObservations: observations,
             assistCheckedAt: canCountObservation || !prior ? checkedAt : previousCheckedAt,
             minute, ownGoal: Boolean(detail.ownGoal), penalty: Boolean(detail.penaltyKick)
@@ -350,7 +360,7 @@ async function findMatchesNeedingRepair(sql) {
         HAVING COUNT(ms.id) <> m.home_score + m.away_score
             OR BOOL_OR(ms.assist_status = 'unverified')
         ORDER BY m.kickoff_at ASC
-        LIMIT 25`;
+        LIMIT 50`;
 }
 
 module.exports = async function handler(req, res) {
