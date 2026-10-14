@@ -4,9 +4,11 @@ const { crestForTeam } = require('../lib/team-names');
 const { dedupeByKey } = require('../lib/match-aggregation');
 
 const ESPN_ENDPOINT = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard';
+const ESPN_TEAM_ENDPOINT = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams';
 const SEASON_START = '2026-08-01';
 const SEASON_END = '2027-06-01';
 const SYNC_LOOKBACK_DAYS = 7;
+const ROSTER_REFRESH_INTERVAL_MS = 24 * 60 * 60 * 1000;
 const teamOwners = {
     Arsenal: ['Hef', 'Red and Blue Division'], Bournemouth: ['Hef', 'Birds and Beasts Division'], 'Nottingham Forest': ['Hef', 'Field and Forest Division'], 'Hull City': ['Hef', 'Cottage and Country Division'],
     'Manchester City': ['Jordan', 'Red and Blue Division'], Brighton: ['Jordan', 'Birds and Beasts Division'], Brentford: ['Jordan', 'Field and Forest Division'], 'Ipswich Town': ['Jordan', 'Cottage and Country Division'],
@@ -76,6 +78,90 @@ async function fetchMatchSummary(eventId) {
     const response = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/summary?event=${encodeURIComponent(eventId)}`);
     if (!response.ok) return null;
     return response.json();
+}
+
+async function fetchTeamRoster(teamProviderId) {
+    const response = await fetch(`${ESPN_TEAM_ENDPOINT}/${encodeURIComponent(teamProviderId)}/roster`);
+    if (!response.ok) throw new Error(`ESPN returned HTTP ${response.status} for team roster ${teamProviderId}`);
+    const payload = await response.json();
+    if (!Array.isArray(payload.athletes) || payload.athletes.length === 0) {
+        throw new Error(`ESPN returned no roster athletes for team ${teamProviderId}`);
+    }
+    return payload.athletes;
+}
+
+async function syncCurrentRosters(sql, now = new Date()) {
+    const [syncState] = await sql`
+        SELECT last_synced_at
+        FROM player_roster_sync
+        WHERE sync_key = 'espn-current-rosters'`;
+    const lastSyncedAt = syncState?.last_synced_at ? new Date(syncState.last_synced_at).getTime() : 0;
+    if (Number.isFinite(lastSyncedAt) && now.getTime() - lastSyncedAt < ROSTER_REFRESH_INTERVAL_MS) {
+        return { refreshed: false, reason: 'cached', players: null };
+    }
+
+    const teams = await sql`
+        SELECT provider_team_id
+        FROM teams
+        WHERE provider = 'espn'
+        ORDER BY provider_team_id`;
+    if (teams.length !== Object.keys(teamOwners).length) {
+        throw new Error(`Expected ${Object.keys(teamOwners).length} ESPN teams before refreshing rosters; found ${teams.length}`);
+    }
+
+    const rosterByTeam = new Array(teams.length);
+    let nextIndex = 0;
+    const workers = Array.from({ length: Math.min(5, teams.length) }, async () => {
+        while (nextIndex < teams.length) {
+            const index = nextIndex;
+            nextIndex += 1;
+            const teamProviderId = String(teams[index].provider_team_id);
+            const athletes = await fetchTeamRoster(teamProviderId);
+            rosterByTeam[index] = athletes.map(athlete => {
+                if (athlete?.id == null || !athlete.fullName && !athlete.displayName) {
+                    throw new Error(`ESPN returned an invalid athlete for team roster ${teamProviderId}`);
+                }
+                return {
+                    provider_athlete_id: String(athlete.id),
+                    athlete_name: athlete.fullName || athlete.displayName,
+                    provider_team_id: teamProviderId
+                };
+            });
+        }
+    });
+    await Promise.all(workers);
+
+    const playersById = new Map();
+    rosterByTeam.flat().forEach(player => {
+        const prior = playersById.get(player.provider_athlete_id);
+        if (prior && prior.provider_team_id !== player.provider_team_id) {
+            throw new Error(`ESPN listed athlete ${player.provider_athlete_id} on multiple current rosters`);
+        }
+        playersById.set(player.provider_athlete_id, player);
+    });
+    const players = [...playersById.values()];
+    if (!players.length) throw new Error('ESPN returned no current roster players.');
+
+    const observedAt = now.toISOString();
+    await sql`
+        INSERT INTO player_current_teams (provider, provider_athlete_id, athlete_name, team_id, observed_at)
+        SELECT 'espn', roster.provider_athlete_id, roster.athlete_name, teams.id, ${observedAt}
+        FROM json_to_recordset(${JSON.stringify(players)}::json)
+            AS roster(provider_athlete_id text, athlete_name text, provider_team_id text)
+        JOIN teams ON teams.provider = 'espn'
+            AND teams.provider_team_id = roster.provider_team_id
+        ON CONFLICT (provider, provider_athlete_id) DO UPDATE SET
+            athlete_name = EXCLUDED.athlete_name,
+            team_id = EXCLUDED.team_id,
+            observed_at = EXCLUDED.observed_at`;
+    await sql`
+        DELETE FROM player_current_teams
+        WHERE provider = 'espn' AND observed_at < ${observedAt}`;
+    await sql`
+        INSERT INTO player_roster_sync (sync_key, last_synced_at)
+        VALUES ('espn-current-rosters', ${observedAt})
+        ON CONFLICT (sync_key) DO UPDATE SET last_synced_at = EXCLUDED.last_synced_at`;
+    return { refreshed: true, reason: null, players: players.length };
 }
 
 function normalizeSummaryEvent(item) {
@@ -392,6 +478,7 @@ module.exports = async function handler(req, res) {
                 console.error(`Failed to sync ESPN event ${event.id}:`, error);
             }
         }
+        const rosterSync = await syncCurrentRosters(sql);
         const remainingIncompleteMatches = await findMatchesNeedingRepair(sql);
         res.setHeader('Cache-Control', 'no-store');
         return res.status(failures.length ? 500 : 200).json({
@@ -412,6 +499,11 @@ module.exports = async function handler(req, res) {
                     && incompleteMatches.find(match => String(match.provider_event_id) === String(event.id))?.assist_pending).length,
                 remaining: remainingIncompleteMatches.filter(match => match.assist_pending).length
             },
+            rosterSync: {
+                refreshed: rosterSync.refreshed,
+                reason: rosterSync.reason,
+                players: rosterSync.players
+            },
             syncedAt: new Date().toISOString()
         });
     } catch (error) {
@@ -426,6 +518,8 @@ module.exports.fetchMatchStatistics = fetchMatchStatistics;
 module.exports.fetchMatchLineups = fetchMatchLineups;
 module.exports.fetchScoringDetails = fetchScoringDetails;
 module.exports.fetchMatchSummary = fetchMatchSummary;
+module.exports.fetchTeamRoster = fetchTeamRoster;
+module.exports.syncCurrentRosters = syncCurrentRosters;
 module.exports.syncEvent = syncEvent;
 module.exports.canReplaceScorerRecords = canReplaceScorerRecords;
 module.exports.buildScorerRecords = buildScorerRecords;

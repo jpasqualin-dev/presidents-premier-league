@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { buildScorerRecords, canReplaceScorerRecords, dayKeys, findMatchesNeedingRepair, syncEvent } = require('../api/sync-espn');
+const { buildScorerRecords, canReplaceScorerRecords, dayKeys, findMatchesNeedingRepair, syncCurrentRosters, syncEvent } = require('../api/sync-espn');
 
 function matchEvent() {
     return {
@@ -172,4 +172,54 @@ test('sync preserves stored scorers on partial ESPN detail and repairs them when
 test('sync stores scoreboard match data when ESPN match details are unavailable', async () => {
     const queries = await runSyncWithSummary(null, new Error('ESPN summary request failed'));
     assert.equal(queries.some(query => query.includes('INSERT INTO matches')), true);
+});
+
+test('current player rosters are refreshed as one complete cached snapshot', async () => {
+    const originalFetch = global.fetch;
+    const rosterRequests = [];
+    const queries = [];
+    const teams = Array.from({ length: 20 }, (_, index) => ({ provider_team_id: String(index + 1) }));
+    const sql = async (parts, ...values) => {
+        const text = parts.join('?');
+        queries.push({ text, values });
+        if (text.includes('SELECT last_synced_at')) return [];
+        if (text.includes('SELECT provider_team_id')) return teams;
+        return [];
+    };
+    global.fetch = async url => {
+        const teamId = String(url).match(/teams\/(\d+)\/roster/u)?.[1];
+        rosterRequests.push(teamId);
+        return {
+            ok: true,
+            json: async () => ({ athletes: [{ id: `player-${teamId}`, fullName: `Player ${teamId}` }] })
+        };
+    };
+
+    try {
+        const result = await syncCurrentRosters(sql, new Date('2026-10-14T00:00:00Z'));
+        assert.deepEqual(result, { refreshed: true, reason: null, players: 20 });
+        assert.equal(rosterRequests.length, 20);
+        assert.equal(queries.some(query => query.text.includes('INSERT INTO player_current_teams')), true);
+        assert.equal(queries.some(query => query.text.includes('DELETE FROM player_current_teams')), true);
+        assert.equal(queries.some(query => query.text.includes('INSERT INTO player_roster_sync')), true);
+    } finally {
+        global.fetch = originalFetch;
+    }
+});
+
+test('current player rosters use the stored snapshot until its daily refresh expires', async () => {
+    const originalFetch = global.fetch;
+    global.fetch = async () => { throw new Error('roster should not be fetched while cached'); };
+    const sql = async parts => {
+        const text = parts.join('?');
+        if (text.includes('SELECT last_synced_at')) return [{ last_synced_at: '2026-10-14T12:00:00Z' }];
+        throw new Error(`Unexpected query: ${text}`);
+    };
+
+    try {
+        const result = await syncCurrentRosters(sql, new Date('2026-10-14T17:00:00Z'));
+        assert.deepEqual(result, { refreshed: false, reason: 'cached', players: null });
+    } finally {
+        global.fetch = originalFetch;
+    }
 });

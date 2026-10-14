@@ -199,22 +199,49 @@ async function readHistoricalMatches(sql, includeDetails = false) {
     return rows.map(normalizeNeonMatch);
 }
 
+async function readCurrentPlayers(sql) {
+    const rows = await sql`
+        SELECT
+            current.provider_athlete_id AS athlete_provider_id,
+            current.athlete_name,
+            team.provider_team_id,
+            team.canonical_name AS team_name
+        FROM player_current_teams current
+        JOIN teams team ON team.id = current.team_id
+        WHERE current.provider = 'espn'
+        ORDER BY current.athlete_name`;
+    return rows.map(player => ({
+        athleteProviderId: player.athlete_provider_id,
+        athleteName: player.athlete_name,
+        teamProviderId: player.provider_team_id,
+        teamName: player.team_name
+    }));
+}
+
 module.exports = async function handler(req, res) {
     if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed.' });
 
     try {
         const includeDetails = req.query?.details === '1' || req.query?.details === 'true';
-        const historyPromise = process.env.DATABASE_URL
-            ? readHistoricalMatches(neon(process.env.DATABASE_URL), includeDetails)
+        const database = process.env.DATABASE_URL ? neon(process.env.DATABASE_URL) : null;
+        const historyPromise = database
+            ? readHistoricalMatches(database, includeDetails)
             : Promise.reject(new Error('DATABASE_URL is not configured.'));
+        const currentPlayersPromise = includeDetails && database
+            ? readCurrentPlayers(database)
+            : Promise.resolve(null);
         const livePromise = fetchRecentEspnMatches();
-        const [historyResult, liveResult] = await Promise.allSettled([historyPromise, livePromise]);
+        const [historyResult, liveResult, currentPlayersResult] = await Promise.allSettled([
+            historyPromise, livePromise, currentPlayersPromise
+        ]);
         const historicalMatches = historyResult.status === 'fulfilled' ? historyResult.value : [];
         const liveMatches = liveResult.status === 'fulfilled' ? liveResult.value : [];
+        const currentPlayers = currentPlayersResult.status === 'fulfilled' ? currentPlayersResult.value : null;
         const liveAvailable = liveResult.status === 'fulfilled';
 
         if (historyResult.status === 'rejected') console.error('Neon history unavailable; serving live ESPN data:', historyResult.reason);
         if (liveResult.status === 'rejected') console.error('ESPN live feed unavailable; serving Neon history:', liveResult.reason);
+        if (currentPlayersResult.status === 'rejected') console.error('Current ESPN player-team mapping unavailable:', currentPlayersResult.reason);
         if (historyResult.status === 'rejected' && liveResult.status === 'rejected') {
             throw new Error('Both Neon history and ESPN live data are unavailable.');
         }
@@ -228,11 +255,13 @@ module.exports = async function handler(req, res) {
             mergedMatches,
             liveAvailable
         );
+        dataQuality.currentPlayerTeamsAvailable = Array.isArray(currentPlayers) && currentPlayers.length > 0;
         res.setHeader('Cache-Control', hasLiveMatch
             ? 'public, s-maxage=10, stale-while-revalidate=20'
             : 'public, s-maxage=60, stale-while-revalidate=120');
         return res.status(200).json({
             matches: mergedMatches,
+            ...(includeDetails ? { currentPlayers: currentPlayers || [] } : {}),
             sources: { historical: historyResult.status === 'fulfilled' ? 'neon' : null, live: liveAvailable ? 'espn' : null },
             liveAvailable,
             generatedAt: new Date().toISOString(),
@@ -246,3 +275,4 @@ module.exports = async function handler(req, res) {
 
 module.exports.applyMatchCorrections = applyMatchCorrections;
 module.exports.buildDataQuality = buildDataQuality;
+module.exports.readCurrentPlayers = readCurrentPlayers;

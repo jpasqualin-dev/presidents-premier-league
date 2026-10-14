@@ -100,6 +100,7 @@
         scoringComplete: data?.dataQuality?.scoringComplete === true,
         assistComplete: data?.dataQuality?.assistComplete === true,
         unverifiedAssistCount: data?.dataQuality?.unverifiedAssistCount || 0,
+        currentPlayerTeamsAvailable: data?.dataQuality?.currentPlayerTeamsAvailable === true,
         historicalAvailable: data?.dataQuality?.historicalAvailable === true,
         historicalMatchCount: data?.dataQuality?.historicalMatchCount || 0,
         totalMatchCount: data?.matches?.length || 0,

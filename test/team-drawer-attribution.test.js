@@ -59,6 +59,60 @@ function renderTeam(teamName, match, allTeams) {
     });
 }
 
+test('transferred players take personal stats to their current team without changing club totals', () => {
+    const drawer = loadTeamDrawer();
+    const matches = [
+        {
+            status: 'FINISHED',
+            matchday: 1,
+            utcDate: '2026-08-22T12:00:00Z',
+            homeTeam: { id: '368', name: 'Everton' },
+            awayTeam: { id: '384', name: 'Crystal Palace' },
+            score: { fullTime: { home: 1, away: 0 } },
+            scorers: [{
+                teamProviderId: '368',
+                athleteProviderId: 'barry',
+                athleteName: 'Thierno Barry',
+                assistProviderId: '268641',
+                assistName: 'Iliman Ndiaye',
+                assistStatus: 'credited'
+            }]
+        },
+        {
+            status: 'FINISHED',
+            matchday: 2,
+            utcDate: '2026-10-12T12:00:00Z',
+            homeTeam: { id: '382', name: 'Manchester City' },
+            awayTeam: { id: '361', name: 'Newcastle United' },
+            score: { fullTime: { home: 1, away: 0 } },
+            scorers: [{
+                teamProviderId: '382',
+                athleteProviderId: '268641',
+                athleteName: 'Iliman Ndiaye',
+                assistStatus: 'unassisted'
+            }]
+        }
+    ];
+    const stats = drawer.buildStats(matches, ['Everton', 'Crystal Palace', 'Manchester City', 'Newcastle United'], () => 'Test');
+    const output = drawer.render('Manchester City', {
+        stats,
+        matches,
+        currentPlayers: [{
+            athleteProviderId: '268641',
+            athleteName: 'Iliman Ndiaye',
+            teamProviderId: '382',
+            teamName: 'Manchester City'
+        }],
+        getLogoByName: () => '',
+        getShortTeamName: name => name,
+        getOwnerOfTeam: () => 'Test'
+    });
+
+    assert.equal(stats.allStats['Manchester City'].GF, 1);
+    assert.equal(stats.allStats.Everton.GF, 1);
+    assert.match(output, /Iliman Ndiaye[\s\S]*?<strong>2<\/strong>/u);
+});
+
 test('Brighton drawer excludes Chelsea player from the same match', () => {
     const output = renderTeam('Brighton', {
         status: 'FINISHED',

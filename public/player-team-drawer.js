@@ -3,6 +3,7 @@
     let teamDrawerOpen = false;
     let openedFromMatch = false;
     let detailedMatches = null;
+    let detailedPlayerTeams = [];
     let detailedMatchesPromise = null;
     let detailedMatchesError = null;
     let detailedMatchesStatus = null;
@@ -26,6 +27,7 @@
         TeamDrawerShared.openFromMatch(teamName, {
             stats,
             matches,
+            currentPlayers: detailedPlayerTeams,
             playerStatsStatus,
             getLogoByName,
             getShortTeamName,
@@ -71,10 +73,11 @@
                     throw new Error('Detailed season match data is incomplete.');
                 }
                 detailedMatches = data.matches;
+                detailedPlayerTeams = Array.isArray(data.currentPlayers) ? data.currentPlayers : [];
                 window.matchDrawerMatches = detailedMatches;
                 detailedMatchesError = null;
                 detailedMatchesStatus = window.DataManager.getStatus({ includeDetails: true });
-                return detailedMatches;
+                return { matches: detailedMatches, currentPlayers: detailedPlayerTeams };
             })
             .catch(error => {
                 console.error('Unable to load detailed team drawer stats:', error);
@@ -87,7 +90,8 @@
             })
             .finally(() => { detailedMatchesPromise = null; });
 
-        detailedMatchesPromise.then(fullMatches => {
+        detailedMatchesPromise.then(detail => {
+            const fullMatches = detail?.matches || null;
             if (!teamDrawerOpen || teamDrawerTeamName.toLowerCase() !== String(teamName).toLowerCase()) return;
             renderTeamDrawer(
                 teamName,

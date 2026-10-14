@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { assistStatus, normalizeEspnEvent, normalizeNeonMatch } = require('../lib/match-contract');
 const { dedupeByKey, mergeMatches } = require('../lib/match-aggregation');
-const { applyMatchCorrections, buildDataQuality } = require('../api/matches');
+const { applyMatchCorrections, buildDataQuality, readCurrentPlayers } = require('../api/matches');
 
 const baseMatch = {
     id: 'espn:1',
@@ -191,4 +191,25 @@ test('match response quality distinguishes complete details from summary or miss
     assert.equal(incompleteAssist.scoringComplete, true);
     assert.equal(incompleteAssist.assistComplete, false);
     assert.equal(incompleteAssist.unverifiedAssistCount, 1);
+});
+
+test('current player records expose stable athlete ids and current club names', async () => {
+    let query = '';
+    const players = await readCurrentPlayers(async parts => {
+        query = parts.join('?');
+        return [{
+            athlete_provider_id: '268641',
+            athlete_name: 'Iliman Ndiaye',
+            provider_team_id: '382',
+            team_name: 'Manchester City'
+        }];
+    });
+
+    assert.match(query, /FROM player_current_teams/u);
+    assert.deepEqual(players, [{
+        athleteProviderId: '268641',
+        athleteName: 'Iliman Ndiaye',
+        teamProviderId: '382',
+        teamName: 'Manchester City'
+    }]);
 });

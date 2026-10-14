@@ -86,18 +86,25 @@
         return { allStats, homeStats, awayStats, cardMismatches };
     }
 
-    function buildPlayerStats(matches, teamName) {
+    function buildPlayerStats(matches, teamName, currentPlayers = []) {
         const players = {};
-        const teamMatches = (matches || []).filter(match => isPlayed(match) && matchesTeam(match, teamName));
+        const currentPlayersById = new Map((currentPlayers || []).map(player => [
+            String(player.athleteProviderId),
+            player
+        ]));
+        const teamMatches = (matches || []).filter(match => isPlayed(match)
+            && (currentPlayersById.size > 0 || matchesTeam(match, teamName)));
         teamMatches.forEach(match => {
             window.getIndividualScoringEvents(match.scorers).forEach(scorer => {
                 const scorerTeamId = String(scorer.teamProviderId || '');
                 const homeTeamId = String(match.homeTeam.id || match.homeTeam.providerId || '');
                 const awayTeamId = String(match.awayTeam.id || match.awayTeam.providerId || '');
                 const scorerTeam = scorerTeamId === homeTeamId ? match.homeTeam.name : scorerTeamId === awayTeamId ? match.awayTeam.name : '';
-                if (!scorerTeam || !sameTeam(scorerTeam, teamName)) return;
+                const currentPlayer = currentPlayersById.get(String(scorer.athleteProviderId || ''));
+                if ((!currentPlayer && (!scorerTeam || !sameTeam(scorerTeam, teamName)))
+                    || (currentPlayer && !sameTeam(currentPlayer.teamName, teamName))) return;
                 const scorerKey = String(scorer.athleteProviderId || scorer.athleteName || 'Unknown scorer');
-                if (!players[scorerKey]) players[scorerKey] = { name: scorer.athleteName || 'Unknown scorer', goals: 0, assists: 0 };
+                if (!players[scorerKey]) players[scorerKey] = { name: currentPlayer?.athleteName || scorer.athleteName || 'Unknown scorer', goals: 0, assists: 0 };
                 players[scorerKey].goals += 1;
             });
             window.getCreditedAssistEvents(match.scorers).forEach(scorer => {
@@ -105,16 +112,18 @@
                 const homeTeamId = String(match.homeTeam.id || match.homeTeam.providerId || '');
                 const awayTeamId = String(match.awayTeam.id || match.awayTeam.providerId || '');
                 const scorerTeam = scorerTeamId === homeTeamId ? match.homeTeam.name : scorerTeamId === awayTeamId ? match.awayTeam.name : '';
-                if (!scorerTeam || !sameTeam(scorerTeam, teamName)) return;
+                const currentPlayer = currentPlayersById.get(String(scorer.assistProviderId || ''));
+                if ((!currentPlayer && (!scorerTeam || !sameTeam(scorerTeam, teamName)))
+                    || (currentPlayer && !sameTeam(currentPlayer.teamName, teamName))) return;
                 const assistKey = String(scorer.assistProviderId || scorer.assistName);
-                if (!players[assistKey]) players[assistKey] = { name: scorer.assistName || 'Unknown assister', goals: 0, assists: 0 };
+                if (!players[assistKey]) players[assistKey] = { name: currentPlayer?.athleteName || scorer.assistName || 'Unknown assister', goals: 0, assists: 0 };
                 players[assistKey].assists += 1;
             });
         });
         return Object.values(players);
     }
 
-    function renderPlayerStatCards(matches, teamName, playerStatsStatus) {
+    function renderPlayerStatCards(matches, teamName, playerStatsStatus, currentPlayers = []) {
         if (playerStatsStatus?.loading || playerStatsStatus?.error) {
             const message = playerStatsStatus.loading
                 ? 'Loading player stats…'
@@ -134,10 +143,11 @@
         else if (playerStatsStatus?.detailsComplete === false) dataWarnings.push('Some match details are unavailable; these totals may be incomplete.');
         if (playerStatsStatus?.scoringComplete === false) dataWarnings.push('Scorer totals do not reconcile with finished-match scores; player totals may be incomplete.');
         if (playerStatsStatus?.assistComplete === false) dataWarnings.push(`${playerStatsStatus.unverifiedAssistCount || 'Some'} goal assist details are unverified; player assist totals may be incomplete.`);
+        if (playerStatsStatus?.currentPlayerTeamsAvailable === false) dataWarnings.push('Current player-team data is unavailable; individual stats remain grouped by the club recorded in each match.');
         const qualityNotice = dataWarnings.length
             ? `<section class="team-drawer-card"><p class="empty-detail" role="alert">${dataWarnings.map(escape).join(' ')}</p></section>`
             : '';
-        const players = buildPlayerStats(matches, teamName);
+        const players = buildPlayerStats(matches, teamName, currentPlayers);
         const configs = [
             { title: 'Goal involvements', value: player => player.goals + player.assists },
             { title: 'Goals', value: player => player.goals },
@@ -223,7 +233,7 @@
         const cardWarning = cardMismatches.length
             ? `<p class="empty-detail team-drawer-data-warning" role="alert">Card totals differ from match events in ${cardMismatches.length} instance${cardMismatches.length === 1 ? '' : 's'}. Displayed totals use the higher count per match. ${cardMismatches.map(item => `Match ${escape(item.matchId)}: ${escape(item.cardType)} cards show ${item.normalizedCount} in totals versus ${item.eventCount} events.`).join(' ')}</p>`
             : '';
-        return `<section class="team-drawer-card"><div class="team-drawer-summary"><div class="team-drawer-identity">${logo ? `<img class="team-drawer-crest" src="${escape(logo)}" alt="${escape(team.team)} crest">` : ''}<div class="team-drawer-owner">${escape(team.owner || 'Unassigned')}</div></div><div class="team-drawer-records"><div class="team-drawer-record team-drawer-rank-pick"><span><span class="team-drawer-record-label">Overall rank</span><strong>${rank}</strong></span><span><span class="team-drawer-record-label">Draft pick</span><strong>${draftPickValue} <span class="team-drawer-draft-diff">(${draftDiffText})</span></strong></span></div><div class="team-drawer-record"><span>Overall record</span><strong>${formatRecord(team)}</strong></div><div class="team-drawer-record"><span>Home record</span><strong>${formatRecord(options.stats.homeStats?.[team.team] || team)}</strong></div><div class="team-drawer-record"><span>Away record</span><strong>${formatRecord(options.stats.awayStats?.[team.team] || team)}</strong></div></div></div></section><section class="team-drawer-card"><h2 class="team-drawer-card-title">Team Form</h2>${form ? `<div class="team-form-grid">${form}</div>` : '<p class="empty-detail">No matches available</p>'}</section>${renderTableCard(teams, team, options)}<section class="team-drawer-card"><h2 class="team-drawer-card-title">Team Stats</h2>${cardWarning}${statRow('Goals', 'GF')}${statRow('Goals Conceded', 'GA')}${statRow('Goal differential', 'GD')}${statRow('Clean sheets', 'cleanSheets')}${statRow('Yellow cards', 'yellowCards', 'yellow')}${statRow('Red cards', 'redCards', 'red')}</section>${renderPlayerStatCards(options.matches, team.team, options.playerStatsStatus)}`;
+        return `<section class="team-drawer-card"><div class="team-drawer-summary"><div class="team-drawer-identity">${logo ? `<img class="team-drawer-crest" src="${escape(logo)}" alt="${escape(team.team)} crest">` : ''}<div class="team-drawer-owner">${escape(team.owner || 'Unassigned')}</div></div><div class="team-drawer-records"><div class="team-drawer-record team-drawer-rank-pick"><span><span class="team-drawer-record-label">Overall rank</span><strong>${rank}</strong></span><span><span class="team-drawer-record-label">Draft pick</span><strong>${draftPickValue} <span class="team-drawer-draft-diff">(${draftDiffText})</span></strong></span></div><div class="team-drawer-record"><span>Overall record</span><strong>${formatRecord(team)}</strong></div><div class="team-drawer-record"><span>Home record</span><strong>${formatRecord(options.stats.homeStats?.[team.team] || team)}</strong></div><div class="team-drawer-record"><span>Away record</span><strong>${formatRecord(options.stats.awayStats?.[team.team] || team)}</strong></div></div></div></section><section class="team-drawer-card"><h2 class="team-drawer-card-title">Team Form</h2>${form ? `<div class="team-form-grid">${form}</div>` : '<p class="empty-detail">No matches available</p>'}</section>${renderTableCard(teams, team, options)}<section class="team-drawer-card"><h2 class="team-drawer-card-title">Team Stats</h2>${cardWarning}${statRow('Goals', 'GF')}${statRow('Goals Conceded', 'GA')}${statRow('Goal differential', 'GD')}${statRow('Clean sheets', 'cleanSheets')}${statRow('Yellow cards', 'yellowCards', 'yellow')}${statRow('Red cards', 'redCards', 'red')}</section>${renderPlayerStatCards(options.matches, team.team, options.playerStatsStatus, options.currentPlayers)}`;
     }
 
     function resetFormScroll(content) {

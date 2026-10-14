@@ -1144,6 +1144,14 @@
                 .sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF)
                 .forEach((team, index) => { team.standingsRank = index + 1; });
 
+            const currentTeamByPlayer = new Map((data.currentPlayers || []).map(player => [
+                String(player.athleteProviderId),
+                player.teamName
+            ]));
+            Object.entries(goalScorers).forEach(([athleteId, player]) => {
+                if (currentTeamByPlayer.has(athleteId)) player.team = currentTeamByPlayer.get(athleteId);
+            });
+
             const finishedMatchesByWeek = {};
             data.matches.filter(match => match.status === 'FINISHED').forEach(match => {
                 finishedMatchesByWeek[match.matchday] = (finishedMatchesByWeek[match.matchday] || 0) + 1;
@@ -1184,6 +1192,9 @@
             }
             if (quality?.assistComplete === false) {
                 dataWarnings.push(`${quality.unverifiedAssistCount || 'Some'} goal assist details are unverified; player assist totals may be incomplete.`);
+            }
+            if (quality?.currentPlayerTeamsAvailable === false) {
+                dataWarnings.push('Current player-team data is unavailable; individual stats may show a player with a former club.');
             }
             if (dataWarnings.length) {
                 const warning = document.createElement('div');
