@@ -951,20 +951,20 @@
             if (todayMatchIndex !== -1) {
                 currentMatchDateIndex = todayMatchIndex;
             } else {
-                const recentMatchIndex = matchDates.reduce((latestIndex, date, index) => {
-                    if (date > Date.now()) return latestIndex;
-                    const hasRelevantMatch = allMatchesData.some(match => {
-                        const matchDate = new Date(match.utcDate);
-                        const matchMidnight = new Date(matchDate.getFullYear(), matchDate.getMonth(), matchDate.getDate()).getTime();
-                        return matchMidnight === date && (isCompletedMatch(match) || ['IN_PLAY', 'PAUSED'].includes(match.status));
-                    });
-                    return hasRelevantMatch ? index : latestIndex;
-                }, -1);
-                if (recentMatchIndex !== -1) {
-                    currentMatchDateIndex = recentMatchIndex;
+                const nextIdx = matchDates.findIndex(date => date > todayMidnight);
+                if (nextIdx !== -1) {
+                    currentMatchDateIndex = nextIdx;
                 } else {
-                    const nextIdx = matchDates.findIndex(t => t > todayMidnight);
-                    currentMatchDateIndex = nextIdx !== -1 ? nextIdx : matchDates.length - 1;
+                    const recentMatchIndex = matchDates.reduce((latestIndex, date, index) => {
+                        if (date > Date.now()) return latestIndex;
+                        const hasRelevantMatch = allMatchesData.some(match => {
+                            const matchDate = new Date(match.utcDate);
+                            const matchMidnight = new Date(matchDate.getFullYear(), matchDate.getMonth(), matchDate.getDate()).getTime();
+                            return matchMidnight === date && (isCompletedMatch(match) || ['IN_PLAY', 'PAUSED'].includes(match.status));
+                        });
+                        return hasRelevantMatch ? index : latestIndex;
+                    }, -1);
+                    currentMatchDateIndex = recentMatchIndex !== -1 ? recentMatchIndex : matchDates.length - 1;
                 }
             }
         }
