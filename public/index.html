@@ -842,13 +842,13 @@
                 const awayOwner = getOwnerOfTeam(match.awayTeam.name);
                 const homeScore = match.score?.fullTime?.home ?? 0;
                 const awayScore = match.score?.fullTime?.away ?? 0;
-                [[homeOwner, homeScore > awayScore ? 3 : homeScore === awayScore ? 1 : 0, homeScore > awayScore ? 'win' : homeScore === awayScore ? 'draw' : 'loss'],
-                    [awayOwner, awayScore > homeScore ? 3 : awayScore === homeScore ? 1 : 0, awayScore > homeScore ? 'win' : awayScore === homeScore ? 'draw' : 'loss']]
-                    .forEach(([owner, points, result]) => {
+                [[homeOwner, homeScore > awayScore ? 3 : homeScore === awayScore ? 1 : 0, homeScore > awayScore ? 'win' : homeScore === awayScore ? 'draw' : 'loss', homeScore - awayScore],
+                    [awayOwner, awayScore > homeScore ? 3 : awayScore === homeScore ? 1 : 0, awayScore > homeScore ? 'win' : awayScore === homeScore ? 'draw' : 'loss', awayScore - homeScore]]
+                    .forEach(([owner, points, result, goalDifference]) => {
                         if (!owner) return;
                         owners[owner] ||= { points: 0, results: [], goalDifference: 0 };
                         owners[owner].points += points;
-                        owners[owner].goalDifference += owner === homeOwner ? homeScore - awayScore : awayScore - homeScore;
+                        owners[owner].goalDifference += goalDifference;
                         owners[owner].results.push(result);
                     });
             });
