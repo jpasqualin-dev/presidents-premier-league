@@ -20,20 +20,20 @@
         return MOBILE_QUERY.matches;
     }
 
-    // On mobile the overlay is absolutely positioned over the page body, so grow the body when the drawer is taller than the page.
+    // On mobile, end the scrollable page where the drawer's content ends, so the page underneath does not extend the scroll range.
     function fitBodyToDrawer() {
         const body = document.body;
         const drawer = document.querySelector('#match-drawer-overlay .match-drawer');
-        body.style.minHeight = '';
+        body.style.height = '';
         if (!isDocumentMode() || !body.classList.contains('drawer-open') || !drawer) return;
-        if (drawer.scrollHeight > body.offsetHeight) body.style.minHeight = `${drawer.scrollHeight}px`;
+        body.style.height = `${drawer.offsetHeight}px`;
     }
 
     function watchContent(overlay) {
-        const content = overlay.querySelector('#match-detail-content');
-        if (!content || contentObserver || typeof ResizeObserver === 'undefined') return;
+        const drawer = overlay.querySelector('.match-drawer');
+        if (!drawer || contentObserver || typeof ResizeObserver === 'undefined') return;
         contentObserver = new ResizeObserver(fitBodyToDrawer);
-        contentObserver.observe(content);
+        contentObserver.observe(drawer);
     }
 
     function show(overlay) {
@@ -43,6 +43,7 @@
         if (savedScrollY === null && isDocumentMode()) savedScrollY = window.scrollY;
         overlay.classList.add('is-open');
         overlay.setAttribute('aria-hidden', 'false');
+        document.documentElement.classList.add('drawer-open');
         document.body.classList.add('drawer-open');
         watchContent(overlay);
         fitBodyToDrawer();
@@ -54,8 +55,9 @@
         clearTimeout(closeTimer);
         closeTimer = null;
         if (savedScrollY === null) {
+            document.documentElement.classList.remove('drawer-open');
             document.body.classList.remove('drawer-open');
-            document.body.style.minHeight = '';
+            document.body.style.height = '';
             return;
         }
         // Keep document mode until the panel finishes sliding out, then return the page to where it was.
@@ -63,8 +65,9 @@
             const y = savedScrollY;
             savedScrollY = null;
             closeTimer = null;
+            document.documentElement.classList.remove('drawer-open');
             document.body.classList.remove('drawer-open');
-            document.body.style.minHeight = '';
+            document.body.style.height = '';
             window.scrollTo(0, y);
         }, CLOSE_DELAY_MS);
     }

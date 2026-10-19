@@ -162,7 +162,8 @@ body.drawer-open { overflow: hidden; }
 .match-drawer { height: 100%; }
 
 @media (max-width: 600px) {
-    html body.drawer-open { position: relative; overflow-x: hidden; overflow-y: visible; }
-    html body.drawer-open .match-drawer-overlay { position: absolute; top: 0; right: 0; bottom: 0; left: 0; height: auto; background: var(--bg-color, #f4f6f8); }
+    html.drawer-open { overflow: auto; }
+    html body.drawer-open { position: relative; overflow: clip; min-height: 100dvh; padding: 0; }
+    html body.drawer-open .match-drawer-overlay { position: absolute; top: 0; right: 0; left: 0; min-height: 100%; height: auto; align-items: flex-start; background: var(--bg-color, #f4f6f8); }
     html body.drawer-open .match-drawer { height: auto; overflow: visible; }
 }

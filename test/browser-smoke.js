@@ -797,10 +797,14 @@ test('nested drawers keep the page scroll position and open at the drawer top', 
     assert.ok(pageScrollBeforeDrawers > 0, 'page could not scroll before opening the drawers');
     await page.evaluate(() => window.openTeamDrawerFromMatch('Crystal Palace'));
     await page.locator('.team-drawer-table-card tbody tr').first().waitFor();
+    await page.waitForFunction(() => {
+        const panel = document.querySelector('.match-drawer-overlay.is-open .match-drawer');
+        return panel && document.body.style.height === `${panel.offsetHeight}px`;
+    });
+    const drawerMaxScroll = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
+    assert.ok(drawerMaxScroll > 0, 'team drawer should be taller than the viewport');
     await page.evaluate(() => window.scrollTo(0, 400));
-    assert.ok(await page.evaluate(() => window.scrollY) > pageScrollBeforeDrawers, 'drawer content did not scroll with the page');
-    const pageScrollBeforeMatch = await page.evaluate(() => window.scrollY);
-
+    assert.equal(await page.evaluate(() => window.scrollY), Math.min(400, drawerMaxScroll), 'drawer content did not scroll with the page');
     await page.evaluate(() => window.openMatchDrawer('smoke-match-2'));
     await page.locator('#match-detail-content .match-status').filter({ hasText: 'Full time' }).waitFor();
     assert.equal(await page.evaluate(() => window.scrollY), 0, 'match drawer did not open at its top');
@@ -1028,7 +1032,7 @@ test('weekly drawer keeps its scroll position when owner cards toggle', async t 
     await context.close();
 });
 
-test('mobile drawers cover the whole page without horizontal overflow', async t => {
+test('mobile drawers stop scrolling just past their last card', async t => {
     if (browserError) return t.skip('Chromium runtime unavailable');
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const page = await context.newPage();
@@ -1050,17 +1054,18 @@ test('mobile drawers cover the whole page without horizontal overflow', async t 
         && document.querySelector('#match-drawer-overlay .match-drawer').getBoundingClientRect().left === 0);
 
     const layout = await page.evaluate(() => {
-        const overlay = document.getElementById('match-drawer-overlay');
-        const rect = overlay.getBoundingClientRect();
+        const cards = [...document.querySelectorAll('.weekly-detail-leader')];
+        window.scrollTo(0, document.documentElement.scrollHeight);
+        const lastCardBottom = cards[cards.length - 1].getBoundingClientRect().bottom + window.scrollY;
         return {
             overflowsX: document.documentElement.scrollWidth > document.documentElement.clientWidth,
-            overlayBottomInDocument: rect.bottom + window.scrollY,
-            documentHeight: document.documentElement.scrollHeight
+            documentHeight: document.documentElement.scrollHeight,
+            lastCardBottom
         };
     });
     assert.equal(layout.overflowsX, false, 'open drawer caused horizontal page overflow');
     assert.ok(layout.documentHeight > 844, 'drawer should be taller than the viewport for this check');
-    assert.ok(layout.overlayBottomInDocument >= layout.documentHeight - 1, 'drawer overlay does not cover the bottom of the page');
+    assert.ok(layout.documentHeight - layout.lastCardBottom <= 40, `page scrolls ${layout.documentHeight - layout.lastCardBottom}px past the last drawer card`);
     await context.close();
 });
 
