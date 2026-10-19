@@ -420,7 +420,7 @@
             return window.DrawerRouter.open({
                 type: 'match',
                 id: String(matchId),
-                render: () => window.openSharedMatchDrawer(matchId, { ...options, skipRouter: true })
+                render: ({ scrollTop } = {}) => window.openSharedMatchDrawer(matchId, { ...options, skipRouter: true, scrollTop })
             });
         }
 
@@ -446,6 +446,7 @@
             console.error('Error fetching match details:', error);
             content.innerHTML = '<p class="empty-detail">Unable to load match details.</p>';
         }
+        if (options.scrollTop != null) window.DrawerScroll.setTop(drawer, options.scrollTop);
     };
 
     window.closeSharedMatchDrawer = function (event) {

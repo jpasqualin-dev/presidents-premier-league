@@ -243,12 +243,11 @@
     function openFromMatch(teamName, options) {
         const displayTeamName = getLongTeamName(teamName);
         const drawer = document.querySelector('.match-drawer');
-        if (!options.skipRouter && drawer) window.DrawerScroll.setTop(drawer, 0);
         if (window.DrawerRouter && !options.skipRouter) {
             return window.DrawerRouter.open({
                 type: 'team',
                 teamName: displayTeamName,
-                render: () => openFromMatch(displayTeamName, { ...options, skipRouter: true })
+                render: ({ scrollTop } = {}) => openFromMatch(displayTeamName, { ...options, skipRouter: true, scrollTop })
             });
         }
 
@@ -266,6 +265,7 @@
             content.innerHTML = render(displayTeamName, options);
             resetFormScroll(content);
         }
+        if (drawer) window.DrawerScroll.setTop(drawer, options.scrollTop ?? 0);
         header?.querySelector('.match-drawer-close')?.focus({ preventScroll: true });
     }
 

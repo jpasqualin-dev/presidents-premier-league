@@ -1,8 +1,13 @@
 (function () {
     const stack = [];
 
-    function render(entry) {
-        return typeof entry?.render === 'function' ? entry.render() : undefined;
+    function render(entry, restoring = false) {
+        return typeof entry?.render === 'function' ? entry.render({ scrollTop: entry.scrollTop, restoring }) : undefined;
+    }
+
+    function currentDrawerTop() {
+        const drawer = document.querySelector('#match-drawer-overlay .match-drawer');
+        return drawer ? window.DrawerScroll.getTop(drawer) : 0;
     }
 
     function describe(entry) {
@@ -24,9 +29,13 @@
     function fitBodyToDrawer() {
         const body = document.body;
         const drawer = document.querySelector('#match-drawer-overlay .match-drawer');
-        body.style.height = '';
-        if (!isDocumentMode() || !body.classList.contains('drawer-open') || !drawer) return;
-        body.style.height = `${drawer.offsetHeight}px`;
+        if (!isDocumentMode() || !body.classList.contains('drawer-open') || !drawer) {
+            body.style.height = '';
+            return;
+        }
+        // Measure before changing the body height; clearing it first forces a layout that clamps the page scroll.
+        const height = drawer.offsetHeight;
+        body.style.height = `${height}px`;
     }
 
     function watchContent(overlay) {
@@ -79,13 +88,18 @@
             return isDocumentMode() ? window.scrollY : drawer.scrollTop;
         },
         setTop(drawer, top) {
-            if (isDocumentMode()) window.scrollTo(0, top);
+            if (isDocumentMode()) {
+                fitBodyToDrawer();
+                window.scrollTo(0, top);
+            }
             else drawer.scrollTop = top;
         }
     };
 
     window.DrawerRouter = {
         open(entry) {
+            const outgoing = stack[stack.length - 1];
+            if (outgoing) outgoing.scrollTop = currentDrawerTop();
             stack.push(entry);
             return render(entry);
         },
@@ -96,7 +110,7 @@
                 return;
             }
             const from = describe(stack.pop());
-            const result = render(stack[stack.length - 1]);
+            const result = render(stack[stack.length - 1], true);
             document.dispatchEvent(new CustomEvent('drawer-router-back', { detail: { from, to: describe(stack[stack.length - 1]) } }));
             return result;
         },

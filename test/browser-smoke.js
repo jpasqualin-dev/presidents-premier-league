@@ -822,6 +822,60 @@ test('nested drawers keep the page scroll position and open at the drawer top', 
     await context.close();
 });
 
+for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 420 }]) {
+    test(`returning to a drawer restores its scroll position at ${viewport.width}px`, async t => {
+        if (browserError) return t.skip('Chromium runtime unavailable');
+        const context = await browser.newContext({ viewport });
+        const page = await context.newPage();
+        await page.route('**/api/matches**', route => route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(fixtureData())
+        }));
+        await page.route('**/api/match-details**', route => route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ scorers: [], events: [], teamStats: [], substitutions: [] })
+        }));
+        await page.goto(`${baseUrl}/hef.html`);
+        await page.locator('body.player-page-ready').waitFor();
+        const scrollTop = () => page.evaluate(() => {
+            const drawer = document.querySelector('#match-drawer-overlay .match-drawer');
+            return window.innerWidth <= 600 ? window.scrollY : drawer.scrollTop;
+        });
+        const scrollRange = () => page.evaluate(() => {
+            const drawer = document.querySelector('#match-drawer-overlay .match-drawer');
+            return window.innerWidth <= 600 ? document.documentElement.scrollHeight - window.innerHeight : drawer.scrollHeight - drawer.clientHeight;
+        });
+        const setScroll = top => page.evaluate(top => {
+            const drawer = document.querySelector('#match-drawer-overlay .match-drawer');
+            if (window.innerWidth <= 600) window.scrollTo(0, top);
+            else drawer.scrollTop = top;
+        }, top);
+
+        await page.evaluate(() => window.openMatchDrawer('smoke-match-2'));
+        await page.locator('#match-detail-content .match-status').filter({ hasText: 'Full time' }).waitFor();
+        const matchRange = await scrollRange();
+        assert.ok(matchRange > 40, 'match drawer should be scrollable at this viewport');
+        await setScroll(40);
+        assert.equal(await scrollTop(), 40, 'match drawer did not scroll');
+
+        await page.locator('#match-detail-content .match-team-link').first().click();
+        await page.locator('#match-drawer-title').filter({ hasText: 'Manchester City' }).waitFor();
+        assert.equal(await scrollTop(), 0, 'nested team drawer did not open at its top');
+
+        await page.evaluate(() => window.DrawerRouter.back());
+        await page.locator('#match-detail-content .match-status').filter({ hasText: 'Full time' }).waitFor();
+        await page.waitForFunction(() => document.querySelector('#match-detail-content .match-status') !== null);
+        assert.equal(await scrollTop(), 40, 'returning to the match drawer did not restore its scroll position');
+        await page.evaluate(() => document.getElementById('match-detail-content').insertAdjacentHTML('afterbegin', '<div style="height:71px" aria-hidden="true"></div>'));
+        await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+        assert.equal(await scrollTop(), 40, 'content that grows above the restored position moved it');
+
+        await context.close();
+    });
+}
+
 test('team drawer loads detailed scorer and card data on demand', async t => {
     if (browserError) return t.skip('Chromium runtime unavailable');
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
