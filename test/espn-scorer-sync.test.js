@@ -169,6 +169,12 @@ test('sync preserves stored scorers on partial ESPN detail and repairs them when
     assert.equal(completeQueries.filter(query => query.includes('INSERT INTO match_scorers')).length, 3);
 });
 
+test('existing scorer lookup exposes the team column that observation matching reads', async () => {
+    const queries = await runSyncWithSummary(matchSummary(3));
+    const scorerLookup = queries.find(query => query.includes('FROM match_scorers ms'));
+    assert.match(scorerLookup, /t\.provider_team_id AS team_provider_id/u);
+});
+
 test('sync stores scoreboard match data when ESPN match details are unavailable', async () => {
     const queries = await runSyncWithSummary(null, new Error('ESPN summary request failed'));
     assert.equal(queries.some(query => query.includes('INSERT INTO matches')), true);

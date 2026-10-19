@@ -396,7 +396,7 @@ async function syncEvent(sql, event) {
     }
     if (hasCompleteScorerPayload) {
         const existingScorers = await sql`
-            SELECT t.provider_team_id, ms.provider_athlete_id, ms.athlete_name, ms.assist_provider_id,
+            SELECT t.provider_team_id AS team_provider_id, ms.provider_athlete_id, ms.athlete_name, ms.assist_provider_id,
                 ms.assist_name, ms.assist_status, ms.assist_observations, ms.assist_checked_at, ms.minute
             FROM match_scorers ms
             JOIN teams t ON t.id = ms.team_id
