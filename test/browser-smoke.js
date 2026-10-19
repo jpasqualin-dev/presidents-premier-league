@@ -971,7 +971,55 @@ test('team drawer labels stale but complete detailed stats with their data times
 
     await page.locator('.team-drawer-player-stat').filter({ hasText: 'Cached City Player' }).first().waitFor();
     const drawerText = (await page.locator('.team-drawer-card').allTextContents()).join(' ');
-    assert.match(drawerText, /Showing cached stats generated.*cached copy last synced/);
+    assert.doesNotMatch(drawerText, /stats generated/i);
+    await context.close();
+});
+
+test('weekly drawer keeps its scroll position when owner cards toggle', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const page = await context.newPage();
+    await page.route('**/api/matches**', route => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(fixtureData())
+    }));
+    await page.goto(`${baseUrl}/index.html`);
+    await page.waitForFunction(() => window.PplWeeklyDrawer);
+    const matches = fixtureData().matches;
+    const teams = matches.flatMap(match => [match.homeTeam.name, match.awayTeam.name]);
+    const owners = Array.from({ length: 6 }, (_, index) => `Owner ${index + 1}`);
+    const draftData = Object.fromEntries(owners.map((owner, index) => [owner, teams.slice(index * 2, index * 2 + 3)]));
+    const week = {
+        week: 5,
+        matches,
+        ownerDetails: owners.map(owner => ({ owner, points: 3, stars: 0, achievements: [], wins: 1, draws: 0, losses: 0, goalDifference: 1 }))
+    };
+    await page.evaluate(({ week, draftData }) => window.PplWeeklyDrawer.open({
+        weeks: [week],
+        index: 0,
+        matches: [],
+        draftData,
+        getShortTeamName: name => name,
+        getOwnerOfTeam: () => '',
+        getLogoByName: () => ''
+    }), { week, draftData });
+    await page.locator('#match-drawer-overlay.is-open').waitFor();
+
+    const drawer = page.locator('#match-drawer-overlay .match-drawer');
+    const ownerCard = name => page.locator('.weekly-detail-leader').filter({ has: page.locator('.weekly-detail-name', { hasText: name }) });
+    await ownerCard('Owner 1').click();
+    await ownerCard('Owner 2').click();
+    await drawer.evaluate(element => {
+        const target = [...element.querySelectorAll('.weekly-detail-leader')][2];
+        element.scrollTop += target.getBoundingClientRect().top - element.getBoundingClientRect().top - 100;
+    });
+    const scrollBefore = await drawer.evaluate(element => element.scrollTop);
+    assert.ok(scrollBefore > 0, 'weekly drawer did not scroll before toggling the third card');
+
+    await ownerCard('Owner 3').click();
+    assert.equal(await ownerCard('Owner 3').getAttribute('aria-expanded'), 'true', 'third owner card did not expand');
+    assert.equal(await drawer.evaluate(element => element.scrollTop), scrollBefore, 'weekly drawer scroll jumped when toggling an owner card');
     await context.close();
 });
 

@@ -68,15 +68,16 @@
         return ownerSections || '<section class="match-detail-section"><p class="empty-detail">No completed matches yet.</p></section>';
     }
 
-    function render() {
+    function render({ preserveScroll = false } = {}) {
         const week = state.weeks[state.index], overlay = document.getElementById('match-drawer-overlay'), drawer = overlay?.querySelector('.match-drawer'), content = document.getElementById('match-detail-content');
         if (!overlay || !drawer || !content) return;
         const header = overlay.querySelector('.match-drawer-header');
         const latestResultsIndex = state.weeks.reduce((latest, item, index) => item.matches.some(isCompletedMatch) ? index : latest, -1);
         const nextDisabled = state.index >= latestResultsIndex;
         header.innerHTML = `<div class="weekly-drawer-nav" style="display:flex"><button class="drawer-week-btn" type="button" aria-label="View previous week" onclick="PplWeeklyDrawer.changeWeek(-1)" ${state.index <= 0 ? 'disabled' : ''}>‹</button><span class="match-drawer-title">Week ${escapeHtml(String(week?.week ?? ''))}</span><button class="drawer-week-btn" type="button" aria-label="View next week" onclick="PplWeeklyDrawer.changeWeek(1)" ${nextDisabled ? 'disabled' : ''}>›</button></div><button class="match-drawer-close" type="button" aria-label="Close weekly results" onclick="closeMatchDrawer()">&times;</button>`;
+        const scrollTop = drawer.scrollTop;
         content.innerHTML = renderWeeklyDetail(week);
-        drawer.scrollTop = 0;
+        drawer.scrollTop = preserveScroll ? scrollTop : 0;
         overlay.classList.add('is-open');
         overlay.setAttribute('aria-hidden', 'false');
         document.body.classList.add('drawer-open');
@@ -102,7 +103,7 @@
         render();
     }
 
-    window.PplWeeklyDrawer = { open, render, toggleForm(week, owner) { const key = `${week}:${owner}`; state.expanded.has(key) ? state.expanded.delete(key) : state.expanded.add(key); render(); }, changeWeek(direction) { const next = state.index + direction; if (next < 0 || next >= state.weeks.length) return; state.index = next; state.expanded.clear(); state.context.onWeekChange?.(next); render(); } };
+    window.PplWeeklyDrawer = { open, render, toggleForm(week, owner) { const key = `${week}:${owner}`; state.expanded.has(key) ? state.expanded.delete(key) : state.expanded.add(key); render({ preserveScroll: true }); }, changeWeek(direction) { const next = state.index + direction; if (next < 0 || next >= state.weeks.length) return; state.index = next; state.expanded.clear(); state.context.onWeekChange?.(next); render(); } };
     document.addEventListener('drawer-router-back', event => {
         const matchId = event.detail?.to?.type === 'weekly' && event.detail?.from?.type === 'match' ? event.detail.from.id : '';
         if (!matchId) return;

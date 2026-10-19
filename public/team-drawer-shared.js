@@ -130,14 +130,6 @@
                 : `Unable to load player stats: ${playerStatsStatus.error}`;
             return `<section class="team-drawer-card"><h2 class="team-drawer-card-title">Player Stats</h2><p class="empty-detail">${escape(message)}</p></section>`;
         }
-        const generatedAt = playerStatsStatus?.generatedAt ? new Date(playerStatsStatus.generatedAt) : null;
-        const lastLoadedAt = playerStatsStatus?.lastSuccessfulSync ? new Date(playerStatsStatus.lastSuccessfulSync) : null;
-        const dataFreshness = generatedAt && Number.isFinite(generatedAt.getTime())
-            ? `${playerStatsStatus.stale ? 'Showing cached stats generated' : 'Stats generated'} ${generatedAt.toLocaleString()}${playerStatsStatus.stale ? `; cached copy last synced ${lastLoadedAt?.toLocaleString() || 'at an unknown time'}` : ''}.`
-            : playerStatsStatus?.stale ? 'Showing previously cached detailed stats.' : '';
-        const freshnessNotice = dataFreshness
-            ? `<section class="team-drawer-card"><p class="empty-detail" role="status">${escape(dataFreshness)}</p></section>`
-            : '';
         const dataWarnings = [];
         if (playerStatsStatus?.historicalAvailable === false) dataWarnings.push('Historical match data is unavailable; these totals may cover only recent matches.');
         else if (playerStatsStatus?.detailsComplete === false) dataWarnings.push('Some match details are unavailable; these totals may be incomplete.');
@@ -153,7 +145,7 @@
             { title: 'Goals', value: player => player.goals },
             { title: 'Assists', value: player => player.assists }
         ];
-            return freshnessNotice + qualityNotice + configs.map(config => {
+        return qualityNotice + configs.map(config => {
             const rankedPlayers = players
                 .filter(player => config.value(player) > 0)
                 .sort((a, b) => config.value(b) - config.value(a) || a.name.localeCompare(b.name));
