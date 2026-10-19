@@ -24,6 +24,7 @@
     function renderTeamDrawer(teamName, matches, playerStatsStatus, skipRouter = false, auditCardEvents = false) {
         const overlay = document.getElementById('match-drawer-overlay');
         const stats = TeamDrawerShared.buildStats(matches, Object.values(draftData).flat(), getOwnerOfTeam, { auditCardEvents });
+        if (!openedFromMatch) window.DrawerScroll.show(overlay);
         TeamDrawerShared.openFromMatch(teamName, {
             stats,
             matches,
@@ -36,12 +37,7 @@
             openMatch: true,
             showBackButton: openedFromMatch
         });
-        if (!openedFromMatch) {
-            overlay?.classList.add('is-open');
-            overlay?.setAttribute('aria-hidden', 'false');
-            document.body.classList.add('drawer-open');
-            overlay?.querySelector('.match-drawer-back')?.remove();
-        }
+        if (!openedFromMatch) overlay?.querySelector('.match-drawer-back')?.remove();
     }
 
     window.openTeamDrawerFromMatch = function (teamName) {

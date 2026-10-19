@@ -75,12 +75,10 @@
         const latestResultsIndex = state.weeks.reduce((latest, item, index) => item.matches.some(isCompletedMatch) ? index : latest, -1);
         const nextDisabled = state.index >= latestResultsIndex;
         header.innerHTML = `<div class="weekly-drawer-nav" style="display:flex"><button class="drawer-week-btn" type="button" aria-label="View previous week" onclick="PplWeeklyDrawer.changeWeek(-1)" ${state.index <= 0 ? 'disabled' : ''}>‹</button><span class="match-drawer-title">Week ${escapeHtml(String(week?.week ?? ''))}</span><button class="drawer-week-btn" type="button" aria-label="View next week" onclick="PplWeeklyDrawer.changeWeek(1)" ${nextDisabled ? 'disabled' : ''}>›</button></div><button class="match-drawer-close" type="button" aria-label="Close weekly results" onclick="closeMatchDrawer()">&times;</button>`;
-        const scrollTop = drawer.scrollTop;
+        const scrollTop = window.DrawerScroll.getTop(drawer);
         content.innerHTML = renderWeeklyDetail(week);
-        drawer.scrollTop = preserveScroll ? scrollTop : 0;
-        overlay.classList.add('is-open');
-        overlay.setAttribute('aria-hidden', 'false');
-        document.body.classList.add('drawer-open');
+        window.DrawerScroll.show(overlay);
+        window.DrawerScroll.setTop(drawer, preserveScroll ? scrollTop : 0);
         overlay.querySelector('.match-drawer-close')?.focus({ preventScroll: true });
     }
 

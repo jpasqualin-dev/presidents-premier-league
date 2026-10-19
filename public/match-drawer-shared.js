@@ -433,7 +433,7 @@
             : options.backButtonMarkup || '';
         if (header && backButtonMarkup) header.insertAdjacentHTML('afterbegin', backButtonMarkup);
         document.getElementById('match-drawer-title').textContent = 'Match details';
-        drawer.scrollTop = 0; overlay.classList.add('is-open'); overlay.setAttribute('aria-hidden', 'false'); document.body.classList.add('drawer-open'); content.innerHTML = '<p class="empty-detail">Loading match details...</p>';
+        window.DrawerScroll.show(overlay); window.DrawerScroll.setTop(drawer, 0); content.innerHTML = '<p class="empty-detail">Loading match details...</p>';
         focusDrawer();
         try {
             const { match, matches } = await window.fetchSharedMatchById(matchId);
@@ -452,7 +452,7 @@
         if (event && event.target.id !== 'match-drawer-overlay') return;
         const closingWeeklyDrawer = window.DrawerRouter?.current()?.type === 'weekly';
         window.DrawerRouter?.closeAll();
-        const overlay = document.getElementById('match-drawer-overlay'); overlay.classList.remove('is-open'); overlay.setAttribute('aria-hidden', 'true'); document.body.classList.remove('drawer-open');
+        const overlay = document.getElementById('match-drawer-overlay'); window.DrawerScroll.hide(overlay);
         window.resetSharedMatchDrawerHeader();
         drawerRenderId += 1;
         const weeklyTrigger = lastDrawerFromWeekly && lastDrawerMatchId

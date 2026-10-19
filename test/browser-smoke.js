@@ -792,24 +792,29 @@ test('nested drawers keep the page scroll position and open at the drawer top', 
     }));
     await page.goto(`${baseUrl}/hef.html`);
     await page.locator('body.player-page-ready').waitFor();
+    await page.evaluate(() => window.scrollTo(0, 300));
+    const pageScrollBeforeDrawers = await page.evaluate(() => window.scrollY);
+    assert.ok(pageScrollBeforeDrawers > 0, 'page could not scroll before opening the drawers');
     await page.evaluate(() => window.openTeamDrawerFromMatch('Crystal Palace'));
     await page.locator('.team-drawer-table-card tbody tr').first().waitFor();
-    await page.evaluate(() => { document.querySelector('.match-drawer').scrollTop = 400; });
-    assert.ok(await page.locator('.match-drawer').evaluate(element => element.scrollTop > 0));
+    await page.evaluate(() => window.scrollTo(0, 400));
+    assert.ok(await page.evaluate(() => window.scrollY) > pageScrollBeforeDrawers, 'drawer content did not scroll with the page');
     const pageScrollBeforeMatch = await page.evaluate(() => window.scrollY);
 
     await page.evaluate(() => window.openMatchDrawer('smoke-match-2'));
     await page.locator('#match-detail-content .match-status').filter({ hasText: 'Full time' }).waitFor();
-    assert.equal(await page.locator('.match-drawer').evaluate(element => element.scrollTop), 0);
-    assert.equal(await page.evaluate(() => window.scrollY), pageScrollBeforeMatch);
+    assert.equal(await page.evaluate(() => window.scrollY), 0, 'match drawer did not open at its top');
 
     await page.evaluate(() => {
-        document.querySelector('.match-drawer').scrollTop = 350;
+        window.scrollTo(0, 350);
         document.querySelector('.match-team-link').click();
     });
     await page.locator('#match-drawer-title').filter({ hasText: 'Manchester City' }).waitFor();
-    assert.equal(await page.locator('.match-drawer').evaluate(element => element.scrollTop), 0);
-    assert.equal(await page.evaluate(() => window.scrollY), pageScrollBeforeMatch);
+    assert.equal(await page.evaluate(() => window.scrollY), 0, 'nested team drawer did not open at its top');
+
+    await page.evaluate(() => window.closeMatchDrawer());
+    await page.waitForFunction(() => !document.body.classList.contains('drawer-open'));
+    assert.equal(await page.evaluate(() => window.scrollY), pageScrollBeforeDrawers, 'closing the drawers did not restore the page position');
     await context.close();
 });
 
@@ -1006,20 +1011,56 @@ test('weekly drawer keeps its scroll position when owner cards toggle', async t 
     }), { week, draftData });
     await page.locator('#match-drawer-overlay.is-open').waitFor();
 
-    const drawer = page.locator('#match-drawer-overlay .match-drawer');
     const ownerCard = name => page.locator('.weekly-detail-leader').filter({ has: page.locator('.weekly-detail-name', { hasText: name }) });
+    assert.equal(await page.locator('#match-drawer-overlay').evaluate(element => getComputedStyle(element).position), 'absolute', 'mobile drawer overlay should scroll with the page');
     await ownerCard('Owner 1').click();
     await ownerCard('Owner 2').click();
-    await drawer.evaluate(element => {
-        const target = [...element.querySelectorAll('.weekly-detail-leader')][2];
-        element.scrollTop += target.getBoundingClientRect().top - element.getBoundingClientRect().top - 100;
+    await page.evaluate(() => {
+        const target = [...document.querySelectorAll('.weekly-detail-leader')][2];
+        window.scrollBy(0, target.getBoundingClientRect().top - 100);
     });
-    const scrollBefore = await drawer.evaluate(element => element.scrollTop);
+    const scrollBefore = await page.evaluate(() => window.scrollY);
     assert.ok(scrollBefore > 0, 'weekly drawer did not scroll before toggling the third card');
 
     await ownerCard('Owner 3').click();
     assert.equal(await ownerCard('Owner 3').getAttribute('aria-expanded'), 'true', 'third owner card did not expand');
-    assert.equal(await drawer.evaluate(element => element.scrollTop), scrollBefore, 'weekly drawer scroll jumped when toggling an owner card');
+    assert.equal(await page.evaluate(() => window.scrollY), scrollBefore, 'weekly drawer scroll jumped when toggling an owner card');
+    await context.close();
+});
+
+test('mobile drawers cover the whole page without horizontal overflow', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const page = await context.newPage();
+    await page.route('**/api/matches**', route => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(fixtureData())
+    }));
+    await page.goto(`${baseUrl}/index.html`);
+    await page.waitForFunction(() => window.PplWeeklyDrawer);
+    const matches = fixtureData().matches;
+    const ownerDetails = Array.from({ length: 12 }, (_, index) => ({ owner: `Owner ${index + 1}`, points: 3, stars: 0, achievements: [], wins: 1, draws: 0, losses: 0, goalDifference: 1 }));
+    const week = { week: 5, matches, ownerDetails };
+    await page.evaluate(week => window.PplWeeklyDrawer.open({
+        weeks: [week], index: 0, matches: [], draftData: {}, getShortTeamName: name => name, getOwnerOfTeam: () => '', getLogoByName: () => ''
+    }), week);
+    await page.locator('#match-drawer-overlay.is-open').waitFor();
+    await page.waitForFunction(() => document.body.classList.contains('drawer-open')
+        && document.querySelector('#match-drawer-overlay .match-drawer').getBoundingClientRect().left === 0);
+
+    const layout = await page.evaluate(() => {
+        const overlay = document.getElementById('match-drawer-overlay');
+        const rect = overlay.getBoundingClientRect();
+        return {
+            overflowsX: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+            overlayBottomInDocument: rect.bottom + window.scrollY,
+            documentHeight: document.documentElement.scrollHeight
+        };
+    });
+    assert.equal(layout.overflowsX, false, 'open drawer caused horizontal page overflow');
+    assert.ok(layout.documentHeight > 844, 'drawer should be taller than the viewport for this check');
+    assert.ok(layout.overlayBottomInDocument >= layout.documentHeight - 1, 'drawer overlay does not cover the bottom of the page');
     await context.close();
 });
 
