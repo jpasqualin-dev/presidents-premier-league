@@ -68,7 +68,11 @@
         return ownerSections || '<section class="match-detail-section"><p class="empty-detail">No completed matches yet.</p></section>';
     }
 
-    function render({ preserveScroll = false, scrollTop = null } = {}) {
+    function weeksFor(context, matches) {
+        return context.getWeeks ? context.getWeeks(matches) : buildWeeks(matches, context.draftData, context.getOwnerOfTeam);
+    }
+
+    function render({ preserveScroll = false, scrollTop = null, focus = true } = {}) {
         const week = state.weeks[state.index], overlay = document.getElementById('match-drawer-overlay'), drawer = overlay?.querySelector('.match-drawer'), content = document.getElementById('match-detail-content');
         if (!overlay || !drawer || !content) return;
         const header = overlay.querySelector('.match-drawer-header');
@@ -79,7 +83,16 @@
         content.innerHTML = renderWeeklyDetail(week);
         window.DrawerScroll.show(overlay);
         window.DrawerScroll.setTop(drawer, preserveScroll ? currentTop : (scrollTop ?? 0));
-        overlay.querySelector('.match-drawer-close')?.focus({ preventScroll: true });
+        if (focus) overlay.querySelector('.match-drawer-close')?.focus({ preventScroll: true });
+    }
+
+    function refreshFromMatches(matches) {
+        if (!state.context?.live || window.DrawerRouter?.current()?.type !== 'weekly') return;
+        const currentWeek = state.weeks[state.index]?.week;
+        state.weeks = weeksFor(state.context, matches);
+        const nextIndex = state.weeks.findIndex(item => String(item.week) === String(currentWeek));
+        state.index = nextIndex >= 0 ? nextIndex : Math.min(state.index, Math.max(state.weeks.length - 1, 0));
+        render({ preserveScroll: true, focus: false });
     }
 
     function open(options) {
@@ -91,9 +104,9 @@
                 render: ({ scrollTop, restoring } = {}) => restoring ? render({ scrollTop }) : open({ ...options, skipRouter: true })
             });
         }
-        state.context = { ...options, getShortTeamName: options.getShortTeamName || (name => name), getOwnerOfTeam: options.getOwnerOfTeam || (() => '') };
+        state.context = { ...options, getShortTeamName: options.getShortTeamName || (name => name), getOwnerOfTeam: options.getOwnerOfTeam || (() => ''), live: !options.weeks || Boolean(options.getWeeks) };
         state.expanded.clear();
-        state.weeks = options.weeks || buildWeeks(options.matches, options.draftData, state.context.getOwnerOfTeam);
+        state.weeks = options.weeks || weeksFor(state.context, options.matches);
         state.index = options.index ?? state.weeks.findIndex(item => String(item.week) === String(options.week));
         if (state.index < 0) state.index = 0;
         if (!state.weeks[state.index]?.matches.some(isCompletedMatch)) return;
@@ -102,6 +115,9 @@
     }
 
     window.PplWeeklyDrawer = { open, render, toggleForm(week, owner) { const key = `${week}:${owner}`; state.expanded.has(key) ? state.expanded.delete(key) : state.expanded.add(key); render({ preserveScroll: true }); }, changeWeek(direction) { const next = state.index + direction; if (next < 0 || next >= state.weeks.length) return; state.index = next; state.expanded.clear(); state.context.onWeekChange?.(next); render(); } };
+    window.DataManager?.subscribe(data => {
+        if (Array.isArray(data?.matches)) refreshFromMatches(data.matches);
+    });
     document.addEventListener('drawer-router-back', event => {
         const matchId = event.detail?.to?.type === 'weekly' && event.detail?.from?.type === 'match' ? event.detail.from.id : '';
         if (!matchId) return;

@@ -1086,6 +1086,36 @@ test('weekly drawer keeps its scroll position when owner cards toggle', async t 
     await context.close();
 });
 
+test('open weekly drawer picks up results delivered by match data updates', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    const liveData = fixtureData();
+    liveData.matches[0] = { ...liveData.matches[0], status: 'IN_PLAY', score: { fullTime: { home: 0, away: 0 }, halfTime: { home: 0, away: 0 } } };
+    let payload = liveData;
+    await page.route('**/api/matches**', route => route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(payload)
+    }));
+    await page.goto(`${baseUrl}/index.html`);
+    await page.waitForFunction(() => window.PplWeeklyDrawer);
+    await page.locator('.today-card[role="button"]').click();
+    await page.locator('#match-drawer-overlay.is-open').waitFor();
+
+    const jameyCard = page.locator('.weekly-detail-leader').filter({ has: page.locator('.weekly-detail-name', { hasText: 'Jamey' }) });
+    await jameyCard.click();
+    assert.equal(await page.locator('.weekly-form-score', { hasText: '3 - 0' }).count(), 0, 'result should not be shown before the match finishes');
+
+    payload = fixtureData();
+    payload.matches[0] = { ...payload.matches[0], score: { fullTime: { home: 3, away: 0 }, halfTime: { home: 1, away: 0 } } };
+    await page.evaluate(() => window.DataManager.getMatchData({ force: true }));
+    await page.locator('.weekly-form-score', { hasText: '3 - 0' }).first().waitFor();
+    assert.equal(await jameyCard.getAttribute('aria-expanded'), 'true', 'owner card collapsed after live data refresh');
+    assert.match(await jameyCard.locator('.weekly-detail-points').innerText(), /^3 PTS/, 'owner points did not update after live data refresh');
+    await context.close();
+});
+
 test('mobile drawers stop scrolling just past their last card', async t => {
     if (browserError) return t.skip('Chromium runtime unavailable');
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });

@@ -823,10 +823,10 @@
         return new Map(rankedPlayers.map((player, index) => [player.player, index + 1]));
     }
 
-    function getWeeklyCardSummary() {
+    function getWeeklyCardSummary(matchesData = allMatchesData) {
         const standingsRankMap = getPplStandingsRankMap();
         const weeks = new Map();
-        allMatchesData.forEach(match => {
+        matchesData.forEach(match => {
             if (match.matchday == null) return;
             if (!weeks.has(match.matchday)) weeks.set(match.matchday, []);
             weeks.get(match.matchday).push(match);
@@ -1241,8 +1241,8 @@
         if (!week) return;
         window.DrawerRouter?.closeAll();
         return PplWeeklyDrawer.open({
-            weeks: weeklyCardWeeks,
-            index: weeklyCardWeekIndex,
+            week: week.week,
+            getWeeks: matches => getWeeklyCardSummary(matches),
             matches: allMatchesData,
             draftData,
             getShortTeamName,
