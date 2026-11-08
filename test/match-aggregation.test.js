@@ -213,3 +213,30 @@ test('current player records expose stable athlete ids and current club names', 
         teamName: 'Manchester City'
     }]);
 });
+
+test('live matches just outside a round window keep the round number', () => {
+    const event = date => ({
+        id: '9', date,
+        competitions: [{
+            status: { type: { state: 'pre' } },
+            competitors: [
+                { homeAway: 'home', team: { id: '1', displayName: 'Home' }, score: '0' },
+                { homeAway: 'away', team: { id: '2', displayName: 'Away' }, score: '0' }
+            ]
+        }]
+    });
+
+    assert.equal(normalizeEspnEvent(event('2026-11-06T20:00Z')).matchday, '10');
+    assert.equal(normalizeEspnEvent(event('2026-11-07T12:30Z')).matchday, '10');
+    assert.equal(normalizeEspnEvent(event('2026-11-08T14:00Z')).matchday, '10');
+    assert.match(normalizeEspnEvent(event('2026-11-14T15:00Z')).matchday, /^2026-W\d+$/u);
+});
+
+test('merging live data does not replace a round number with an ISO-week fallback', () => {
+    const [match] = mergeMatches([
+        { ...baseMatch, status: 'FINISHED', matchday: '10' },
+        { ...baseMatch, status: 'FINISHED', matchday: '2026-W45' }
+    ]);
+
+    assert.equal(match.matchday, '10');
+});
