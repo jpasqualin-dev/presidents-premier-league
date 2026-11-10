@@ -388,6 +388,44 @@
 
         .draft-table .overall-header-container { margin: 0 10px; }
 
+        .draft-card-header {
+            display: grid;
+            grid-template-columns: 30px minmax(0, 1fr) 30px;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .draft-card-header .plain-table-title { text-align: center; }
+
+        .draft-nav-btn {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: transparent;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        @media (hover: hover) {
+            .draft-nav-btn:hover {
+                background-color: var(--accent-green);
+                border-color: var(--accent-green);
+                color: #38003c;
+            }
+        }
+
+        .draft-nav-btn:focus-visible {
+            outline: 2px solid var(--accent-green);
+            outline-offset: 2px;
+        }
+
         .draft-table th:nth-child(2),
         .draft-table td:nth-child(2) { text-align: left; }
 
@@ -502,7 +540,7 @@
                     <table class="draft-table overall-standings-table">
                         <thead>
                             <tr class="title-row">
-                                <th colspan="3"><div class="overall-header-container"><h2 id="draft-title" class="plain-table-title">Draft: Jordan</h2></div></th>
+                                <th colspan="3"><div class="overall-header-container draft-card-header"><button class="draft-nav-btn" id="draft-prev-player" type="button" aria-label="View previous player's draft picks">&#10094;</button><h2 id="draft-title" class="plain-table-title">Draft: Jordan</h2><button class="draft-nav-btn" id="draft-next-player" type="button" aria-label="View next player's draft picks">&#10095;</button></div></th>
                             </tr>
                             <tr><th scope="col">Round</th><th scope="col">Team</th><th scope="col">Overall Pick</th></tr>
                         </thead>
@@ -579,15 +617,31 @@
         draftTitle.textContent = `Draft: ${playerName}`;
         window.playerTeams = PplLeagueConfig.draftData[playerName] || [];
         window.playerTeamLogos = TeamNames.logoMap();
-        const renderDraftTables = () => {
-            const renderTeamCell = (team, shortName = false) => {
-                const crest = TeamNames.crest(team);
-                const displayName = shortName ? TeamNames.shortName(team) : team;
-                return `<span class="draft-team-cell">${crest ? `<img class="draft-team-icon" src="${crest}" alt="" aria-hidden="true">` : ''}<span>${displayName}</span></span>`;
-            };
-            document.getElementById('draft-table-body').innerHTML = window.playerTeams
+        const renderTeamCell = (team, shortName = false) => {
+            const crest = TeamNames.crest(team);
+            const displayName = shortName ? TeamNames.shortName(team) : team;
+            return `<span class="draft-team-cell">${crest ? `<img class="draft-team-icon" src="${crest}" alt="" aria-hidden="true">` : ''}<span>${displayName}</span></span>`;
+        };
+        const draftCardOrder = Object.entries(PplLeagueConfig.draftPicks)
+            .filter(([, pick]) => pick <= playerNames.length)
+            .sort(([, leftPick], [, rightPick]) => leftPick - rightPick)
+            .map(([team]) => PplLeagueConfig.ownersByTeam[team]);
+        let draftCardPlayer = playerName;
+        const renderDraftCardRows = () => {
+            document.getElementById('draft-table-body').innerHTML = (PplLeagueConfig.draftData[draftCardPlayer] || [])
                 .map((team, index) => `<tr><td>${index + 1}</td><td>${renderTeamCell(team)}</td><td>${PplLeagueConfig.draftPicks[team] || '--'}</td></tr>`)
                 .join('');
+        };
+        const changeDraftCardPlayer = direction => {
+            const index = draftCardOrder.indexOf(draftCardPlayer);
+            draftCardPlayer = draftCardOrder[(index + direction + draftCardOrder.length) % draftCardOrder.length];
+            draftTitle.textContent = `Draft: ${draftCardPlayer}`;
+            renderDraftCardRows();
+        };
+        document.getElementById('draft-prev-player').addEventListener('click', () => changeDraftCardPlayer(-1));
+        document.getElementById('draft-next-player').addEventListener('click', () => changeDraftCardPlayer(1));
+        const renderDraftTables = () => {
+            renderDraftCardRows();
             document.getElementById('full-draft-table-body').innerHTML = Object.entries(PplLeagueConfig.draftPicks)
                 .sort(([, leftPick], [, rightPick]) => leftPick - rightPick)
                 .map(([team, pick]) => `<tr><td>${Math.ceil(pick / playerNames.length)}</td><td>${PplLeagueConfig.ownersByTeam[team] || '--'}</td><td>${renderTeamCell(team, true)}</td><td>${pick}</td></tr>`)

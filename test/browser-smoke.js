@@ -1444,6 +1444,18 @@ test('shared player page renders its shared shell and switches local tabs', asyn
     await page.locator('#draft-table-body .draft-team-icon').first().waitFor();
     assert.equal(await page.locator('#draft-table-body .draft-team-icon').count(), 4);
     assert.equal(await page.locator('#draft-table-body tr').first().locator('.draft-team-cell').textContent(), 'Liverpool');
+    const draftCardSequence = [];
+    for (let step = 0; step < 5; step++) {
+        await page.locator('#draft-next-player').click();
+        draftCardSequence.push(await page.locator('#draft-title').textContent());
+    }
+    assert.deepEqual(draftCardSequence, ['Draft: Nate', 'Draft: Jamey', 'Draft: Hef', 'Draft: Jordan', 'Draft: Wes']);
+    await page.locator('#draft-prev-player').click();
+    assert.equal(await page.locator('#draft-title').textContent(), 'Draft: Jordan');
+    assert.equal(await page.locator('#draft-table-body tr').first().locator('.draft-team-cell').textContent(), 'Manchester City');
+    await page.locator('#draft-next-player').click();
+    assert.equal(await page.locator('#draft-title').textContent(), 'Draft: Wes');
+    assert.equal(await page.locator('#draft-table-body tr').first().locator('.draft-team-cell').textContent(), 'Liverpool');
     assert.equal(await page.locator('#full-draft-title').textContent(), 'Draft');
     const draftTitleRows = await page.locator('.draft-table-shell, .full-draft-table-shell').evaluateAll(wrappers => wrappers.map(wrapper => {
         const table = wrapper.querySelector('table');
