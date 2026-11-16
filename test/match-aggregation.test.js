@@ -230,6 +230,9 @@ test('live matches just outside a round window keep the round number', () => {
     assert.equal(normalizeEspnEvent(event('2026-11-07T12:30Z')).matchday, '10');
     assert.equal(normalizeEspnEvent(event('2026-11-08T14:00Z')).matchday, '10');
     assert.match(normalizeEspnEvent(event('2026-11-14T15:00Z')).matchday, /^2026-W\d+$/u);
+    assert.equal(normalizeEspnEvent(event('2026-11-22T14:00Z')).matchday, '11');
+    assert.equal(normalizeEspnEvent(event('2026-11-27T20:00Z')).matchday, '12');
+    assert.equal(normalizeEspnEvent(event('2027-01-01T15:00Z')).matchday, '19');
 });
 
 test('merging live data does not replace a round number with an ISO-week fallback', () => {
