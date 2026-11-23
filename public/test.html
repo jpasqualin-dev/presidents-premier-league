@@ -80,13 +80,28 @@
             white-space: nowrap;
         }
 
-        .points-bar {
+        .points-stack {
+            display: flex;
+            flex-direction: column;
             width: 100%;
             max-width: 56px;
-            min-height: 2px;
             border-radius: 4px 4px 0 0;
-            background-color: #38003c;
-            transition: height 0.3s ease;
+            overflow: hidden;
+        }
+
+        .points-segment {
+            display: flex;
+            flex: 1 1 0;
+            align-items: center;
+            justify-content: center;
+            min-height: 0;
+            background-color: var(--seg-light);
+        }
+
+        .points-crest {
+            display: block;
+            flex: 0 0 auto;
+            object-fit: contain;
         }
 
         .points-bar-name {
@@ -139,8 +154,8 @@
             text-align: center;
         }
 
-        body.dark-mode .points-bar {
-            background-color: #c4a7ff;
+        body.dark-mode .points-segment {
+            background-color: var(--seg-dark);
         }
 
         body.dark-mode .points-timeframe-btn[aria-pressed="true"] {
@@ -187,10 +202,36 @@
     <script src="league-config.js"></script>
     <script src="match-data.js"></script>
     <script>
-        const { draftData, getOwnerOfTeam } = PplLeagueConfig;
+        const { draftData, ownersByTeam } = PplLeagueConfig;
         const managers = Object.keys(draftData);
         const state = { mode: 'PTS', timeframe: 'all', matches: null };
         const BAR_MAX_PX = 150;
+        const CREST_MAX_PX = 28;
+        const MIN_CREST_PX = 8;
+
+        // Light and dark stack colors from EPL_Team_Colors_Light_Dark_2026-27.xlsx ("Use on Light/Dark Mode" role).
+        const teamColors = {
+            'Arsenal': { light: '#EF0107', dark: '#FFFFFF' },
+            'Aston Villa': { light: '#670E36', dark: '#95BFE5' },
+            'AFC Bournemouth': { light: '#DA291C', dark: '#FFFFFF' },
+            'Brentford': { light: '#E30613', dark: '#FFFFFF' },
+            'Brighton & Hove Albion': { light: '#0057B8', dark: '#FFFFFF' },
+            'Chelsea': { light: '#034694', dark: '#FFFFFF' },
+            'Coventry City': { light: '#1D2D4F', dark: '#59CBE8' },
+            'Crystal Palace': { light: '#1B458F', dark: '#C4122E' },
+            'Everton': { light: '#003399', dark: '#FFFFFF' },
+            'Fulham': { light: '#000000', dark: '#FFFFFF' },
+            'Hull City': { light: '#000000', dark: '#F5A12D' },
+            'Ipswich Town': { light: '#0044A9', dark: '#FFFFFF' },
+            'Leeds United': { light: '#1D428A', dark: '#FFFFFF' },
+            'Liverpool': { light: '#C8102E', dark: '#FFFFFF' },
+            'Manchester City': { light: '#1C2C5B', dark: '#6CABDD' },
+            'Manchester United': { light: '#DA291C', dark: '#FFFFFF' },
+            'Newcastle United': { light: '#241F20', dark: '#FFFFFF' },
+            'Nottingham Forest': { light: '#DD0000', dark: '#FFFFFF' },
+            'Sunderland': { light: '#EB172B', dark: '#FFFFFF' },
+            'Tottenham Hotspur': { light: '#132257', dark: '#FFFFFF' }
+        };
 
         const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
 
@@ -202,18 +243,23 @@
             return 0;
         }
 
+        function canonicalTeam(name) {
+            const value = String(name || '');
+            return Object.keys(ownersByTeam).find(team => value === team || value.toLowerCase().includes(team.toLowerCase())) || null;
+        }
+
         function buildWeekTotals(matches) {
             const weekTotals = new Map();
             matches.filter(isFinished).forEach(match => {
                 const week = Number(match.matchday);
                 const homeScore = match.score?.fullTime?.home ?? 0;
                 const awayScore = match.score?.fullTime?.away ?? 0;
-                const totals = weekTotals.get(week) || Object.fromEntries(managers.map(manager => [manager, 0]));
+                const totals = weekTotals.get(week) || new Map();
                 [
-                    [getOwnerOfTeam(match.homeTeam?.name), pointsForResult(homeScore, awayScore)],
-                    [getOwnerOfTeam(match.awayTeam?.name), pointsForResult(awayScore, homeScore)]
-                ].forEach(([owner, points]) => {
-                    if (owner in totals) totals[owner] += points;
+                    [canonicalTeam(match.homeTeam?.name), pointsForResult(homeScore, awayScore)],
+                    [canonicalTeam(match.awayTeam?.name), pointsForResult(awayScore, homeScore)]
+                ].forEach(([team, points]) => {
+                    if (team) totals.set(team, (totals.get(team) || 0) + points);
                 });
                 weekTotals.set(week, totals);
             });
@@ -224,16 +270,22 @@
             const weekTotals = buildWeekTotals(matches || []);
             const allWeeks = [...weekTotals.keys()].sort((left, right) => left - right);
             const weeks = timeframe === 'all' ? allWeeks : allWeeks.slice(-Number(timeframe));
-            const totals = Object.fromEntries(managers.map(manager => [manager, 0]));
-            weeks.forEach(week => managers.forEach(manager => { totals[manager] += weekTotals.get(week)[manager]; }));
-            const rows = managers.map(manager => ({
-                manager,
-                PTS: totals[manager],
-                AVG: weeks.length ? totals[manager] / weeks.length : 0
-            }));
-            rows.sort((left, right) => left[state.mode === 'AVG' ? 'AVG' : 'PTS'] - right[state.mode === 'AVG' ? 'AVG' : 'PTS'] || left.manager.localeCompare(right.manager));
+            const teamPoints = new Map(Object.keys(ownersByTeam).map(team => [team, 0]));
+            weeks.forEach(week => weekTotals.get(week).forEach((points, team) => teamPoints.set(team, teamPoints.get(team) + points)));
+            const divisor = weeks.length || 1;
+            const rows = managers.map(manager => {
+                const teams = draftData[manager].map(team => {
+                    const PTS = teamPoints.get(team) || 0;
+                    return { team, PTS, AVG: PTS / divisor };
+                });
+                const PTS = teams.reduce((sum, entry) => sum + entry.PTS, 0);
+                return { manager, teams, PTS, AVG: PTS / divisor };
+            });
+            const sortKey = state.mode === 'AVG' ? 'AVG' : 'PTS';
+            rows.sort((left, right) => right[sortKey] - left[sortKey] || left.manager.localeCompare(right.manager));
             return { rows, weeks };
         }
+
 
         function formatValue(value, mode) {
             return mode === 'AVG' ? value.toFixed(2) : String(value);
@@ -273,8 +325,20 @@
             const maxValue = Math.max(...rows.map(row => row[state.mode]), 0);
             chart.innerHTML = rows.map(row => {
                 const value = row[state.mode];
-                const height = maxValue > 0 ? Math.round((value / maxValue) * BAR_MAX_PX) : 0;
-                return `<div class="points-bar-column"><div class="points-bar-value">${formatValue(value, state.mode)}</div><div class="points-bar" style="height:${height}px" title="${escapeHtml(row.manager)}: ${formatValue(value, state.mode)}"></div><div class="points-bar-name">${escapeHtml(row.manager)}</div></div>`;
+                const barPx = maxValue > 0 ? (value / maxValue) * BAR_MAX_PX : 0;
+                const segments = [...row.teams]
+                    .sort((left, right) => left[state.mode] - right[state.mode] || left.team.localeCompare(right.team))
+                    .map(entry => {
+                        const points = entry[state.mode];
+                        const colors = teamColors[entry.team] || { light: '#38003c', dark: '#c4a7ff' };
+                        const segmentPx = value > 0 ? (points / value) * barPx : 0;
+                        const crestPx = Math.min(CREST_MAX_PX, Math.floor(segmentPx) - 4);
+                        const crest = crestPx >= MIN_CREST_PX
+                            ? `<img class="points-crest" src="${escapeHtml(TeamNames.crest(entry.team))}" alt="${escapeHtml(entry.team)} crest" style="width:${crestPx}px;height:${crestPx}px">`
+                            : '';
+                        return `<div class="points-segment" style="flex-grow:${points};--seg-light:${colors.light};--seg-dark:${colors.dark}" title="${escapeHtml(entry.team)}: ${formatValue(points, state.mode)}">${crest}</div>`;
+                    }).join('');
+                return `<div class="points-bar-column"><div class="points-bar-value">${formatValue(value, state.mode)}</div><div class="points-stack" style="height:${barPx}px" title="${escapeHtml(row.manager)}: ${formatValue(value, state.mode)}">${segments}</div><div class="points-bar-name">${escapeHtml(row.manager)}</div></div>`;
             }).join('');
             status.textContent = '';
         }
