@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Presidents Premier League</title>
+    <link rel="stylesheet" href="theme.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--page-bg);
+            color: var(--text-main);
+            padding: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .points-card {
+            position: relative;
+            padding: 16px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .points-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .points-card-title {
+            color: var(--title-color);
+            font-size: 1.05rem;
+            font-weight: 800;
+        }
+
+        .points-card-subtitle {
+            margin-top: 2px;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .points-mode-toggle {
+            flex-shrink: 0;
+        }
+
+        .points-chart {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            gap: 8px;
+            height: 220px;
+            padding-top: 24px;
+        }
+
+        .points-bar-column {
+            display: flex;
+            flex: 1 1 0;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            min-width: 0;
+        }
+
+        .points-bar-value {
+            margin-bottom: 4px;
+            color: var(--text-main);
+            font-size: 0.8rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .points-bar {
+            width: 100%;
+            max-width: 56px;
+            min-height: 2px;
+            border-radius: 4px 4px 0 0;
+            background-color: #38003c;
+            transition: height 0.3s ease;
+        }
+
+        .points-bar-name {
+            margin-top: 6px;
+            color: var(--text-main);
+            font-size: 0.75rem;
+            font-weight: 700;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
+        }
+
+        .points-timeframes {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .points-timeframe-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            background-color: var(--card-bg);
+            color: var(--text-muted);
+            font: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .points-timeframe-btn[aria-pressed="true"] {
+            background-color: #38003c;
+            border-color: #38003c;
+            color: #ffffff;
+        }
+
+        .points-timeframe-btn:focus-visible,
+        .toggle-btn:focus-visible {
+            outline: 2px solid #38003c;
+            outline-offset: 2px;
+        }
+
+        .points-status {
+            margin-top: 12px;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-align: center;
+        }
+
+        body.dark-mode .points-bar {
+            background-color: #c4a7ff;
+        }
+
+        body.dark-mode .points-timeframe-btn[aria-pressed="true"] {
+            background-color: #c4a7ff;
+            border-color: #c4a7ff;
+            color: #1a1a1a;
+        }
+
+        .points-empty {
+            padding: 40px 0;
+            color: var(--text-muted);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <section class="points-card" aria-labelledby="points-card-title">
+        <div class="points-card-header">
+            <div>
+                <h2 class="points-card-title" id="points-card-title">Manager Points</h2>
+                <div class="points-card-subtitle" id="points-card-subtitle">Loading results…</div>
+            </div>
+            <div class="toggle-switch points-mode-toggle" role="group" aria-label="Show total points or average points">
+                <button type="button" class="toggle-btn" data-mode="PTS" aria-pressed="true">PTS</button>
+                <button type="button" class="toggle-btn" data-mode="AVG" aria-pressed="false">AVG</button>
+            </div>
+        </div>
+
+        <div class="points-chart" id="points-chart" role="img" aria-label="Bar chart of manager points"></div>
+
+        <div class="points-timeframes" role="group" aria-label="Time frame">
+            <button type="button" class="points-timeframe-btn" data-weeks="1" aria-pressed="false">Last 1</button>
+            <button type="button" class="points-timeframe-btn" data-weeks="2" aria-pressed="false">Last 2</button>
+            <button type="button" class="points-timeframe-btn" data-weeks="3" aria-pressed="false">Last 3</button>
+            <button type="button" class="points-timeframe-btn" data-weeks="4" aria-pressed="false">Last 4</button>
+            <button type="button" class="points-timeframe-btn" data-weeks="all" aria-pressed="true">All</button>
+        </div>
+
+        <div class="points-status" id="points-status" role="status" aria-live="polite"></div>
+    </section>
+
+    <script src="theme.js"></script>
+    <script src="team-names.js"></script>
+    <script src="league-config.js"></script>
+    <script src="match-data.js"></script>
+    <script>
+        const { draftData, getOwnerOfTeam } = PplLeagueConfig;
+        const managers = Object.keys(draftData);
+        const state = { mode: 'PTS', timeframe: 'all', matches: null };
+        const BAR_MAX_PX = 150;
+
+        const escapeHtml = value => String(value ?? '').replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
+
+        const isFinished = match => match?.status === 'FINISHED' && match.matchday != null;
+
+        function pointsForResult(scored, conceded) {
+            if (scored > conceded) return 3;
+            if (scored === conceded) return 1;
+            return 0;
+        }
+
+        function buildWeekTotals(matches) {
+            const weekTotals = new Map();
+            matches.filter(isFinished).forEach(match => {
+                const week = Number(match.matchday);
+                const homeScore = match.score?.fullTime?.home ?? 0;
+                const awayScore = match.score?.fullTime?.away ?? 0;
+                const totals = weekTotals.get(week) || Object.fromEntries(managers.map(manager => [manager, 0]));
+                [
+                    [getOwnerOfTeam(match.homeTeam?.name), pointsForResult(homeScore, awayScore)],
+                    [getOwnerOfTeam(match.awayTeam?.name), pointsForResult(awayScore, homeScore)]
+                ].forEach(([owner, points]) => {
+                    if (owner in totals) totals[owner] += points;
+                });
+                weekTotals.set(week, totals);
+            });
+            return weekTotals;
+        }
+
+        function computeManagerRows(matches, timeframe) {
+            const weekTotals = buildWeekTotals(matches || []);
+            const allWeeks = [...weekTotals.keys()].sort((left, right) => left - right);
+            const weeks = timeframe === 'all' ? allWeeks : allWeeks.slice(-Number(timeframe));
+            const totals = Object.fromEntries(managers.map(manager => [manager, 0]));
+            weeks.forEach(week => managers.forEach(manager => { totals[manager] += weekTotals.get(week)[manager]; }));
+            const rows = managers.map(manager => ({
+                manager,
+                PTS: totals[manager],
+                AVG: weeks.length ? totals[manager] / weeks.length : 0
+            }));
+            rows.sort((left, right) => left[state.mode === 'AVG' ? 'AVG' : 'PTS'] - right[state.mode === 'AVG' ? 'AVG' : 'PTS'] || left.manager.localeCompare(right.manager));
+            return { rows, weeks };
+        }
+
+        function formatValue(value, mode) {
+            return mode === 'AVG' ? value.toFixed(2) : String(value);
+        }
+
+        function render() {
+            const chart = document.getElementById('points-chart');
+            const subtitle = document.getElementById('points-card-subtitle');
+            const status = document.getElementById('points-status');
+
+            document.querySelectorAll('.toggle-btn').forEach(button => {
+                const active = button.dataset.mode === state.mode;
+                button.classList.toggle('active', active);
+                button.setAttribute('aria-pressed', String(active));
+            });
+            document.querySelectorAll('.points-timeframe-btn').forEach(button => {
+                const active = button.dataset.weeks === state.timeframe;
+                button.setAttribute('aria-pressed', String(active));
+            });
+
+            if (state.matches === null) {
+                chart.innerHTML = '<div class="points-empty">Loading results…</div>';
+                return;
+            }
+
+            const { rows, weeks } = computeManagerRows(state.matches, state.timeframe);
+            if (!weeks.length) {
+                subtitle.textContent = 'No completed weeks yet';
+                chart.innerHTML = '<div class="points-empty">No completed matches yet.</div>';
+                status.textContent = '';
+                return;
+            }
+
+            const range = weeks.length === 1 ? `Week ${weeks[0]}` : `Weeks ${weeks[0]}–${weeks[weeks.length - 1]}`;
+            subtitle.textContent = `${state.mode === 'AVG' ? 'Average points per week' : 'Total points'} · ${range}`;
+
+            const maxValue = Math.max(...rows.map(row => row[state.mode]), 0);
+            chart.innerHTML = rows.map(row => {
+                const value = row[state.mode];
+                const height = maxValue > 0 ? Math.round((value / maxValue) * BAR_MAX_PX) : 0;
+                return `<div class="points-bar-column"><div class="points-bar-value">${formatValue(value, state.mode)}</div><div class="points-bar" style="height:${height}px" title="${escapeHtml(row.manager)}: ${formatValue(value, state.mode)}"></div><div class="points-bar-name">${escapeHtml(row.manager)}</div></div>`;
+            }).join('');
+            status.textContent = '';
+        }
+
+        document.querySelectorAll('.toggle-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                state.mode = button.dataset.mode;
+                render();
+            });
+        });
+        document.querySelectorAll('.points-timeframe-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                state.timeframe = button.dataset.weeks;
+                render();
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            render();
+            DataManager.subscribe(data => {
+                if (data === null) {
+                    document.getElementById('points-status').textContent = 'Unable to load match data.';
+                    return;
+                }
+                state.matches = data?.matches || [];
+                render();
+            });
+            DataManager.start();
+        });
+    </script>
+</body>
+</html>
