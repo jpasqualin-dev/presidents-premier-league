@@ -281,7 +281,7 @@
                 PL: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0,
                 goldenBoot: 0, homeGoals: 0, awayGoals: 0, failedToScore: 0, homeFailedToScore: 0, awayFailedToScore: 0, yellowCards: 0, redCards: 0, penaltiesConceded: 0, homeWins: 0, awayWins: 0, homeDraws: 0, awayDraws: 0, assists: 0, homeAssists: 0, awayAssists: 0, goldenGloves: 0, homeCleanSheets: 0, awayCleanSheets: 0, ppm: 0, gpm: 0, gcpm: 0,
                 pvpWins: 0, pga: 0, ptsPga: 0, comebackWins: 0, comebackDraws: 0, comebackWinsDraws: 0, homeComebackWins: 0, homeComebackDraws: 0, homeComebackWinsDraws: 0, awayComebackWins: 0, awayComebackDraws: 0, awayComebackWinsDraws: 0, roundsWon: 0,
-                undefeatedWeeks: 0, perfectWeeks: 0
+                undefeatedWeeks: 0, perfectWeeks: 0, weeksPlayed: 0, pointsInWeeksPlayed: 0, ptsPerWeek: 0
             };
         }
         return stats;
@@ -876,6 +876,12 @@
                 players: [...players].sort((a, b) => b.perfectWeeks - a.perfectWeeks || b.PTS - a.PTS),
                 playerVal: player => player.perfectWeeks,
                 pillClass: "pill-purple"
+            },
+            {
+                title: "PTS per week",
+                players: [...players].sort((a, b) => b.ptsPerWeek - a.ptsPerWeek || b.PTS - a.PTS),
+                playerVal: player => player.ptsPerWeek.toFixed(2),
+                pillClass: "pill-blue"
             }
         ];
 
@@ -1176,7 +1182,13 @@
                     if (incompletePlayerWeeks[matchweek]?.[player]) return;
                     if (!results.includes('loss')) playerStats[player].undefeatedWeeks += 1;
                     if (results.every(result => result === 'win')) playerStats[player].perfectWeeks += 1;
+                    playerStats[player].weeksPlayed += 1;
+                    playerStats[player].pointsInWeeksPlayed += weeklyPlayerPoints[matchweek][player];
                 });
+            });
+
+            Object.values(playerStats).forEach(p => {
+                p.ptsPerWeek = p.weeksPlayed > 0 ? (p.pointsInWeeksPlayed / p.weeksPlayed) : 0;
             });
 
             renderSeasonAwards(playerStats, teamStats, goalScorers);

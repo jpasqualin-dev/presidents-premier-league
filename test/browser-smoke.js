@@ -253,6 +253,28 @@ test('stats page renders available totals when scorer data does not reconcile', 
     await context.close();
 });
 
+test('stats page shows PTS per week under Matchweek Results', async t => {
+    if (browserError) return t.skip('Chromium runtime unavailable');
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.route('**/api/matches**', route => {
+        const includeDetails = new URL(route.request().url()).searchParams.get('details') === '1';
+        return route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(includeDetails ? detailedFixtureData() : fixtureData())
+        });
+    });
+
+    await page.goto(`${baseUrl}/stats.html`);
+    const card = page.locator('#matchweek-results-container .stat-card').filter({ hasText: 'PTS per week' });
+    await card.locator('.stat-card-title').click();
+    const values = await card.locator('.stat-player-row .stat-value').allTextContents();
+    assert.ok(values.length > 0);
+    values.forEach(value => assert.match(value.trim(), /^\d+\.\d{2}$/u));
+    await context.close();
+});
+
 test('scoring card groups tied weeks without repeating the Week label', async t => {
     if (browserError) return t.skip('Chromium runtime unavailable');
     const context = await browser.newContext();
