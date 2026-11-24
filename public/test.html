@@ -60,7 +60,6 @@
             justify-content: space-around;
             gap: 8px;
             height: 286px;
-            padding-top: 24px;
         }
 
         .points-bar-column {
@@ -175,7 +174,7 @@
     <section class="points-card" aria-labelledby="points-card-title">
         <div class="points-card-header">
             <div>
-                <h2 class="points-card-title" id="points-card-title">Manager Points</h2>
+                <h2 class="points-card-title" id="points-card-title">Total Points</h2>
                 <div class="points-card-subtitle" id="points-card-subtitle">Loading results…</div>
             </div>
             <div class="toggle-switch points-mode-toggle" role="group" aria-label="Show total points or average points">
@@ -205,7 +204,7 @@
         const { draftData, ownersByTeam } = PplLeagueConfig;
         const managers = Object.keys(draftData);
         const state = { mode: 'PTS', timeframe: 'all', matches: null };
-        const BAR_MAX_PX = 195;
+        const BAR_MAX_PX = 247;
         const CREST_MAX_PX = 36;
         const MIN_CREST_PX = 8;
 
@@ -317,9 +316,11 @@
 
         function render() {
             const chart = document.getElementById('points-chart');
+            const title = document.getElementById('points-card-title');
             const subtitle = document.getElementById('points-card-subtitle');
             const status = document.getElementById('points-status');
 
+            title.textContent = state.mode === 'AVG' ? 'Average Points' : 'Total Points';
             document.querySelectorAll('.toggle-btn').forEach(button => {
                 const active = button.dataset.mode === state.mode;
                 button.classList.toggle('active', active);
@@ -344,7 +345,7 @@
             }
 
             const range = weeks.length === 1 ? `Week ${weeks[0]}` : `Weeks ${weeks[0]}–${weeks[weeks.length - 1]}`;
-            subtitle.textContent = `${state.mode === 'AVG' ? 'Average points per week' : 'Total points'} · ${range}`;
+            subtitle.textContent = range;
 
             const maxValue = Math.max(...rows.map(row => row[state.mode]), 0);
             chart.innerHTML = rows.map(row => {
