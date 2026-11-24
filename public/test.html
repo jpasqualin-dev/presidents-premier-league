@@ -58,7 +58,7 @@
             display: flex;
             align-items: flex-end;
             justify-content: space-around;
-            gap: 0;
+            gap: 8px;
             height: 286px;
         }
 
@@ -69,15 +69,6 @@
             align-items: center;
             justify-content: flex-end;
             min-width: 0;
-            padding: 0 4px;
-        }
-
-        .points-baseline {
-            width: calc(100% + 8px);
-            height: 3px;
-            margin: 0 -4px 4px;
-            border-radius: 2px;
-            background-color: var(--accent-green);
         }
 
         .points-bar-value {
@@ -95,6 +86,10 @@
             max-width: 56px;
             border-radius: 4px 4px 0 0;
             overflow: hidden;
+        }
+
+        .points-stack.has-points {
+            outline: 1px solid #000000;
         }
 
         .points-segment {
@@ -408,7 +403,7 @@
                             : '';
                         return `<div class="points-segment" style="flex-grow:${points};--seg-light:${lightColors[index]};--seg-dark:${darkColors[index]}" title="${escapeHtml(entry.team)}: ${formatValue(points, state.mode)}">${crest}</div>`;
                     }).join('');
-                return `<div class="points-bar-column"><div class="points-bar-value">${formatValue(value, state.mode)}</div><div class="points-stack" style="height:${barPx}px" title="${escapeHtml(row.manager)}: ${formatValue(value, state.mode)}">${segments}</div><div class="points-baseline" aria-hidden="true"></div><div class="points-bar-name">${escapeHtml(row.manager)}</div></div>`;
+                return `<div class="points-bar-column"><div class="points-bar-value">${formatValue(value, state.mode)}</div><div class="points-stack${barPx > 0 ? ' has-points' : ''}" style="height:${barPx}px" title="${escapeHtml(row.manager)}: ${formatValue(value, state.mode)}">${segments}</div><div class="points-bar-name">${escapeHtml(row.manager)}</div></div>`;
             }).join('');
             status.textContent = '';
         }
